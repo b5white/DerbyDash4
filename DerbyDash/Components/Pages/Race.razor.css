@@ -1,0 +1,42 @@
+﻿.ignoremouseclick {
+    pointer-events: none;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: -9999;
+    /*background-color: rgba(0,0,0,0.5);*/
+}
+
+.scores {
+    position: fixed;
+    bottom: 1;  
+    /*background-color: rgba(02,02,0,0.5);*/
+}
+
+.race-description {
+    position: fixed;
+    z-index: 1;
+    bottom: 80px; /* Adjust as needed */
+    color: black;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 white, -1px -1px 0 white, -1px 1px 0 white, 1px -1px 0 white, 0px 1px 0 white, 0px -1px 0 white, -1px 0px 0 white, 1px 0px 0 white;
+}
+
+.race-input-box {
+    position: fixed;
+    bottom: 10px; /* Adjust as needed */
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 1;
+    padding: 10px;
+    box-sizing: border-box;
+    background: white; /* Optional: to make it stand out */
+}
+
+
+#hidden {
+    visibility: hidden;
+}

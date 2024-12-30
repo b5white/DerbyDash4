@@ -1,0 +1,73 @@
+﻿@page "/race/{ProblemClassString}"
+@rendermode InteractiveServer
+@attribute [AllowAnonymous]
+@implements IDisposable
+@using DerbyDash.Components.Problems
+@using DerbyDash.Components.Layout
+@using Microsoft.AspNetCore.Components.Web
+
+@if (!Started)
+{
+    <h1>@GetTitle(ProblemClassString)</h1>
+    <p></p>
+    <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+        <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
+        <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
+    </EditForm>
+} else if (span > 0) {
+    if (ReceivedError) {
+        <p>The system ran into a problem and couldn't calculate your results.</p>
+        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+            <button type="submit" tabindex="0" autofocus="autofocus">Try again</button>
+            <input type="text" id="hidden" />
+        </EditForm>
+    }
+    else
+    {
+        <h1>@GetTitle(ProblemClassString)</h1>
+        <h1>@encouragingWord</h1>
+        <p>Think you can do better? Try again.</p>
+        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+            <button type="submit" tabindex="0" autofocus="autofocus">Try again</button>
+            <input type="text" id="hidden" />
+        </EditForm>
+        <p></p>
+        <h1>Your time was @span.ToString("F3")</h1>
+        <p></p>
+        <p>
+            Your average is @averageSpan.ToString("F3")
+        </p>
+        @* <p>
+            Your speed is @speed.ToString("F3")  Distance: @currentDistance.ToString("F3")
+        </p> *@
+
+        @if (increasedSpan > 0) {
+            <p>
+                You improved your average by @increasedSpan.ToString("F3")
+            </p>
+        }
+
+        <h2>Top 5 scores</h2>
+        @for (int i = 0; i < Scores.Length; i++) {
+            string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
+
+            @if (i == currentScoreIndex) {
+                <p><b>@formattedTime</b></p>
+            } else {
+                <p>@formattedTime</p>
+            }
+        }
+    }
+    <p></p>
+} else {
+    @if (problem != null) {
+        <p>
+            <TrackContainer @ref="trackContainerInstance" Cars="@Cars" />
+        </p>
+        <h2 class="race-description"><b>@problem.Description </b></h2>
+        <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput" @bind:after="OnAfter" />
+        <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
+        <p> </p>
+    }
+}
+

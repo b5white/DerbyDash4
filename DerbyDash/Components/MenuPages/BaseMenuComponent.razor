@@ -1,0 +1,47 @@
+﻿@* BaseMenuComponent.razor *@
+<div class="nav_menu_container">
+    <nav class="nav_menu_nav">
+        <ul class="nav_menu_list">
+            @ChildContent
+        </ul>
+    </nav>
+</div>
+
+<div class="bottom-half">
+    <img src="@selectedImage" alt="Horse running" class="centered-image" />
+</div>
+
+<style>
+    .centered-image {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 70%; /* Adjust as needed */
+        height: auto;
+        object-fit: contain;
+        max-width: 600px; /* Optional: Maximum size */
+    }
+</style>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    private string[] images = {
+        "images/horse-running1.gif",
+        "images/horse-running2.gif",
+        "images/horse-running3.gif",
+        "images/horse-running4.gif",
+        "images/horse-running5.gif",
+        "images/horse-running6.gif",
+        "images/horse-running7.gif"
+    };
+
+    private string selectedImage;
+
+    protected override void OnInitialized() {
+        Random random = new Random();
+        int index = random.Next(images.Length);
+        selectedImage = images[index];
+    }
+}

@@ -1,0 +1,16 @@
+﻿@page "/"
+@namespace DerbyDash.Components.Pages
+@rendermode InteractiveServer
+@using DerbyDash.Components.Layout
+@using DerbyDash.Components.MenuPages
+@attribute [AllowAnonymous]
+
+<PageTitle>Home</PageTitle>
+@* <p>
+        <TrackContainer Cars="@Cars" />
+</p> *@
+<BaseMenuComponent>
+    <h1>Welcome to  @appName</h1>
+</BaseMenuComponent>
+
+
