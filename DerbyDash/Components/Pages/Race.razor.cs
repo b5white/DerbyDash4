@@ -7,6 +7,7 @@ using System.Threading;
 using DerbyDash.Components.Layout;
 using Microsoft.AspNetCore.Components.Forms;
 using Mono.TextTemplating;
+using DerbyDash.Components.Track;
 
 namespace DerbyDash.Components.Pages {
 
@@ -39,7 +40,7 @@ namespace DerbyDash.Components.Pages {
         private ElementReference textInput;
         private string encouragingWord = "";
         private bool ReceivedError = false;
-        private List<Car> Cars = new List<Car>();
+        private RaceComponents Track = new();
         private int Margin = 10;
         private int MarginTop = 0;
         private string FlexBasis = "";
@@ -68,7 +69,7 @@ namespace DerbyDash.Components.Pages {
                 Started = true;
                 Running = true;
                 CreateProblems();
-                CreateCars();
+                CreateTrack();
                 encouragingWord = encouragingWords[Random.Shared.Next(0, encouragingWords.Length)];
                 ReceivedError = false;
                 currentTimeIndex = 0;
@@ -119,6 +120,8 @@ namespace DerbyDash.Components.Pages {
                     } else {
                         EndRace();
                     }
+                    ScaleRace();
+                    StateHasChanged();
                 } else {
                     if (Answer.Length > (problem?.Length ?? 999)) {
                         Answer = "";
@@ -128,27 +131,28 @@ namespace DerbyDash.Components.Pages {
             if (Running) {
                 InactivityTimer.Start();
             }
-            ScaleRace();
-            StateHasChanged();
         }
 
         private void ScaleRace() {
-            const double trackLength = 150.0;
             const double visibleLength = 60.0;
             const double topMargin = 0.0; // Space at the top of the container
-            const float topMultiplier = 4.0f; // Adjusted from 2.5f to 2.0f
+            const float topMultiplier = 7.0f; // when they get to the top speed, about 15,
+                                              // they'll be going 105 ft/s
+                                              // about 75 MPH
+            const int startDistance = 0;
+            double relativePosition;
 
             // Find the lead car's distance
-            double leadDistance = Cars.Max(car => car.Distance);
+            double leadDistance = Math.Min(Track.Cars.Max(car => car.Distance), totalDistance);
 
             // Calculate the visible range
             double visibleStart = Math.Max(0, leadDistance - visibleLength);
             double visibleEnd = leadDistance;
 
-            foreach (var car in Cars) {
+            foreach (var car in Track.Cars) {
                 //            if (car.Distance >= visibleStart) {
                 // Calculate the car's position within the visible range
-                double relativePosition = (car.Distance - visibleStart) / visibleLength;
+                relativePosition = (car.Distance - visibleStart) / visibleLength;
 
                 // Set the Top property (0 for the lead car, increasing for cars further back)
                 car.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
@@ -158,10 +162,16 @@ namespace DerbyDash.Components.Pages {
                 //}
             }
 
+            // Set the locations for the start and finish lines
+            relativePosition = (startDistance - visibleStart) / visibleLength;
+            Track.StartLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            relativePosition = (totalDistance - visibleStart) / visibleLength;
+            Track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+
             // Set flex-basis for all cars
-            int gap = 10;
-            foreach (var car in Cars) {
-                car.ResetFlexBasis(Cars.Count, gap);
+            int gap = 30;
+            foreach (var car in Track.Cars) {
+                car.ResetFlexBasis(Track.Cars.Count, gap);
             }
         }
 
@@ -202,7 +212,8 @@ namespace DerbyDash.Components.Pages {
             Task.Run(() => CalculateNewDistanceAsync(span));
         }
 
-        private async Task CalculateNewDistanceAsync(double time) {
+        private async Task<bool> CalculateNewDistanceAsync(double time) {
+            Boolean Result = false;
             currentDistance = 0;
             int i;
 
@@ -212,19 +223,23 @@ namespace DerbyDash.Components.Pages {
             }
             //  Console.WriteLine("curr: {0}  Total: {1}", currentDistance, totalDistance);
             if (currentDistance >= totalDistance) {
-                EndRace();
-            } else {
-                Cars[0].Distance = currentDistance;
-                Cars[0].Speed = i * speedIncrement;
+                Result = true;
             }
-            Console.WriteLine($"0, {time}, {Cars[0].Speed}, {currentDistance}");
-
+            Track.Cars[0].Distance = currentDistance;
+            Track.Cars[0].Speed = i * speedIncrement;
+            Console.WriteLine($"0, {time}, {Track.Cars[0].Speed}, {currentDistance}");
+            return Result;
         }
 
-        private async Task CalculateOldDistanceAsync(double time) {
-            for (int i = 1; i < Cars.Count; i++) {
-                Cars[i].CalculateCurrentDistance(time);
+        private async Task<bool> CalculateOldDistanceAsync(double time) {
+            Boolean Result = true;
+            for (int i = 1; i < Track.Cars.Count; i++) {
+                double dist = Track.Cars[i].CalculateCurrentDistance(time);
+                if (dist < totalDistance) {
+                    Result = false;
+                }
             }
+            return Result;
         }
 
         private void ResetScores(float timeSpan) {
@@ -272,8 +287,8 @@ namespace DerbyDash.Components.Pages {
         //    }
         //}
 
-        private void CreateCars() {
-            Cars = [
+        private void CreateTrack() {
+            List<Car> Cars = [
                 new Car { index = 0, ImageUrl = "Racecar1.png" },
                 new Car { index = 1, ImageUrl = "Racecar2.png" },
                 new Car { index = 2, ImageUrl = "Racecar3.png" },
@@ -284,6 +299,9 @@ namespace DerbyDash.Components.Pages {
             for (int i = 1; i < Cars.Count; i++) {
                 Cars[i].InitializeFastEddyTimeIncrements(random);
             }
+            Track.Cars = Cars;
+            Track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
+            Track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -360,6 +378,7 @@ namespace DerbyDash.Components.Pages {
                     float span = GetSpan(starttime);
                     await CalculateNewDistanceAsync(span);
                     await CalculateOldDistanceAsync(span);
+                    // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finshed races.
                     ScaleRace();
                     await InvokeAsync(() => {
                         StateHasChanged();

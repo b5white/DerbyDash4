@@ -1,7 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 
 <div class="track-container">
-    @foreach (var car in Cars) {        
+    <div class="start-line" style="top: @Track.StartLine.TopStr;  margin: 0">
+        <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="" />
+    </div>
+    <div class="start-line" style="top: @Track.FinishLine.TopStr;">
+        <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
+    </div>
+    @foreach (var car in Track.Cars) {        
         <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr; margin: @car.MarginStr;">
             <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
             <p>

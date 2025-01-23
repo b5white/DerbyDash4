@@ -61,8 +61,8 @@
     <p></p>
 } else {
     @if (problem != null) {
-        <p>
-            <TrackContainer @ref="trackContainerInstance" Cars="@Cars" />
+        <p class="TC">
+            <TrackContainer @ref="trackContainerInstance" Track="@Track" />
         </p>
         <h2 class="race-description"><b>@problem.Description </b></h2>
         <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput" @bind:after="OnAfter" />

@@ -7,7 +7,7 @@
     max-width: 100%; /* Ensure the container does not exceed the screen width */
 }
 
-.car-dynamic {
+.car-dynamic, .start-line {
     position: relative; /* Add this to make 'top' property effective */
     margin: 5px;
     box-sizing: border-box; /* Include margin in width calculation */
