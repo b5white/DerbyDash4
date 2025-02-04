@@ -7,10 +7,11 @@
     max-width: 100%; /* Ensure the container does not exceed the screen width */
 }
 
-.car-dynamic, .start-line {
+.car-dynamic {
     position: relative; /* Add this to make 'top' property effective */
     margin: 5px;
     box-sizing: border-box; /* Include margin in width calculation */
+    z-index: 99999; /* Ensures cars appear above the start line */
 }
 
     .car-dynamic img {
@@ -19,3 +20,16 @@
         object-fit: contain; /* Ensure the image is not cropped */
     }
 
+.start-line {
+    position: relative;
+    width: 100%;
+    text-align: center;
+}
+
+.start-line img {
+    margin-bottom: -5vh;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    object-fit: cover;
+}
