@@ -9,7 +9,8 @@
 
 .car-dynamic {
     position: relative; /* Add this to make 'top' property effective */
-    margin: 5px;
+    flex: 1; /* Add flex grow */
+    margin: 6px;
     box-sizing: border-box; /* Include margin in width calculation */
     z-index: 99999; /* Ensures cars appear above the start line */
 }
