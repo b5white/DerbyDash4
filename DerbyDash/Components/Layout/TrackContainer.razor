@@ -8,7 +8,7 @@
         <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
     </div>
     @foreach (var car in Track.Cars) {        
-        <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr; margin: @car.MarginStr;">
+        <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
             <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
             <p>
                 T: @car.Top.ToString("F0")  S: @car.Speed.ToString("F0")  D:@car.Distance.ToString("F2")

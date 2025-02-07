@@ -2,8 +2,8 @@
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
-<h1>Addition Menu</h1>
-<p>Choose your topic</p>
+<h1 class="tables-title">Addition Menu</h1>
+<p class="topic-subtitle">Choose your topic</p>
 <p></p>
 <BaseMenuComponent>
     <li class="nav_menu_item"><a href="/race/addition-1stable" class="nav_menu_link">1s Table</a></li>
@@ -20,3 +20,15 @@
     <li class="nav_menu_item"><a href="/race/addition-12stable" class="nav_menu_link">12s Table</a></li>
     <li class="nav_menu_item"><a href="/race/addition-13stable" class="nav_menu_link">13s Table</a></li>
 </BaseMenuComponent>
+
+<style>
+    .tables-title {
+        margin-left: 8px;
+        margin-top: 8px;
+    }
+
+    .topic-subtitle {
+        margin-left: 8px;
+        font-size: 1.2rem;
+    }
+</style>
