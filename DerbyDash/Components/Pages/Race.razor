@@ -62,7 +62,7 @@
 } else {
     @if (problem != null) {
         <p class="TC">
-            <TrackContainer @ref="trackContainerInstance" Track="@Track" />
+            <TrackContainer @ref="trackContainerInstance" Track="@Track" IsMoving="@(Track.Cars.Any(c => c.Speed > 0))"/>
         </p>
         <h2 class="race-description"><b>@problem.Description </b></h2>
         <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput" @bind:after="OnAfter" />

@@ -7,6 +7,9 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public RaceComponents Track { get; set; } = new();
 
+        [Parameter]
+        public bool IsMoving { get; set; }
+
 
         //protected override void OnAfterRender(bool firstRender) {
         //    // You can add any additional logic here if needed

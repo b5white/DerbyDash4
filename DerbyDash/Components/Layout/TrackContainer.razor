@@ -1,19 +1,31 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 
-<div class="track-container">
-    <div class="start-line" style="top: @Track.StartLine.TopStr;  margin: 0">
-        <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="" />
-    </div>
-    <div class="start-line" style="top: @Track.FinishLine.TopStr;">
-        <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
-    </div>
-    @foreach (var car in Track.Cars) {        
-        <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
-            <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
-            <p>
-                T: @car.Top.ToString("F0")  S: @car.Speed.ToString("F0")  D:@car.Distance.ToString("F2")
-            </p>
+<div class="road">
+    @for (int i = 0; i < 5; i++)
+    {
+        <div class="lane-group">
+            @for (int j = 0; j < 4; j++)
+            {
+                <div class="lane @(IsMoving ? "animated" : "")"></div>
+            }
         </div>
     }
+    
+    <div class="track-container">
+        <div class="start-line" style="top: @Track.StartLine.TopStr;  margin: 0">
+            <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="" />
+        </div>
+        <div class="start-line" style="top: @Track.FinishLine.TopStr;">
+            <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
+        </div>
+        @foreach (var car in Track.Cars) {        
+            <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
+                <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
+                <p>
+                    T: @car.Top.ToString("F0")  S: @car.Speed.ToString("F0")  D:@car.Distance.ToString("F2")
+                </p>
+            </div>
+        }
+    </div>
 </div>
 

@@ -1,36 +1,92 @@
-﻿.track-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
+﻿.road {
+    width: 100%;
+    height: 100vh; /* Full viewport height */
+    min-height: 600px; /* Minimum height to ensure content visibility */
+    background-color: #404040;
     position: relative;
-    z-index: -1;
-    max-width: 100%; /* Ensure the container does not exceed the screen width */
+    overflow: hidden;
+    display: flex; /* Add flex display */
+    flex-direction: column; /* Stack children vertically */
+}
+
+.lane-group {
+    position: absolute;
+    width: 10px;
+    height: 100vh;
+    top: 0;
+}
+
+.lane {
+    width: 100%;
+    height: 70px;
+    background-color: #ffff00;
+    margin-bottom: 210px;
+    /* animation: moveRoad 2s linear infinite; */
+}
+
+.lane.animated {
+    animation: moveRoad 2s linear infinite;
+}
+
+.lane-group:nth-child(1) { left: 15%; }
+.lane-group:nth-child(2) { left: 33%; }
+.lane-group:nth-child(3) { left: 50%; }
+.lane-group:nth-child(4) { left: 67%; }
+.lane-group:nth-child(5) { left: 83%; }
+.lane-group:nth-child(6) { left: 95%; }
+
+@keyframes moveRoad {
+    0% { transform: translateY(-400%); }
+    100% { transform: translateY(0); }
+}
+
+.track-container {
+    position: relative; /* Change from absolute */
+    width: 100%;
+    flex: 1; /* Take remaining space */
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    z-index: 1;
 }
 
 .car-dynamic {
-    position: relative; /* Add this to make 'top' property effective */
-    flex: 1; /* Add flex grow */
-    margin: 6px;
-    box-sizing: border-box; /* Include margin in width calculation */
-    z-index: 99999; /* Ensures cars appear above the start line */
+    position: relative;
+    width: 16%;
+    margin: 5px;
+    box-sizing: border-box;
+    z-index: 2;
 }
 
-    .car-dynamic img {
-        width: 100%; /* Scale the image to fit the container width */
-        height: auto; /* Maintain aspect ratio */
-        object-fit: contain; /* Ensure the image is not cropped */
-    }
+.car-dynamic img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
 
 .start-line {
-    position: relative;
+    position: absolute; /* Change from relative to absolute */
     width: 100%;
     text-align: center;
+    z-index: 1; /* Increase z-index to be above cars */
+    left: 0; /* Ensure it starts from left edge */
+    right: 0; /* Ensure it stretches to right edge */
 }
 
 .start-line img {
-    margin-bottom: -5vh;
-    width: 100%;
+    width: 100vw; /* Use viewport width instead of percentage */
     max-width: none;
     height: auto;
     object-fit: cover;
+}
+
+@media screen and (max-width: 768px) {
+    .car-dynamic {
+        width: 15%;
+        /* margin: 2px; */
+    }
+    
+    .lane-group {
+        width: 8px;
+    }
 }
