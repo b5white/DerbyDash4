@@ -1,24 +1,11 @@
 ﻿@page "/AdditionMenu"
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
+@inherits BaseMenuPage
 
-<h1 class="addition-title">Addition Menu</h1>
-<p class="topic-subtitle">Choose your topic</p>
-<p></p>
+<BaseMenuPage Title="Addition Menu" Subtitle="Choose your topic">
 <BaseMenuComponent>
     <li class="nav_menu_item"><a href="/Addition-TablesMenu" class="nav_menu_link">Addition Tables</a></li>
     <li class="nav_menu_item"><a href="/Addition-ProblemsMenu" class="nav_menu_link">Mixed Problem Sets</a></li>
 </BaseMenuComponent>
-
-
-<style>
-    .addition-title {
-        margin-left: 8px;
-        margin-top: 8px;
-    }
-
-    .topic-subtitle {
-        margin-left: 8px;
-        font-size: 1.2rem;
-    }
-</style>
+</BaseMenuPage>

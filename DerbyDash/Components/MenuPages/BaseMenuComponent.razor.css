@@ -46,6 +46,16 @@
     }
 }
 
+.centered-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 70%; /* Adjust as needed */
+    height: auto;
+    object-fit: contain;
+    max-width: 600px; /* Optional: Maximum size */
+}
+
 .content {
     height: 50vh; /* Upper half of the page */
 }

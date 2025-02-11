@@ -1,10 +1,10 @@
 ﻿@page "/RaceSetsMenu"
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
+@inherits BaseMenuPage
 
-<h1 class="races-title">Races</h1>
-<p class="topic-subtitle">Choose your topic</p>
-<p></p>
+<BaseMenuPage Title="Race Menu" Subtitle="Choose your topic">
+
 <BaseMenuComponent>
 @*     <li class="nav_menu_item"><a href="/race#Keyboardingrace" class="nav_menu_link">Keyboarding</a></li> *@
     <li class="nav_menu_item"><a href="/AdditionMenu" class="nav_menu_link">Addition</a></li>
@@ -14,16 +14,4 @@
     <li class="nav_menu_item_disabled"><a href="/FractionsMenu" class="nav_menu_link">Fractions</a></li>
     <li class="nav_menu_item_disabled"><a href="/DecimalsMenu" class="nav_menu_link">Decimals</a></li> *@
 </BaseMenuComponent>
-
-
-<style>
-    .races-title {
-        margin-left: 8px;
-        margin-top: 8px;
-    }
-
-    .topic-subtitle {
-        margin-left: 8px;
-        font-size: 1.2rem;
-    }
-</style>
+</BaseMenuPage>
