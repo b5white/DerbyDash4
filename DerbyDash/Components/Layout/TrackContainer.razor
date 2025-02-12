@@ -3,10 +3,10 @@
 <div class="road">
     @for (int i = 0; i < 5; i++)
     {
-        <div class="lane-group">
+        <div class="lane-group" >
             @for (int j = 0; j < 4; j++)
             {
-                <div class="lane @(IsMoving ? "animated" : "")"></div>
+                <div class="lane" style="@GetLaneStyle()"></div>
             }
         </div>
     }

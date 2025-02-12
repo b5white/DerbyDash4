@@ -1,19 +1,16 @@
 ﻿.road {
     width: 100%;
-    height: 100vh; /* Full viewport height */
-    min-height: 600px; /* Minimum height to ensure content visibility */
+    height: 100vh;
     background-color: #404040;
     position: relative;
     overflow: hidden;
-    display: flex; /* Add flex display */
-    flex-direction: column; /* Stack children vertically */
 }
 
 .lane-group {
     position: absolute;
     width: 10px;
     height: 100vh;
-    top: 0;
+    transition: transform 0.05s linear;
 }
 
 .lane {
@@ -21,12 +18,17 @@
     height: 70px;
     background-color: #ffff00;
     margin-bottom: 210px;
-    /* animation: moveRoad 2s linear infinite; */
+    will-change: transform;
+    /* transition: transform 0.05s linear; */
 }
+
 
 .lane.animated {
     animation: moveRoad 2s linear infinite;
 }
+/* .lane.animated {
+    animation: var(--road-animation);
+}  */
 
 .lane-group:nth-child(1) { left: 15%; }
 .lane-group:nth-child(2) { left: 33%; }

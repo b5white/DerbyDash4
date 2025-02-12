@@ -14,6 +14,8 @@ namespace DerbyDash.Components.Pages {
     public partial class Race: ComponentBase {
         private bool Started = false;
         private bool Running = false;
+        private bool Finished = false;
+        private bool CurrentRacerFinished = false;
 
         private ProblemManagerBase? problems;
         private ProblemsBase? problem;
@@ -21,7 +23,7 @@ namespace DerbyDash.Components.Pages {
         private string Answer = "";
         private long starttime = 0;
         private long calctime = 0;
-        private float span = 0;
+        private float RaceTime = 0;
         private float averageSpan = 0;
         private float increasedSpan = 0;
         private float prevAve = 0;
@@ -63,7 +65,9 @@ namespace DerbyDash.Components.Pages {
 
         private void Reset() {
             if (!Running) {
-                span = 0;
+                RaceTime = 0;
+                CurrentRacerFinished = false;
+                Finished = false;
                 currentDistance = 0;
                 Answer = "";
                 Started = true;
@@ -82,6 +86,7 @@ namespace DerbyDash.Components.Pages {
                 Task.Run(() => StartPeriodicTimerAsync());
             }
         }
+
 
         private void StartClick() {
             Reset();
@@ -177,7 +182,7 @@ namespace DerbyDash.Components.Pages {
 
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
-                if (!Running || span > 0) {
+                if (!Running || RaceTime > 0) {
                     StartClick();
                 } else {
                     Answer = "";
@@ -194,53 +199,63 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void EndRace() {
-            if (Running || problems != null) { // avoid double execution
-                Console.WriteLine("EndRace");
-                span = GetSpan(starttime);
-                StopPeriodicTimer();
+            if (Running) {
+                RaceTime = GetSpan(starttime);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                ResetScores(span);
+                ResetScores(RaceTime);
                 CalculateAverage();
-                Running = false;
+                Running = true;
                 problems = null;
             }
         }
 
         private void CalculateDistance() {
-            float span = GetSpan(starttime);
-            Task.Run(() => CalculateNewDistanceAsync(span));
+            float RaceTime = GetSpan(starttime);
+            Task.Run(() => CalculateNewDistanceAsync(RaceTime));
         }
 
-        private async Task<bool> CalculateNewDistanceAsync(double time) {
-            Boolean Result = false;
+        private async Task CalculateNewDistanceAsync(double time) {
             currentDistance = 0;
             int i;
 
             for (i = 0; (i < ElapsedAnswerTimes.Length) && (ElapsedAnswerTimes[i] > 0); i++) {
-                double span = (float)(time - ElapsedAnswerTimes[i]);
-                currentDistance += span * speedIncrement;
+                double RaceTime = (float)(time - ElapsedAnswerTimes[i]);
+                currentDistance += RaceTime * speedIncrement;
             }
-            //  Console.WriteLine("curr: {0}  Total: {1}", currentDistance, totalDistance);
-            if (currentDistance >= totalDistance) {
-                Result = true;
-            }
+
             Track.Cars[0].Distance = currentDistance;
             Track.Cars[0].Speed = i * speedIncrement;
-            Console.WriteLine($"0, {time}, {Track.Cars[0].Speed}, {currentDistance}");
-            return Result;
+
+            if (currentDistance >= totalDistance && !CurrentRacerFinished) {
+                CurrentRacerFinished = true;
+                EndRace();
+            }
         }
 
         private async Task<bool> CalculateOldDistanceAsync(double time) {
-            Boolean Result = true;
+            Boolean allFinished = true;
             for (int i = 1; i < Track.Cars.Count; i++) {
                 double dist = Track.Cars[i].CalculateCurrentDistance(time);
                 if (dist < totalDistance) {
-                    Result = false;
+                    allFinished = false;
                 }
             }
-            return Result;
+            
+            if (allFinished && CurrentRacerFinished && !Finished) {
+                Finished = true;
+                Running = false;
+                PeriodicTimerToken.Cancel();
+                periodicTimer.Dispose();
+                StopPeriodicTimer();
+                await InvokeAsync(() => {
+                    StateHasChanged();
+                });
+            }
+            
+            return allFinished;
         }
+
 
         private void ResetScores(float timeSpan) {
             void swap(int i) {
@@ -375,9 +390,9 @@ namespace DerbyDash.Components.Pages {
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     Console.WriteLine("Timer triggered");
-                    float span = GetSpan(starttime);
-                    await CalculateNewDistanceAsync(span);
-                    await CalculateOldDistanceAsync(span);
+                    float RaceTime = GetSpan(starttime);
+                    await CalculateNewDistanceAsync(RaceTime);
+                    await CalculateOldDistanceAsync(RaceTime);
                     // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finshed races.
                     ScaleRace();
                     await InvokeAsync(() => {
