@@ -241,7 +241,7 @@ namespace DerbyDash.Components.Pages {
                     allFinished = false;
                 }
             }
-            
+
             if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
@@ -252,7 +252,7 @@ namespace DerbyDash.Components.Pages {
                     StateHasChanged();
                 });
             }
-            
+
             return allFinished;
         }
 

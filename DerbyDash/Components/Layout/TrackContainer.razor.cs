@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
-using System.Drawing;
-using DerbyDash.Components.Track;
+﻿using DerbyDash.Components.Track;
+using Microsoft.AspNetCore.Components;
 
 namespace DerbyDash.Components.Layout {
     public partial class TrackContainer {
@@ -12,17 +11,15 @@ namespace DerbyDash.Components.Layout {
 
         [Parameter]
         public double Speed { get; set; }
-        
+
         [Parameter]
         public double Distance { get; set; }
-        
-        private string GetLaneStyle()
-        {
+
+        private string GetLaneStyle() {
             bool anyCarAtTop = Track.Cars.Any(car => car.Top <= 0);
             Console.WriteLine($"StartLine Top: {anyCarAtTop}");
-            
-            if (anyCarAtTop)
-            {
+
+            if (anyCarAtTop) {
                 var speedMultiplier = 5;
                 var baseOffset = (Distance * speedMultiplier) % 280;
                 return $"transform: translateY({baseOffset}px)";

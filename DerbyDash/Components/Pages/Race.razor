@@ -6,27 +6,21 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started)
-{
+@if (!Started) {
     <h1 style="margin: 20px 10px;">@GetTitle(ProblemClassString)</h1>
     <p></p>
     <EditForm EditContext="@editContext" OnValidSubmit="StartClick" style="margin: 15px 10px;">
         <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
         <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
     </EditForm>
-} 
-else if (Finished) 
-{
-    if (ReceivedError) 
-    {
+} else if (Finished) {
+    if (ReceivedError) {
         <p>The system ran into a problem and couldn't calculate your results.</p>
         <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
             <button type="submit" tabindex="0" autofocus="autofocus">Try again</button>
             <input type="text" id="hidden" />
         </EditForm>
-    }
-    else
-    {
+    } else {
         <h1>@GetTitle(ProblemClassString)</h1>
         <h1>@encouragingWord</h1>
         <p>Think you can do better? Try again.</p>
@@ -59,17 +53,13 @@ else if (Finished)
         }
     }
     <p></p>
-} 
-else 
-{
-    @if (problem != null) 
-    {
+} else {
+    @if (problem != null) {
         <p class="TC">
-            <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)" Distance="@(Track.Cars.Max(c => c.Distance))"  IsMoving="@(Track.Cars.Any(c => c.Speed > 0))"/>
+            <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)" Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Speed > 0))" />
         </p>
         <h2 class="race-description"><b>@problem.Description </b></h2>
-        @if (!CurrentRacerFinished)
-        {
+        @if (!CurrentRacerFinished) {
             <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput" @bind:after="OnAfter" />
             <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
         }
