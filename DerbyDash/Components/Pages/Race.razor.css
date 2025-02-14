@@ -40,3 +40,150 @@
 #hidden {
     visibility: hidden;
 }
+
+.error-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    text-align: center;
+    background: #fff1f0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.error-message {
+    color: #d32f2f;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.results-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.results-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.race-title {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.encouraging-message {
+    color: #27ae60;
+    font-size: 1.8rem;
+}
+
+.race-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    min-width: 200px;
+    text-align: center;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.improvement {
+    background: #e3fcef;
+}
+
+.leaderboard {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.leaderboard-title {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+}
+
+.score-list {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.score-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    margin: 0.5rem 0;
+    background: white;
+    border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.current-score {
+    background: #e3f2fd;
+    font-weight: bold;
+    transform: scale(1.05);
+}
+
+.rank {
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.time {
+    color: #2c3e50;
+}
+
+.play-again-button, .retry-button {
+    display: block;
+    width: 200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    border: none;
+    border-radius: 25px;
+    background: #3498db;
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.play-again-button:hover, .retry-button:hover {
+    background: #2980b9;
+}
+
+.retry-button {
+    background: #e74c3c;
+}
+
+.retry-button:hover {
+    background: #c0392b;
+}

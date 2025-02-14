@@ -9,8 +9,9 @@
 .lane-group {
     position: absolute;
     width: 10px;
-    height: 100vh;
-    transition: transform 0.05s linear;
+    height: 200vh; /* Double the viewport height */
+    transform-style: preserve-3d; /* Optimize performance */
+    will-change: transform;
 }
 
 .lane {
@@ -18,7 +19,7 @@
     height: 70px;
     background-color: #ffff00;
     margin-bottom: 210px;
-    will-change: transform;
+    /* will-change: transform; */
     /* transition: transform 0.05s linear; */
 }
 
@@ -92,3 +93,6 @@
         width: 8px;
     }
 }
+
+
+

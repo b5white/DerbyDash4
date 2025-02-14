@@ -6,60 +6,90 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started) {
+@if (!Started)
+{
     <h1 style="margin: 20px 10px;">@GetTitle(ProblemClassString)</h1>
     <p></p>
     <EditForm EditContext="@editContext" OnValidSubmit="StartClick" style="margin: 15px 10px;">
         <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
         <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
     </EditForm>
-} else if (Finished) {
-    if (ReceivedError) {
-        <p>The system ran into a problem and couldn't calculate your results.</p>
-        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
-            <button type="submit" tabindex="0" autofocus="autofocus">Try again</button>
-            <input type="text" id="hidden" />
-        </EditForm>
-    } else {
-        <h1>@GetTitle(ProblemClassString)</h1>
-        <h1>@encouragingWord</h1>
-        <p>Think you can do better? Try again.</p>
-        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
-            <button type="submit" tabindex="0" autofocus="autofocus">Try again</button>
-            <input type="text" id="hidden" />
-        </EditForm>
-        <p></p>
-        <h1>Your time was @RaceTime.ToString("F3")</h1>
-        <p></p>
-        <p>
-            Your average is @averageSpan.ToString("F3")
-        </p>
+} 
+else if (Finished) 
+{
+    @if (ReceivedError) {
+            <div class="error-container">
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>The system ran into a problem and couldn't calculate your results.</p>
+                </div>
+                <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+                    <button class="retry-button" type="submit" tabindex="0" autofocus="autofocus">
+                        <i class="fas fa-redo"></i> Try again
+                    </button>
+                    <input type="text" id="hidden" />
+                </EditForm>
+            </div>
+        } else {
+            <div class="results-container">
+                <div class="results-header">
+                    <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
+                    <h2 class="encouraging-message">@encouragingWord</h2>
+                </div>
 
-        @if (increasedSpan > 0) {
-            <p>
-                You improved your average by @increasedSpan.ToString("F3")
-            </p>
+                <div class="race-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Your Time</div>
+                        <div class="stat-value">@RaceTime.ToString("F3")</div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-label">Average</div>
+                        <div class="stat-value">@averageSpan.ToString("F3")</div>
+                    </div>
+
+                    @if (increasedSpan > 0) {
+                        <div class="stat-card improvement">
+                            <div class="stat-label">Improvement</div>
+                            <div class="stat-value">+@increasedSpan.ToString("F3")</div>
+                        </div>
+                    }
+                </div>
+
+                <div class="leaderboard">
+                    <h2 class="leaderboard-title">Top 5 Scores</h2>
+                    <div class="score-list">
+                        @for (int i = 0; i < Scores.Length; i++) {
+                            string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
+                            <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
+                                <span class="rank">@(i + 1)</span>
+                                <span class="time">@formattedTime</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+                    <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
+                        <i class="fas fa-play"></i> Play Again
+                    </button>
+                    <input type="text" id="hidden" />
+                </EditForm>
+            </div>
         }
 
-        <h2>Top 5 scores</h2>
-        @for (int i = 0; i < Scores.Length; i++) {
-            string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
-
-            @if (i == currentScoreIndex) {
-                <p><b>@formattedTime</b></p>
-            } else {
-                <p>@formattedTime</p>
-            }
-        }
-    }
     <p></p>
-} else {
-    @if (problem != null) {
+} 
+else 
+{
+    @if (problem != null) 
+    {
         <p class="TC">
-            <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)" Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Speed > 0))" />
+            <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)" Distance="@(Track.Cars.Max(c => c.Distance))"  IsMoving="@(Track.Cars.Any(c => c.Speed > 0))"/>
         </p>
-        <h2 class="race-description"><b>@problem.Description </b></h2>
-        @if (!CurrentRacerFinished) {
+        @if (!CurrentRacerFinished)
+        {   
+            <h2 class="race-description"><b>@problem.Description </b></h2>
             <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput" @bind:after="OnAfter" />
             <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
         }

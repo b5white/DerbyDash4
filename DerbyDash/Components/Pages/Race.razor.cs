@@ -154,6 +154,17 @@ namespace DerbyDash.Components.Pages {
             double visibleStart = Math.Max(0, leadDistance - visibleLength);
             double visibleEnd = leadDistance;
 
+            // Check if any car reached the top
+            bool isAnyCarAtTop = Track.Cars.Any(car => car.Top <= 0);
+
+            // Calculate lane offset only if cars reached top
+            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier) % 280 : 0;
+            
+            if (trackContainerInstance != null) {
+                trackContainerInstance.LaneOffset = laneOffset;
+                trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
+            }
+
             foreach (var car in Track.Cars) {
                 //            if (car.Distance >= visibleStart) {
                 // Calculate the car's position within the visible range

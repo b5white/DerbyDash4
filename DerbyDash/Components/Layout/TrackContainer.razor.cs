@@ -15,16 +15,14 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public double Distance { get; set; }
 
-        private string GetLaneStyle() {
-            bool anyCarAtTop = Track.Cars.Any(car => car.Top <= 0);
-            Console.WriteLine($"StartLine Top: {anyCarAtTop}");
+        [Parameter]
+        public double LaneOffset { get; set; }
 
-            if (anyCarAtTop) {
-                var speedMultiplier = 5;
-                var baseOffset = (Distance * speedMultiplier) % 280;
-                return $"transform: translateY({baseOffset}px)";
-            }
-            return "transform: translateY(0)";
+        [Parameter]
+        public bool IsAnyCarAtTop { get; set; }
+
+        private string GetLaneStyle() {
+            return IsAnyCarAtTop ? $"transform: translateY({LaneOffset}px)" : "transform: translateY(0)";
         }
 
 
