@@ -1,13 +1,11 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
-using Microsoft.AspNetCore.Components.Web;
-using Timer = System.Timers.Timer;
-using System.Timers;
-using System.Threading;
-using DerbyDash.Components.Layout;
-using Microsoft.AspNetCore.Components.Forms;
-using Mono.TextTemplating;
 using DerbyDash.Components.Track;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Components.Web;
+using System.Timers;
+using Timer = System.Timers.Timer;
 
 namespace DerbyDash.Components.Pages {
 
@@ -158,7 +156,7 @@ namespace DerbyDash.Components.Pages {
 
             // Calculate lane offset only if cars reached top
             double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier) % 280 : 0;
-            
+
             if (trackContainerInstance != null) {
                 trackContainerInstance.LaneOffset = laneOffset;
                 trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
@@ -487,8 +485,8 @@ namespace DerbyDash.Components.Pages {
             "Practice strengthens those brain muscles.",
             "Sailing through those problems like a pro.",
 
-			// Other
-			"Do it the same, but better."
+			// Funny?
+			"Do it the same, but better!"
         };
     }
 }
