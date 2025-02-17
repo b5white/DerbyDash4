@@ -49,6 +49,10 @@ namespace DerbyDash.Components.Pages {
         private EditContext editContext = new EditContext(new object());
         private Random random = new Random();
 
+        private bool isCountingDown = false;
+        private int countdownValue = 3;
+        private Timer countdownTimer = new Timer(1000); // 1 second intervals
+
         [Parameter] public string? ProblemClassString { get; set; }
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
@@ -89,7 +93,29 @@ namespace DerbyDash.Components.Pages {
 
 
         private void StartClick() {
-            Reset();
+            // Reset();
+            isCountingDown = true;
+            countdownValue = 3;
+            Started = true; // We need this to show the track
+            countdownTimer = new Timer(1000);
+            countdownTimer.Elapsed += CountdownTick;
+            countdownTimer.Start();
+            StateHasChanged();
+        }
+
+        private void CountdownTick(object? sender, ElapsedEventArgs e) {
+            InvokeAsync(() => {
+                countdownValue--;
+                
+                if (countdownValue < 0) {
+                    countdownTimer.Stop();
+                    countdownTimer.Elapsed -= CountdownTick;
+                    isCountingDown = false;
+                    Reset(); // Start the actual race
+                }
+                
+                StateHasChanged();
+            });
         }
 
         private void CreateProblems() {
@@ -140,10 +166,8 @@ namespace DerbyDash.Components.Pages {
 
         private void ScaleRace() {
             const double visibleLength = 60.0;
-            const double topMargin = 0.0; // Space at the top of the container
-            const float topMultiplier = 7.0f; // when they get to the top speed, about 15,
-                                              // they'll be going 105 ft/s
-                                              // about 75 MPH
+            const double topMargin = 0.0;
+            const float topMultiplier = 7.0f;
             const int startDistance = 0;
             double relativePosition;
 
@@ -157,12 +181,16 @@ namespace DerbyDash.Components.Pages {
             // Check if any car reached the top
             bool isAnyCarAtTop = Track.Cars.Any(car => car.Top <= 0);
 
-            // Calculate lane offset only if cars reached top
-            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier) % 280 : 0;
+            // Calculate speed multiplier based on number of correct answers
+            float speedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
+            
+            // Calculate lane offset with increased speed effect
+            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
             
             if (trackContainerInstance != null) {
                 trackContainerInstance.LaneOffset = laneOffset;
                 trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
+                trackContainerInstance.SpeedMultiplier = speedMultiplier;
             }
 
             foreach (var car in Track.Cars) {
@@ -442,6 +470,7 @@ namespace DerbyDash.Components.Pages {
             periodicTimer.Dispose();
             InactivityTimer?.Dispose();
             FlashTimer?.Dispose();
+            countdownTimer?.Dispose();
         }
 
         string[] encouragingWords = new string[] {

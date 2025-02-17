@@ -19,7 +19,7 @@
     height: 70px;
     background-color: #ffff00;
     margin-bottom: 210px;
-    /* will-change: transform; */
+    will-change: transform;
     /* transition: transform 0.05s linear; */
 }
 

@@ -21,8 +21,17 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public bool IsAnyCarAtTop { get; set; }
 
+        [Parameter]
+        public float SpeedMultiplier { get; set; } = 1.0f;
+
+
         private string GetLaneStyle() {
-            return IsAnyCarAtTop ? $"transform: translateY({LaneOffset}px)" : "transform: translateY(0)";
+            if (!IsAnyCarAtTop) return "transform: translateY(0)";
+            
+            string transform = $"transform: translateY({LaneOffset}px)";
+            string transition = $"transition: transform {0.05f / SpeedMultiplier}s linear";
+            
+            return $"{transform}; {transition}";
         }
 
 
