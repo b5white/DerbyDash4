@@ -6,8 +6,7 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started)
-{
+@if (!Started) {
     <h1 style="margin: 20px 10px;">@GetTitle(ProblemClassString)</h1>
     <p></p>
     <EditForm EditContext="@editContext" OnValidSubmit="StartClick" style="margin: 15px 10px;">
@@ -58,6 +57,16 @@ else if (Finished)
                     <div class="stat-label">Average</div>
                     <div class="stat-value">@averageSpan.ToString("F3")</div>
                 </div>
+            <div class="race-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Your Time</div>
+                    <div class="stat-value">@RaceTime.ToString("F3")</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Average</div>
+                    <div class="stat-value">@averageSpan.ToString("F3")</div>
+                </div>
 
                 @if (increasedSpan > 0)
                 {
@@ -82,6 +91,14 @@ else if (Finished)
                 </div>
             </div>
 
+            <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+                <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
+                    <i class="fas fa-play"></i> Play Again
+                </button>
+                <input type="text" id="hidden" />
+            </EditForm>
+        </div>
+    }
             <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
                 <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
                     <i class="fas fa-play"></i> Play Again
