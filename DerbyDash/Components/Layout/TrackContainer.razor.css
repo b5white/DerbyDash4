@@ -67,6 +67,24 @@
     object-fit: contain;
 }
 
+.debug-panel {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 1000;
+    background: rgba(0,0,0,0.7);
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    font-family: monospace;
+    pointer-events: none;
+}
+
+.debug-info {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
 .start-line {
     position: absolute; /* Change from relative to absolute */
     width: 100%;
@@ -74,6 +92,7 @@
     z-index: 1; /* Increase z-index to be above cars */
     left: 0; /* Ensure it starts from left edge */
     right: 0; /* Ensure it stretches to right edge */
+    will-change: transform;
 }
 
 .start-line img {

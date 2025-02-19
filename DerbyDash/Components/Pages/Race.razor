@@ -14,14 +14,14 @@
         <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
     </EditForm>
 }
-else if (isCountingDown)
+@* else if (isCountingDown)
 {
     <div class="countdown-container">
         <div class="countdown-number">
             @(countdownValue == 0 ? "GO!" : countdownValue.ToString())
         </div>
     </div>
-}
+} *@
 else if (Finished)
 {
     @if (ReceivedError)
@@ -96,17 +96,26 @@ else
     {
         <p class="TC">
             <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)"
-                Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Speed > 0))" />
+                Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Top > 0))" />
+
+            <div class="countdown-sequence">
+                <div class="count three">3</div>
+                <div class="count two">2</div>
+                <div class="count one">1</div>
+                <div class="count go">GO!</div>
+            </div>
         </p>
         @if (!CurrentRacerFinished)
-        {
-            <h2 class="race-description"><b>@problem.Description </b></h2>
-            <div class="speed-indicator">
-                <span class="speed-value">@(Math.Round(Track.Cars[0].Speed * 8))km/h</span>
+        {   
+            <div class="problem-container delayed-show">
+                <h2 class="race-description"><b>@problem.Description </b></h2>
+                <div class="speed-indicator">
+                    <span class="speed-value">@(Math.Round(Track.Cars[0].Speed * 8))km/h</span>
+                </div>
+                <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
+                    @bind:after="OnAfter" />
+                <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
             </div>
-            <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
-                @bind:after="OnAfter" />
-            <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
         }
         <p> </p>
     }

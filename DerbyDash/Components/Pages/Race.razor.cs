@@ -47,10 +47,6 @@ namespace DerbyDash.Components.Pages {
         private EditContext editContext = new EditContext(new object());
         private Random random = new Random();
 
-        private bool isCountingDown = false;
-        private int countdownValue = 3;
-        private Timer countdownTimer = new Timer(1000); // 1 second intervals
-
         [Parameter] public string? ProblemClassString { get; set; }
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
@@ -90,29 +86,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void StartClick() {
-            // Reset();
-            isCountingDown = true;
-            countdownValue = 3;
-            Started = true; // We need this to show the track
-            countdownTimer = new Timer(1000);
-            countdownTimer.Elapsed += CountdownTick;
-            countdownTimer.Start();
-            StateHasChanged();
-        }
-
-        private void CountdownTick(object? sender, ElapsedEventArgs e) {
-            InvokeAsync(() => {
-                countdownValue--;
-                
-                if (countdownValue < 0) {
-                    countdownTimer.Stop();
-                    countdownTimer.Elapsed -= CountdownTick;
-                    isCountingDown = false;
-                    Reset(); // Start the actual race
-                }
-                
-                StateHasChanged();
-            });
+            Reset();
         }
 
         private void CreateProblems() {
@@ -340,19 +314,25 @@ namespace DerbyDash.Components.Pages {
 
         private void CreateTrack() {
             List<Car> Cars = [
-                new Car { index = 0, ImageUrl = "Racecar1.png" },
-                new Car { index = 1, ImageUrl = "Racecar2.png" },
-                new Car { index = 2, ImageUrl = "Racecar3.png" },
-                new Car { index = 3, ImageUrl = "Racecar4.png" },
-                new Car { index = 4, ImageUrl = "Racecar5.png" },
-                new Car { index = 5, ImageUrl = "Racecar6.png" }
+                new Car { index = 0, ImageUrl = "Racecar1.png", Top = 9999 }, // Initialize with off-screen position
+                new Car { index = 1, ImageUrl = "Racecar2.png", Top = 9999 },
+                new Car { index = 2, ImageUrl = "Racecar3.png", Top = 9999 },
+                new Car { index = 3, ImageUrl = "Racecar4.png", Top = 9999 },
+                new Car { index = 4, ImageUrl = "Racecar5.png", Top = 9999 },
+                new Car { index = 5, ImageUrl = "Racecar6.png", Top = 9999 }
             ];
+
             for (int i = 1; i < Cars.Count; i++) {
                 Cars[i].InitializeFastEddyTimeIncrements(random);
             }
             Track.Cars = Cars;
+            
+            // Initialize lines off-screen
             Track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
             Track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
+            
+            // Call ScaleRace immediately to set initial positions
+            ScaleRace();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -467,7 +447,6 @@ namespace DerbyDash.Components.Pages {
             periodicTimer.Dispose();
             InactivityTimer?.Dispose();
             FlashTimer?.Dispose();
-            countdownTimer?.Dispose();
         }
 
         string[] encouragingWords = new string[] {
