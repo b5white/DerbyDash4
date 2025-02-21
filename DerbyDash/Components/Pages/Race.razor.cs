@@ -1,6 +1,7 @@
 ﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
+using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
@@ -10,6 +11,13 @@ using Timer = System.Timers.Timer;
 namespace DerbyDash.Components.Pages {
 
     public partial class Race: ComponentBase {
+        [Inject]
+        public required RaceService RaceService { get; set; }
+        [Inject]
+        public required ILogger<Race> _logger { get; set; }
+        [Parameter]
+        public string? ProblemClassString { get; set; }
+
         private bool Started = false;
         private bool Running = false;
         private bool Finished = false;
@@ -26,7 +34,6 @@ namespace DerbyDash.Components.Pages {
         private float increasedSpan = 0;
         private float prevAve = 0;
         private double currentDistance = 0;
-        private float totalDistance = 150;
         private float[] Scores = [0, 0, 0, 0, 0];
         private int currentScoreIndex = 0;
         private int currentTimeIndex = 0;
@@ -40,14 +47,12 @@ namespace DerbyDash.Components.Pages {
         private ElementReference textInput;
         private string encouragingWord = "";
         private bool ReceivedError = false;
-        private RaceComponents Track = new();
+        private RaceComponents track = new();
         private int Margin = 10;
         private int MarginTop = 0;
         private string FlexBasis = "";
         private EditContext editContext = new EditContext(new object());
-        private Random random = new Random();
 
-        [Parameter] public string? ProblemClassString { get; set; }
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
 
@@ -71,7 +76,8 @@ namespace DerbyDash.Components.Pages {
                 Started = true;
                 Running = true;
                 CreateProblems();
-                CreateTrack();
+                InitializeTrack(ProblemClassString);
+                ScaleRace(0);
                 encouragingWord = encouragingWords[Random.Shared.Next(0, encouragingWords.Length)];
                 ReceivedError = false;
                 currentTimeIndex = 0;
@@ -90,10 +96,10 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CreateProblems() {
+            if (String.IsNullOrEmpty(ProblemClassString)) {
+                ProblemClassString = "addition-4stable";
+            }
             if (problems == null) {
-                if (String.IsNullOrEmpty(ProblemClassString)) {
-                    ProblemClassString = "addition-4stable";
-                }
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
             }
         }
@@ -108,7 +114,7 @@ namespace DerbyDash.Components.Pages {
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    CalculateDistance();
+                    CalculateNewDistance(GetSpan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetSpan(starttime);
@@ -122,7 +128,7 @@ namespace DerbyDash.Components.Pages {
                     } else {
                         EndRace();
                     }
-                    ScaleRace();
+                    ScaleRace(currentTimeIndex);
                     StateHasChanged();
                 } else {
                     if (Answer.Length > (problem?.Length ?? 999)) {
@@ -135,39 +141,36 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private void ScaleRace() {
+        private void ScaleRace(int currentTimeIndex) {
             const double visibleLength = 60.0;
-            const double topMargin = 0.0;
-            const float topMultiplier = 7.0f;
+            const double topMargin = 0.0; // Space at the top of the container
+            const float topMultiplier = 7.0f; // when they get to the top speed, about 15,
+                                              // they'll be going 105 ft/s
+                                              // about 75 MPH
             const int startDistance = 0;
             double relativePosition;
 
             // Find the lead car's distance
-            double leadDistance = Math.Min(Track.Cars.Max(car => car.Distance), totalDistance);
+            double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
 
             // Calculate the visible range
             double visibleStart = Math.Max(0, leadDistance - visibleLength);
             double visibleEnd = leadDistance;
 
             // Check if any car reached the top
-            bool isAnyCarAtTop = Track.Cars.Any(car => car.Top <= 0);
+            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
 
             // Calculate speed multiplier based on number of correct answers
             float speedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
 
-            double continuousOffset = isAnyCarAtTop ? leadDistance * topMultiplier * speedMultiplier * 0.12 : 0;
-
             // Calculate lane offset with increased speed effect
-            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) : 0;
+            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
 
-            if (trackContainerInstance != null) {
-                trackContainerInstance.LaneOffset = laneOffset % 280; // Lanes repeat
-                trackContainerInstance.ContinuousOffset = continuousOffset;   // Start line continues
-                trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
-                trackContainerInstance.SpeedMultiplier = speedMultiplier;
-            }
+            track.LaneOffset = laneOffset;
+            track.IsAnyCarAtTop = isAnyCarAtTop;
+            track.SpeedMultiplier = speedMultiplier;
 
-            foreach (var car in Track.Cars) {
+            foreach (var car in track.Cars) {
                 //            if (car.Distance >= visibleStart) {
                 // Calculate the car's position within the visible range
                 relativePosition = (car.Distance - visibleStart) / visibleLength;
@@ -182,14 +185,14 @@ namespace DerbyDash.Components.Pages {
 
             // Set the locations for the start and finish lines
             relativePosition = (startDistance - visibleStart) / visibleLength;
-            Track.StartLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-            relativePosition = (totalDistance - visibleStart) / visibleLength;
-            Track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            track.StartLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
+            track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
 
             // Set flex-basis for all cars
             int gap = 30;
-            foreach (var car in Track.Cars) {
-                car.ResetFlexBasis(Track.Cars.Count, gap);
+            foreach (var car in track.Cars) {
+                car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
 
@@ -223,12 +226,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private void CalculateDistance() {
-            float RaceTime = GetSpan(starttime);
-            Task.Run(() => CalculateNewDistanceAsync(RaceTime));
-        }
-
-        private async Task CalculateNewDistanceAsync(double time) {
+        private void CalculateNewDistance(double time) {
             currentDistance = 0;
             int i;
 
@@ -237,20 +235,20 @@ namespace DerbyDash.Components.Pages {
                 currentDistance += RaceTime * speedIncrement;
             }
 
-            Track.Cars[0].Distance = currentDistance;
-            Track.Cars[0].Speed = i * speedIncrement;
+            track.Cars[0].Distance = currentDistance;
+            track.Cars[0].Speed = i * speedIncrement;
 
-            if (currentDistance >= totalDistance && !CurrentRacerFinished) {
+            if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
                 EndRace();
             }
         }
 
-        private async Task<bool> CalculateOldDistanceAsync(double time) {
+        private bool CalculateOldDistance(double time) {
             Boolean allFinished = true;
-            for (int i = 1; i < Track.Cars.Count; i++) {
-                double dist = Track.Cars[i].CalculateCurrentDistance(time);
-                if (dist < totalDistance) {
+            for (int i = 1; i < track.Cars.Count; i++) {
+                double dist = track.Cars[i].CalculateCurrentDistance(time);
+                if (dist < RaceService.TotalDistance) {
                     allFinished = false;
                 }
             }
@@ -261,9 +259,6 @@ namespace DerbyDash.Components.Pages {
                 PeriodicTimerToken.Cancel();
                 periodicTimer.Dispose();
                 StopPeriodicTimer();
-                await InvokeAsync(() => {
-                    StateHasChanged();
-                });
             }
 
             return allFinished;
@@ -315,40 +310,24 @@ namespace DerbyDash.Components.Pages {
         //    }
         //}
 
-        private void CreateTrack() {
-            List<Car> Cars = [
-                new Car { index = 0, ImageUrl = "Racecar1.png", Top = 9999 }, // Initialize with off-screen position
-                new Car { index = 1, ImageUrl = "Racecar2.png", Top = 9999 },
-                new Car { index = 2, ImageUrl = "Racecar3.png", Top = 9999 },
-                new Car { index = 3, ImageUrl = "Racecar4.png", Top = 9999 },
-                new Car { index = 4, ImageUrl = "Racecar5.png", Top = 9999 },
-                new Car { index = 5, ImageUrl = "Racecar6.png", Top = 9999 }
-            ];
-
-            for (int i = 1; i < Cars.Count; i++) {
-                Cars[i].InitializeFastEddyTimeIncrements(random);
+        public void InitializeTrack(string? problemSetIdentifier) {
+            if (string.IsNullOrEmpty(problemSetIdentifier)) {
+                throw new Exception("problemSetIdentifier is empty or null.");
             }
-            Track.Cars = Cars;
-
-            // Initialize lines off-screen
-            Track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
-            Track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
-
-            // Call ScaleRace immediately to set initial positions
-            ScaleRace();
+            track = RaceService.CreateTrack(problemSetIdentifier);
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             try {
                 await textInput.FocusAsync();
-            } catch (Exception e) {
+            } catch (Exception) {
             }
         }
 
         public async void OnAfterIgnore() {
             try {
                 await textInput.FocusAsync();
-            } catch (Exception e) {
+            } catch (Exception) {
             }
         }
 
@@ -410,13 +389,11 @@ namespace DerbyDash.Components.Pages {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     Console.WriteLine("Timer triggered");
                     float RaceTime = GetSpan(starttime);
-                    await CalculateNewDistanceAsync(RaceTime);
-                    await CalculateOldDistanceAsync(RaceTime);
-                    // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finshed races.
-                    ScaleRace();
-                    await InvokeAsync(() => {
-                        StateHasChanged();
-                    });
+                    CalculateNewDistance(RaceTime);
+                    CalculateOldDistance(RaceTime);
+                    // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finished races.
+                    ScaleRace(currentTimeIndex);
+                    await InvokeAsync(StateHasChanged);
                 }
             } catch (OperationCanceledException E) {
                 Console.WriteLine(E.Message);

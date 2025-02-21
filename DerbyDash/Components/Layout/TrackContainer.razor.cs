@@ -15,6 +15,7 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public double Distance { get; set; }
 
+<<<<<<< HEAD
         [Parameter]
         public double LaneOffset { get; set; }
 
@@ -42,12 +43,15 @@ namespace DerbyDash.Components.Layout {
 
 
 
+=======
+>>>>>>> f0123cc547cd293069d6395a5b1712dacaca1ec3
         private string GetLaneStyle() {
-            if (!IsAnyCarAtTop) return "transform: translateY(0)";
-            
-            string transform = $"transform: translateY({LaneOffset}px)";
-            string transition = $"transition: transform {0.05f / SpeedMultiplier}s linear";
-            
+            if (!Track.IsAnyCarAtTop) {
+                return "transform: translateY(0)";
+            }
+            string transform = $"transform: translateY({Track.LaneOffset}px)";
+            string transition = $"transition: transform {0.05f / Track.SpeedMultiplier}s linear";
+
             return $"{transform}; {transition}";
         }
 

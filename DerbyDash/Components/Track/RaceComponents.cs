@@ -4,7 +4,9 @@
         public RaceComponent StartLine { get; set; } = new();
         public RaceComponent FinishLine { get; set; } = new();
         public RaceComponent LeftFence { get; set; } = new();
-
+        public double LaneOffset { get; set; } = 0;
+        public bool IsAnyCarAtTop { get; set; } = false;
+        public float SpeedMultiplier { get; set; } = 1.0f;
     }
 
     public class RaceComponent {
