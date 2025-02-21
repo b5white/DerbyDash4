@@ -22,10 +22,8 @@
         </div>
     </div>
 } *@
-else if (Finished)
-{
-    @if (ReceivedError)
-    {
+else if (Finished) {
+    @if (ReceivedError) {
         <div class="error-container">
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -38,14 +36,12 @@ else if (Finished)
                 <input type="text" id="hidden" />
             </EditForm>
         </div>
-    }
-    else
-    {
+    } else {
         <div class="results-container">
             <div class="results-header">
                 <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
                 <h2 class="encouraging-message">@encouragingWord</h2>
-            </div>                
+            </div>
             <div class="race-stats">
                 <div class="stat-card">
                     <div class="stat-label">Your Time</div>
@@ -57,8 +53,7 @@ else if (Finished)
                     <div class="stat-value">@averageSpan.ToString("F3")</div>
                 </div>
 
-                @if (increasedSpan > 0)
-                {
+                @if (increasedSpan > 0) {
                     <div class="stat-card improvement">
                         <div class="stat-label">Improvement</div>
                         <div class="stat-value">+@increasedSpan.ToString("F3")</div>
@@ -69,8 +64,7 @@ else if (Finished)
             <div class="leaderboard">
                 <h2 class="leaderboard-title">Top 5 Scores</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < Scores.Length; i++)
-                    {
+                    @for (int i = 0; i < Scores.Length; i++) {
                         string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
                         <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
@@ -89,14 +83,11 @@ else if (Finished)
         </div>
     }
     <p></p>
-}
-else
-{
-    @if (problem != null)
-    {
+} else {
+    @if (problem != null) {
         <p class="TC">
             <TrackContainer @ref="trackContainerInstance" Track="@Track" Speed="@(Track.Cars[0].Speed)"
-                Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Top > 0))" />
+                            Distance="@(Track.Cars.Max(c => c.Distance))" IsMoving="@(Track.Cars.Any(c => c.Top > 0))" />
 
             <div class="countdown-sequence">
                 <div class="count three">3</div>
@@ -105,15 +96,14 @@ else
                 <div class="count go">GO!</div>
             </div>
         </p>
-        @if (!CurrentRacerFinished)
-        {   
+        @if (!CurrentRacerFinished) {
             <div class="problem-container delayed-show">
                 <h2 class="race-description"><b>@problem.Description </b></h2>
                 <div class="speed-indicator">
                     <span class="speed-value">@(Math.Round(Track.Cars[0].Speed * 8))km/h</span>
                 </div>
                 <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
-                    @bind:after="OnAfter" />
+                       @bind:after="OnAfter" />
                 <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
             </div>
         }

@@ -90,10 +90,10 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CreateProblems() {
+            if (String.IsNullOrEmpty(ProblemClassString)) {
+                ProblemClassString = "addition-4stable";
+            }
             if (problems == null) {
-                if (String.IsNullOrEmpty(ProblemClassString)) {
-                    ProblemClassString = "addition-4stable";
-                }
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
             }
         }
@@ -137,8 +137,10 @@ namespace DerbyDash.Components.Pages {
 
         private void ScaleRace() {
             const double visibleLength = 60.0;
-            const double topMargin = 0.0;
-            const float topMultiplier = 7.0f;
+            const double topMargin = 0.0; // Space at the top of the container
+            const float topMultiplier = 7.0f; // when they get to the top speed, about 15,
+                                              // they'll be going 105 ft/s
+                                              // about 75 MPH
             const int startDistance = 0;
             double relativePosition;
 
@@ -154,10 +156,10 @@ namespace DerbyDash.Components.Pages {
 
             // Calculate speed multiplier based on number of correct answers
             float speedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
-            
+
             // Calculate lane offset with increased speed effect
             double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
-            
+
             if (trackContainerInstance != null) {
                 trackContainerInstance.LaneOffset = laneOffset;
                 trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
@@ -325,12 +327,14 @@ namespace DerbyDash.Components.Pages {
             for (int i = 1; i < Cars.Count; i++) {
                 Cars[i].InitializeFastEddyTimeIncrements(random);
             }
+
+            // Set the track properties
             Track.Cars = Cars;
-            
+
             // Initialize lines off-screen
             Track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
             Track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
-            
+
             // Call ScaleRace immediately to set initial positions
             ScaleRace();
         }
