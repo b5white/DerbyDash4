@@ -19,6 +19,8 @@ namespace DerbyDash.Components.Track {
         public int index;
         public double Speed { get; set; } = 0;
         public double Distance { get; set; } = 0;
+        public double TotalTime { get; set; } = 0;
+
         public string ImageUrl { get; set; } = "";
         public string FlexBasis { get; set; } = $"calc((100% - 170px) / 6)";
 

@@ -15,22 +15,13 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public double Distance { get; set; }
 
-        [Parameter]
-        public double LaneOffset { get; set; }
-
-        [Parameter]
-        public bool IsAnyCarAtTop { get; set; }
-
-        [Parameter]
-        public float SpeedMultiplier { get; set; } = 1.0f;
-
-
         private string GetLaneStyle() {
-            if (!IsAnyCarAtTop) return "transform: translateY(0)";
-            
-            string transform = $"transform: translateY({LaneOffset}px)";
-            string transition = $"transition: transform {0.05f / SpeedMultiplier}s linear";
-            
+            if (!Track.IsAnyCarAtTop) {
+                return "transform: translateY(0)";
+            }
+            string transform = $"transform: translateY({Track.LaneOffset}px)";
+            string transition = $"transition: transform {0.05f / Track.SpeedMultiplier}s linear";
+
             return $"{transform}; {transition}";
         }
 

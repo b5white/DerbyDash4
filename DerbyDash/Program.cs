@@ -1,8 +1,6 @@
-using DerbyDash.Client.Pages;
 using DerbyDash.Components;
 using DerbyDash.Data;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
+using DerbyDash.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash {
@@ -20,6 +18,7 @@ namespace DerbyDash {
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
+            builder.Services.AddScoped<RaceService>();
 
             var app = builder.Build();
 
