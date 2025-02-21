@@ -10,9 +10,10 @@
     }
 
     <div class="track-container">
-        <div class="start-line" style="top: @Track.StartLine.TopStr;  margin: 0">
+        <div class="start-line" style="@GetStartLineStyle(); top: @Track.StartLine.TopStr;">
             <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="" />
         </div>
+
         <div class="start-line" style="top: @Track.FinishLine.TopStr;">
             <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
         </div>

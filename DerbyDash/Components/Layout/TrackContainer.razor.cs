@@ -24,6 +24,23 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public float SpeedMultiplier { get; set; } = 1.0f;
 
+        [Parameter]
+        public double ContinuousOffset { get; set; }
+
+        private string GetStartLineStyle() {
+            if (!IsAnyCarAtTop) {
+                // Keep start line static until a car reaches top
+                return "transform: translateY(0)";
+            }
+            
+            // Begin movement after car reaches top
+            string transform = $"transform: translateY({ContinuousOffset}px)";
+            string transition = $"transition: transform {SpeedMultiplier}s linear";
+            
+            return $"{transform}; {transition}";
+        }
+
+
 
         private string GetLaneStyle() {
             if (!IsAnyCarAtTop) return "transform: translateY(0)";

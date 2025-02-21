@@ -154,12 +154,15 @@ namespace DerbyDash.Components.Pages {
 
             // Calculate speed multiplier based on number of correct answers
             float speedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
-            
+
+            double continuousOffset = isAnyCarAtTop ? leadDistance * topMultiplier * speedMultiplier * 0.12 : 0;
+
             // Calculate lane offset with increased speed effect
-            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
-            
+            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) : 0;
+
             if (trackContainerInstance != null) {
-                trackContainerInstance.LaneOffset = laneOffset;
+                trackContainerInstance.LaneOffset = laneOffset % 280; // Lanes repeat
+                trackContainerInstance.ContinuousOffset = continuousOffset;   // Start line continues
                 trackContainerInstance.IsAnyCarAtTop = isAnyCarAtTop;
                 trackContainerInstance.SpeedMultiplier = speedMultiplier;
             }
@@ -326,11 +329,11 @@ namespace DerbyDash.Components.Pages {
                 Cars[i].InitializeFastEddyTimeIncrements(random);
             }
             Track.Cars = Cars;
-            
+
             // Initialize lines off-screen
             Track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
             Track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
-            
+
             // Call ScaleRace immediately to set initial positions
             ScaleRace();
         }

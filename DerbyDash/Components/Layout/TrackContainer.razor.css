@@ -9,7 +9,7 @@
 .lane-group {
     position: absolute;
     width: 10px;
-    height: 200vh; /* Double the viewport height */
+    height: 100vh; /* Double the viewport height */
     transform-style: preserve-3d; /* Optimize performance */
     will-change: transform;
 }
@@ -20,7 +20,7 @@
     background-color: #ffff00;
     margin-bottom: 210px;
     will-change: transform;
-    /* transition: transform 0.05s linear; */
+    transition: transform 0.05s linear;
 }
 
 
@@ -93,6 +93,8 @@
     left: 0; /* Ensure it starts from left edge */
     right: 0; /* Ensure it stretches to right edge */
     will-change: transform;
+    transform-style: preserve-3d;
+    transition: transform 0.05s linear;
 }
 
 .start-line img {
