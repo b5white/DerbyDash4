@@ -9,7 +9,7 @@
 @if (!Started) {
     <h1 style="margin: 20px 10px;">@GetTitle(ProblemClassString)</h1>
     <p></p>
-    <EditForm EditContext="@editContext" OnValidSubmit="StartClick" style="margin: 15px 10px;">
+    <EditForm EditContext="@editContext" OnValidSubmit="StartClick" FormName="startForm" style="margin: 15px 10px;">
         <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
         <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
     </EditForm>

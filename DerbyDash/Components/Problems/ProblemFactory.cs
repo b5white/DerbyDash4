@@ -7,7 +7,7 @@
         public static ProblemManagerBase CreateProblemManager(string problemTypeName) {
             if (problemTypeMap.TryGetValue(problemTypeName, out Type? problemType)) {
                 Type managerType = typeof(ProblemManager<>).MakeGenericType(problemType);
-                var result = Activator.CreateInstance(managerType) as ProblemManagerBase;
+                ProblemManagerBase? result = Activator.CreateInstance(managerType) as ProblemManagerBase;
                 if (result == null) {
                     throw new ArgumentException($"Problem type '{problemTypeName}' could not be created.");
                 }

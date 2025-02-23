@@ -170,7 +170,7 @@ namespace DerbyDash.Components.Pages {
             track.IsAnyCarAtTop = isAnyCarAtTop;
             track.SpeedMultiplier = speedMultiplier;
 
-            foreach (var car in track.Cars) {
+            foreach (Car car in track.Cars) {
                 //            if (car.Distance >= visibleStart) {
                 // Calculate the car's position within the visible range
                 relativePosition = (car.Distance - visibleStart) / visibleLength;
@@ -191,7 +191,7 @@ namespace DerbyDash.Components.Pages {
 
             // Set flex-basis for all cars
             int gap = 30;
-            foreach (var car in track.Cars) {
+            foreach (Car car in track.Cars) {
                 car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
