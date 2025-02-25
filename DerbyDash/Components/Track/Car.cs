@@ -52,11 +52,11 @@ namespace DerbyDash.Components.Track {
 
         public void ResetFlexBasis(int itemCount, int gap) {
             // Calculate total gap and margin width
-            var totalGapWidth = (itemCount - 1) * gap;
-            var totalMarginWidth = itemCount * 2 * Margin;
+            int totalGapWidth = (itemCount - 1) * gap;
+            int totalMarginWidth = itemCount * 2 * Margin;
 
             // Calculate available space
-            var availableSpace = "(100% - " + (totalGapWidth + totalMarginWidth) + "px)";
+            string availableSpace = "(100% - " + (totalGapWidth + totalMarginWidth) + "px)";
 
             // Calculate flex-basis
             FlexBasis = $"calc({availableSpace} / {itemCount})";

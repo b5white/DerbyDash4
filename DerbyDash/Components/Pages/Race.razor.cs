@@ -217,7 +217,7 @@ namespace DerbyDash.Components.Pages {
 
             // Update car spacing
             int gap = 30;
-            foreach (var car in track.Cars) {
+            foreach (Car car in track.Cars) {
                 car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
