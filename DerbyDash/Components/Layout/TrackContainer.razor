@@ -1,34 +1,55 @@
 ﻿@using Microsoft.AspNetCore.Components.Web
 
 <div class="road">
-    @for (int i = 0; i < 5; i++) {
-        <div class="lane-group">
-            @for (int j = 0; j < 4; j++) {
-                <div class="lane" style="@GetLaneStyle()"></div>
-            }
-        </div>
-    }
-
-    <div class="track-container">
-        <div class="start-line" style="@GetStartLineStyle(); top: @Track.StartLine.TopStr;">
-            <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="" />
-        </div>
-
-        <div class="start-line" style="top: @Track.FinishLine.TopStr;">
-            <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="" />
-        </div>
-        @foreach (var car in Track.Cars) {
-            <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
-                <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
+    <div class="track-background">
+        @for (int i = 0; i < 3; i++)
+        {
+            <div class="lane-section">
+                @for (int j = 0; j < 5; j++)
+                {
+                    <div class="lane-group">
+                        @for (int k = 0; k < 40; k++)
+                        {
+                            <div class="lane" style="@GetLaneStyle()"></div>
+                        }
+                    </div>
+                }
             </div>
         }
-        <div class="debug-panel">
-            @foreach (var car in Track.Cars) {
-                <div class="debug-info">
-                    T: @car.Top.ToString("F0") S: @car.Speed.ToString("F0") D: @car.Distance.ToString("F2")
+    </div>
+
+    <div class="track-container">
+        <div class="race-lines">
+            <div class="start-line @(Track.StartLine.Visible ? "" : "hidden")"
+                style="@GetStartLineStyle(); top: @Track.StartLine.TopStr;">
+                <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
+            </div>
+
+            <div class="finish-line" style="top: @Track.FinishLine.TopStr;">
+                <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="Finish Line" />
+            </div>
+        </div>
+
+        <div class="cars-container">
+            @foreach (var car in Track.Cars)
+            {
+                <div class="car-dynamic"
+                    style="flex-basis: @car.FlexBasis; top: @car.TopStr; transform: translateZ(@(car.Speed)px)">
+                    <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
                 </div>
             }
-        </div>    
+        </div>
+
+        @* @if (Track.ShowDebug) {
+            <div class="debug-panel">
+                @foreach (var car in Track.Cars) {
+                    <div class="debug-info">
+                        Speed: @car.Speed.ToString("F0") 
+                        Distance: @car.Distance.ToString("F2")
+                        Offset: @Track.LaneOffset.ToString("F0")
+                    </div>
+                }
+            </div>
+        } *@
     </div>
 </div>
-

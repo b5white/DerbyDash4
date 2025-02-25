@@ -6,24 +6,34 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started) {
-    <h1 style="margin: 20px 10px;">@GetTitle(ProblemClassString)</h1>
-    <p></p>
-    <EditForm EditContext="@editContext" OnValidSubmit="StartClick" style="margin: 15px 10px;">
-        <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
-        <button type="submit" tabindex="1" id="startButton" autofocus>Start</button>
-    </EditForm>
-}
-@* else if (isCountingDown)
+@if (!Started)
 {
-    <div class="countdown-container">
-        <div class="countdown-number">
-            @(countdownValue == 0 ? "GO!" : countdownValue.ToString())
+    <div class="race-start-container">
+        <div class="race-title-box">
+            <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
+            <p class="race-subtitle">Ready to race with numbers?</p>
+        </div>
+
+        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+            <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
+            <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
+                <div class="button-content">
+                    <i class="fas fa-flag-checkered"></i>
+                    <span>Start Race</span>
+                </div>
+            </button>
+        </EditForm>
+
+        <div class="race-instructions">
+            <p>Solve math problems to accelerate your car!</p>
         </div>
     </div>
-} *@
-else if (Finished) {
-    @if (ReceivedError) {
+}
+
+else if (Finished)
+{
+    @if (ReceivedError)
+    {
         <div class="error-container">
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -36,7 +46,9 @@ else if (Finished) {
                 <input type="text" id="hidden" />
             </EditForm>
         </div>
-    } else {
+    }
+    else
+    {
         <div class="results-container">
             <div class="results-header">
                 <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
@@ -53,7 +65,8 @@ else if (Finished) {
                     <div class="stat-value">@averageSpan.ToString("F3")</div>
                 </div>
 
-                @if (increasedSpan > 0) {
+                @if (increasedSpan > 0)
+                {
                     <div class="stat-card improvement">
                         <div class="stat-label">Improvement</div>
                         <div class="stat-value">+@increasedSpan.ToString("F3")</div>
@@ -64,7 +77,8 @@ else if (Finished) {
             <div class="leaderboard">
                 <h2 class="leaderboard-title">Top 5 Scores</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < Scores.Length; i++) {
+                    @for (int i = 0; i < Scores.Length; i++)
+                    {
                         string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
                         <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
@@ -83,27 +97,53 @@ else if (Finished) {
         </div>
     }
     <p></p>
-} else {
-    @if (problem != null) {
+}
+else
+{
+    @if (problem != null)
+    {
         <p class="TC">
             <TrackContainer @ref="trackContainerInstance" Track="@track" Speed="@(track.Cars[0].Speed)"
-                            Distance="@(track.Cars.Max(c => c.Distance))" IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
+                Distance="@(track.Cars.Max(c => c.Distance))" IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
 
-            <div class="countdown-sequence">
-                <div class="count three">3</div>
-                <div class="count two">2</div>
-                <div class="count one">1</div>
-                <div class="count go">GO!</div>
+        <div class="countdown-sequence">
+            <div class="count three">3</div>
+            <div class="count two">2</div>
+            <div class="count one">1</div>
+            <div class="count go">GO!</div>
+        </div>
+        <!-- Add this after the countdown-sequence div -->
+        <div class="problem-container delayed-show">
+            <div class="game-hud">
+                @* <div class="speed-meter">
+                    <div class="speed-dial">
+                        <span class="speed-value">@(Math.Round(track.Cars[0].Speed * 8))km/h</span>
+                    </div>
+                </div> *@
+
+                <div class="math-problem">
+                    <div class="problem-bubble">
+                        <h2 class="problem-text">@problem.Description</h2>
+                    </div>
+                </div>
+
+                <div class="answer-box">
+                    <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
+                        @bind:after="OnAfter" placeholder="Type your answer..." />
+                </div>
             </div>
+        </div>
+
         </p>
-        @if (!CurrentRacerFinished) {
+        @if (!CurrentRacerFinished)
+        {
             <div class="problem-container delayed-show">
-                <h2 class="race-description"><b>@problem.Description </b></h2>
+                @* <h2 class="race-description"><b>@problem.Description </b></h2> *@
                 <div class="speed-indicator">
                     <span class="speed-value">@(Math.Round(track.Cars[0].Speed * 8))km/h</span>
                 </div>
-                <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
-                       @bind:after="OnAfter" />
+                @* <input class="form-control mb-2 race-input-box" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
+                    @bind:after="OnAfter" /> *@
                 <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
             </div>
         }

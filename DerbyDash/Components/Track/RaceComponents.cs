@@ -11,6 +11,7 @@
 
     public class RaceComponent {
         public float Top { get; set; } = 200;
+        public bool Visible { get; set; } = true;
         public string TopStr {
             get {
                 return Top.ToString() + "px";

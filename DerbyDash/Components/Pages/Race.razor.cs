@@ -53,6 +53,10 @@ namespace DerbyDash.Components.Pages {
         private string FlexBasis = "";
         private EditContext editContext = new EditContext(new object());
 
+        private bool startLineHasDisappeared = false; // Track disappearance state
+        private bool hasCompletedFirstScroll = false; // Track first scroll completion
+        private float previousScrollOffset = 0; // Track scroll cycled
+
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
 
@@ -141,13 +145,14 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
+
+
         private void ScaleRace(int currentTimeIndex) {
             const double visibleLength = 60.0;
-            const double topMargin = 0.0; // Space at the top of the container
-            const float topMultiplier = 7.0f; // when they get to the top speed, about 15,
-                                              // they'll be going 105 ft/s
-                                              // about 75 MPH
-            const int startDistance = 0;
+            const double topMargin = 0.0;
+            const float topMultiplier = 7.0f;
+            // const int startDistance = 0;
+            const float initialStartLineTop = 70.0f * topMultiplier;
             double relativePosition;
 
             // Find the lead car's distance
@@ -157,44 +162,66 @@ namespace DerbyDash.Components.Pages {
             double visibleStart = Math.Max(0, leadDistance - visibleLength);
             double visibleEnd = leadDistance;
 
-            // Check if any car reached the top
-            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
+            // Speed calculations
+            float baseSpeedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
+            float speedMultiplier = baseSpeedMultiplier * (float)Math.Pow(1.1, currentTimeIndex / 5.0);
 
-            // Calculate speed multiplier based on number of correct answers
-            float speedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
+            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= topMargin * topMultiplier);
 
-            // Calculate lane offset with increased speed effect
-            double laneOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
+            // Calculate scroll effects
+            // const float SPEED_ADJUSTMENT = 0.7f;
+            double scrollOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
+            // double startLineOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier * SPEED_ADJUSTMENT) : 0;
 
-            track.LaneOffset = laneOffset;
+            track.LaneOffset = scrollOffset;
             track.IsAnyCarAtTop = isAnyCarAtTop;
             track.SpeedMultiplier = speedMultiplier;
 
-            foreach (var car in track.Cars) {
-                //            if (car.Distance >= visibleStart) {
-                // Calculate the car's position within the visible range
-                relativePosition = (car.Distance - visibleStart) / visibleLength;
+            // Start line positioning logic
+            if (!startLineHasDisappeared) {
+                if (isAnyCarAtTop) {
+                    // Detect scroll cycle completion
+                    if (previousScrollOffset > (float)scrollOffset) {
+                        hasCompletedFirstScroll = true;
+                    }
 
-                // Set the Top property (0 for the lead car, increasing for cars further back)
-                car.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-                //} else {
-                //    // Car is behind the visible range
-                //    car.Top = 400f;
-                //}
+                    // Set position and check for disappearance condition
+                    track.StartLine.Top = initialStartLineTop;
+                    if (hasCompletedFirstScroll) {
+                        startLineHasDisappeared = true;
+                        track.StartLine.Visible = false;
+                    }
+
+                    previousScrollOffset = (float)scrollOffset;
+                } else {
+                    track.StartLine.Top = initialStartLineTop;
+                    track.StartLine.Visible = true;
+                }
             }
 
-            // Set the locations for the start and finish lines
-            relativePosition = (startDistance - visibleStart) / visibleLength;
-            track.StartLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            // Progressive car movement
+            foreach (var car in track.Cars) {
+                if (car.Distance <= 0) {
+                    car.Top = track.StartLine.Top;
+                } else {
+                    relativePosition = (car.Distance - visibleStart) / visibleLength;
+                    float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+                    double progressFactor = Math.Min(car.Distance / 10.0, 1.0);
+                    car.Top = track.StartLine.Top + (targetTop - track.StartLine.Top) * (float)progressFactor;
+                }
+            }
+
+            // Finish line positioning
             relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
             track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
 
-            // Set flex-basis for all cars
+            // Update car spacing
             int gap = 30;
             foreach (var car in track.Cars) {
                 car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
+
 
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
@@ -387,7 +414,7 @@ namespace DerbyDash.Components.Pages {
             //   Console.WriteLine("Timer started");
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
-                    Console.WriteLine("Timer triggered");
+                    // Console.WriteLine("Timer triggered");
                     float RaceTime = GetSpan(starttime);
                     CalculateNewDistance(RaceTime);
                     CalculateOldDistance(RaceTime);
