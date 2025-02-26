@@ -1,4 +1,5 @@
 ﻿using DerbyDash.Components.Track;
+using DerbyDash.Data;
 
 namespace DerbyDash.Services {
     public class RaceService {
@@ -33,6 +34,14 @@ namespace DerbyDash.Services {
             track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
 
             return track;
+        }
+
+        public Task SaveRaceAsync(RaceComponents track) {
+            return Task.CompletedTask;
+        }
+
+        public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
+            return new List<SpeedIncrement>();
         }
     }
 }

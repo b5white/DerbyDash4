@@ -1,6 +1,7 @@
 ﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
+using DerbyDash.HelperUtilities;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -145,8 +146,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-
-
         private void ScaleRace(int currentTimeIndex) {
             const double visibleLength = 60.0;
             const double topMargin = 0.0;
@@ -222,7 +221,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
                 if (!Running || RaceTime > 0) {
@@ -244,6 +242,8 @@ namespace DerbyDash.Components.Pages {
         private void EndRace() {
             if (Running) {
                 RaceTime = GetSpan(starttime);
+                track.Cars[0].TotalTime = RaceTime;
+                track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
                 ResetScores(RaceTime);
@@ -277,6 +277,8 @@ namespace DerbyDash.Components.Pages {
                 double dist = track.Cars[i].CalculateCurrentDistance(time);
                 if (dist < RaceService.TotalDistance) {
                     allFinished = false;
+                } else if (track.Cars[i].TotalTime == 0) {
+                    track.Cars[i].TotalTime = time;
                 }
             }
 
@@ -286,6 +288,7 @@ namespace DerbyDash.Components.Pages {
                 PeriodicTimerToken.Cancel();
                 periodicTimer.Dispose();
                 StopPeriodicTimer();
+                Utilities.FireAndForget(RaceService.SaveRaceAsync(track));
             }
 
             return allFinished;

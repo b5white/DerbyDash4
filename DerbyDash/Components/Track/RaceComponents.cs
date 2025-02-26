@@ -7,6 +7,8 @@
         public double LaneOffset { get; set; } = 0;
         public bool IsAnyCarAtTop { get; set; } = false;
         public float SpeedMultiplier { get; set; } = 1.0f;
+        public int ProblemId { get; set; }
+        public string FamilyMemberId { get; set; } = "";
     }
 
     public class RaceComponent {

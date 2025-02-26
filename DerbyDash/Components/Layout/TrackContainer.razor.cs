@@ -25,13 +25,13 @@ namespace DerbyDash.Components.Layout {
 
             double scrollSpeed = Speed * SCROLL_MULTIPLIER;
             double currentOffset = Track.LaneOffset;
-            
+
             // Calculate smooth transition
             string transform = $"transform: translateY({currentOffset}px)";
             string transition = $"transition: transform {ANIMATION_DURATION_BASE / Track.SpeedMultiplier}s linear";
-            
+
             previousOffset = currentOffset;
-            
+
             return $"{transform}; {transition}";
         }
 
@@ -62,7 +62,7 @@ namespace DerbyDash.Components.Layout {
         //     if (Track.LaneOffset > lastOffset) {
         //         lastOffset = Track.LaneOffset;
         //     }
-            
+
         //     string transform = $"transform: translateY({lastOffset}px)";
         //     string transition = $"transition: transform {5f / Track.SpeedMultiplier}s linear";
 
@@ -86,11 +86,5 @@ namespace DerbyDash.Components.Layout {
         //protected override void OnAfterRender(bool firstRender) {
         //    // You can add any additional logic here if needed
         //}
-    }
-
-    public class SpeedIncrement {
-        public double Time { get; set; }
-        public double Speed { get; set; }
-        public double Distance { get; set; }
     }
 }
