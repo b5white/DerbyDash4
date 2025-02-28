@@ -6,8 +6,7 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started)
-{
+@if (!Started) {
     <div class="race-start-container">
         <div class="race-title-box">
             <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
@@ -28,12 +27,8 @@
             <p>Solve math problems to accelerate your car!</p>
         </div>
     </div>
-}
-
-else if (Finished)
-{
-    @if (ReceivedError)
-    {
+} else if (Finished) {
+    @if (ReceivedError) {
         <div class="error-container">
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -46,9 +41,7 @@ else if (Finished)
                 <input type="text" id="hidden" />
             </EditForm>
         </div>
-    }
-    else
-    {
+    } else {
         <div class="results-container">
             <div class="results-header">
                 <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
@@ -65,8 +58,7 @@ else if (Finished)
                     <div class="stat-value">@averageSpan.ToString("F3")</div>
                 </div>
 
-                @if (increasedSpan > 0)
-                {
+                @if (increasedSpan > 0) {
                     <div class="stat-card improvement">
                         <div class="stat-label">Improvement</div>
                         <div class="stat-value">+@increasedSpan.ToString("F3")</div>
@@ -77,8 +69,7 @@ else if (Finished)
             <div class="leaderboard">
                 <h2 class="leaderboard-title">Top 5 Scores</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < Scores.Length; i++)
-                    {
+                    @for (int i = 0; i < Scores.Length; i++) {
                         string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
                         <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
@@ -97,11 +88,8 @@ else if (Finished)
         </div>
     }
     <p></p>
-}
-else
-{
-    @if (problem != null)
-    {
+} else {
+    @if (problem != null) {
         <p class="TC">
             <TrackContainer @ref="trackContainerInstance" Track="@track" Speed="@(track.Cars[0].Speed)"
                 Distance="@(track.Cars.Max(c => c.Distance))" IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
@@ -137,8 +125,7 @@ else
         }
 
         </p>
-        @if (!CurrentRacerFinished)
-        {
+        @if (!CurrentRacerFinished) {
             <div class="problem-container delayed-show">
                 @* <h2 class="race-description"><b>@problem.Description </b></h2> *@
                 <div class="speed-indicator">

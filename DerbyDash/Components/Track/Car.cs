@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Data;
 
 namespace DerbyDash.Components.Track {
     public class Car {
@@ -17,6 +17,7 @@ namespace DerbyDash.Components.Track {
             }
         }
         public int index;
+        public DateTime RaceDateTime { get; set; }
         public double Speed { get; set; } = 0;
         public double Distance { get; set; } = 0;
         public double TotalTime { get; set; } = 0;
@@ -66,6 +67,7 @@ namespace DerbyDash.Components.Track {
             double currentTime = 0;
             double currentSpeed = 0;
             double currentDistance = 0;
+            RaceDateTime = DateTime.Now;
 
             for (int i = 0; i < 10; i++) {
                 double timeIncrement = random.NextDouble() * (14 - 5) + 5; // Random time increment between 2 and 10
@@ -77,9 +79,8 @@ namespace DerbyDash.Components.Track {
                     Speed = currentSpeed,
                     Distance = currentDistance
                 });
-                Console.WriteLine($"{index}, {timeIncrement}, {currentTime}, {currentSpeed}, {currentDistance}");
+                //Console.WriteLine($">index:{index}, timeIncrement:{timeIncrement}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
             }
         }
     }
-
 }

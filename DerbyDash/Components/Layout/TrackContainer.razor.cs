@@ -19,10 +19,4 @@ namespace DerbyDash.Components.Layout {
             Track.UpdateSpeedClass((int)Speed);
         }
     }
-
-    public class SpeedIncrement {
-        public double Time { get; set; }
-        public double Speed { get; set; }
-        public double Distance { get; set; }
-    }
 }
