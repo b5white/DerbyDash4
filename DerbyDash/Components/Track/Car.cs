@@ -46,11 +46,11 @@ namespace DerbyDash.Components.Track {
             double additionalDistance = lastSpeed * timeElapsed;
             Distance = lastDistance + additionalDistance;
             Speed = lastSpeed;
-            Console.WriteLine($"{index}, {currentTime}, {lastIndex}, {lastTime}, {timeElapsed}, {lastDistance}, {additionalDistance}, {Distance}, {lastSpeed}");
+            // Console.WriteLine($"{index}, {currentTime}, {lastIndex}, {lastTime}, {timeElapsed}, {lastDistance}, {additionalDistance}, {Distance}, {lastSpeed}");
             return Distance;
         }
 
-        public void ResetFlexBasis(int itemCount, int gap) {
+            public void ResetFlexBasis(int itemCount, int gap) {
             // Calculate total gap and margin width
             int totalGapWidth = (itemCount - 1) * gap;
             int totalMarginWidth = itemCount * 2 * Margin;

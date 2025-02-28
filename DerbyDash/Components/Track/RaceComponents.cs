@@ -6,7 +6,15 @@
         public RaceComponent LeftFence { get; set; } = new();
         public double LaneOffset { get; set; } = 0;
         public bool IsAnyCarAtTop { get; set; } = false;
+        public bool IsFinishLineVisible { get; set; } = false;
         public float SpeedMultiplier { get; set; } = 1.0f;
+
+        public int SpeedClass { get; set; } = 1;
+
+        public void UpdateSpeedClass(int speed) {
+            // Map speed value to CSS class (1-5)
+            SpeedClass = Math.Clamp(speed / 2 + 1, 1, 5);
+        }
     }
 
     public class RaceComponent {

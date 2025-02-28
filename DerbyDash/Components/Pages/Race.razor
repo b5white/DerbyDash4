@@ -112,27 +112,29 @@ else
             <div class="count one">1</div>
             <div class="count go">GO!</div>
         </div>
-        <!-- Add this after the countdown-sequence div -->
-        <div class="problem-container delayed-show">
-            <div class="game-hud">
-                @* <div class="speed-meter">
+        @if (Running && !CurrentRacerFinished)
+        {
+            <div class="problem-container delayed-show">
+                <div class="game-hud">
+                    @* <div class="speed-meter">
                     <div class="speed-dial">
                         <span class="speed-value">@(Math.Round(track.Cars[0].Speed * 8))km/h</span>
                     </div>
                 </div> *@
 
-                <div class="math-problem">
-                    <div class="problem-bubble">
-                        <h2 class="problem-text">@problem.Description</h2>
+                    <div class="math-problem">
+                        <div class="problem-bubble">
+                            <h2 class="problem-text">@problem.Description</h2>
+                        </div>
+                    </div>
+
+                    <div class="answer-box">
+                        <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
+                            @bind:after="OnAfter" placeholder="Type your answer..." />
                     </div>
                 </div>
-
-                <div class="answer-box">
-                    <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
-                        @bind:after="OnAfter" placeholder="Type your answer..." />
-                </div>
             </div>
-        </div>
+        }
 
         </p>
         @if (!CurrentRacerFinished)
