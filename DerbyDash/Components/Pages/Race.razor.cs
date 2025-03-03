@@ -102,7 +102,7 @@ namespace DerbyDash.Components.Pages {
 							StartPeriodicTimerAsync();
                         });
                     }
-                });                
+                });
             }
         }
 

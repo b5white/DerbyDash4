@@ -30,6 +30,21 @@
                 </div>
             }
         </div>
+        @if (Track.ShowDebug) {
+            <div class="debug-panel">
+                @foreach (var car in Track.Cars) {
+                    <div class="debug-info">
+                        Speed: @car.Speed.ToString("F0")
+                        Top: @car.Top.ToString("F0")
+                        Distance: @car.Distance.ToString("F2")
+                        Offset: @Track.LaneOffset.ToString("F0")
+                    </div>
+                }
+                <div class="debug-info">
+                    Start Top: @Track.StartLine.Top.ToString("F0")
+                </div>
+            </div>
+        }
     </div>
 </div>
 

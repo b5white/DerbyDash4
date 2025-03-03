@@ -23,7 +23,7 @@ namespace DerbyDash.Services {
             ];
 
             for (int i = 1; i < Cars.Count; i++) {
-                Cars[i].InitializeFastEddyTimeIncrements(random);
+                Cars[i].InitializeFastEddyTimeIncrements(random, i);
             }
 
             // Set the track properties

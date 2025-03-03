@@ -51,7 +51,7 @@ namespace DerbyDash.Components.Track {
             return Distance;
         }
 
-            public void ResetFlexBasis(int itemCount, int gap) {
+        public void ResetFlexBasis(int itemCount, int gap) {
             // Calculate total gap and margin width
             int totalGapWidth = (itemCount - 1) * gap;
             int totalMarginWidth = itemCount * 2 * Margin;
@@ -63,14 +63,14 @@ namespace DerbyDash.Components.Track {
             FlexBasis = $"calc({availableSpace} / {itemCount})";
         }
 
-        public void InitializeFastEddyTimeIncrements(Random random) {
+        public void InitializeFastEddyTimeIncrements(Random random, int index) {
             double currentTime = 0;
             double currentSpeed = 0;
             double currentDistance = 0;
             RaceDateTime = DateTime.Now;
 
             for (int i = 0; i < 10; i++) {
-                double timeIncrement = random.NextDouble() * (14 - 5) + 5; // Random time increment between 2 and 10
+                double timeIncrement = ((random.NextDouble() * 2) + 1) * index; // Random time increment between 2 and 10
                 currentTime += timeIncrement;
                 currentDistance += currentSpeed * timeIncrement;
                 currentSpeed++; // Assumes speed increment of 1
