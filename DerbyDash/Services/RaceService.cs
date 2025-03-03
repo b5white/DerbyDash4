@@ -43,5 +43,13 @@ namespace DerbyDash.Services {
         public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
             return new List<SpeedIncrement>();
         }
+
+        public void ReadScores(int problemId) {
+            ;
+        }
+
+        public void WriteScores(int problemId) {
+            ;
+        }
     }
 }

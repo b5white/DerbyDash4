@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.HelperUtilities;
@@ -91,7 +91,6 @@ namespace DerbyDash.Components.Pages {
                     ElapsedAnswerTimes[i] = 0;
                 }
                 problem = problems!.Next();
-                starttime = DateTime.Now.Ticks;
 
                 // Delay the start of inactivity timer by 3 seconds
                 Task.Run(async () => {
@@ -99,11 +98,11 @@ namespace DerbyDash.Components.Pages {
                     if (Running && !Finished) {
                         await InvokeAsync(() => {
                             InactivityTimer.Start();
+                            starttime = DateTime.Now.Ticks;
+							StartPeriodicTimerAsync();
                         });
                     }
-                });
-
-                Task.Run(() => StartPeriodicTimerAsync());
+                });                
             }
         }
 
@@ -238,83 +237,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-
-        // private void ScaleRace(int currentTimeIndex) {
-        //     const double visibleLength = 60.0;
-        //     const double topMargin = 0.0;
-        //     const float topMultiplier = 7.0f;
-        //     // const int startDistance = 0;
-        //     const float initialStartLineTop = 70.0f * topMultiplier;
-        //     double relativePosition;
-
-        //     // Find the lead car's distance
-        //     double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
-
-        //     // Calculate the visible range
-        //     double visibleStart = Math.Max(0, leadDistance - visibleLength);
-        //     double visibleEnd = leadDistance;
-
-        //     // Speed calculations
-        //     float baseSpeedMultiplier = Math.Min(currentTimeIndex / 15.0f * 8.0f + 1.0f, 8.0f);
-        //     float speedMultiplier = baseSpeedMultiplier * (float)Math.Pow(1.1, currentTimeIndex / 5.0);
-
-        //     bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= topMargin * topMultiplier);
-
-        //     // Calculate scroll effects
-        //     // const float SPEED_ADJUSTMENT = 0.7f;
-        //     double scrollOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier) % 280 : 0;
-        //     // double startLineOffset = isAnyCarAtTop ? (leadDistance * topMultiplier * speedMultiplier * SPEED_ADJUSTMENT) : 0;
-
-        //     track.LaneOffset = scrollOffset;
-        //     track.IsAnyCarAtTop = isAnyCarAtTop;
-        //     track.SpeedMultiplier = speedMultiplier;
-
-        //     // Start line positioning logic
-        //     if (!startLineHasDisappeared) {
-        //         if (isAnyCarAtTop) {
-        //             // Detect scroll cycle completion
-        //             if (previousScrollOffset > (float)scrollOffset) {
-        //                 hasCompletedFirstScroll = true;
-        //             }
-
-        //             // Set position and check for disappearance condition
-        //             track.StartLine.Top = initialStartLineTop;
-        //             if (hasCompletedFirstScroll) {
-        //                 startLineHasDisappeared = true;
-        //                 track.StartLine.Visible = false;
-        //             }
-
-        //             previousScrollOffset = (float)scrollOffset;
-        //         } else {
-        //             track.StartLine.Top = initialStartLineTop;
-        //             track.StartLine.Visible = true;
-        //         }
-        //     }
-
-        //     // Progressive car movement
-        //     foreach (var car in track.Cars) {
-        //         if (car.Distance <= 0) {
-        //             car.Top = track.StartLine.Top;
-        //         } else {
-        //             relativePosition = (car.Distance - visibleStart) / visibleLength;
-        //             float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-        //             double progressFactor = Math.Min(car.Distance / 10.0, 1.0);
-        //             car.Top = track.StartLine.Top + (targetTop - track.StartLine.Top) * (float)progressFactor;
-        //         }
-        //     }
-
-        //     // Finish line positioning
-        //     relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
-        //     track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-
-        //     // Update car spacing
-        //     int gap = 30;
-        //     foreach (Car car in track.Cars) {
-        //         car.ResetFlexBasis(track.Cars.Count, gap);
-        //     }
-        // }
-
-
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
                 if (!Running || RaceTime > 0) {
@@ -340,7 +262,7 @@ namespace DerbyDash.Components.Pages {
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                ResetScores(RaceTime);
+                UpdateScores(RaceTime);
                 CalculateAverage();
                 Running = true;
                 problems = null;
@@ -361,9 +283,6 @@ namespace DerbyDash.Components.Pages {
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
-                InactivityTimer.Stop();
-                FlashTimer.Stop();
-
                 EndRace();
             }
         }
@@ -391,6 +310,11 @@ namespace DerbyDash.Components.Pages {
             return allFinished;
         }
 
+        private void UpdateScores(float timeSpan) {
+            RaceService.ReadScores(track.ProblemId);
+            ResetScores(timeSpan);
+            RaceService.WriteScores(track.ProblemId);
+        }
 
         private void ResetScores(float timeSpan) {
             void swap(int i) {

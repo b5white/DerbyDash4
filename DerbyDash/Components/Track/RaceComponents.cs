@@ -10,6 +10,9 @@
         public float SpeedMultiplier { get; set; } = 1.0f;
 
         public int SpeedClass { get; set; } = 1;
+        public int ProblemId { get; set; }
+        public string FamilyMemberId { get; set; } = "";
+        public bool ShowDebug = true;
 
         public void UpdateSpeedClass(int speed) {
             // Map speed value to CSS class (1-5)
