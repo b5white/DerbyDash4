@@ -91,18 +91,18 @@
 
 .start-line.animated {
     animation: moveRoad 3s linear infinite;
-    will-change: transform;
+    /* will-change: transform; */
     animation-play-state: running;
-    animation-fill-mode: both;
+    /* animation-fill-mode: both; */
     transform-origin: top center;
 }
 
 /* And these speed variations matching lane speeds */
-.start-line.animated.speed-1 { animation-duration: 4s; }
-.start-line.animated.speed-2 { animation-duration: 3s; }
-.start-line.animated.speed-3 { animation-duration: 2.5s; }
-.start-line.animated.speed-4 { animation-duration: 2s; }
-.start-line.animated.speed-5 { animation-duration: 1.5s; }
+.start-line.animated.speed-1 { animation-duration: 5.0s; }  /* 10% slower */
+.start-line.animated.speed-2 { animation-duration: 4.0s; }
+.start-line.animated.speed-3 { animation-duration: 3.65s; }
+.start-line.animated.speed-4 { animation-duration: 2.9s; }
+.start-line.animated.speed-5 { animation-duration: 2.35s; }
 
 .start-line img, .finish-line img {
     width: 100vw;

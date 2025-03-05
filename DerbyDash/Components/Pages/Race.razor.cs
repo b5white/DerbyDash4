@@ -173,6 +173,8 @@ namespace DerbyDash.Components.Pages {
             bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= topMargin * topMultiplier);
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
+            track.SpeedClass = Math.Min(currentTimeIndex + 1, 5);
+
             // Check if finish line is in view (visible) - this is crucial for our fix
             relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
             track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
@@ -182,7 +184,7 @@ namespace DerbyDash.Components.Pages {
             // Calculate lane offset for synchronized movement - only if finish line is not visible
             if (isAnyCarAtTop && !track.IsFinishLineVisible) {
                 // Calculate offset based on the animation timing
-                double cycleTime = 4000 / Math.Min(currentTimeIndex + 1, 5); // Match with CSS speed classes
+                double cycleTime = 4000 / track.SpeedClass; // Match with CSS speed classes
                 double progress = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond % cycleTime) / cycleTime;
                 track.LaneOffset = progress * 280;
                 track.StartLine.Top = initialStartLineTop;
@@ -213,7 +215,6 @@ namespace DerbyDash.Components.Pages {
                 previousScrollOffset = 0;
             }
 
-
             // Position cars
             foreach (var car in track.Cars) {
                 if (car.Distance <= 0) {
@@ -236,6 +237,26 @@ namespace DerbyDash.Components.Pages {
                 car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
+
+        private void SynchronizeAnimationStart() {
+    // Reset any existing animations
+    track.IsAnyCarAtTop = false;
+    
+    // Force redraw without animation
+    StateHasChanged();
+    
+    // After a brief delay, enable animations in sync
+    Task.Run(async () => {
+        await Task.Delay(50);
+        await InvokeAsync(() => {
+            if (Running && !Finished) {
+                track.IsAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
+                StateHasChanged();
+            }
+        });
+    });
+}
+
 
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
@@ -285,6 +306,13 @@ namespace DerbyDash.Components.Pages {
                 CurrentRacerFinished = true;
                 EndRace();
             }
+
+            bool wasCarAtTop = track.IsAnyCarAtTop;
+    bool isCarAtTop = track.Cars.Any(car => car.Top <= 0);
+    
+    if (!wasCarAtTop && isCarAtTop) {
+        SynchronizeAnimationStart();
+    }
         }
 
         private bool CalculateOldDistance(double time) {
