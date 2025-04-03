@@ -91,6 +91,9 @@ namespace DerbyDash.Components.Pages {
                     ElapsedAnswerTimes[i] = 0;
                 }
                 problem = problems!.Next();
+                startLineHasDisappeared = false;
+                track.StartLine.Visible = true;
+                previousScrollOffset = 0;
 
                 // Delay the start of inactivity timer by 3 seconds
                 Task.Run(async () => {
@@ -99,7 +102,7 @@ namespace DerbyDash.Components.Pages {
                         await InvokeAsync(() => {
                             InactivityTimer.Start();
                             starttime = DateTime.Now.Ticks;
-							StartPeriodicTimerAsync();
+                            StartPeriodicTimerAsync();
                         });
                     }
                 });
@@ -156,6 +159,8 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
+        private Dictionary<int, float> _lastPenaltyPositions = new Dictionary<int, float>();
+
         private void ScaleRace(int currentTimeIndex) {
             const double visibleLength = 60.0;
             const double topMargin = 0.0;
@@ -173,50 +178,46 @@ namespace DerbyDash.Components.Pages {
             bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= topMargin * topMultiplier);
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
-            track.SpeedClass = Math.Min(currentTimeIndex + 1, 5);
+            // Set speed class based on player car speed
+            track.SpeedClass = Math.Clamp((int)track.Cars[0].Speed, 1, 15);
 
-            // Check if finish line is in view (visible) - this is crucial for our fix
+            // Check if finish line is in view (visible)
             relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
             track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-            // Set finish line visibility flag based on its position being in the visible area
             track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
 
-            // Calculate lane offset for synchronized movement - only if finish line is not visible
+            // Track start line visibility cycles - but don't manipulate its position
             if (isAnyCarAtTop && !track.IsFinishLineVisible) {
                 // Calculate offset based on the animation timing
                 double cycleTime = 4000 / track.SpeedClass; // Match with CSS speed classes
                 double progress = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond % cycleTime) / cycleTime;
                 track.LaneOffset = progress * 280;
-                track.StartLine.Top = initialStartLineTop;
 
-                // Detect end of first cycle to permanently hide start line
+                // Only track animation cycles for visibility control
                 if (!startLineHasDisappeared) {
-                    // We detect when offset approaches maximum and resets back to minimum
-                    if (previousScrollOffset > track.LaneOffset || previousScrollOffset > 250) {
-                        // Increment cycle counter
-                        startLineAnimationCycles++;
-                        if (startLineAnimationCycles >= 3) {
-                            startLineHasDisappeared = true;
-                            track.StartLine.Visible = false;
-                        }
+                    // We detect when the animation completes one full cycle
+                    if (previousScrollOffset > track.LaneOffset) {
+                        // Start line has completed one cycle - hide it permanently
+                        startLineHasDisappeared = true;
+                        track.StartLine.Visible = false;
                     }
                     previousScrollOffset = track.LaneOffset;
                 }
-                // Important: Don't set Visible = true here anymore, maintaining permanent disappearance
             } else {
-                track.StartLine.Top = initialStartLineTop;
                 track.LaneOffset = 0;
+                previousScrollOffset = 0;
 
-                // Only show start line if it hasn't disappeared yet
-                if (!startLineHasDisappeared) {
+                // Important: Only show start line if race hasn't properly started yet
+                // This ensures it doesn't reappear after disappearing
+                if (!startLineHasDisappeared && !isAnyCarAtTop) {
                     track.StartLine.Visible = true;
                 }
-
-                previousScrollOffset = 0;
             }
 
-            // Position cars
-            foreach (var car in track.Cars) {
+            // Position cars - handle player car separately from AI cars
+            // First calculate positions for AI cars
+            for (int i = 1; i < track.Cars.Count; i++) {
+                var car = track.Cars[i];
                 if (car.Distance <= 0) {
                     car.Top = initialStartLineTop;
                 } else {
@@ -227,9 +228,27 @@ namespace DerbyDash.Components.Pages {
                 }
             }
 
-            // Finish line positioning
-            relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
-            track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            // Then handle player car (index 0) separately
+            Car playerCar = track.Cars[0];
+            if (playerCar.Speed <= 0 && isAnyCarAtTop) {
+                float timeSinceLastAnswer = 0;
+                if (currentTimeIndex > 0 && starttime > 0) {
+                    timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                }
+
+                float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / 5.0f);
+
+                relativePosition = (playerCar.Distance - visibleStart) / visibleLength;
+                float normalTargetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+
+                float penaltyPosition = initialStartLineTop * fallBehindFactor + normalTargetTop * (1 - fallBehindFactor);
+
+                playerCar.Top = penaltyPosition;
+            } else {
+                relativePosition = (playerCar.Distance - visibleStart) / visibleLength;
+                float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+                playerCar.Top = initialStartLineTop + (targetTop - initialStartLineTop);
+            }
 
             // Update car spacing
             int gap = 30;
@@ -238,24 +257,25 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
+
         private void SynchronizeAnimationStart() {
-    // Reset any existing animations
-    track.IsAnyCarAtTop = false;
-    
-    // Force redraw without animation
-    StateHasChanged();
-    
-    // After a brief delay, enable animations in sync
-    Task.Run(async () => {
-        await Task.Delay(50);
-        await InvokeAsync(() => {
-            if (Running && !Finished) {
-                track.IsAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
-                StateHasChanged();
-            }
-        });
-    });
-}
+            // Reset any existing animations
+            track.IsAnyCarAtTop = false;
+
+            // Force redraw without animation
+            StateHasChanged();
+
+            // After a brief delay, enable animations in sync
+            Task.Run(async () => {
+                await Task.Delay(50);
+                await InvokeAsync(() => {
+                    if (Running && !Finished) {
+                        track.IsAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
+                        StateHasChanged();
+                    }
+                });
+            });
+        }
 
 
         public void HandleKeyPress(KeyboardEventArgs e) {
@@ -308,11 +328,11 @@ namespace DerbyDash.Components.Pages {
             }
 
             bool wasCarAtTop = track.IsAnyCarAtTop;
-    bool isCarAtTop = track.Cars.Any(car => car.Top <= 0);
-    
-    if (!wasCarAtTop && isCarAtTop) {
-        SynchronizeAnimationStart();
-    }
+            bool isCarAtTop = track.Cars.Any(car => car.Top <= 0);
+
+            if (!wasCarAtTop && isCarAtTop) {
+                SynchronizeAnimationStart();
+            }
         }
 
         private bool CalculateOldDistance(double time) {
@@ -512,38 +532,38 @@ namespace DerbyDash.Components.Pages {
 			//Encouragement and Praise for Effort:
 			"Great job sticking with it!",
             "You did it!",
-            "I’m so proud of your hard work!",
+            "I'm so proud of your hard work!",
             "Your effort is really paying off!",
-            "You’re doing fantastic work!",
-            "Keep it up, you’re doing great!",
+            "You're doing fantastic work!",
+            "Keep it up, you're doing great!",
             "Fantastic effort, keep it up!",
-            "You’re doing a wonderful job!",
+            "You're doing a wonderful job!",
             "Your hard work is really showing!",
             "Great perseverance!",
-            "You’re making great progress!",
+            "You're making great progress!",
             "You should be proud of yourself!",
             "Your hard work is paying off!",
-            "You’re doing an excellent job!",
+            "You're doing an excellent job!",
             "Fantastic!",
-            "You’re showing great determination!",
-            "You’re doing a great job staying focused!",
+            "You're showing great determination!",
+            "You're doing a great job staying focused!",
 
 			//Recognition of Improvement:
-			"You’re getting better every day!",
-            "I can see how much you’ve improved!",
+			"You're getting better every day!",
+            "I can see how much you've improved!",
             "You are really improving!",
-            "You’re mastering these problems!",
+            "You're mastering these problems!",
             "You are becoming a math whiz!",
-            "You’re really getting the hang of this!",
-            "I’m impressed with your progress!",
-            "You’re getting better with every race!",
-            "You’re really shining in math!",
+            "You're really getting the hang of this!",
+            "I'm impressed with your progress!",
+            "You're getting better with every race!",
+            "You're really shining in math!",
 
 			//Motivational and Positive Reinforcement:
-			"I love how you don’t give up!",
+			"I love how you don't give up!",
             "Wow, look at you go!",
             "Like a boss.",
-            "Complaining doesn’t solve problems, you do.",
+            "Complaining doesn't solve problems, you do.",
             "Problems aren't solved by complaining — they're solved by you!",
             "Slicing through those problems like a champ.",
             "You tackled those problems like a pro!",

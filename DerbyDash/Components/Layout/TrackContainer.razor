@@ -2,22 +2,23 @@
 @using Microsoft.AspNetCore.Components.Web
 
 <div class="road">
-    @for (int i = 0; i < 5; i++)
-    {
-        <div class="lane-group @((Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) ? $"animated speed-{Track.SpeedClass}" : "")">
-            @for (int j = 0; j < 40; j++)
-            {
-                <div class="lane"></div>
-            }
-        </div>
-    }
-
-    <div class="track-container">
-        <!-- Apply the same updated condition to start line animation -->
-        <div class="start-line @(Track.StartLine.Visible ? "" : "hidden") @((Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) ? $"animated speed-{Track.SpeedClass}" : "")"
-            style="top: @Track.StartLine.TopStr;">
+    <div class="track-background @((Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) ? $"animated speed-{Track.SpeedClass}" : "")">
+        @for (int i = 0; i < 5; i++)
+        {
+            <div class="lane-group">
+                @for (int j = 0; j < 40; j++)
+                {
+                    <div class="lane"></div>
+                }
+            </div>
+        }
+        
+        <div class="start-line @(Track.StartLine.Visible ? "" : "hidden")">
             <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
         </div>
+    </div>
+
+    <div class="track-container">
         <div class="finish-line" style="top: @Track.FinishLine.TopStr;">
             <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="Finish Line" />
         </div>
@@ -47,6 +48,7 @@
         }
     </div>
 </div>
+
 
 
 @* @using DerbyDash.Components.Track

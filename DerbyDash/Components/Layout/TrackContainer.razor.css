@@ -15,6 +15,13 @@
     will-change: transform;
 }
 
+/* New animation for the entire track background */
+.track-background.animated {
+    animation: moveRoad 3s linear infinite;
+    animation-play-state: running;
+    transform-origin: top center;
+}
+
 .lane-section {
     height: 33.33%;
     position: relative;
@@ -24,10 +31,12 @@
 .lane-group {
     position: absolute;
     width: 10px;
-    height: calc(100vh + 280px); /* Extended height to allow smooth entry */
+    height: calc(100vh + 560px); /* Extended height to allow smooth entry */
     transform-style: preserve-3d;
     overflow: hidden;
     transition: all 0.3s ease-in-out;
+    /* Position the lane group above the viewport initially */
+    top: -280px;
 }
 
 .lane {
@@ -44,11 +53,12 @@
 .lane-group:nth-child(4) { left: 66%; }
 .lane-group:nth-child(5) { left: 83%; }
 
-.lane-group.animated {
+/* Remove individual lane-group animation since parent now animates */
+/* .lane-group.animated {
     animation: moveRoad 3s linear infinite;
     animation-play-state: running;
     transform-origin: top center;
-}
+} */
 
 @keyframes moveRoad {
     0% { transform: translateY(0); }
@@ -56,11 +66,21 @@
 }
 
 /* Speed variations for dynamic animation speeds */
-.speed-1 { animation-duration: 4s; }
-.speed-2 { animation-duration: 3s; }
-.speed-3 { animation-duration: 2.5s; }
-.speed-4 { animation-duration: 2s; }
-.speed-5 { animation-duration: 1.5s; }
+.track-background.animated.speed-1 { animation-duration: 4.0s; }  /* 7 ft/s: 28ft ÷ 7ft/s = 4s */
+.track-background.animated.speed-2 { animation-duration: 2.0s; }  /* 14 ft/s: 28ft ÷ 14ft/s = 2s */
+.track-background.animated.speed-3 { animation-duration: 1.33s; } /* 21 ft/s: 28ft ÷ 21ft/s = 1.33s */
+.track-background.animated.speed-4 { animation-duration: 1.0s; }  /* 28 ft/s: 28ft ÷ 28ft/s = 1s */
+.track-background.animated.speed-5 { animation-duration: 0.8s; }  /* 35 ft/s: 28ft ÷ 35ft/s = 0.8s */
+.track-background.animated.speed-6 { animation-duration: 0.67s; } /* 42 ft/s: 28ft ÷ 42ft/s = 0.67s */
+.track-background.animated.speed-7 { animation-duration: 0.57s; } /* 49 ft/s: 28ft ÷ 49ft/s = 0.57s */
+.track-background.animated.speed-8 { animation-duration: 0.5s; }  /* 56 ft/s: 28ft ÷ 56ft/s = 0.5s */
+.track-background.animated.speed-9 { animation-duration: 0.44s; } /* 63 ft/s: 28ft ÷ 63ft/s = 0.44s */
+.track-background.animated.speed-10 { animation-duration: 0.4s; } /* 70 ft/s: 28ft ÷ 70ft/s = 0.4s */
+.track-background.animated.speed-11 { animation-duration: 0.36s; } /* 77 ft/s: 28ft ÷ 77ft/s = 0.36s */
+.track-background.animated.speed-12 { animation-duration: 0.33s; } /* 84 ft/s: 28ft ÷ 84ft/s = 0.33s */
+.track-background.animated.speed-13 { animation-duration: 0.31s; } /* 91 ft/s: 28ft ÷ 91ft/s = 0.31s */
+.track-background.animated.speed-14 { animation-duration: 0.29s; } /* 98 ft/s: 28ft ÷ 98ft/s = 0.29s */
+.track-background.animated.speed-15 { animation-duration: 0.27s; } /* 105 ft/s: 28ft ÷ 105ft/s = 0.27s */
 
 .track-container {
     position: relative;
@@ -85,24 +105,25 @@
     transition: all 0.3s ease-in-out;
 }
 
+/* Start line positioning - now relative to track-background */
+.start-line {
+    top: calc(100vh - 350px); /* Fixed position relative to track-background */
+    left: 0;
+    width: 100%;
+}
+
 .start-line.hidden {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
-.start-line.animated {
+/* Remove individual start-line animation since parent now animates */
+/* .start-line.animated {
     animation: moveRoad 3s linear infinite;
-    /* will-change: transform; */
     animation-play-state: running;
-    /* animation-fill-mode: both; */
     transform-origin: top center;
-}
-
-/* And these speed variations matching lane speeds */
-.start-line.animated.speed-1 { animation-duration: 5.0s; }  /* 10% slower */
-.start-line.animated.speed-2 { animation-duration: 4.0s; }
-.start-line.animated.speed-3 { animation-duration: 3.65s; }
-.start-line.animated.speed-4 { animation-duration: 2.9s; }
-.start-line.animated.speed-5 { animation-duration: 2.35s; }
+} */
 
 .start-line img, .finish-line img {
     width: 100vw;

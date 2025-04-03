@@ -16,7 +16,8 @@
 
         public void UpdateSpeedClass(int speed) {
             // Map speed value to CSS class (1-5)
-            SpeedClass = Math.Clamp(speed / 2 + 1, 1, 5);
+            // SpeedClass = Math.Clamp(speed / 2 + 1, 1, 5);
+            SpeedClass = Math.Clamp(speed, 1, 15);
         }
     }
 
