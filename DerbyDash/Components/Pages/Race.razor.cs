@@ -162,40 +162,49 @@ namespace DerbyDash.Components.Pages {
         private Dictionary<int, float> _lastPenaltyPositions = new Dictionary<int, float>();
 
         private void ScaleRace(int currentTimeIndex) {
-            const double visibleLength = 60.0;
-            const double topMargin = 0.0;
-            const float topMultiplier = 7.0f;
-            const float initialStartLineTop = 70.0f * topMultiplier;
+            // Track and viewport constants
+            const double VISIBLE_TRACK_LENGTH = 60.0;
+            const double TOP_MARGIN = 0.0;
+            const float TOP_MULTIPLIER = 7.0f;
+            const float TRACK_HEIGHT = 70.0f;
+            const float INITIAL_START_LINE_TOP = 70.0f * TOP_MULTIPLIER;
+            const int CAR_GAP = 30;
+            const double LANE_SCROLL_CYCLE_PERCENTAGE = 0.85;
+            const double LANE_SCROLL_MAX = 280;
+            const int ANIMATION_CYCLE_BASE_TIME = 4000; // milliseconds
+            const int MIN_SPEED_CLASS = 1;
+            const int MAX_SPEED_CLASS = 15;
+
             double relativePosition;
 
             // Find the lead car's distance
             double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
 
             // Calculate the visible range
-            double visibleStart = Math.Max(0, leadDistance - visibleLength);
+            double visibleStart = Math.Max(0, leadDistance - VISIBLE_TRACK_LENGTH);
 
             // Check if any car has reached the top position
-            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= topMargin * topMultiplier);
+            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
             // Set speed class based on player car speed
             track.UpdateSpeedClass();
 
             // Check if finish line is in view (visible)
-            relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
-            track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+            relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
+            track.FinishLine.Top = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
             track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
 
             // Track start line visibility cycles
             if (isAnyCarAtTop && !track.IsFinishLineVisible) {
                 // Calculate offset based on the animation timing
-                double cycleTime = 4000 / track.SpeedClass; // Match with CSS speed classes
+                double cycleTime = ANIMATION_CYCLE_BASE_TIME / track.SpeedClass; // Match with CSS speed classes
                 double progress = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond % cycleTime) / cycleTime;
-                track.LaneOffset = progress * 280;
+                track.LaneOffset = progress * LANE_SCROLL_MAX;
 
                 // Track when the start line should disappear
                 if (!startLineHasDisappeared) {
-                    if (progress > 0.85 && previousScrollOffset < track.LaneOffset) {
+                    if (previousScrollOffset < track.LaneOffset) {
                         startLineHasDisappeared = true;
                         track.StartLine.Visible = false;
                     }
@@ -215,33 +224,37 @@ namespace DerbyDash.Components.Pages {
             for (int i = 0; i < track.Cars.Count; i++) {
                 var car = track.Cars[i];
                 // Calculate the target position based on distance
-                relativePosition = (car.Distance - visibleStart) / visibleLength;
-                float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+                relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
+                float targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
 
                 // Apply special handling for the current player car only when inactive
                 if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
                     // Calculate time since last answer for the active player
                     float timeSinceLastAnswer = 0;
+                    const float FALL_BEHIND_TIME_THRESHOLD = 5.0f;
+
                     if (currentTimeIndex > 0 && starttime > 0) {
                         timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
                     }
 
                     // Apply fall-behind effect only for the active player when they're inactive
-                    float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / 5.0f);
-                    car.Top = initialStartLineTop * fallBehindFactor + targetTop * (1 - fallBehindFactor);
+                    float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
+                    car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
                 } else {
                     // Use the exact same logic that was used for the player car
-                    car.Top = initialStartLineTop + (targetTop - initialStartLineTop);
+                    relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
+                    targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * 70) * TOP_MULTIPLIER;
+                    car.Top = INITIAL_START_LINE_TOP + (targetTop - INITIAL_START_LINE_TOP);
+
                 }
             }
 
-
             // Update car spacing
-            int gap = 30;
             foreach (var car in track.Cars) {
-                car.ResetFlexBasis(track.Cars.Count, gap);
+                car.ResetFlexBasis(track.Cars.Count, CAR_GAP);
             }
         }
+
 
 
 
