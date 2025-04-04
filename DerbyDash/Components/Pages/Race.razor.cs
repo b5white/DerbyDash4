@@ -231,11 +231,8 @@ namespace DerbyDash.Components.Pages {
                     car.Top = initialStartLineTop * fallBehindFactor + targetTop * (1 - fallBehindFactor);
                 } else {
                     // Use the exact same logic that was used for the player car
-                    relativePosition = (car.Distance - visibleStart) / visibleLength;
-                    targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
                     car.Top = initialStartLineTop + (targetTop - initialStartLineTop);
                 }
-                // }
             }
 
 
