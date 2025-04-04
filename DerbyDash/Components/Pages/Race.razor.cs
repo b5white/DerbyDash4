@@ -57,16 +57,20 @@ namespace DerbyDash.Components.Pages {
         private double previousScrollOffset = 0; // Track scroll cycled
         private int startLineAnimationCycles = 0;
 
+        private float GetSpan(double starttime) {
+            return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
+        }
+
 
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
 
         protected override void OnInitialized() {
-            InactivityTimer = new Timer(4000); // 4 seconds of inactivity
+            InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
             InactivityTimer.AutoReset = false;
 
-            FlashTimer = new Timer(800); // 1/2 second flash
+            FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
             FlashTimer.Elapsed += HideAnswer;
             FlashTimer.AutoReset = false;
         }
@@ -94,9 +98,9 @@ namespace DerbyDash.Components.Pages {
                 track.StartLine.Visible = true;
                 previousScrollOffset = 0;
 
-                // Delay the start of inactivity timer by 3 seconds
+                // Delay the start of inactivity timer
                 Task.Run(async () => {
-                    await Task.Delay(3000); // 3 second delay
+                    await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
                         await InvokeAsync(() => {
                             InactivityTimer.Start();
@@ -158,17 +162,25 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
+        private const int INACTIVITY_TIMER_INTERVAL = 4000; // 4 seconds
+        private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
+        private const int PERIODIC_TIMER_SPAN_MICROSECONDS = 200000; // 1/5 of a second
+        private const int ANIMATION_SYNC_DELAY = 50; // milliseconds
+        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds
+
         private void ScaleRace(int currentTimeIndex) {
             // Track and viewport constants
             const double VISIBLE_TRACK_LENGTH = 60.0;
             const double TOP_MARGIN = 0.0;
             const float TOP_MULTIPLIER = 7.0f;
             const float TRACK_HEIGHT = 70.0f;
-            const float INITIAL_START_LINE_TOP = 70.0f * TOP_MULTIPLIER;
+            const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
             const int CAR_GAP = 30;
-            const double LANE_SCROLL_CYCLE_PERCENTAGE = 0.85;
             const double LANE_SCROLL_MAX = 280;
-            const int ANIMATION_CYCLE_BASE_TIME = 4000; // milliseconds
+            const int MIN_SPEED_CLASS = 1;
+            const int MAX_SPEED_CLASS = 15;
+            const double ANIMATION_RESET_THRESHOLD = 0.95; // Detect when animation resets
+            const float FALL_BEHIND_TIME_THRESHOLD = 5.0f;
 
             double relativePosition;
 
@@ -183,7 +195,7 @@ namespace DerbyDash.Components.Pages {
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
             // Set speed class based on player car speed
-            track.UpdateSpeedClass();
+            track.SpeedClass = Math.Clamp((int)track.Cars[0].Speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
 
             // Check if finish line is in view (visible)
             relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
@@ -192,14 +204,20 @@ namespace DerbyDash.Components.Pages {
 
             // Track start line visibility cycles
             if (isAnyCarAtTop && !track.IsFinishLineVisible) {
-                // Calculate offset based on the animation timing
-                double cycleTime = ANIMATION_CYCLE_BASE_TIME / track.SpeedClass; // Match with CSS speed classes
-                double progress = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond % cycleTime) / cycleTime;
-                track.LaneOffset = progress * LANE_SCROLL_MAX;
+                // Calculate animation cycle time based on speed class - matching CSS values
+                double animationDuration = 4.0 / track.SpeedClass; // Base duration is 4.0s for speed-1
 
-                // Track when the start line should disappear
+                // Calculate current position in animation cycle (0.0 to 1.0)
+                double currentTimeMs = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
+                double cyclePosition = (currentTimeMs % (animationDuration * 1000)) / (animationDuration * 1000);
+
+                // Calculate lane offset to match CSS animation
+                track.LaneOffset = cyclePosition * LANE_SCROLL_MAX;
+
+                // Detect when we've completed one full animation cycle
                 if (!startLineHasDisappeared) {
-                    if (previousScrollOffset < track.LaneOffset) {
+                    // Check if we've just crossed the cycle reset point
+                    if (previousScrollOffset > track.LaneOffset && cyclePosition < ANIMATION_RESET_THRESHOLD) {
                         startLineHasDisappeared = true;
                         track.StartLine.Visible = false;
                     }
@@ -209,7 +227,7 @@ namespace DerbyDash.Components.Pages {
                 track.LaneOffset = 0;
                 previousScrollOffset = 0;
 
-                // Only show start line if it hasn't disappeared yet
+                // Only show start line if it hasn't disappeared yet and we're not at the top
                 if (!startLineHasDisappeared && !isAnyCarAtTop) {
                     track.StartLine.Visible = true;
                 }
@@ -226,10 +244,9 @@ namespace DerbyDash.Components.Pages {
                 if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
                     // Calculate time since last answer for the active player
                     float timeSinceLastAnswer = 0;
-                    const float FALL_BEHIND_TIME_THRESHOLD = 5.0f;
 
                     if (currentTimeIndex > 0 && starttime > 0) {
-                        timeSinceLastAnswer = GetTimespan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                        timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
                     }
 
                     // Apply fall-behind effect only for the active player when they're inactive
@@ -238,9 +255,8 @@ namespace DerbyDash.Components.Pages {
                 } else {
                     // Use the exact same logic that was used for the player car
                     relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
-                    targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * 70) * TOP_MULTIPLIER;
+                    targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
                     car.Top = INITIAL_START_LINE_TOP + (targetTop - INITIAL_START_LINE_TOP);
-
                 }
             }
 
@@ -249,6 +265,7 @@ namespace DerbyDash.Components.Pages {
                 car.ResetFlexBasis(track.Cars.Count, CAR_GAP);
             }
         }
+
 
 
 
@@ -262,7 +279,7 @@ namespace DerbyDash.Components.Pages {
 
             // After a brief delay, enable animations in sync
             Task.Run(async () => {
-                await Task.Delay(50);
+                await Task.Delay(ANIMATION_SYNC_DELAY);
                 await InvokeAsync(() => {
                     if (Running && !Finished) {
                         track.IsAnyCarAtTop = track.Cars.Any(car => car.Top <= 0);
@@ -476,15 +493,13 @@ namespace DerbyDash.Components.Pages {
         private async Task StartPeriodicTimerAsync() {
             // Create a new CancellationTokenSource each time the timer is started
             PeriodicTimerToken = new CancellationTokenSource();
-            periodicTimer = new(TimeSpan.FromMicroseconds(PeriodicTimerSpan));
-            //   Console.WriteLine("Timer started");
+            periodicTimer = new(TimeSpan.FromMicroseconds(PERIODIC_TIMER_SPAN_MICROSECONDS));
+
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
-                    // Console.WriteLine("Timer triggered");
-                    float RaceTime = GetTimespan(starttime);
+                    float RaceTime = GetSpan(starttime);
                     CalculateNewDistance(RaceTime);
                     CalculateOldDistance(RaceTime);
-                    // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finished races.
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
                 }
