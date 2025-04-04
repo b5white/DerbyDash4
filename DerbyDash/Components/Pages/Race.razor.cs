@@ -186,18 +186,16 @@ namespace DerbyDash.Components.Pages {
             track.FinishLine.Top = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
             track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
 
-            // Track start line visibility cycles - but don't manipulate its position
+            // Track start line visibility cycles
             if (isAnyCarAtTop && !track.IsFinishLineVisible) {
                 // Calculate offset based on the animation timing
                 double cycleTime = 4000 / track.SpeedClass; // Match with CSS speed classes
                 double progress = (DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond % cycleTime) / cycleTime;
                 track.LaneOffset = progress * 280;
 
-                // Only track animation cycles for visibility control
+                // Track when the start line should disappear
                 if (!startLineHasDisappeared) {
-                    // We detect when the animation completes one full cycle
-                    if (previousScrollOffset > track.LaneOffset) {
-                        // Start line has completed one cycle - hide it permanently
+                    if (progress > 0.85 && previousScrollOffset < track.LaneOffset) {
                         startLineHasDisappeared = true;
                         track.StartLine.Visible = false;
                     }
@@ -207,48 +205,39 @@ namespace DerbyDash.Components.Pages {
                 track.LaneOffset = 0;
                 previousScrollOffset = 0;
 
-                // Important: Only show start line if race hasn't properly started yet
-                // This ensures it doesn't reappear after disappearing
+                // Only show start line if it hasn't disappeared yet
                 if (!startLineHasDisappeared && !isAnyCarAtTop) {
                     track.StartLine.Visible = true;
                 }
             }
 
-            // Position cars - handle player car separately from AI cars
-            // First calculate positions for AI cars
-            for (int i = 1; i < track.Cars.Count; i++) {
+            // Position all cars using the same logic for consistency
+            for (int i = 0; i < track.Cars.Count; i++) {
                 var car = track.Cars[i];
-                if (car.Distance <= 0) {
-                    car.Top = initialStartLineTop;
-                } else {
-                    relativePosition = (car.Distance - visibleStart) / visibleLength;
-                    float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-                    double progressFactor = Math.Min(car.Distance / 10.0, 1.0);
-                    car.Top = initialStartLineTop + (targetTop - initialStartLineTop) * (float)progressFactor;
-                }
-            }
-
-            // Then handle player car (index 0) separately
-            Car playerCar = track.Cars[0];
-            if (playerCar.Speed <= 0 && isAnyCarAtTop) {
-                float timeSinceLastAnswer = 0;
-                if (currentTimeIndex > 0 && starttime > 0) {
-                    timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
-                }
-
-                float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / 5.0f);
-
-                relativePosition = (playerCar.Distance - visibleStart) / visibleLength;
-                float normalTargetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-
-                float penaltyPosition = initialStartLineTop * fallBehindFactor + normalTargetTop * (1 - fallBehindFactor);
-
-                playerCar.Top = penaltyPosition;
-            } else {
-                relativePosition = (playerCar.Distance - visibleStart) / visibleLength;
+                // Calculate the target position based on distance
+                relativePosition = (car.Distance - visibleStart) / visibleLength;
                 float targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
-                playerCar.Top = initialStartLineTop + (targetTop - initialStartLineTop);
+
+                // Apply special handling for the current player car only when inactive
+                if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
+                    // Calculate time since last answer for the active player
+                    float timeSinceLastAnswer = 0;
+                    if (currentTimeIndex > 0 && starttime > 0) {
+                        timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                    }
+
+                    // Apply fall-behind effect only for the active player when they're inactive
+                    float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / 5.0f);
+                    car.Top = initialStartLineTop * fallBehindFactor + targetTop * (1 - fallBehindFactor);
+                } else {
+                    // Use the exact same logic that was used for the player car
+                    relativePosition = (car.Distance - visibleStart) / visibleLength;
+                    targetTop = (float)(topMargin + (1 - relativePosition) * 70) * topMultiplier;
+                    car.Top = initialStartLineTop + (targetTop - initialStartLineTop);
+                }
+                // }
             }
+
 
             // Update car spacing
             int gap = 30;
@@ -256,6 +245,7 @@ namespace DerbyDash.Components.Pages {
                 car.ResetFlexBasis(track.Cars.Count, gap);
             }
         }
+
 
 
         private void SynchronizeAnimationStart() {
