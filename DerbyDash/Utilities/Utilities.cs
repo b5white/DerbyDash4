@@ -34,6 +34,10 @@ namespace DerbyDash.HelperUtilities {
             }
         }
 
+        public static bool AreDoublesEqual(double value1, double value2, double errorMargin) {
+            return Math.Abs(value1 - value2) <= errorMargin;
+        }
+
         public static int GetUniqueIntFromString(string input) {
             using (SHA256 sha256Hash = SHA256.Create()) {
                 // Compute the hash for the input string
