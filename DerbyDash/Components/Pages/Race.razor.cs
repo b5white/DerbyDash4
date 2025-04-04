@@ -158,8 +158,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private Dictionary<int, float> _lastPenaltyPositions = new Dictionary<int, float>();
-
         private void ScaleRace(int currentTimeIndex) {
             // Track and viewport constants
             const double VISIBLE_TRACK_LENGTH = 60.0;
