@@ -44,11 +44,11 @@ namespace DerbyDash.Services {
             return new List<SpeedIncrement>();
         }
 
-        public void ReadScores(int problemId) {
+        public void ReadResults(int problemId) {
             ;
         }
 
-        public void WriteScores(int problemId) {
+        public void WriteResults(int problemId) {
             ;
         }
     }

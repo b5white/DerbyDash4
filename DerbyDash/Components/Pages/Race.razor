@@ -67,11 +67,11 @@
             </div>
 
             <div class="leaderboard">
-                <h2 class="leaderboard-title">Top 5 Times</h2>
+                <h2 class="leaderboard-title">Top 5 Results</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < previousTimes.Length; i++) {
-                        string formattedTime = (previousTimes[i] > 0) ? previousTimes[i].ToString("F3") : "0";
-                        <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
+                    @for (int i = 0; i < previousResults.Length; i++) {
+                        string formattedTime = (previousResults[i] > 0) ? previousResults[i].ToString("F3") : "0";
+                        <div class="score-item @(i == currentResultIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
                             <span class="time">@formattedTime</span>
                         </div>

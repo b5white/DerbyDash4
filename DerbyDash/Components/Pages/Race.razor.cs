@@ -34,8 +34,8 @@ namespace DerbyDash.Components.Pages {
         private float prevAverage = 0;
         private float improvedTime = 0;
         private double currentDistance = 0;
-        private float[] previousTimes = [0, 0, 0, 0, 0];
-        private int currentScoreIndex = 0;
+        private float[] previousResults = [0, 0, 0, 0, 0];
+        public int currentResultIndex = 0;
         private int currentTimeIndex = 0;
         private float[] ElapsedAnswerTimes = new float[50];
         int PeriodicTimerSpan = 200000;  // 1/5 of a second
@@ -300,7 +300,7 @@ namespace DerbyDash.Components.Pages {
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                UpdateScores(RaceTime);
+                UpdateResults(RaceTime);
                 CalculateAverage();
                 Running = true;
                 problems = null;
@@ -355,27 +355,27 @@ namespace DerbyDash.Components.Pages {
             return allFinished;
         }
 
-        private void UpdateScores(float timeSpan) {
-            RaceService.ReadScores(track.ProblemId);
-            ResetScores(timeSpan);
-            RaceService.WriteScores(track.ProblemId);
+        private void UpdateResults(float timeSpan) {
+            RaceService.ReadResults(track.ProblemId);
+            ResetResults(timeSpan);
+            RaceService.WriteResults(track.ProblemId);
         }
 
-        private void ResetScores(float timeSpan) {
+        private void ResetResults(float timeSpan) {
             void swap(int i) {
-                float prevScore = previousTimes[i - 1];
-                previousTimes[i - 1] = previousTimes[i];
-                previousTimes[i] = prevScore;
+                float prevResult = previousResults[i - 1];
+                previousResults[i - 1] = previousResults[i];
+                previousResults[i] = prevResult;
             }
 
-            currentScoreIndex = -1;
-            if ((previousTimes[4] == 0) || (timeSpan < previousTimes[4])) {
-                previousTimes[4] = timeSpan;
-                currentScoreIndex = 4;
+            currentResultIndex = -1;
+            if ((previousResults[4] == 0) || (timeSpan < previousResults[4])) {
+                previousResults[4] = timeSpan;
+                currentResultIndex = 4;
                 for (int i = 4; i > 0; i--) {
-                    if ((previousTimes[i - 1] == 0) || (previousTimes[i] < previousTimes[i - 1])) {
+                    if ((previousResults[i - 1] == 0) || (previousResults[i] < previousResults[i - 1])) {
                         swap(i);
-                        currentScoreIndex = i - 1;
+                        currentResultIndex = i - 1;
                     }
                 }
             }
@@ -385,10 +385,10 @@ namespace DerbyDash.Components.Pages {
             int count = 0;
             float total = 0;
 
-            for (int i = 0; i < previousTimes.Length; i++) {
-                if (previousTimes[i] > 0) {
+            for (int i = 0; i < previousResults.Length; i++) {
+                if (previousResults[i] > 0) {
                     count++;
-                    total += previousTimes[i];
+                    total += previousResults[i];
                 }
             }
             float average = total / count;
