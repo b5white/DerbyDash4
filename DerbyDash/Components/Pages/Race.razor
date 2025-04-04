@@ -55,22 +55,22 @@
 
                 <div class="stat-card">
                     <div class="stat-label">Average</div>
-                    <div class="stat-value">@averageSpan.ToString("F3")</div>
+                    <div class="stat-value">@prevAverage.ToString("F3")</div>
                 </div>
 
-                @if (increasedSpan > 0) {
+                @if (improvedTime > 0) {
                     <div class="stat-card improvement">
                         <div class="stat-label">Improvement</div>
-                        <div class="stat-value">+@increasedSpan.ToString("F3")</div>
+                        <div class="stat-value">+@improvedTime.ToString("F3")</div>
                     </div>
                 }
             </div>
 
             <div class="leaderboard">
-                <h2 class="leaderboard-title">Top 5 Scores</h2>
+                <h2 class="leaderboard-title">Top 5 Times</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < Scores.Length; i++) {
-                        string formattedTime = (Scores[i] > 0) ? Scores[i].ToString("F3") : "0";
+                    @for (int i = 0; i < previousTimes.Length; i++) {
+                        string formattedTime = (previousTimes[i] > 0) ? previousTimes[i].ToString("F3") : "0";
                         <div class="score-item @(i == currentScoreIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
                             <span class="time">@formattedTime</span>

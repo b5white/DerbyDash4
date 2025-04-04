@@ -31,11 +31,10 @@ namespace DerbyDash.Components.Pages {
         private long starttime = 0;
         private long calctime = 0;
         private float RaceTime = 0;
-        private float averageSpan = 0;
-        private float increasedSpan = 0;
-        private float prevAve = 0;
+        private float prevAverage = 0;
+        private float improvedTime = 0;
         private double currentDistance = 0;
-        private float[] Scores = [0, 0, 0, 0, 0];
+        private float[] previousTimes = [0, 0, 0, 0, 0];
         private int currentScoreIndex = 0;
         private int currentTimeIndex = 0;
         private float[] ElapsedAnswerTimes = new float[50];
@@ -132,10 +131,10 @@ namespace DerbyDash.Components.Pages {
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    CalculateNewDistance(GetSpan(starttime));
+                    CalculateNewDistance(GetTimespan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
-                        ElapsedAnswerTimes[currentTimeIndex++] = GetSpan(starttime);
+                        ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
                     } catch (IndexOutOfRangeException) {
                         Console.WriteLine("currentTimeIndex = {0}", currentTimeIndex);
                         currentTimeIndex = 0;
@@ -232,7 +231,7 @@ namespace DerbyDash.Components.Pages {
                     const float FALL_BEHIND_TIME_THRESHOLD = 5.0f;
 
                     if (currentTimeIndex > 0 && starttime > 0) {
-                        timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                        timeSinceLastAnswer = GetTimespan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
                     }
 
                     // Apply fall-behind effect only for the active player when they're inactive
@@ -296,7 +295,7 @@ namespace DerbyDash.Components.Pages {
 
         private void EndRace() {
             if (Running) {
-                RaceTime = GetSpan(starttime);
+                RaceTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = RaceTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
@@ -364,17 +363,17 @@ namespace DerbyDash.Components.Pages {
 
         private void ResetScores(float timeSpan) {
             void swap(int i) {
-                float prevScore = Scores[i - 1];
-                Scores[i - 1] = Scores[i];
-                Scores[i] = prevScore;
+                float prevScore = previousTimes[i - 1];
+                previousTimes[i - 1] = previousTimes[i];
+                previousTimes[i] = prevScore;
             }
 
             currentScoreIndex = -1;
-            if ((Scores[4] == 0) || (timeSpan < Scores[4])) {
-                Scores[4] = timeSpan;
+            if ((previousTimes[4] == 0) || (timeSpan < previousTimes[4])) {
+                previousTimes[4] = timeSpan;
                 currentScoreIndex = 4;
                 for (int i = 4; i > 0; i--) {
-                    if ((Scores[i - 1] == 0) || (Scores[i] < Scores[i - 1])) {
+                    if ((previousTimes[i - 1] == 0) || (previousTimes[i] < previousTimes[i - 1])) {
                         swap(i);
                         currentScoreIndex = i - 1;
                     }
@@ -386,18 +385,17 @@ namespace DerbyDash.Components.Pages {
             int count = 0;
             float total = 0;
 
-            for (int i = 0; i < Scores.Length; i++) {
-                if (Scores[i] > 0) {
+            for (int i = 0; i < previousTimes.Length; i++) {
+                if (previousTimes[i] > 0) {
                     count++;
-                    total += Scores[i];
+                    total += previousTimes[i];
                 }
             }
             float average = total / count;
-            if (averageSpan > 0) {
-                increasedSpan = (average < averageSpan) ? (averageSpan - average) : 0;
+            if (prevAverage > 0) {
+                improvedTime = (average < prevAverage) ? (prevAverage - average) : 0;
             }
-            prevAve = averageSpan;
-            averageSpan = average;
+            prevAverage = average;
         }
 
         //private void ignoremouse(MouseEventArgs e) {
@@ -485,7 +483,7 @@ namespace DerbyDash.Components.Pages {
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     // Console.WriteLine("Timer triggered");
-                    float RaceTime = GetSpan(starttime);
+                    float RaceTime = GetTimespan(starttime);
                     CalculateNewDistance(RaceTime);
                     CalculateOldDistance(RaceTime);
                     // TODO Use the results of these to tell if the race is over. Meanwhile need to not show finished races.
@@ -505,7 +503,7 @@ namespace DerbyDash.Components.Pages {
             periodicTimer.Dispose();
         }
 
-        private float GetSpan(double starttime) {
+        private float GetTimespan(double starttime) {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
 
