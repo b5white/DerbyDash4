@@ -57,6 +57,12 @@ namespace DerbyDash.Components.Pages {
         private double previousScrollOffset = 0; // Track scroll cycled
         private int startLineAnimationCycles = 0;
 
+        private const int INACTIVITY_TIMER_INTERVAL = 4000; // 4 seconds
+        private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
+        private const int PERIODIC_TIMER_SPAN_MICROSECONDS = 200000; // 1/5 of a second
+        private const int ANIMATION_SYNC_DELAY = 50; // milliseconds
+        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds
+
         private float GetSpan(double starttime) {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
@@ -162,11 +168,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private const int INACTIVITY_TIMER_INTERVAL = 4000; // 4 seconds
-        private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
-        private const int PERIODIC_TIMER_SPAN_MICROSECONDS = 200000; // 1/5 of a second
-        private const int ANIMATION_SYNC_DELAY = 50; // milliseconds
-        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds
+        
 
         private void ScaleRace(int currentTimeIndex) {
             // Track and viewport constants
