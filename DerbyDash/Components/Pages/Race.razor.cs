@@ -245,6 +245,7 @@ namespace DerbyDash.Components.Pages {
                     relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
                     targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * 70) * TOP_MULTIPLIER;
                     car.Top = INITIAL_START_LINE_TOP + (targetTop - INITIAL_START_LINE_TOP);
+
                 }
             }
 
