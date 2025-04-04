@@ -172,8 +172,6 @@ namespace DerbyDash.Components.Pages {
             const double LANE_SCROLL_CYCLE_PERCENTAGE = 0.85;
             const double LANE_SCROLL_MAX = 280;
             const int ANIMATION_CYCLE_BASE_TIME = 4000; // milliseconds
-            const int MIN_SPEED_CLASS = 1;
-            const int MAX_SPEED_CLASS = 15;
 
             double relativePosition;
 

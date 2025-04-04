@@ -13,6 +13,8 @@
         public int ProblemId { get; set; }
         public string FamilyMemberId { get; set; } = "";
         public bool ShowDebug = true;
+        const int MIN_SPEED_CLASS = 1;
+        const int MAX_SPEED_CLASS = 15;
 
         public void UpdateSpeedClass() {
             UpdateSpeedClass((int)Cars[0].Speed);
@@ -20,7 +22,7 @@
 
         public void UpdateSpeedClass(int speed) {
             // Map speed value to CSS class (1-5)
-            SpeedClass = Math.Clamp(speed, 1, 15);
+            SpeedClass = Math.Clamp(speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
         }
     }
 
