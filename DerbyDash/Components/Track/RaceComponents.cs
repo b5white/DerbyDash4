@@ -14,9 +14,12 @@
         public string FamilyMemberId { get; set; } = "";
         public bool ShowDebug = true;
 
+        public void UpdateSpeedClass() {
+            UpdateSpeedClass((int)Cars[0].Speed);
+        }
+
         public void UpdateSpeedClass(int speed) {
             // Map speed value to CSS class (1-5)
-            // SpeedClass = Math.Clamp(speed / 2 + 1, 1, 5);
             SpeedClass = Math.Clamp(speed, 1, 15);
         }
     }

@@ -179,7 +179,7 @@ namespace DerbyDash.Components.Pages {
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
             // Set speed class based on player car speed
-            track.SpeedClass = Math.Clamp((int)track.Cars[0].Speed, 1, 15);
+            track.UpdateSpeedClass();
 
             // Check if finish line is in view (visible)
             relativePosition = (RaceService.TotalDistance - visibleStart) / visibleLength;
