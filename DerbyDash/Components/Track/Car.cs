@@ -1,5 +1,4 @@
 ﻿using DerbyDash.Data;
-using DerbyDash.HelperUtilities;
 
 namespace DerbyDash.Components.Track {
     public class Car {
@@ -48,7 +47,7 @@ namespace DerbyDash.Components.Track {
             double additionalDistance = lastSpeed * timeElapsed;
             Distance = lastDistance + additionalDistance;
             Speed = lastSpeed;
-            // Console.WriteLine($"{index}, {currentTime}, {lastIndex}, {lastTime}, {timeElapsed}, {lastDistance}, {additionalDistance}, {Distance}, {lastSpeed}");
+            
             return Distance;
         }
 
@@ -102,7 +101,7 @@ namespace DerbyDash.Components.Track {
                     Speed = currentSpeed,
                     Distance = currentDistance
                 });
-                //Console.WriteLine($">index:{index}, timeIncrement:{timeIncrement}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
+               
             }
         }
     }
