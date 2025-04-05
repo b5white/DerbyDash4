@@ -1,4 +1,11 @@
-﻿.ignoremouseclick {
+﻿html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.ignoremouseclick {
     pointer-events: none;
     position: fixed;
     top: 0;
@@ -418,12 +425,17 @@
 /* For start button styling and initial page styling */
 .race-start-container {
     min-height: 100vh;
+    width: 100%;
+    min-width: 88vw;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-    padding: 20px;
+    overflow-x: hidden;
 }
 
 .race-title-box {
