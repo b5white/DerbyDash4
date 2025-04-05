@@ -79,17 +79,20 @@ namespace DerbyDash.Components.Track {
             };
 
             double[,] distances = {
-                { 0,  7.19820785522461, 24.20490264892580, 54.70310401916500,102.57438850402800,182.52254676818800 },
-                { 0,  9.86215686798096, 35.60293102264400, 82.72199630737300,159.24126815795900,-1, },
-                { 0,  4.89573097229004, 18.22347450256350, 42.13734340667720, 82.54607295989990,-1, },
-                { 0,  3.92602872848511, 13.89093065261840, 34.52113914489750, 70.88122749328610,150.91706657409700 },
-                { 0,  5.69009923934937, 19.84951066970830, 46.78676557540890,187.96631574630700,371.50040388107300 }
+                { 0, 1.13538551330566, 3.74566459655762, 8.73382377624515, 15.940839767456, 36.0498924255369 },
+                { 0, 1.69894409179688, 7.71540451049796, 16.2233085632326, 29.9171600341797, 0 },
+                { 0, 1.35587811470032, 4.89215970039368, 8.81441330909729, 17.3379843235017, 0 },
+                { 0, 1.33469438552857, 3.44753885269165, 9.13039445877076, 17.9835381507874, 52.569266796112 },
+                { 0, 1.4257025718689, 4.20491552352904, 9.90305328369139, 115.166263580322, 122.225914001465 }
             };
 
             for (int i = 0; i < 6; i++) {
-                double timeIncrement = ((random.NextDouble() * 2) + 1) * index; // Random time increment between 2 and 10
                 currentTime = times[index, i];
-                currentDistance += currentSpeed * timeIncrement;
+                if (i == 0) {
+                    currentDistance = 0;
+                } else {
+                    currentDistance += currentSpeed * (currentTime - times[index, i]);
+                }
                 if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i], 0.0001)) {
                     Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
                 }
