@@ -1,8 +1,9 @@
 ﻿@using DerbyDash.Components.Track
 @using Microsoft.AspNetCore.Components.Web
+@implements IDisposable
 
 <div class="road">
-    <div class="track-background @((Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) ? $"animated speed-{Track.SpeedClass}" : "")">
+    <div class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
         @for (int i = 0; i < 5; i++)
         {
             <div class="lane-group">
@@ -13,7 +14,7 @@
             </div>
         }
         
-        <div class="start-line @(Track.StartLine.Visible ? "" : "hidden")">
+        <div class="start-line @(startLineHidden ? "hidden" : "")" @ref="startLineElement">
             <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
         </div>
     </div>
@@ -43,46 +44,10 @@
                 }
                 <div class="debug-info">
                     Start Top: @Track.StartLine.Top.ToString("F0")
+                    Finish Visible: @Track.IsFinishLineVisible
+                    Start Hidden: @startLineHidden
                 </div>
             </div>
         }
     </div>
 </div>
-
-
-
-@* @using DerbyDash.Components.Track
-@using Microsoft.AspNetCore.Components.Web
-
-
-<div class="road">
-    @for (int i = 0; i < 5; i++)
-    {
-        <div class="lane-group @(Track.IsAnyCarAtTop ? $"animated speed-{Track.SpeedClass}" : "")">
-            @for (int j = 0; j < 40; j++)
-            {
-                <div class="lane"></div>
-            }
-        </div>
-    }
-
-    <div class="track-container">
-        <!-- Apply the same animation classes as lane-group -->
-        <div class="start-line @(Track.StartLine.Visible ? "" : "hidden") @(Track.IsAnyCarAtTop ? $"animated speed-{Track.SpeedClass}" : "")"
-            style="top: @Track.StartLine.TopStr;">
-            <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
-        </div>
-        <div class="finish-line" style="top: @Track.FinishLine.TopStr;">
-            <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="Finish Line" />
-        </div>
-
-        <div class="cars-container">
-            @foreach (var car in Track.Cars)
-            {
-                <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
-                    <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
-                </div>
-            }
-        </div>
-    </div>
-</div> *@

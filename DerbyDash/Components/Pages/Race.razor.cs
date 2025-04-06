@@ -100,9 +100,8 @@ namespace DerbyDash.Components.Pages {
                     ElapsedAnswerTimes[i] = 0;
                 }
                 problem = problems!.Next();
-                startLineHasDisappeared = false;
-                track.StartLine.Visible = true;
-                previousScrollOffset = 0;
+
+                // No need to manage start line visibility - it's handled by CSS now
 
                 // Delay the start of inactivity timer
                 Task.Run(async () => {
@@ -117,6 +116,7 @@ namespace DerbyDash.Components.Pages {
                 });
             }
         }
+
 
         private void StartClick() {
             Reset();
@@ -168,8 +168,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        
-
         private void ScaleRace(int currentTimeIndex) {
             // Track and viewport constants
             const double VISIBLE_TRACK_LENGTH = 60.0;
@@ -178,11 +176,9 @@ namespace DerbyDash.Components.Pages {
             const float TRACK_HEIGHT = 70.0f;
             const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
             const int CAR_GAP = 30;
-            const double LANE_SCROLL_MAX = 280;
             const int MIN_SPEED_CLASS = 1;
             const int MAX_SPEED_CLASS = 15;
-            const double ANIMATION_RESET_THRESHOLD = 0.95; // Detect when animation resets
-            const float FALL_BEHIND_TIME_THRESHOLD = 5.0f;
+            const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
 
             double relativePosition;
 
@@ -203,37 +199,6 @@ namespace DerbyDash.Components.Pages {
             relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
             track.FinishLine.Top = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
             track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
-
-            // Track start line visibility cycles
-            if (isAnyCarAtTop && !track.IsFinishLineVisible) {
-                // Calculate animation cycle time based on speed class - matching CSS values
-                double animationDuration = 4.0 / track.SpeedClass; // Base duration is 4.0s for speed-1
-
-                // Calculate current position in animation cycle (0.0 to 1.0)
-                double currentTimeMs = DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond;
-                double cyclePosition = (currentTimeMs % (animationDuration * 1000)) / (animationDuration * 1000);
-
-                // Calculate lane offset to match CSS animation
-                track.LaneOffset = cyclePosition * LANE_SCROLL_MAX;
-
-                // Detect when we've completed one full animation cycle
-                if (!startLineHasDisappeared) {
-                    // Check if we've just crossed the cycle reset point
-                    if (previousScrollOffset > track.LaneOffset && cyclePosition < ANIMATION_RESET_THRESHOLD) {
-                        startLineHasDisappeared = true;
-                        track.StartLine.Visible = false;
-                    }
-                    previousScrollOffset = track.LaneOffset;
-                }
-            } else {
-                track.LaneOffset = 0;
-                previousScrollOffset = 0;
-
-                // Only show start line if it hasn't disappeared yet and we're not at the top
-                if (!startLineHasDisappeared && !isAnyCarAtTop) {
-                    track.StartLine.Visible = true;
-                }
-            }
 
             // Position all cars using the same logic for consistency
             for (int i = 0; i < track.Cars.Count; i++) {
@@ -268,10 +233,6 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-
-
-
-
         private void SynchronizeAnimationStart() {
             // Reset any existing animations
             track.IsAnyCarAtTop = false;
@@ -290,7 +251,6 @@ namespace DerbyDash.Components.Pages {
                 });
             });
         }
-
 
         public void HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {

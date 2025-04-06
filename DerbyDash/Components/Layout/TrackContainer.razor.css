@@ -16,8 +16,8 @@
     will-change: transform;
 }
 
-/* New animation for the entire track background */
-.track-background.animated {
+/* Animation only runs when explicitly enabled and finish line is not visible */
+.track-background.animated:not(.finish-visible) {
     animation: moveRoad 3s linear infinite;
     animation-play-state: running;
     transform-origin: top center;
@@ -54,34 +54,58 @@
 .lane-group:nth-child(4) { left: 66%; }
 .lane-group:nth-child(5) { left: 83%; }
 
-/* Remove individual lane-group animation since parent now animates */
-/* .lane-group.animated {
-    animation: moveRoad 3s linear infinite;
-    animation-play-state: running;
-    transform-origin: top center;
-} */
-
 @keyframes moveRoad {
     0% { transform: translateY(0); }
     100% { transform: translateY(280px); }
 }
 
+/* Start line animation - separate from road animation */
+.track-background.animated:not(.finish-visible) {
+    animation: moveRoad 3s linear infinite;
+    animation-play-state: running;
+    transform-origin: top center;
+}
+
+.track-background.animated .start-line.hidden,
+.track-background.finish-visible .start-line.hidden {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+}
+
 /* Speed variations for dynamic animation speeds */
-.track-background.animated.speed-1 { animation-duration: 4.0s; }  /* 7 ft/s: 28ft ÷ 7ft/s = 4s */
-.track-background.animated.speed-2 { animation-duration: 2.0s; }  /* 14 ft/s: 28ft ÷ 14ft/s = 2s */
-.track-background.animated.speed-3 { animation-duration: 1.33s; } /* 21 ft/s: 28ft ÷ 21ft/s = 1.33s */
-.track-background.animated.speed-4 { animation-duration: 1.0s; }  /* 28 ft/s: 28ft ÷ 28ft/s = 1s */
-.track-background.animated.speed-5 { animation-duration: 0.8s; }  /* 35 ft/s: 28ft ÷ 35ft/s = 0.8s */
-.track-background.animated.speed-6 { animation-duration: 0.67s; } /* 42 ft/s: 28ft ÷ 42ft/s = 0.67s */
-.track-background.animated.speed-7 { animation-duration: 0.57s; } /* 49 ft/s: 28ft ÷ 49ft/s = 0.57s */
-.track-background.animated.speed-8 { animation-duration: 0.5s; }  /* 56 ft/s: 28ft ÷ 56ft/s = 0.5s */
-.track-background.animated.speed-9 { animation-duration: 0.44s; } /* 63 ft/s: 28ft ÷ 63ft/s = 0.44s */
-.track-background.animated.speed-10 { animation-duration: 0.4s; } /* 70 ft/s: 28ft ÷ 70ft/s = 0.4s */
-.track-background.animated.speed-11 { animation-duration: 0.36s; } /* 77 ft/s: 28ft ÷ 77ft/s = 0.36s */
-.track-background.animated.speed-12 { animation-duration: 0.33s; } /* 84 ft/s: 28ft ÷ 84ft/s = 0.33s */
-.track-background.animated.speed-13 { animation-duration: 0.31s; } /* 91 ft/s: 28ft ÷ 91ft/s = 0.31s */
-.track-background.animated.speed-14 { animation-duration: 0.29s; } /* 98 ft/s: 28ft ÷ 98ft/s = 0.29s */
-.track-background.animated.speed-15 { animation-duration: 0.27s; } /* 105 ft/s: 28ft ÷ 105ft/s = 0.27s */
+.track-background.animated.speed-1:not(.finish-visible) { animation-duration: 4.0s; }  /* 7 ft/s: 28ft ÷ 7ft/s = 4s */
+.track-background.animated.speed-2:not(.finish-visible) { animation-duration: 2.0s; }  /* 14 ft/s: 28ft ÷ 14ft/s = 2s */
+.track-background.animated.speed-3:not(.finish-visible) { animation-duration: 1.33s; } /* 21 ft/s: 28ft ÷ 21ft/s = 1.33s */
+.track-background.animated.speed-4:not(.finish-visible) { animation-duration: 1.0s; }  /* 28 ft/s: 28ft ÷ 28ft/s = 1s */
+.track-background.animated.speed-5:not(.finish-visible) { animation-duration: 0.8s; }  /* 35 ft/s: 28ft ÷ 35ft/s = 0.8s */
+.track-background.animated.speed-6:not(.finish-visible) { animation-duration: 0.67s; } /* 42 ft/s: 28ft ÷ 42ft/s = 0.67s */
+.track-background.animated.speed-7:not(.finish-visible) { animation-duration: 0.57s; } /* 49 ft/s: 28ft ÷ 49ft/s = 0.57s */
+.track-background.animated.speed-8:not(.finish-visible) { animation-duration: 0.5s; }  /* 56 ft/s: 28ft ÷ 56ft/s = 0.5s */
+.track-background.animated.speed-9:not(.finish-visible) { animation-duration: 0.44s; } /* 63 ft/s: 28ft ÷ 63ft/s = 0.44s */
+.track-background.animated.speed-10:not(.finish-visible) { animation-duration: 0.4s; } /* 70 ft/s: 28ft ÷ 70ft/s = 0.4s */
+.track-background.animated.speed-11:not(.finish-visible) { animation-duration: 0.36s; } /* 77 ft/s: 28ft ÷ 77ft/s = 0.36s */
+.track-background.animated.speed-12:not(.finish-visible) { animation-duration: 0.33s; } /* 84 ft/s: 28ft ÷ 84ft/s = 0.33s */
+.track-background.animated.speed-13:not(.finish-visible) { animation-duration: 0.31s; } /* 91 ft/s: 28ft ÷ 91ft/s = 0.31s */
+.track-background.animated.speed-14:not(.finish-visible) { animation-duration: 0.29s; } /* 98 ft/s: 28ft ÷ 98ft/s = 0.29s */
+.track-background.animated.speed-15:not(.finish-visible) { animation-duration: 0.27s; } /* 105 ft/s: 28ft ÷ 105ft/s = 0.27s */
+
+/* Also apply the same speed variations to the start line animation */
+.track-background.animated.speed-1:not(.finish-visible) .start-line { animation-duration: 4.0s; }
+.track-background.animated.speed-2:not(.finish-visible) .start-line { animation-duration: 2.0s; }
+.track-background.animated.speed-3:not(.finish-visible) .start-line { animation-duration: 1.33s; }
+.track-background.animated.speed-4:not(.finish-visible) .start-line { animation-duration: 1.0s; }
+.track-background.animated.speed-5:not(.finish-visible) .start-line { animation-duration: 0.8s; }
+.track-background.animated.speed-6:not(.finish-visible) .start-line { animation-duration: 0.67s; }
+.track-background.animated.speed-7:not(.finish-visible) .start-line { animation-duration: 0.57s; }
+.track-background.animated.speed-8:not(.finish-visible) .start-line { animation-duration: 0.5s; }
+.track-background.animated.speed-9:not(.finish-visible) .start-line { animation-duration: 0.44s; }
+.track-background.animated.speed-10:not(.finish-visible) .start-line { animation-duration: 0.4s; }
+.track-background.animated.speed-11:not(.finish-visible) .start-line { animation-duration: 0.36s; }
+.track-background.animated.speed-12:not(.finish-visible) .start-line { animation-duration: 0.33s; }
+.track-background.animated.speed-13:not(.finish-visible) .start-line { animation-duration: 0.31s; }
+.track-background.animated.speed-14:not(.finish-visible) .start-line { animation-duration: 0.29s; }
+.track-background.animated.speed-15:not(.finish-visible) .start-line { animation-duration: 0.27s; }
 
 .track-container {
     position: relative;
@@ -106,25 +130,12 @@
     transition: all 0.3s ease-in-out;
 }
 
-/* Start line positioning - now relative to track-background */
+/* Start line positioning */
 .start-line {
-    top: calc(100vh - 450px); /* Fixed position relative to track-background */
+    top: calc(100vh - 450px);
     left: 0;
     width: 100%;
 }
-
-.start-line.hidden {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-}
-
-/* Remove individual start-line animation since parent now animates */
-/* .start-line.animated {
-    animation: moveRoad 3s linear infinite;
-    animation-play-state: running;
-    transform-origin: top center;
-} */
 
 .start-line img, .finish-line img {
     width: 100vw;
@@ -187,7 +198,7 @@
     }
 
     .start-line {
-        top: calc(100vh - 350px); /* Fixed position relative to track-background */
+        top: calc(100vh - 350px);
         left: 0;
         width: 100%;
     }
