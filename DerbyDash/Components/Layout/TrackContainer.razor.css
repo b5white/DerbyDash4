@@ -32,12 +32,12 @@
 .lane-group {
     position: absolute;
     width: 10px;
-    height: calc(100vh + 560px); /* Extended height to allow smooth entry */
+    height: calc(100vh + 860px); /* Extended height to allow smooth entry */
     transform-style: preserve-3d;
     overflow: hidden;
     transition: all 0.3s ease-in-out;
     /* Position the lane group above the viewport initially */
-    top: -280px;
+    top: -560px;
 }
 
 .lane {
@@ -56,7 +56,7 @@
 
 @keyframes moveRoad {
     0% { transform: translateY(0); }
-    100% { transform: translateY(280px); }
+    100% { transform: translateY(560px); }
 }
 
 /* Start line animation - separate from road animation */
