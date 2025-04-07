@@ -206,6 +206,7 @@ namespace DerbyDash.Components.Pages {
                 // Calculate the target position based on distance
                 relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
                 float targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
+                car.Top = targetTop;
 
                 // Apply special handling for the current player car only when inactive
                 if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
@@ -219,11 +220,6 @@ namespace DerbyDash.Components.Pages {
                     // Apply fall-behind effect only for the active player when they're inactive
                     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
                     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
-                } else {
-                    // Use the exact same logic that was used for the player car
-                    relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
-                    targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
-                    car.Top = INITIAL_START_LINE_TOP + (targetTop - INITIAL_START_LINE_TOP);
                 }
             }
 
