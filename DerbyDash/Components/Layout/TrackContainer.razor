@@ -43,9 +43,11 @@
                     </div>
                 }
                 <div class="debug-info">
-                    Start Top: @Track.StartLine.Top.ToString("F0")
-                    Finish Visible: @Track.IsFinishLineVisible
-                    Start Hidden: @startLineHidden
+                    StTop: @Track.StartLine.Top.ToString("F0")
+                    FinVis: @Track.IsFinishLineVisible
+                    StHid: @startLineHidden
+                    SC: @Track.SpeedClass
+                    Time: @Track.RaceTime
                 </div>
             </div>
         }
