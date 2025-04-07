@@ -66,7 +66,6 @@ namespace DerbyDash.Components.Pages {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
 
-
         public ProblemsBase? ProblemClass { get; set; }
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
 
