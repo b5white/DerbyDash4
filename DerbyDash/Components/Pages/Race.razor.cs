@@ -67,7 +67,6 @@ namespace DerbyDash.Components.Pages {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
 
-
         public ProblemsBase? ProblemClass { get; set; }
         TrackContainer? trackContainerInstance;
 

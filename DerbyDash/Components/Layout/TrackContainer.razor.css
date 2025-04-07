@@ -32,17 +32,17 @@
 .lane-group {
     position: absolute;
     width: 10px;
-    height: calc(100vh + 860px); /* Extended height to allow smooth entry */
+    height: calc(100vh + 560px); /* Extended height to allow smooth entry */
     transform-style: preserve-3d;
     overflow: hidden;
     transition: all 0.3s ease-in-out;
     /* Position the lane group above the viewport initially */
-    top: -560px;
+    top: -280px;
 }
 
 .lane {
     width: 100%;
-    height: 100px; /* Increased from 70px */
+    height: 70px; /* Increased from 70px */
     background-color: #ffff00;
     margin-bottom: 210px;
     transform-style: preserve-3d;
