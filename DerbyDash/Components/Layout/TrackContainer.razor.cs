@@ -1,6 +1,5 @@
 ﻿using DerbyDash.Components.Track;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using System;
 
 namespace DerbyDash.Components.Layout {
@@ -16,15 +15,15 @@ namespace DerbyDash.Components.Layout {
 
         [Parameter]
         public double Distance { get; set; }
-        
-        [Inject]
-        private IJSRuntime JSRuntime { get; set; }
-        
+            
         private ElementReference startLineElement;
         private bool startLineHidden = false;
         private System.Threading.Timer animationTimer;
         private DateTime animationStartTime;
         private bool animationStarted = false;
+        
+        // Add a constant for speed scaling to match visual effects
+        private const double SPEED_SCALING_FACTOR = 7.0;
         
         protected override void OnInitialized()
         {
@@ -48,9 +47,14 @@ namespace DerbyDash.Components.Layout {
                 // Calculate how long the animation has been running
                 TimeSpan animationDuration = DateTime.Now - animationStartTime;
                 
-                // Calculate when the start line should be hidden based on speed class
-                // Speed class 1 = 4s animation, Speed class 15 = 0.27s animation
-                double hideTimeSeconds = 4.0 / Math.Max(1, Track.SpeedClass) * 0.8;
+                // Get the current animation duration based on speed class
+                double currentAnimationDuration = GetAnimationDurationForSpeedClass(Track.SpeedClass);
+                
+                // Calculate when the start line should be hidden
+                // For faster animations (higher speed classes), we need a higher percentage
+                // to ensure the start line disappears at the right moment
+                double hidePercentage = CalculateHidePercentage(Track.SpeedClass);
+                double hideTimeSeconds = currentAnimationDuration * hidePercentage;
                 
                 // If enough time has passed, hide the start line
                 if (animationDuration.TotalSeconds >= hideTimeSeconds && !startLineHidden)
@@ -79,10 +83,56 @@ namespace DerbyDash.Components.Layout {
                 }
             }
         }
+
+        // Helper method to get the animation duration based on speed class
+        private double GetAnimationDurationForSpeedClass(int speedClass)
+        {
+            // These values match the CSS animation durations in TrackContainer.razor.css
+            return speedClass switch
+            {
+                1 => 8.0,
+                2 => 4.0,
+                3 => 2.66,
+                4 => 2.0,
+                5 => 1.6,
+                6 => 1.34,
+                7 => 1.14,
+                8 => 1.0,
+                9 => 0.88,
+                10 => 0.8,
+                11 => 0.72,
+                12 => 0.66,
+                13 => 0.62,
+                14 => 0.58,
+                15 => 0.54,
+                _ => 8.0 // Default to the slowest animation if out of range
+            };
+        }
+
+        // Helper method to calculate the appropriate hide percentage based on speed class
+        private double CalculateHidePercentage(int speedClass)
+        {
+            // For slower animations (lower speed classes), we can use a lower percentage
+            // For faster animations (higher speed classes), we need a higher percentage
+            // This ensures the start line disappears at visually consistent points
+            if (speedClass <= 3)
+                return 0.96;  // Slower speeds need less time before hiding
+            else if (speedClass <= 7)
+                return 0.6;  // Medium speeds
+            else if (speedClass <= 11)
+                return 0.5;  // Faster speeds
+            else
+                return 0.3;  // Very fast speeds need more time before hiding
+            
+            // Alternative approach: linear interpolation between 0.3 and 0.6
+            // return 0.3 + ((double)speedClass - 1) / 14 * 0.3;
+        }
+
         
         protected override void OnParametersSet() {
             // Update speed class based on current speed
-            Track.UpdateSpeedClass((int)Speed);
+            // Apply the scaling factor to match visual speed
+            Track.UpdateSpeedClass((int)(Speed * SPEED_SCALING_FACTOR));
             
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden)
