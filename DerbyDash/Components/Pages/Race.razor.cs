@@ -180,6 +180,9 @@ namespace DerbyDash.Components.Pages {
             const int MAX_SPEED_CLASS = 15;
             const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
 
+            // Speed scaling factor to match visual effects
+            const double SPEED_SCALING_FACTOR = 7.0;
+
             double relativePosition;
 
             // Find the lead car's distance
@@ -192,8 +195,8 @@ namespace DerbyDash.Components.Pages {
             bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
             track.IsAnyCarAtTop = isAnyCarAtTop;
 
-            // Set speed class based on player car speed
-            track.SpeedClass = Math.Clamp((int)track.Cars[0].Speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+            // Set speed class based on player car speed with scaling factor
+            track.SpeedClass = Math.Clamp((int)(track.Cars[0].Speed * SPEED_SCALING_FACTOR), MIN_SPEED_CLASS, MAX_SPEED_CLASS);
 
             // Check if finish line is in view (visible)
             relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
@@ -284,12 +287,17 @@ namespace DerbyDash.Components.Pages {
             currentDistance = 0;
             int i;
 
+            // Apply a speed multiplier to make car movement match visual lane speed
+            const double SPEED_MULTIPLIER = 7.0;
+
             for (i = 0; (i < ElapsedAnswerTimes.Length) && (ElapsedAnswerTimes[i] > 0); i++) {
-                double raceTime = (float)(time - ElapsedAnswerTimes[i]);
-                currentDistance += raceTime * speedIncrement;
+                double RaceTime = (float)(time - ElapsedAnswerTimes[i]);
+                // Apply the multiplier to the distance calculation
+                currentDistance += RaceTime * speedIncrement * SPEED_MULTIPLIER;
             }
 
             track.Cars[0].Distance = currentDistance;
+            // Keep the raw speed for counting purposes
             track.Cars[0].Speed = i * speedIncrement;
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
