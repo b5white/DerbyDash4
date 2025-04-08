@@ -10,9 +10,6 @@ namespace DerbyDash.Components.Layout {
         public bool IsMoving { get; set; }
 
         [Parameter]
-        public double Speed { get; set; }
-
-        [Parameter]
         public double Distance { get; set; }
 
         private ElementReference startLineElement;
@@ -102,10 +99,6 @@ namespace DerbyDash.Components.Layout {
 
 
         protected override void OnParametersSet() {
-            // Update speed class based on current speed
-            // Apply the scaling factor to match visual speed
-            Track.UpdateSpeedClass((int)(Speed * SPEED_SCALING_FACTOR));
-
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
                 startLineHidden = false;

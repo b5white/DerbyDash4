@@ -16,13 +16,9 @@
         const int MIN_SPEED_CLASS = 1;
         const int MAX_SPEED_CLASS = 15;
 
-        public void UpdateSpeedClass() {
-            UpdateSpeedClass((int)Cars[0].Speed);
-        }
-
-        public void UpdateSpeedClass(int speed) {
+        public void UpdateSpeedClass(double speed) {
             // Map speed value to CSS class (1-5)
-            SpeedClass = Math.Clamp(speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+            SpeedClass = Math.Clamp((int)speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
         }
     }
 
