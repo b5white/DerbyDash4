@@ -194,9 +194,11 @@ namespace DerbyDash.Components.Pages {
             // Check if any car has reached the top position
             bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
             track.IsAnyCarAtTop = isAnyCarAtTop;
-
-            // Set speed class based on player car speed with scaling factor
-            track.SpeedClass = Math.Clamp((int)(track.Cars[0].Speed * SPEED_SCALING_FACTOR), MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+            if (isAnyCarAtTop) {
+                double fastestCar = track.Cars.Max(car => car.Speed);
+                // Set speed class based on player car speed with scaling factor
+                track.SpeedClass = Math.Clamp((int)(fastestCar), MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+            }
 
             // Check if finish line is in view (visible)
             relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
