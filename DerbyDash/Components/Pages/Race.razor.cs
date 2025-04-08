@@ -30,7 +30,6 @@ namespace DerbyDash.Components.Pages {
         private string Answer = "";
         private long starttime = 0;
         private long calctime = 0;
-        private float RaceTime = 0;
         private float prevAverage = 0;
         private float improvedTime = 0;
         private double currentDistance = 0;
@@ -68,6 +67,8 @@ namespace DerbyDash.Components.Pages {
         }
 
         public ProblemsBase? ProblemClass { get; set; }
+        public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
+
         TrackContainer? trackContainerInstance;
 
         protected override void OnInitialized() {
@@ -468,7 +469,7 @@ namespace DerbyDash.Components.Pages {
 
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
-                    float RaceTime = GetSpan(starttime);
+                    RaceTime = GetSpan(starttime);
                     CalculateNewDistance(RaceTime);
                     CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);

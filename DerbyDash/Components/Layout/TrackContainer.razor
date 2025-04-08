@@ -42,11 +42,13 @@
                         Offset: @Track.LaneOffset.ToString("F0")
                     </div>
                 }
-                @* <div class="debug-info">
-                    Start Top: @Track.StartLine.Top.ToString("F0")
-                    Finish Visible: @Track.IsFinishLineVisible
-                    Start Hidden: @startLineHidden
-                </div> *@
+                <div class="debug-info">
+                    StTop: @Track.StartLine.Top.ToString("F0")
+                    FinVis: @Track.IsFinishLineVisible
+                    StHid: @startLineHidden
+                    SC: @Track.SpeedClass
+                    Time: @Track.RaceTime
+                </div>
             </div>
         }
     </div>

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 using System;
 
 namespace DerbyDash.Components.Layout {
-    public partial class TrackContainer : IDisposable {
+    public partial class TrackContainer: IDisposable {
         [Parameter]
         public RaceComponents Track { get; set; } = new();
 
@@ -30,20 +30,17 @@ namespace DerbyDash.Components.Layout {
             // Set up a timer to check if the start line should be hidden
             animationTimer = new System.Threading.Timer(CheckStartLineVisibility, null, 1000, 200);
         }
-        
-        private void CheckStartLineVisibility(object state)
-        {
+
+        private void CheckStartLineVisibility(object state) {
             // Only proceed if animation is running
-            if (Track.IsAnyCarAtTop && !Track.IsFinishLineVisible)
-            {
+            if (Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) {
                 // If animation just started, record the start time
-                if (!animationStarted)
-                {
+                if (!animationStarted) {
                     animationStarted = true;
                     animationStartTime = DateTime.Now;
                     return; // Wait for next check
                 }
-                
+
                 // Calculate how long the animation has been running
                 TimeSpan animationDuration = DateTime.Now - animationStartTime;
                 
@@ -57,24 +54,19 @@ namespace DerbyDash.Components.Layout {
                 double hideTimeSeconds = currentAnimationDuration * hidePercentage;
                 
                 // If enough time has passed, hide the start line
-                if (animationDuration.TotalSeconds >= hideTimeSeconds && !startLineHidden)
-                {
+                if (animationDuration.TotalSeconds >= hideTimeSeconds && !startLineHidden) {
                     InvokeAsync(() => {
                         startLineHidden = true;
                         StateHasChanged();
                     });
                 }
-            }
-            else
-            {
+            } else {
                 // Reset animation tracking if animation stops
-                if (!Track.IsAnyCarAtTop)
-                {
+                if (!Track.IsAnyCarAtTop) {
                     animationStarted = false;
-                    
+
                     // If we're at the beginning of the race, make sure start line is visible
-                    if (Distance < 10 && startLineHidden)
-                    {
+                    if (Distance < 10 && startLineHidden) {
                         InvokeAsync(() => {
                             startLineHidden = false;
                             StateHasChanged();
@@ -135,15 +127,13 @@ namespace DerbyDash.Components.Layout {
             Track.UpdateSpeedClass((int)(Speed * SPEED_SCALING_FACTOR));
             
             // Reset start line visibility at the beginning of the race
-            if (Distance < 1 && startLineHidden)
-            {
+            if (Distance < 1 && startLineHidden) {
                 startLineHidden = false;
                 animationStarted = false;
             }
         }
-        
-        public void Dispose()
-        {
+
+        public void Dispose() {
             animationTimer?.Dispose();
         }
     }

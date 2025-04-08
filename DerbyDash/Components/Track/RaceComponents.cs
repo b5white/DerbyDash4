@@ -8,8 +8,8 @@
         public bool IsAnyCarAtTop { get; set; } = false;
         public bool IsFinishLineVisible { get; set; } = false;
         public float SpeedMultiplier { get; set; } = 1.0f;
-
         public int SpeedClass { get; set; } = 1;
+        public float RaceTime = 0;
         public int ProblemId { get; set; }
         public string FamilyMemberId { get; set; } = "";
         public bool ShowDebug = true;
