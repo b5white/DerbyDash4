@@ -25,6 +25,7 @@ namespace DerbyDash.Components.Track {
         public int ImageId { get; set; } = -1;
         public string ImageUrl { get => $"Racecar{ImageId}.png"; }
         public string FlexBasis { get; set; } = $"calc((100% - 170px) / 6)";
+        const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
 
         // Method to calculate current distance
         public double CalculateCurrentDistance(double currentTime) {
@@ -32,7 +33,6 @@ namespace DerbyDash.Components.Track {
             double lastTime = 0;
             double lastDistance = 0;
             double lastSpeed = 0;
-            const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
             for (int i = 0; i < SpeedIncrements.Count; i++) {
                 if (SpeedIncrements[i].Time <= currentTime) {
                     lastIndex = i;
@@ -71,7 +71,6 @@ namespace DerbyDash.Components.Track {
             double currentDistance = 0;
             RaceDateTime = DateTime.Now;
             index--;  // We want entries 0-5 to go to cars 1-6.
-            const double SPEED_MULTIPLIER = 7.0;
 
             double[,] times = {
                 { 6.06282234191895, 7.19820785522461, 8.50334739685059,10.16606712341310,11.96782112121580,15.98963165283200 },

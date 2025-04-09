@@ -3,13 +3,10 @@
 @implements IDisposable
 
 <div class="road">
-    <div
-        class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
-        @for (int i = 0; i < 5; i++)
-        {
+    <div class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
+        @for (int i = 0; i < 5; i++) {
             <div class="lane-group">
-                @for (int j = 0; j < 40; j++)
-                {
+                @for (int j = 0; j < 40; j++) {
                     <div class="lane"></div>
                 }
             </div>
@@ -26,18 +23,15 @@
         </div>
 
         <div class="cars-container">
-            @foreach (var car in Track.Cars)
-            {
+            @foreach (var car in Track.Cars) {
                 <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
                     <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
                 </div>
             }
         </div>
-        @if (Track.ShowDebug)
-        {
+        @if (Track.ShowDebug) {
             <div class="debug-panel">
-                @foreach (var car in Track.Cars)
-                {
+                @foreach (var car in Track.Cars) {
                     <div class="debug-info">
                         Speed: @car.Speed.ToString("F0")
                         Top: @car.Top.ToString("F0")
@@ -48,15 +42,14 @@
                 <div class="debug-info">
                     StTop: @Track.StartLine.Top.ToString("F0")
                     AnimProgress: @(animationStarted ? ((DateTime.Now - animationStartTime).TotalSeconds %
-                    GetAnimationDurationForSpeedClass(Track.SpeedClass) /
-                    GetAnimationDurationForSpeedClass(Track.SpeedClass)).ToString("F2") : "0.00")
-                FinVis: @Track.IsFinishLineVisible
-                StHid: @startLineHidden
-                SC: @Track.SpeedClass
-                Time: @Track.RaceTime
+                GetAnimationDurationForSpeedClass(Track.SpeedClass) /
+                GetAnimationDurationForSpeedClass(Track.SpeedClass)).ToString("F2") : "0.00")
+                    FinVis: @Track.IsFinishLineVisible
+                    StHid: @startLineHidden
+                    SC: @Track.SpeedClass
+                    Time: @Track.RaceTime
+                </div>
             </div>
-        </div>
-                }
-
+        }
     </div>
 </div>

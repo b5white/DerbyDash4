@@ -38,13 +38,6 @@ namespace DerbyDash.Services {
                 Cars[i].InitializeFastEddyTimeIncrements(random, i);
             }
 
-            // Set the track properties
-            track.Cars = Cars;
-
-            // Initialize lines off-screen
-            track.StartLine = new RaceComponent { Top = 9999, ImageUrl = "StartLine.png" };
-            track.FinishLine = new RaceComponent { Top = 9999, ImageUrl = "FinishLine.png" };
-
             return track;
         }
 

@@ -21,10 +21,6 @@ namespace DerbyDash.Components.Layout {
         private const float START_LINE_INITIAL_TOP = 490f; // Match your CSS value
         private const float START_LINE_FINAL_TOP = -70f;   // Where the start line ends up
 
-
-        // Add a constant for speed scaling to match visual effects
-        private const double SPEED_SCALING_FACTOR = RaceComponents.SPEED_MULTIPLIER;
-
         protected override void OnInitialized() {
             // Set up a timer to check if the start line should be hidden
             animationTimer = new System.Threading.Timer(CheckStartLineVisibility, null, 1000, 200);
@@ -55,8 +51,6 @@ namespace DerbyDash.Components.Layout {
 
                 // Update the start line's Top property to reflect its visual position
                 // The start line moves from its initial position (e.g., 490px) to off-screen (e.g., -70px)
-                const float START_LINE_INITIAL_TOP = 490f; // Adjust based on your CSS
-                const float START_LINE_FINAL_TOP = -70f;   // Adjust based on your CSS
                 float currentTop = START_LINE_INITIAL_TOP + (float)(animationProgress * (START_LINE_FINAL_TOP - START_LINE_INITIAL_TOP));
 
                 // Update the start line's Top property
@@ -87,13 +81,10 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-
-
         // Helper method to get the animation duration based on speed class
         private double GetAnimationDurationForSpeedClass(int speedClass) {
             double BaseAnimationSpeed = 8.0;
             // These values match the CSS animation durations in TrackContainer.razor.css
-            speedClass = Math.Clamp(speedClass, 1, 15);
             return BaseAnimationSpeed / speedClass;
         }
 
@@ -120,8 +111,8 @@ namespace DerbyDash.Components.Layout {
             // Update speed class based on the fastest car's speed, not just the player car
             double fastestSpeed = Track.Cars.Max(car => car.Speed);
 
-            // Apply the scaling factor to match visual speed
-            Track.UpdateSpeedClass((int)(fastestSpeed * SPEED_SCALING_FACTOR));
+            // Apply the scaling factor to match speed
+            Track.UpdateSpeedClass((int)(fastestSpeed));
 
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
