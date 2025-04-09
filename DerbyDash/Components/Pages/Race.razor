@@ -119,8 +119,9 @@
                     <div class="answer-box">
                         <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
                             @bind:after="OnAfter" placeholder="Type your answer..." />
+                            <button @onclick="GoBack">Emergency Exit</button>
+                        </div>
                     </div>
-                </div>
             </div>
         }
 

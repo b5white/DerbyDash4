@@ -14,8 +14,13 @@ namespace DerbyDash.Components.Pages {
     public partial class Race: ComponentBase {
         [Inject]
         public required RaceService RaceService { get; set; }
+
+        [Inject]
+        public required NavigationManager NavigationManager { get; set; }
+
         [Inject]
         public required ILogger<Race> _logger { get; set; }
+
         [Parameter]
         public string? ProblemClassString { get; set; }
 
@@ -324,8 +329,6 @@ namespace DerbyDash.Components.Pages {
             if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
-                PeriodicTimerToken.Cancel();
-                periodicTimer.Dispose();
                 StopPeriodicTimer();
                 Utilities.FireAndForget(RaceService.SaveRaceAsync(track));
             }
@@ -357,6 +360,11 @@ namespace DerbyDash.Components.Pages {
                     }
                 }
             }
+        }
+
+        private void GoBack() {
+            StopPeriodicTimer();
+            NavigationManager.NavigateTo("javascript:history.back()");
         }
 
         private void CalculateAverage() {
