@@ -181,7 +181,12 @@ namespace DerbyDash.Components.Pages {
             const float TRACK_HEIGHT = 70.0f;
             const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
             const int CAR_GAP = 30;
+            const int MIN_SPEED_CLASS = 1;
+            const int MAX_SPEED_CLASS = 15;
             const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
+
+            // Speed scaling factor to match visual effects
+            const double SPEED_SCALING_FACTOR = 7.0;
 
             double relativePosition;
 
@@ -195,9 +200,15 @@ namespace DerbyDash.Components.Pages {
             bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
             track.IsAnyCarAtTop = isAnyCarAtTop;
             if (isAnyCarAtTop) {
+                // Use the fastest car's speed for animation, not just player car
                 double fastestCar = track.Cars.Max(car => car.Speed);
-                // Set speed class based on player car speed with scaling factor
-                track.UpdateSpeedClass(fastestCar);
+                // Set speed class based on fastest car speed with scaling factor
+                track.SpeedClass = Math.Clamp((int)(fastestCar * SPEED_SCALING_FACTOR), MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+
+                // Ensure a minimum speed class when any car is at top, even if player is at speed 0
+                if (track.SpeedClass < MIN_SPEED_CLASS && isAnyCarAtTop) {
+                    track.SpeedClass = MIN_SPEED_CLASS;
+                }
             }
 
             // Check if finish line is in view (visible)
@@ -290,7 +301,7 @@ namespace DerbyDash.Components.Pages {
             int i;
 
             // Apply a speed multiplier to make car movement match visual lane speed
-            const double SPEED_MULTIPLIER = 7.0;
+            const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
 
             for (i = 0; (i < ElapsedAnswerTimes.Length) && (ElapsedAnswerTimes[i] > 0); i++) {
                 double RaceTime = (float)(time - ElapsedAnswerTimes[i]);

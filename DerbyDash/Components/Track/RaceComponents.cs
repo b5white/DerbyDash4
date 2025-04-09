@@ -1,5 +1,6 @@
 ﻿namespace DerbyDash.Components.Track {
     public class RaceComponents {
+        public const double SPEED_MULTIPLIER = 7.0;
         public List<Car> Cars { get; set; } = new();
         public RaceComponent StartLine { get; set; } = new();
         public RaceComponent FinishLine { get; set; } = new();
@@ -16,9 +17,19 @@
         const int MIN_SPEED_CLASS = 1;
         const int MAX_SPEED_CLASS = 15;
 
-        public void UpdateSpeedClass(double speed) {
-            // Map speed value to CSS class (1-5)
-            SpeedClass = Math.Clamp((int)speed, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+        public void UpdateSpeedClass() {
+            UpdateSpeedClass((int)Cars.Max(car => car.Speed));
+        }
+
+        public void UpdateSpeedClass(int speed) {
+            // Map speed value to CSS class (1-15)
+            int speedClass = (int)(speed * SPEED_MULTIPLIER);
+            SpeedClass = Math.Clamp(speedClass, MIN_SPEED_CLASS, MAX_SPEED_CLASS);
+
+            // Ensure a minimum speed class when any car is at top
+            if (SpeedClass < MIN_SPEED_CLASS && IsAnyCarAtTop) {
+                SpeedClass = MIN_SPEED_CLASS;
+            }
         }
     }
 

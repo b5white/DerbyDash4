@@ -32,6 +32,7 @@ namespace DerbyDash.Components.Track {
             double lastTime = 0;
             double lastDistance = 0;
             double lastSpeed = 0;
+            const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
             for (int i = 0; i < SpeedIncrements.Count; i++) {
                 if (SpeedIncrements[i].Time <= currentTime) {
                     lastIndex = i;
@@ -45,7 +46,7 @@ namespace DerbyDash.Components.Track {
                 lastSpeed = SpeedIncrements[lastIndex].Speed;
             }
             double timeElapsed = currentTime - lastTime;
-            double additionalDistance = lastSpeed * timeElapsed;
+            double additionalDistance = lastSpeed * timeElapsed * SPEED_MULTIPLIER;
             Distance = lastDistance + additionalDistance;
             Speed = lastSpeed;
 
@@ -70,6 +71,7 @@ namespace DerbyDash.Components.Track {
             double currentDistance = 0;
             RaceDateTime = DateTime.Now;
             index--;  // We want entries 0-5 to go to cars 1-6.
+            const double SPEED_MULTIPLIER = 7.0;
 
             double[,] times = {
                 { 6.06282234191895, 7.19820785522461, 8.50334739685059,10.16606712341310,11.96782112121580,15.98963165283200 },
@@ -95,7 +97,7 @@ namespace DerbyDash.Components.Track {
                 if (i == 0) {
                     currentDistance = 0;
                 } else {
-                    currentDistance += currentSpeed * (currentTime - times[index, i - 1]);
+                    currentDistance += currentSpeed * (currentTime - times[index, i - 1]) * SPEED_MULTIPLIER;
                 }
                 if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i], 0.0001)) {
                     Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");

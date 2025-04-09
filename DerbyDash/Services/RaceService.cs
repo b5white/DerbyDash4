@@ -22,6 +22,18 @@ namespace DerbyDash.Services {
                 new Car { index = 5, ImageId = 6, Top = 9999 }
             ];
 
+            RaceComponents track = new RaceComponents {
+                Cars = Cars,
+                StartLine = new RaceComponent {
+                    Top = 490f, // Set to match the CSS value
+                    ImageUrl = "startline.png"
+                },
+                FinishLine = new RaceComponent {
+                    Top = 9999f,
+                    ImageUrl = "finishline.png"
+                }
+            };
+
             for (int i = 1; i < Cars.Count; i++) {
                 Cars[i].InitializeFastEddyTimeIncrements(random, i);
             }

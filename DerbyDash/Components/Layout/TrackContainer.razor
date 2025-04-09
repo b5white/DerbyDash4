@@ -3,7 +3,8 @@
 @implements IDisposable
 
 <div class="road">
-    <div class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
+    <div
+        class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
         @for (int i = 0; i < 5; i++)
         {
             <div class="lane-group">
@@ -13,7 +14,7 @@
                 }
             </div>
         }
-        
+
         <div class="start-line @(startLineHidden ? "hidden" : "")" @ref="startLineElement">
             <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
         </div>
@@ -32,9 +33,11 @@
                 </div>
             }
         </div>
-        @if (Track.ShowDebug) {
+        @if (Track.ShowDebug)
+        {
             <div class="debug-panel">
-                @foreach (var car in Track.Cars) {
+                @foreach (var car in Track.Cars)
+                {
                     <div class="debug-info">
                         Speed: @car.Speed.ToString("F0")
                         Top: @car.Top.ToString("F0")
@@ -44,12 +47,16 @@
                 }
                 <div class="debug-info">
                     StTop: @Track.StartLine.Top.ToString("F0")
-                    FinVis: @Track.IsFinishLineVisible
-                    StHid: @startLineHidden
-                    SC: @Track.SpeedClass
-                    Time: @Track.RaceTime
-                </div>
+                    AnimProgress: @(animationStarted ? ((DateTime.Now - animationStartTime).TotalSeconds %
+                    GetAnimationDurationForSpeedClass(Track.SpeedClass) /
+                    GetAnimationDurationForSpeedClass(Track.SpeedClass)).ToString("F2") : "0.00")
+                FinVis: @Track.IsFinishLineVisible
+                StHid: @startLineHidden
+                SC: @Track.SpeedClass
+                Time: @Track.RaceTime
             </div>
-        }
+        </div>
+                }
+
     </div>
 </div>

@@ -18,8 +18,12 @@ namespace DerbyDash.Components.Layout {
         private DateTime animationStartTime;
         private bool animationStarted = false;
 
+        private const float START_LINE_INITIAL_TOP = 490f; // Match your CSS value
+        private const float START_LINE_FINAL_TOP = -70f;   // Where the start line ends up
+
+
         // Add a constant for speed scaling to match visual effects
-        private const double SPEED_SCALING_FACTOR = 7.0;
+        private const double SPEED_SCALING_FACTOR = RaceComponents.SPEED_MULTIPLIER;
 
         protected override void OnInitialized() {
             // Set up a timer to check if the start line should be hidden
@@ -43,10 +47,20 @@ namespace DerbyDash.Components.Layout {
                 double currentAnimationDuration = GetAnimationDurationForSpeedClass(Track.SpeedClass);
 
                 // Calculate when the start line should be hidden
-                // For faster animations (higher speed classes), we need a higher percentage
-                // to ensure the start line disappears at the right moment
                 double hidePercentage = CalculateHidePercentage(Track.SpeedClass);
                 double hideTimeSeconds = currentAnimationDuration * hidePercentage;
+
+                // Calculate the current position of the start line based on animation progress
+                double animationProgress = (animationDuration.TotalSeconds % currentAnimationDuration) / currentAnimationDuration;
+
+                // Update the start line's Top property to reflect its visual position
+                // The start line moves from its initial position (e.g., 490px) to off-screen (e.g., -70px)
+                const float START_LINE_INITIAL_TOP = 490f; // Adjust based on your CSS
+                const float START_LINE_FINAL_TOP = -70f;   // Adjust based on your CSS
+                float currentTop = START_LINE_INITIAL_TOP + (float)(animationProgress * (START_LINE_FINAL_TOP - START_LINE_INITIAL_TOP));
+
+                // Update the start line's Top property
+                Track.StartLine.Top = currentTop;
 
                 // If enough time has passed, hide the start line
                 if (animationDuration.TotalSeconds >= hideTimeSeconds && !startLineHidden) {
@@ -64,12 +78,16 @@ namespace DerbyDash.Components.Layout {
                     if (Distance < 10 && startLineHidden) {
                         InvokeAsync(() => {
                             startLineHidden = false;
+                            // Reset start line position
+                            Track.StartLine.Top = 490f; // Initial position
                             StateHasChanged();
                         });
                     }
                 }
             }
         }
+
+
 
         // Helper method to get the animation duration based on speed class
         private double GetAnimationDurationForSpeedClass(int speedClass) {
@@ -99,12 +117,29 @@ namespace DerbyDash.Components.Layout {
 
 
         protected override void OnParametersSet() {
+            // Update speed class based on the fastest car's speed, not just the player car
+            double fastestSpeed = Track.Cars.Max(car => car.Speed);
+
+            // Apply the scaling factor to match visual speed
+            Track.UpdateSpeedClass((int)(fastestSpeed * SPEED_SCALING_FACTOR));
+
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
                 startLineHidden = false;
                 animationStarted = false;
             }
         }
+
+        private double GetAnimationProgress() {
+            if (!animationStarted)
+                return 0;
+
+            double currentAnimationDuration = GetAnimationDurationForSpeedClass(Track.SpeedClass);
+            TimeSpan animationDuration = DateTime.Now - animationStartTime;
+            return (animationDuration.TotalSeconds % currentAnimationDuration) / currentAnimationDuration;
+        }
+
+
 
         public void Dispose() {
             animationTimer?.Dispose();
