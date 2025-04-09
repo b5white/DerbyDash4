@@ -6,7 +6,8 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
 
-@if (!Started) {
+@if (!Started)
+{
     <div class="race-start-container">
         <div class="race-title-box">
             <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
@@ -27,8 +28,11 @@
             <p>Solve math problems to accelerate your car!</p>
         </div>
     </div>
-} else if (Finished) {
-    @if (ReceivedError) {
+}
+else if (Finished)
+{
+    @if (ReceivedError)
+    {
         <div class="error-container">
             <div class="error-message">
                 <i class="fas fa-exclamation-circle"></i>
@@ -41,12 +45,25 @@
                 <input type="text" id="hidden" />
             </EditForm>
         </div>
-    } else {
+    }
+    else
+    {   <div class="results-box">
+
+    </div>
         <div class="results-container">
             <div class="results-header">
                 <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
                 <h2 class="encouraging-message">@encouragingWord</h2>
             </div>
+
+            <!-- Move the play again button up, right after the header -->
+            <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+                <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
+                    <i class="fas fa-play"></i> Play Again
+                </button>
+                <input type="text" id="hidden" />
+            </EditForm>
+
             <div class="race-stats">
                 <div class="stat-card">
                     <div class="stat-label">Your Time</div>
@@ -58,7 +75,8 @@
                     <div class="stat-value">@prevAverage.ToString("F3")</div>
                 </div>
 
-                @if (improvedTime > 0) {
+                @if (improvedTime > 0)
+                {
                     <div class="stat-card improvement">
                         <div class="stat-label">Improvement</div>
                         <div class="stat-value">+@improvedTime.ToString("F3")</div>
@@ -69,7 +87,8 @@
             <div class="leaderboard">
                 <h2 class="leaderboard-title">Top 5 Results</h2>
                 <div class="score-list">
-                    @for (int i = 0; i < previousResults.Length; i++) {
+                    @for (int i = 0; i < previousResults.Length; i++)
+                    {
                         string formattedTime = (previousResults[i] > 0) ? previousResults[i].ToString("F3") : "0";
                         <div class="score-item @(i == currentResultIndex ? "current-score" : "")">
                             <span class="rank">@(i + 1)</span>
@@ -78,21 +97,17 @@
                     }
                 </div>
             </div>
-
-            <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
-                <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
-                    <i class="fas fa-play"></i> Play Again
-                </button>
-                <input type="text" id="hidden" />
-            </EditForm>
         </div>
     }
     <p></p>
-} else {
-    @if (problem != null) {
+}
+else
+{
+    @if (problem != null)
+    {
         <p class="TC">
             <TrackContainer @ref="trackContainerInstance" Track="@track" Distance="@(track.Cars.Max(c => c.Distance))"
-                            IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
+                IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
 
         <div class="countdown-sequence">
             <div class="count three">3</div>
@@ -119,14 +134,17 @@
                     <div class="answer-box">
                         <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
                             @bind:after="OnAfter" placeholder="Type your answer..." />
-                            <button @onclick="GoBack">Emergency Exit</button>
-                        </div>
                     </div>
+                    <button class="emergency-exit-button" @onclick="GoBack">
+                        <i class="fas fa-exclamation-circle"></i> Emergency Exit
+                    </button>
+                </div>
             </div>
         }
 
         </p>
-        @if (!CurrentRacerFinished) {
+        @if (!CurrentRacerFinished)
+        {
             <div class="problem-container delayed-show">
                 @* <h2 class="race-description"><b>@problem.Description </b></h2> *@
                 <div class="speed-indicator">
