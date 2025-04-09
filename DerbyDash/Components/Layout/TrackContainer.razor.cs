@@ -10,9 +10,6 @@ namespace DerbyDash.Components.Layout {
         public bool IsMoving { get; set; }
 
         [Parameter]
-        public double Speed { get; set; }
-
-        [Parameter]
         public double Distance { get; set; }
 
         private ElementReference startLineElement;

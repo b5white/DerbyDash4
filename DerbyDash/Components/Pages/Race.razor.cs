@@ -176,12 +176,7 @@ namespace DerbyDash.Components.Pages {
             const float TRACK_HEIGHT = 70.0f;
             const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
             const int CAR_GAP = 30;
-            const int MIN_SPEED_CLASS = 1;
-            const int MAX_SPEED_CLASS = 15;
             const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
-
-            // Speed scaling factor to match visual effects
-            const double SPEED_SCALING_FACTOR = 7.0;
 
             double relativePosition;
 
