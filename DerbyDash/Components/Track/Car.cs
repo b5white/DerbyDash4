@@ -98,8 +98,8 @@ namespace DerbyDash.Components.Track {
                 } else {
                     currentDistance += currentSpeed * (currentTime - times[index, i - 1]) * SPEED_MULTIPLIER;
                 }
-                if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i], 0.0001)) {
-                    Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
+                if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i] * SPEED_MULTIPLIER, 0.0001)) {
+                    Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{distances[index, i] * SPEED_MULTIPLIER}");
                 }
                 currentSpeed++; // Assumes speed increment of 1
                 SpeedIncrements.Add(new SpeedIncrement {

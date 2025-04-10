@@ -13,6 +13,7 @@ namespace DerbyDash.Services {
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {
+            const int CAR_GAP = 30;
             List<Car> Cars = [
                 new Car { index = 0, ImageId = 1, Top = 9999 }, // Initialize with off-screen position
                 new Car { index = 1, ImageId = 2, Top = 9999 },
@@ -36,6 +37,7 @@ namespace DerbyDash.Services {
 
             for (int i = 1; i < Cars.Count; i++) {
                 Cars[i].InitializeFastEddyTimeIncrements(random, i);
+                Cars[i].ResetFlexBasis(Cars.Count, CAR_GAP);
             }
 
             return track;
