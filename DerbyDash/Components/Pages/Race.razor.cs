@@ -11,7 +11,7 @@ using Timer = System.Timers.Timer;
 
 namespace DerbyDash.Components.Pages {
 
-    public partial class Race: ComponentBase {
+    public partial class Race: ComponentBase, IDisposable {
         [Inject]
         public required RaceService RaceService { get; set; }
 
@@ -180,7 +180,6 @@ namespace DerbyDash.Components.Pages {
             const float TOP_MULTIPLIER = 7.0f;
             const float TRACK_HEIGHT = 70.0f;
             const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
-            const int CAR_GAP = 30;
             const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
 
             double relativePosition;
@@ -227,11 +226,6 @@ namespace DerbyDash.Components.Pages {
                     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
                     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
                 }
-            }
-
-            // Update car spacing
-            foreach (var car in track.Cars) {
-                car.ResetFlexBasis(track.Cars.Count, CAR_GAP);
             }
         }
 

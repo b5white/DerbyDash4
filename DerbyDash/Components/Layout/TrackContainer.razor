@@ -1,6 +1,5 @@
 ﻿@using DerbyDash.Components.Track
 @using Microsoft.AspNetCore.Components.Web
-@implements IDisposable
 
 <div class="road">
     <div class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
