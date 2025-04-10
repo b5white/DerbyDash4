@@ -271,7 +271,7 @@ namespace DerbyDash.Components.Pages {
             if (Running) {
                 float FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
-                track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(FinishTime, ElapsedAnswerTimes);
+                track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
                 UpdateResults(FinishTime);
