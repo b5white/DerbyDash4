@@ -73,6 +73,7 @@ namespace DerbyDash.Components.Pages {
 
         public ProblemsBase? ProblemClass { get; set; }
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
+        public float FinishTime = 0;
 
         TrackContainer? trackContainerInstance;
 
@@ -268,12 +269,12 @@ namespace DerbyDash.Components.Pages {
 
         private void EndRace() {
             if (Running) {
-                RaceTime = GetTimespan(starttime);
-                track.Cars[0].TotalTime = RaceTime;
-                track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
+                float FinishTime = GetTimespan(starttime);
+                track.Cars[0].TotalTime = FinishTime;
+                track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(FinishTime, ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                UpdateResults(RaceTime);
+                UpdateResults(FinishTime);
                 CalculateAverage();
                 Running = true;
                 problems = null;
