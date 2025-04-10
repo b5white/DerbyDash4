@@ -17,6 +17,7 @@ namespace DerbyDash.Components.Layout {
         private System.Threading.Timer animationTimer;
         private DateTime animationStartTime;
         private bool animationStarted = false;
+        private const double SPEED_SCALING_FACTOR = RaceComponents.SPEED_MULTIPLIER;
 
         private const float START_LINE_INITIAL_TOP = 490f; // Match your CSS value
         private const float START_LINE_FINAL_TOP = -70f;   // Where the start line ends up
@@ -112,7 +113,7 @@ namespace DerbyDash.Components.Layout {
             double fastestSpeed = Track.Cars.Max(car => car.Speed);
 
             // Apply the scaling factor to match speed
-            Track.UpdateSpeedClass((int)(fastestSpeed));
+            Track.UpdateSpeedClass((int)(fastestSpeed * SPEED_SCALING_FACTOR));
 
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
