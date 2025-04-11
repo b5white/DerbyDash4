@@ -198,7 +198,7 @@ namespace DerbyDash.Components.Pages {
                 // Use the fastest car's speed for animation, not just player car
                 double fastestSpeed = track.Cars.Max(car => car.Speed);
                 // Set speed class based on fastest car speed with scaling factor
-                track.UpdateSpeedClass((int)(fastestSpeed * 7));
+                track.UpdateSpeedClass((int)(fastestSpeed));
             }
 
             // Check if finish line is in view (visible)

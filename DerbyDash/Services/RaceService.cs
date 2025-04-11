@@ -5,7 +5,7 @@ namespace DerbyDash.Services {
     public class RaceService {
         private RaceComponents track = new();
         private readonly ILogger<RaceService> _logger;
-        public float TotalDistance = 150;
+        public float TotalDistance = 200;
         private Random random = new Random();
 
         public RaceService(ILogger<RaceService> logger) {
