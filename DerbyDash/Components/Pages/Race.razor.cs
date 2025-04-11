@@ -198,7 +198,7 @@ namespace DerbyDash.Components.Pages {
                 // Use the fastest car's speed for animation, not just player car
                 double fastestSpeed = track.Cars.Max(car => car.Speed);
                 // Set speed class based on fastest car speed with scaling factor
-                track.UpdateSpeedClass((int)(fastestSpeed));
+                track.UpdateSpeedClass((int)(fastestSpeed * 7));
             }
 
             // Check if finish line is in view (visible)
@@ -215,18 +215,18 @@ namespace DerbyDash.Components.Pages {
                 car.Top = targetTop;
 
                 // Apply special handling for the current player car only when inactive
-                if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
-                    // Calculate time since last answer for the active player
-                    float timeSinceLastAnswer = 0;
+                // if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
+                //     // Calculate time since last answer for the active player
+                //     float timeSinceLastAnswer = 0;
 
-                    if (currentTimeIndex > 0 && starttime > 0) {
-                        timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
-                    }
+                //     if (currentTimeIndex > 0 && starttime > 0) {
+                //         timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                //     }
 
-                    // Apply fall-behind effect only for the active player when they're inactive
-                    float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
-                    car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
-                }
+                //     // Apply fall-behind effect only for the active player when they're inactive
+                //     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
+                //     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
+                // }
             }
         }
 

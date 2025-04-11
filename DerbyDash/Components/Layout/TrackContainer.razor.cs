@@ -95,13 +95,13 @@ namespace DerbyDash.Components.Layout {
             // For faster animations (higher speed classes), we need a higher percentage
             // This ensures the start line disappears at visually consistent points
             if (speedClass <= 3)
-                return 0.96;  // Slower speeds need less time before hiding
+                return 0.3;  // Slower speeds need less time before hiding
             else if (speedClass <= 7)
-                return 0.6;  // Medium speeds
+                return 0.25;  // Medium speeds
             else if (speedClass <= 11)
-                return 0.5;  // Faster speeds
+                return 0.2;  // Faster speeds
             else
-                return 0.3;  // Very fast speeds need more time before hiding
+                return 0.15;  // Very fast speeds need more time before hiding
 
             // Alternative approach: linear interpolation between 0.3 and 0.6
             // return 0.3 + ((double)speedClass - 1) / 14 * 0.3;
@@ -113,7 +113,7 @@ namespace DerbyDash.Components.Layout {
             double fastestSpeed = Track.Cars.Max(car => car.Speed);
 
             // Apply the scaling factor to match speed
-            Track.UpdateSpeedClass((int)(fastestSpeed * SPEED_SCALING_FACTOR));
+            Track.UpdateSpeedClass((int)(fastestSpeed));
 
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
