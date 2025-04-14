@@ -269,13 +269,12 @@ namespace DerbyDash.Components.Pages {
 
         private void EndRace() {
             if (Running) {
-                float FinishTime = GetTimespan(starttime);
+                FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                UpdateResults(FinishTime);
-                CalculateAverage();
+                Utilities.FireAndForget(() => UpdateResultsAsync(FinishTime));
                 Running = true;
                 problems = null;
             }
@@ -326,34 +325,31 @@ namespace DerbyDash.Components.Pages {
                 Finished = true;
                 Running = false;
                 StopPeriodicTimer();
-                Utilities.FireAndForget(RaceService.SaveRaceAsync(track));
             }
 
             return allFinished;
         }
 
-        private void UpdateResults(float timeSpan) {
-            RaceService.ReadResults(track.ProblemId);
-            ResetResults(timeSpan);
-            RaceService.WriteResults(track.ProblemId);
+        private async Task UpdateResultsAsync(float timeSpan) {
+            await Task.Run(() => {
+                ResetResults(timeSpan);
+                CalculateAverage();
+            });
+            await RaceService.SaveRaceAsync(track);
         }
 
         private void ResetResults(float timeSpan) {
-            void swap(int i) {
-                float prevResult = previousResults[i - 1];
-                previousResults[i - 1] = previousResults[i];
-                previousResults[i] = prevResult;
-            }
+            List<Car> previousRaces = track.Cars
+                .Where(car => car.TotalTime > 0)
+                .OrderBy(car => car.TotalTime)  // take the 5 fastest
+                .Take(5)
+                .ToList();
 
             currentResultIndex = -1;
-            if ((previousResults[4] == 0) || (timeSpan < previousResults[4])) {
-                previousResults[4] = timeSpan;
-                currentResultIndex = 4;
-                for (int i = 4; i > 0; i--) {
-                    if ((previousResults[i - 1] == 0) || (previousResults[i] < previousResults[i - 1])) {
-                        swap(i);
-                        currentResultIndex = i - 1;
-                    }
+            for (int i = previousRaces.Count - 1; i >= 0; i--) {
+                previousResults[i] = (float)previousRaces[i].TotalTime;
+                if (Utilities.AreDoublesEqual(previousResults[i], timeSpan, 0.000001)) {
+                    currentResultIndex = i;
                 }
             }
         }
