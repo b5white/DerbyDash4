@@ -341,7 +341,7 @@ html, body {
 
 /* Race start screen */
 .race-start-container {
-    min-height: 100vh;
+    height: 92vh;
     width: 100%;
     min-width: 88vw;
     box-sizing: border-box;

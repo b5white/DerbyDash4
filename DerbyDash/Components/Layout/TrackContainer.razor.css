@@ -1,9 +1,10 @@
 ﻿.road {
     width: 100%;
-    height: 100vh;
+    height: 90vh;
     max-width: 100vw;
     background-color: #404040;
     position: relative;
+    top: 2vh;
     overflow: hidden;
     perspective: 1000px;
 }
