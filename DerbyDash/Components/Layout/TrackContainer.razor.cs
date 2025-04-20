@@ -17,7 +17,6 @@ namespace DerbyDash.Components.Layout {
         private System.Threading.Timer animationTimer;
         private DateTime animationStartTime;
         private bool animationStarted = false;
-        private const double SPEED_SCALING_FACTOR = RaceComponents.SPEED_MULTIPLIER;
 
         private const float START_LINE_INITIAL_TOP = 490f; // Match your CSS value
         private const float START_LINE_FINAL_TOP = -70f;   // Where the start line ends up
