@@ -53,11 +53,14 @@ namespace DerbyDash.HelperUtilities {
             }
         }
 
-        public static void FireAndForget(Task task) {
-            task.ContinueWith(t => {
-                // Log or handle exceptions
-                _logger.LogError(t.Exception, "An error occurred during a fire-and-forget operation.");
-            }, TaskContinuationOptions.OnlyOnFaulted);
+        public static void FireAndForget(Func<Task> taskFactory) {
+            _ = Task.Run(async () => {
+                try {
+                    await taskFactory();
+                } catch (Exception ex) {
+                    _logger.LogError(ex, "Error");
+                }
+            });
         }
     }
 }
