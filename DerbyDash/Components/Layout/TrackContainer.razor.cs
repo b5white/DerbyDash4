@@ -113,7 +113,7 @@ namespace DerbyDash.Components.Layout {
             double fastestSpeed = Track.Cars.Max(car => car.Speed);
 
             // Apply the scaling factor to match speed
-            Track.UpdateSpeedClass((int)(fastestSpeed));
+            Track.UpdateSpeedClass((int)(fastestSpeed * 1.5));
 
             // Reset start line visibility at the beginning of the race
             if (Distance < 1 && startLineHidden) {
