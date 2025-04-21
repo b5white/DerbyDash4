@@ -188,6 +188,9 @@
 }
 
 @media screen and (max-width: 768px) {
+    .road {
+        top: 15vh;
+    }
     .lane {
         height: 70px; /* Maintain smaller height on mobile */
     }
