@@ -152,7 +152,7 @@ namespace DerbyDash.Components.Pages {
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
                     } catch (IndexOutOfRangeException) {
-                        Console.WriteLine("currentTimeIndex = {0}", currentTimeIndex);
+                        LogMessage(String.Format("currentTimeIndex = {0}", currentTimeIndex));
                         currentTimeIndex = 0;
                         ReceivedError = true;
                     }
@@ -331,11 +331,15 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task UpdateResultsAsync(float timeSpan) {
-            await Task.Run(() => {
-                ResetResults(timeSpan);
-                CalculateAverage();
-            });
-            await RaceService.SaveRaceAsync(track);
+            try {
+                await Task.Run(() => {
+                    ResetResults(timeSpan);
+                    CalculateAverage();
+                });
+                await RaceService.SaveRaceAsync(track);
+            } catch (Exception ex) {
+                LogMessage(ex);
+            }
         }
 
         private void ResetResults(float timeSpan) {
@@ -387,7 +391,15 @@ namespace DerbyDash.Components.Pages {
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
-            track = RaceService.CreateTrack(problemSetIdentifier);
+            try {
+                track = RaceService.CreateTrack(problemSetIdentifier);
+            } catch (MissingFamilyMemberException) {
+                NavigationManager.NavigateTo("/Account/Manage/FamilyMembers");
+            } catch (MissingUserException) {
+                NavigationManager.NavigateTo("/Account/login");
+            } catch (Exception ex) {
+                LogMessage(ex);
+            }
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -467,10 +479,9 @@ namespace DerbyDash.Components.Pages {
                     await InvokeAsync(StateHasChanged);
                 }
             } catch (OperationCanceledException E) {
-                Console.WriteLine(E.Message);
-                Console.WriteLine("Timer cancelled");
+                LogMessage(E, "Timer cancelled");
             }
-            Console.WriteLine("Timer stopped");
+            LogMessage("Timer stopped");
         }
 
         private void StopPeriodicTimer() {
@@ -483,15 +494,15 @@ namespace DerbyDash.Components.Pages {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
 
-        public void LogMessage(Exception E) {
-            System.Diagnostics.Debug.WriteLine(E.Message);
+        public void LogMessage(Exception E, string message = "") {
+            _logger.LogError(E, message);
             if (E.InnerException != null) {
                 LogMessage(E.InnerException);
             }
         }
 
         public void LogMessage(string message) {
-            System.Diagnostics.Debug.WriteLine(message);
+            _logger.LogWarning(message);
         }
 
         public void Dispose() {
