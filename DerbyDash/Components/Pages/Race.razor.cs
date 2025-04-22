@@ -1,6 +1,7 @@
 ﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
+using DerbyDash.Exceptions;
 using DerbyDash.HelperUtilities;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
