@@ -393,10 +393,10 @@ namespace DerbyDash.Components.Pages {
             }
             try {
                 track = RaceService.CreateTrack(problemSetIdentifier);
-            } catch (MissingFamilyMemberException) {
-                NavigationManager.NavigateTo("/Account/Manage/FamilyMembers");
-            } catch (MissingUserException) {
-                NavigationManager.NavigateTo("/Account/login");
+            // } catch (MissingFamilyMemberException) {
+            //     NavigationManager.NavigateTo("/Account/Manage/FamilyMembers");
+            // } catch (MissingUserException) {
+            //     NavigationManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
             }

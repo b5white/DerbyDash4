@@ -93,14 +93,16 @@ namespace DerbyDash.Components.Layout {
             // For slower animations (lower speed classes), we can use a lower percentage
             // For faster animations (higher speed classes), we need a higher percentage
             // This ensures the start line disappears at visually consistent points
+
+            // Further adjusted percentages to delay hiding even more
             if (speedClass <= 3)
-                return 0.3;  // Slower speeds need less time before hiding
+                return 0.99; // Hide very late for slow speeds
             else if (speedClass <= 7)
-                return 0.25;  // Medium speeds
+                return 0.85; // Hide significantly later for medium speeds
             else if (speedClass <= 11)
-                return 0.2;  // Faster speeds
+                return 0.70; // Hide later for faster speeds
             else
-                return 0.15;  // Very fast speeds need more time before hiding
+                return 0.60; // Hide later for very fast speeds
 
             // Alternative approach: linear interpolation between 0.3 and 0.6
             // return 0.3 + ((double)speedClass - 1) / 14 * 0.3;
