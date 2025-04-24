@@ -1,4 +1,4 @@
-﻿/* Base styles */
+﻿﻿﻿﻿﻿/* Base styles */
 html, body {
     margin: 0;
     padding: 0;
@@ -215,35 +215,116 @@ html, body {
     transform: scale(1.1);
 }
 
-/* Countdown animation */
-.countdown-sequence {
+/* Stoplight animation */
+.stoplight-container {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 78%;
-    bottom: -75%;
+    top: 30%;
+    right: 15%;
     display: flex;
     justify-content: center;
     align-items: center;
     pointer-events: none;
+    z-index: 1000;
+    animation: fadeOutStoplight 0.5s ease-out 3s forwards;
+    /* transform: perspective(500px) rotateY(-10deg); */
 }
 
-.count {
+@keyframes fadeOutStoplight {
+    0% { opacity: 1; }
+    100% { opacity: 0; visibility: hidden; }
+}
+
+.stoplight {
+    background-color: #333;
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    border: 5px solid #222;
+    position: relative;
+    /* transform: perspective(500px) rotateY(-5deg); */
+}
+
+/* Stoplight arm - extending to the right */
+.stoplight::after {
+    content: '';
     position: absolute;
-    font-size: 50px;
-    font-weight: bold;
-    color: white;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-    opacity: 0;
+    top: 50%;
+    right: -100vw;
+    transform: translateY(-50%);
+    width: calc(100vw);
+    height: 15px;
+    background-color: #222;
+    z-index: -1;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 }
 
-.three { animation: countAnim 1s ease-out 0s forwards; }
-.two { animation: countAnim 1s ease-out 1s forwards; }
-.one { animation: countAnim 1s ease-out 2s forwards; }
-.go { 
-    animation: countAnim 1s ease-out 3s forwards;
-    color: #2ecc71;
-    font-size: 50px;
+.light {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    opacity: 0.3;
+    position: relative;
+    margin: 0 5px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.light::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 70%;
+    height: 70%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), transparent);
+}
+
+.light.red {
+    background-color: #ff0000;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    animation: redLight 3s ease-out forwards;
+}
+
+.light.yellow {
+    background-color: #ffff00;
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.3);
+    animation: yellowLight 3s ease-out forwards;
+}
+
+.light.green {
+    background-color: #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+    animation: greenLight 3s ease-out forwards;
+}
+
+@keyframes redLight {
+    0% { opacity: 0.3; }
+    5% { opacity: 1; }
+    33% { opacity: 1; }
+    34% { opacity: 0.3; }
+    100% { opacity: 0.3; }
+}
+
+@keyframes yellowLight {
+    0% { opacity: 0.3; }
+    33% { opacity: 0.3; }
+    34% { opacity: 1; }
+    66% { opacity: 1; }
+    67% { opacity: 0.3; }
+    100% { opacity: 0.3; }
+}
+
+@keyframes greenLight {
+    0% { opacity: 0.3; }
+    66% { opacity: 0.3; }
+    67% { opacity: 1; }
+    95% { opacity: 1; }
+    100% { opacity: 0.3; }
 }
 
 .problem-container {
@@ -251,7 +332,7 @@ html, body {
     z-index: 2000;
     opacity: 0;
     visibility: hidden;
-    animation: showProblem 0.5s ease-out 4s forwards;
+    animation: showProblem 0.5s ease-out 3s forwards;
 }
 
 /* Speed indicator */
@@ -341,7 +422,7 @@ html, body {
 
 /* Race start screen */
 .race-start-container {
-    height: 92vh;
+    height: 100vh;
     width: 100%;
     min-width: 88vw;
     box-sizing: border-box;
@@ -527,6 +608,10 @@ html, body {
 }
 
 @media (max-width: 768px) {
+    .stoplight-container {
+        top: 70%;
+        right: 5%;
+    }
     .problem-text {
         font-size: 24px;
     }
@@ -593,6 +678,26 @@ html, body {
     .leaderboard {
         padding: 1rem;
     }
+    
+    /* Responsive stoplight */
+    .stoplight-container {
+        top: 70%;
+        right: 10%;
+    }
+    
+    .stoplight {
+        padding: 10px;
+        gap: 10px;
+    }
+    
+    .light {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .stoplight::after {
+        height: 10px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -605,6 +710,26 @@ html, body {
     
     .emergency-exit-button i {
         font-size: 12px;
+    }
+    
+    /* Smaller stoplight for very small screens */
+    .stoplight-container {
+        top: 70%;
+        right: 5%;
+    }
+    
+    .stoplight {
+        padding: 8px;
+        gap: 8px;
+    }
+    
+    .light {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .stoplight::after {
+        height: 8px;
     }
 }
 

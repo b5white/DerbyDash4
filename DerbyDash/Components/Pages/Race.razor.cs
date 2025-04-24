@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Layout;
+﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Exceptions;
@@ -66,7 +66,7 @@ namespace DerbyDash.Components.Pages {
         private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
         private const int PERIODIC_TIMER_SPAN_MICROSECONDS = 200000; // 1/5 of a second
         private const int ANIMATION_SYNC_DELAY = 50; // milliseconds
-        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds
+        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds (matches stoplight sequence)
 
         private float GetSpan(double starttime) {
             return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;

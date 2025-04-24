@@ -97,11 +97,12 @@
             <TrackContainer @ref="trackContainerInstance" Track="@track" Distance="@(track.Cars.Max(c => c.Distance))"
                             IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
 
-            <div class="countdown-sequence">
-                <div class="count three">3</div>
-                <div class="count two">2</div>
-                <div class="count one">1</div>
-                <div class="count go">GO!</div>
+            <div class="stoplight-container">
+                <div class="stoplight">
+                    <div class="light red"></div>
+                    <div class="light yellow"></div>
+                    <div class="light green"></div>
+                </div>
             </div>
             @if (Running && !CurrentRacerFinished) {
                 <div class="problem-container delayed-show">
