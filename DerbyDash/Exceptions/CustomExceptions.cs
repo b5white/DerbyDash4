@@ -1,11 +1,11 @@
 ﻿namespace DerbyDash.Exceptions {
-    public class MissingFamilyMemberException: Exception {
-        public MissingFamilyMemberException() { }
+    public class MissingTeamMemberException: Exception {
+        public MissingTeamMemberException() { }
 
-        public MissingFamilyMemberException(string message)
+        public MissingTeamMemberException(string message)
             : base(message) { }
 
-        public MissingFamilyMemberException(string message, Exception inner)
+        public MissingTeamMemberException(string message, Exception inner)
             : base(message, inner) { }
     }
 
