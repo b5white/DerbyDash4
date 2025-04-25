@@ -1,6 +1,8 @@
 using DerbyDash.Components;
+using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash {
@@ -19,6 +21,7 @@ namespace DerbyDash {
                 options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
             builder.Services.AddScoped<RaceService>();
+            builder.Services.AddTransient<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             WebApplication app = builder.Build();
 

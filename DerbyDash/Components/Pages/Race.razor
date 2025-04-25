@@ -12,7 +12,7 @@
             <p class="race-subtitle">Ready to race with numbers?</p>
         </div>
 
-        <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+        <EditForm EditContext="@editContext" OnValidSubmit="StartClick" FormName="StartRaceForm">
             <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
             <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
                 <div class="button-content">
