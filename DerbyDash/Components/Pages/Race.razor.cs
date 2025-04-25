@@ -186,48 +186,50 @@ namespace DerbyDash.Components.Pages {
 
             double relativePosition;
 
-            // Find the lead car's distance
-            double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
+            if (track.Cars.Count > 0) {
+                // Find the lead car's distance
+                double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
 
-            // Calculate the visible range
-            double visibleStart = Math.Max(0, leadDistance - VISIBLE_TRACK_LENGTH);
+                // Calculate the visible range
+                double visibleStart = Math.Max(0, leadDistance - VISIBLE_TRACK_LENGTH);
 
-            // Check if any car has reached the top position
-            bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
-            track.IsAnyCarAtTop = isAnyCarAtTop;
-            if (isAnyCarAtTop) {
-                // Use the fastest car's speed for animation, not just player car
-                double fastestSpeed = track.Cars.Max(car => car.Speed);
-                // Set speed class based on fastest car speed with scaling factor
-                track.UpdateSpeedClass((int)(fastestSpeed));
-            }
+                // Check if any car has reached the top position
+                bool isAnyCarAtTop = track.Cars.Any(car => car.Top <= TOP_MARGIN * TOP_MULTIPLIER);
+                track.IsAnyCarAtTop = isAnyCarAtTop;
+                if (isAnyCarAtTop) {
+                    // Use the fastest car's speed for animation, not just player car
+                    double fastestSpeed = track.Cars.Max(car => car.Speed);
+                    // Set speed class based on fastest car speed with scaling factor
+                    track.UpdateSpeedClass((int)(fastestSpeed));
+                }
 
-            // Check if finish line is in view (visible)
-            relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
-            track.FinishLine.Top = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
-            track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
+                // Check if finish line is in view (visible)
+                relativePosition = (RaceService.TotalDistance - visibleStart) / VISIBLE_TRACK_LENGTH;
+                track.FinishLine.Top = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
+                track.IsFinishLineVisible = relativePosition >= 0 && relativePosition <= 1;
 
-            // Position all cars using the same logic for consistency
-            for (int i = 0; i < track.Cars.Count; i++) {
-                var car = track.Cars[i];
-                // Calculate the target position based on distance
-                relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
-                float targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
-                car.Top = targetTop;
+                // Position all cars using the same logic for consistency
+                for (int i = 0; i < track.Cars.Count; i++) {
+                    var car = track.Cars[i];
+                    // Calculate the target position based on distance
+                    relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
+                    float targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
+                    car.Top = targetTop;
 
-                // Apply special handling for the current player car only when inactive
-                // if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
-                //     // Calculate time since last answer for the active player
-                //     float timeSinceLastAnswer = 0;
+                    // Apply special handling for the current player car only when inactive
+                    // if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
+                    //     // Calculate time since last answer for the active player
+                    //     float timeSinceLastAnswer = 0;
 
-                //     if (currentTimeIndex > 0 && starttime > 0) {
-                //         timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
-                //     }
+                    //     if (currentTimeIndex > 0 && starttime > 0) {
+                    //         timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
+                    //     }
 
-                //     // Apply fall-behind effect only for the active player when they're inactive
-                //     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
-                //     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
-                // }
+                    //     // Apply fall-behind effect only for the active player when they're inactive
+                    //     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
+                    //     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
+                    // }
+                }
             }
         }
 
@@ -394,10 +396,10 @@ namespace DerbyDash.Components.Pages {
             }
             try {
                 track = RaceService.CreateTrack(problemSetIdentifier);
-            // } catch (MissingFamilyMemberException) {
-            //     NavigationManager.NavigateTo("/Account/Manage/FamilyMembers");
-            // } catch (MissingUserException) {
-            //     NavigationManager.NavigateTo("/Account/login");
+            } catch (MissingTeamMemberException) {
+                NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
+            } catch (MissingUserException) {
+                NavigationManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
             }

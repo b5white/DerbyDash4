@@ -24,6 +24,7 @@ namespace DerbyDash.Components.Track {
         public double TotalTime { get; set; } = 0;
         public int ImageId { get; set; } = -1;
         public string ImageUrl { get => $"Racecar{ImageId}.png"; }
+        public int RaceId = 0;
         public string FlexBasis { get; set; } = $"calc((100% - 170px) / 6)";
         const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
 
@@ -70,7 +71,6 @@ namespace DerbyDash.Components.Track {
             double currentSpeed = 0;
             double currentDistance = 0;
             RaceDateTime = DateTime.Now;
-            index--;  // We want entries 0-5 to go to cars 1-6.
 
             double[,] times = {
                 { 6.06282234191895, 7.19820785522461, 8.50334739685059,10.16606712341310,11.96782112121580,15.98963165283200 },
