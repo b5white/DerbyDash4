@@ -96,9 +96,9 @@ namespace DerbyDash.Components.Layout {
 
             // Further adjusted percentages to delay hiding even more
             if (speedClass <= 3)
-                return 0.99; // Hide very late for slow speeds
+                return 1; // Hide very late for slow speeds
             else if (speedClass <= 7)
-                return 0.85; // Hide significantly later for medium speeds
+                return 0.9; // Hide significantly later for medium speeds
             else if (speedClass <= 11)
                 return 0.70; // Hide later for faster speeds
             else
