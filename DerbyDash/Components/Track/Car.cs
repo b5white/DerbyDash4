@@ -1,4 +1,4 @@
-﻿using DerbyDash.Data;
+﻿﻿using DerbyDash.Data;
 using DerbyDash.HelperUtilities;
 
 namespace DerbyDash.Components.Track {
@@ -72,6 +72,9 @@ namespace DerbyDash.Components.Track {
             double currentDistance = 0;
             RaceDateTime = DateTime.Now;
 
+            // Ensure index is within bounds (0-4)
+            index = Math.Min(Math.Max(index, 0), 4);
+
             double[,] times = {
                 { 6.06282234191895, 7.19820785522461, 8.50334739685059,10.16606712341310,11.96782112121580,15.98963165283200 },
                 { 8.16321277618408, 9.86215686798096,12.87038707733150,15.70635509490970,19.12981796264650,0},
@@ -88,26 +91,38 @@ namespace DerbyDash.Components.Track {
                 { 0, 1.4257025718689, 4.20491552352904, 9.90305328369139, 115.166263580322, 122.225914001465 }
             };
 
-            for (int i = 0; i < 6; i++) {
-                currentTime = times[index, i];
-                if (currentTime == 0) {
-                    break; // Exit the loop after the last populated timeSpan 
-                }
-                if (i == 0) {
-                    currentDistance = 0;
-                } else {
-                    currentDistance += currentSpeed * (currentTime - times[index, i - 1]) * SPEED_MULTIPLIER;
-                }
-                if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i] * SPEED_MULTIPLIER, 0.0001)) {
-                    Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{distances[index, i] * SPEED_MULTIPLIER}");
-                }
-                currentSpeed++; // Assumes speed increment of 1
-                SpeedIncrements.Add(new SpeedIncrement {
-                    Time = currentTime,
-                    Speed = currentSpeed,
-                    Distance = currentDistance
-                });
+            // Add at least one speed increment to ensure the car has valid data
+            SpeedIncrements.Add(new SpeedIncrement {
+                Time = 0,
+                Speed = 0,
+                Distance = 0
+            });
 
+            // Process the time increments
+            for (int i = 0; i < 6; i++) {
+                try {
+                    currentTime = times[index, i];
+                    if (currentTime == 0) {
+                        break; // Exit the loop after the last populated timeSpan 
+                    }
+                    if (i == 0) {
+                        currentDistance = 0;
+                    } else {
+                        currentDistance += currentSpeed * (currentTime - times[index, i - 1]) * SPEED_MULTIPLIER;
+                    }
+                    if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i] * SPEED_MULTIPLIER, 0.0001)) {
+                        Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{distances[index, i] * SPEED_MULTIPLIER}");
+                    }
+                    currentSpeed++; // Assumes speed increment of 1
+                    SpeedIncrements.Add(new SpeedIncrement {
+                        Time = currentTime,
+                        Speed = currentSpeed,
+                        Distance = currentDistance
+                    });
+                } catch (IndexOutOfRangeException) {
+                    // If we somehow still get an index error, just break the loop
+                    break;
+                }
             }
         }
     }

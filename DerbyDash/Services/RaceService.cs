@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Track;
+﻿﻿using DerbyDash.Components.Track;
 using DerbyDash.Data;
 
 namespace DerbyDash.Services {
@@ -35,8 +35,11 @@ namespace DerbyDash.Services {
                 }
             };
 
-            for (int i = 1; i < Cars.Count; i++) {
-                Cars[i].InitializeFastEddyTimeIncrements(random, i);
+            // Start from index 0 to initialize all cars
+            for (int i = 0; i < Cars.Count; i++) {
+                // Make sure we don't exceed the array bounds in the Car class
+                int safeIndex = Math.Min(i, 4); // The times/distances arrays have 5 rows (0-4)
+                Cars[i].InitializeFastEddyTimeIncrements(random, safeIndex);
                 Cars[i].ResetFlexBasis(Cars.Count, CAR_GAP);
             }
 
