@@ -43,9 +43,16 @@ namespace Microsoft.AspNetCore.Routing
             accountGroup.MapPost("/Logout", async (
                 ClaimsPrincipal user,
                 [FromServices] SignInManager<ApplicationUser> signInManager,
-                [FromForm] string returnUrl) =>
+                [FromForm] string? returnUrl) =>
             {
                 await signInManager.SignOutAsync();
+                
+                // If returnUrl is null, empty, or invalid, redirect to home page
+                if (string.IsNullOrEmpty(returnUrl) || returnUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    return TypedResults.LocalRedirect("~/");
+                }
+                
                 return TypedResults.LocalRedirect($"~/{returnUrl}");
             });
 

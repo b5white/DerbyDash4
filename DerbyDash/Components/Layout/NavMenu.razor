@@ -1,7 +1,9 @@
 ﻿@implements IDisposable
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
 
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -33,13 +35,9 @@
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <form action="Account/Logout" method="post">
-                        <AntiforgeryToken />
-                        <input type="hidden" name="ReturnUrl" value="@currentUrl" />
-                        <button type="submit" class="nav-link">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
-                        </button>
-                    </form>
+                    <NavLink class="nav-link" @onclick="HandleLogoutClick">
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+                    </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
@@ -61,5 +59,11 @@
     </nav>
 </div>
 
-
+@code {
+    private async Task HandleLogoutClick()
+    {
+        // Force a page reload to ensure proper logout
+        NavigationManager.NavigateTo("/Account/LogoutPage", forceLoad: true);
+    }
+}
 

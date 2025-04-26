@@ -1,0 +1,33 @@
+@page "/Account/LogoutPage"
+@using Microsoft.AspNetCore.Identity
+@using DerbyDash.Data
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server
+@using System.Security.Claims
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager NavigationManager
+@inject CustomAuthStateProvider AuthStateProvider
+
+<PageTitle>Logging out...</PageTitle>
+
+<div class="logout-container">
+    <div class="logout-content">
+        <h1>Logging out...</h1>
+        <p>Please wait while we sign you out.</p>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Sign out the user
+        await SignInManager.SignOutAsync();
+        
+        // Notify our custom auth state provider about the logout
+        AuthStateProvider.NotifyUserLogout();
+        
+        // Redirect to home page with force reload to ensure the UI updates
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}
