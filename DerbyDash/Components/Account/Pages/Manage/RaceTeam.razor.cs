@@ -8,7 +8,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private string? message;
         private ApplicationUser user = default!;
 
-        private List<string> raceTeam = new() { "Alice", "Bob", "Charlie" };
+        private List<Racer> raceTeam;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -28,6 +28,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         protected override async Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            raceTeam = new() {
+                new Racer { Name = "Alice" },
+                new Racer { Name = "Bob" },
+                new Racer { Name = "Charlie" }
+            };
 
             //raceTeam.Clear();
             //raceTeam.AddRange(await RaceTeamService.GetRacers());

@@ -12,6 +12,9 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public double Distance { get; set; }
 
+        [Parameter]
+        public bool ShowDebug { get; set; }
+
         private ElementReference startLineElement;
         private bool startLineHidden = false;
         private System.Threading.Timer animationTimer;

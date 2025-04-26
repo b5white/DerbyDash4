@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Exceptions;
@@ -18,6 +18,9 @@ namespace DerbyDash.Components.Pages {
 
         [Inject]
         public required NavigationManager NavigationManager { get; set; }
+
+        [Inject]
+        public required IConfiguration configuration { get; set; }
 
         [Inject]
         public required ILogger<Race> _logger { get; set; }
@@ -56,6 +59,7 @@ namespace DerbyDash.Components.Pages {
         private int Margin = 10;
         private int MarginTop = 0;
         private string FlexBasis = "";
+        private bool ShowDebug = false;
         private EditContext editContext = new EditContext(new object());
 
         private bool startLineHasDisappeared = false; // Track disappearance state
@@ -66,11 +70,7 @@ namespace DerbyDash.Components.Pages {
         private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
         private const int PERIODIC_TIMER_SPAN_MICROSECONDS = 200000; // 1/5 of a second
         private const int ANIMATION_SYNC_DELAY = 50; // milliseconds
-        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds (matches stoplight sequence)
-
-        private float GetSpan(double starttime) {
-            return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
-        }
+        private const int INITIAL_TIMER_DELAY = 3000; // 3 seconds
 
         public ProblemsBase? ProblemClass { get; set; }
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
@@ -79,6 +79,8 @@ namespace DerbyDash.Components.Pages {
         TrackContainer? trackContainerInstance;
 
         protected override void OnInitialized() {
+            _logger.LogInformation("OnInitialized");
+            ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
             InactivityTimer.AutoReset = false;
@@ -89,6 +91,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void Reset() {
+            _logger.LogInformation("Reset");
             if (!Running) {
                 RaceTime = 0;
                 CurrentRacerFinished = false;
@@ -130,6 +133,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CreateProblems() {
+            _logger.LogInformation("CreateProblems");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
             }
@@ -234,6 +238,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void SynchronizeAnimationStart() {
+            _logger.LogInformation("SynchronizeAnimationStart");
             // Reset any existing animations
             track.IsAnyCarAtTop = false;
 
@@ -271,6 +276,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void EndRace() {
+            _logger.LogInformation("EndRace");
             if (Running) {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
@@ -346,6 +352,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void ResetResults(float timeSpan) {
+            _logger.LogInformation("ResetResults");
             List<Car> previousRaces = track.Cars
                 .Where(car => car.TotalTime > 0)
                 .OrderBy(car => car.TotalTime)  // take the 5 fastest
@@ -367,6 +374,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CalculateAverage() {
+            _logger.LogInformation("CalculateAverage");
             int count = 0;
             float total = 0;
 
@@ -391,14 +399,17 @@ namespace DerbyDash.Components.Pages {
         //}
 
         public void InitializeTrack(string? problemSetIdentifier) {
+            _logger.LogInformation("InitializeTrack");
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
                 track = RaceService.CreateTrack(problemSetIdentifier);
-            } catch (MissingTeamMemberException) {
+            } catch (MissingTeamMemberException ex) {
+                LogMessage(ex);
                 NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
-            } catch (MissingUserException) {
+            } catch (MissingUserException ex) {
+                LogMessage(ex);
                 NavigationManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
@@ -469,6 +480,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task StartPeriodicTimerAsync() {
+            _logger.LogInformation("StartPeriodicTimerAsync");
             // Create a new CancellationTokenSource each time the timer is started
             PeriodicTimerToken = new CancellationTokenSource();
             periodicTimer = new(TimeSpan.FromMicroseconds(PERIODIC_TIMER_SPAN_MICROSECONDS));
@@ -488,9 +500,14 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void StopPeriodicTimer() {
+            _logger.LogInformation("StopPeriodicTimer");
             // Cancel the token and dispose of the timer
             PeriodicTimerToken.Cancel();
             periodicTimer.Dispose();
+        }
+
+        private float GetSpan(double starttime) {
+            return (float)(DateTime.Now.Ticks - starttime) / TimeSpan.TicksPerSecond;
         }
 
         private float GetTimespan(double starttime) {

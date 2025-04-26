@@ -12,10 +12,10 @@
 
 <h3>Current race team</h3>
 @if (raceTeam.Any()) {
-    @foreach (string Name in raceTeam) {
+    @foreach (Racer fm in raceTeam) {
         <div class="row">
             <div class="col-xl-6">
-                @Name
+                @fm.Name
             </div>
         </div>
     }
