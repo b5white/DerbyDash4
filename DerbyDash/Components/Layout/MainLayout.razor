@@ -26,14 +26,7 @@
 </div>
 
 @code {
-    private bool IsAuthPage => 
-        NavigationManager.Uri.Contains("/Account/Login") || 
-        NavigationManager.Uri.Contains("/Account/Register") ||
-        NavigationManager.Uri.Contains("/Account/ForgotPassword") ||
-        NavigationManager.Uri.Contains("/Account/ResetPassword") ||
-        NavigationManager.Uri.Contains("/Account/ConfirmEmail") ||
-        NavigationManager.Uri.Contains("/Account/Lockout") ||
-        NavigationManager.Uri.Contains("/Account/Manage");
+    private bool IsAuthPage => NavigationManager.Uri.Contains("/Account/");
 
     protected override void OnInitialized()
     {

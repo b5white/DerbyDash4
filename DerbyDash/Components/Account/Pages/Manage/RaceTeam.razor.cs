@@ -21,7 +21,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         //[Inject]
         //internal IRaceTeamService RaceTeamService { get; set; } = default!;
-        [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+        [Inject] 
+        public ILogger<RaceTeam> Logger { get; set; } = default!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
