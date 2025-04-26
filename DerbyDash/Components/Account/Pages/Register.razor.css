@@ -1,0 +1,262 @@
+.register-container {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a1a 0%, #333333 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.register-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/RaceTrack/Background.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+.register-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+}
+
+.register-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    margin-top: 2rem;
+}
+
+.register-image {
+    flex: 1;
+    background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+}
+
+.register-image::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/RaceTrack/Background.png');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.1;
+    z-index: 0;
+}
+
+.register-image-content {
+    position: relative;
+    z-index: 1;
+}
+
+.register-form {
+    flex: 1;
+    padding: 2rem;
+    background-color: #fff;
+}
+
+.register-logo {
+    text-align: center;
+    /* margin-bottom: 2rem; */
+}
+
+.register-logo h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.register-logo span {
+    color: #ff5722;
+}
+
+.register-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #ff5722;
+    box-shadow: 0 0 0 0.2rem rgba(255, 87, 34, 0.25);
+}
+
+.btn-register {
+    background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-register:hover {
+    background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 87, 34, 0.4);
+}
+
+.register-links {
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.register-links a {
+    color: #ff5722;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.register-links a:hover {
+    color: #ff9800;
+    text-decoration: underline;
+}
+
+.checkered-pattern {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    background-image: repeating-linear-gradient(90deg, #000 0px, #000 20px, #fff 20px, #fff 40px);
+}
+
+.checkered-pattern.top {
+    top: 0;
+    bottom: auto;
+}
+
+.racing-stripe {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 30px;
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-50%) skewY(-5deg);
+}
+
+.validation-message {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.text-danger {
+    color: #e74c3c !important;
+}
+
+.password-tips {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #ff5722;
+}
+
+.password-tips h3 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.password-tips ul {
+    padding-left: 1.5rem;
+}
+
+.password-tips li {
+    margin-bottom: 0.5rem;
+    color: #555;
+}
+
+.password-tips .example {
+    font-style: italic;
+    color: #777;
+    margin-top: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .register-card {
+        flex-direction: column;
+    }
+    
+    .register-image {
+        padding: 2rem;
+    }
+    
+    .register-form {
+        padding: 2rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .register-content {
+        padding: 1rem;
+    }
+    
+    .register-card {
+        margin-top: 1rem;
+    }
+    
+    .register-image {
+        padding: 1.5rem;
+    }
+    
+    .register-form {
+        padding: 1.5rem;
+    }
+    
+    .register-title {
+        font-size: 1.5rem;
+    }
+}
