@@ -12,43 +12,78 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Log in</PageTitle>
+<PageTitle>Log in - Derby Dash</PageTitle>
 
-<h1>Log in</h1>
-<div class="row">
-    <div class="col-lg-6">
-        <section>
-            <StatusMessage Message="@errorMessage" />
-            <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
-                <DataAnnotationsValidator />
-                <hr />
-                <ValidationSummary class="text-danger" role="alert" />
-                <div class="form-floating mb-3">
-                    <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label for="Input.Email" class="form-label">Email</label>
-                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+<div class="login-container">
+    <div class="login-background"></div>
+    <div class="login-content">
+        <div class="login-logo">
+            <h1>Derby<span>Dash</span></h1>
+        </div>
+        <div class="login-card">
+            <div class="login-image">
+                <div class="checkered-pattern top"></div>
+                <div class="racing-stripe"></div>
+                <div class="login-image-content">
+                    <h2>Race to Learn!</h2>
+                    <p>Solve math problems and beat your opponents in exciting races. Track your progress and become the ultimate math racing champion!</p>
                 </div>
-                <div class="form-floating mb-3">
-                    <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label for="Input.Password" class="form-label">Password</label>
-                    <ValidationMessage For="() => Input.Password" class="text-danger" />
-                </div>
-                <div>
-                    <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
-                </div>
-                <div>
-                    <p>
-                        <a href="Account/ForgotPassword">Forgot your password?</a>
-                    </p>
-                    <p>
-                        <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Register as a new user</a>
-                    </p>
-                    <p>
-                        <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
-                    </p>
-                </div>
-            </EditForm>
-        </section>
+                <div class="checkered-pattern"></div>
+            </div>
+            <div class="login-form">
+                <h2 class="login-title">Sign In to Your Account</h2>
+                <StatusMessage Message="@errorMessage" />
+                <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="text-danger" role="alert" />
+                    
+                    <div class="form-group">
+                        <label for="Input.Email">Email Address</label>
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" 
+                            autocomplete="username" aria-required="true" placeholder="Enter your email" />
+                        <ValidationMessage For="() => Input.Email" class="validation-message" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="Input.Password">Password</label>
+                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password" 
+                            class="form-control" autocomplete="current-password" aria-required="true" 
+                            placeholder="Enter your password" />
+                        <ValidationMessage For="() => Input.Password" class="validation-message" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+                            Remember me
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-login">
+                        <i class="fas fa-flag-checkered"></i> Start Your Engines
+                    </button>
+                    
+                    <div class="login-divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <div class="login-links">
+                        <p>
+                            <a href="Account/ForgotPassword">Forgot your password?</a>
+                        </p>
+                        <p>
+                            Don't have an account? 
+                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                                Sign up now
+                            </a>
+                        </p>
+                        <p>
+                            <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                        </p>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
     </div>
 </div>
 

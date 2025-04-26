@@ -1,5 +1,7 @@
 ﻿@inherits MainLayoutBase
 @using DerbyDash.Components.Layout
+@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager NavigationManager
 
 <div class="page">
     <div class="sidebar">
@@ -7,7 +9,10 @@
     </div>
 
     <div class="main">
-        <Breadcrumb />
+        @if (!IsAuthPage)
+        {
+            <Breadcrumb />
+        }
         <main>
             @Body
         </main>
@@ -19,3 +24,30 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool IsAuthPage => 
+        NavigationManager.Uri.Contains("/Account/Login") || 
+        NavigationManager.Uri.Contains("/Account/Register") ||
+        NavigationManager.Uri.Contains("/Account/ForgotPassword") ||
+        NavigationManager.Uri.Contains("/Account/ResetPassword") ||
+        NavigationManager.Uri.Contains("/Account/ConfirmEmail") ||
+        NavigationManager.Uri.Contains("/Account/Lockout") ||
+        NavigationManager.Uri.Contains("/Account/Manage");
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += LocationChanged;
+        base.OnInitialized();
+    }
+
+    private void LocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= LocationChanged;
+    }
+}
