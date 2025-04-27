@@ -2,11 +2,10 @@ using DerbyDash.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 
-namespace DerbyDash.Components.Account
-{
+namespace DerbyDash.Components.Account {
     // Remove the "else if (EmailSender is IdentityNoOpEmailSender)" block from RegisterConfirmation.razor after updating with a real implementation.
-    internal sealed class IdentityNoOpEmailSender : IEmailSender<ApplicationUser>
-    {
+    internal sealed class IdentityNoOpEmailSender: IEmailSender<ApplicationUser> {
+
         private readonly IEmailSender emailSender = new NoOpEmailSender();
 
         public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink) =>

@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Exceptions;
