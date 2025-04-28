@@ -235,6 +235,7 @@
     }
     
     .register-form {
+        height: auto;
         padding: 2rem;
     }
 }
