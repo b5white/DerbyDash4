@@ -190,7 +190,7 @@ namespace DerbyDash.Components.Pages {
 
             double relativePosition;
 
-            if (track.Cars.Count > 0 && track.Cars.Any(car => car.SpeedIncrements.Any())) {
+            if (track.Cars.Count > 0) {
                 // Find the lead car's distance
                 double leadDistance = Math.Min(track.Cars.Max(car => car.Distance), RaceService.TotalDistance);
 

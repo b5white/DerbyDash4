@@ -18,14 +18,11 @@
 
 <StatusMessage Message="@statusMessage" />
 
-@if (emailConfirmationLink is not null)
-{
+@if (emailConfirmationLink is not null) {
     <p>
         Normally this would be emailed: <a href="@emailConfirmationLink">Until then, click here to confirm your account</a>
     </p>
-}
-else
-{
+} else {
     <p role="alert">Please check your email to confirm your account.</p>
 }
 
@@ -42,21 +39,16 @@ else
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (Email is null)
-        {
+    protected override async Task OnInitializedAsync() {
+        if (Email is null) {
             RedirectManager.RedirectTo("");
         }
 
         var user = await UserManager.FindByEmailAsync(Email);
-        if (user is null)
-        {
+        if (user is null) {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             statusMessage = "Error finding user for unspecified email";
-        }
-        else if (EmailSender is IdentityNoOpEmailSender)
-        {
+        } else if (EmailSender is IdentityNoOpEmailSender) {
             // Once you add a real email sender, you should remove this code that lets you confirm the account
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);

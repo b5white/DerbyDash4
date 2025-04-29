@@ -14,6 +14,11 @@
 
 <h1>Confirm email</h1>
 <StatusMessage Message="@statusMessage" />
+<p>Next Step: Add racers to your race team.</p>
+<p>
+    <a href="Account/Manage/RaceTeam">Add Racers</a>
+</p>
+
 
 @code {
     private string? statusMessage;
@@ -27,21 +32,16 @@
     [SupplyParameterFromQuery]
     private string? Code { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (UserId is null || Code is null)
-        {
+    protected override async Task OnInitializedAsync() {
+        if (UserId is null || Code is null) {
             RedirectManager.RedirectTo("");
         }
 
         ApplicationUser? user = await UserManager.FindByIdAsync(UserId);
-        if (user is null)
-        {
+        if (user is null) {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             statusMessage = $"Error loading user with ID {UserId}";
-        }
-        else
-        {
+        } else {
             string code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             IdentityResult result = await UserManager.ConfirmEmailAsync(user, code);
             statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";

@@ -1,11 +1,10 @@
 using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
-using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DerbyDash {
     public class Program {
@@ -18,13 +17,31 @@ namespace DerbyDash {
             //    .AddInteractiveWebAssemblyComponents()
             //    .AddAuthenticationStateSerialization();
 
+            // Add Scoped services
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<CustomAuthStateProvider>());
-
+            //builder.Services.AddTransient<IEmailSender, EmailSender>();
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
+            //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
+            builder.Services.AddScoped<UserManager<IdentityUser>>(provider => {
+                var userManager = new UserManager<IdentityUser>(
+                    provider.GetRequiredService<IUserStore<IdentityUser>>(),
+                    provider.GetRequiredService<IOptions<IdentityOptions>>(),
+                    provider.GetRequiredService<IPasswordHasher<IdentityUser>>(),
+                    new List<IUserValidator<IdentityUser>>(),
+                    new List<IPasswordValidator<IdentityUser>>(), // No password validators
+                    provider.GetRequiredService<ILookupNormalizer>(),
+                    provider.GetRequiredService<IdentityErrorDescriber>(),
+                    provider.GetRequiredService<IServiceProvider>(),
+                    provider.GetRequiredService<ILogger<UserManager<IdentityUser>>>()
+                );
+                return userManager;
+            });
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
@@ -32,7 +49,7 @@ namespace DerbyDash {
 
             // Add Identity services
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
-                options.SignIn.RequireConfirmedAccount = false;  // TODO turned off until we have email set up.
+                options.SignIn.RequireConfirmedAccount = true;
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
@@ -51,12 +68,6 @@ namespace DerbyDash {
 
             // Add authorization services
             builder.Services.AddAuthorization();
-
-            // Add Scoped services
-            builder.Services.AddScoped<RaceService>();
-            //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddTransient<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-            builder.Services.AddSingleton<UserManager<ApplicationUser>, NoOpUserManager>();
 
             WebApplication app = builder.Build();
 
