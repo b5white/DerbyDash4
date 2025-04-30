@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Layout;
+﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Exceptions;
@@ -15,6 +15,9 @@ namespace DerbyDash.Components.Pages {
     public partial class Race: ComponentBase, IDisposable {
         [Inject]
         public required RaceService RaceService { get; set; }
+
+        [Inject]
+        public required RacerService RacerService { get; set; }
 
         [Inject]
         public required NavigationManager NavigationManager { get; set; }
@@ -404,7 +407,21 @@ namespace DerbyDash.Components.Pages {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
+                // Get the current racer from the RacerService
+                var currentRacer = RacerService.GetCurrentRacer();
+                if (currentRacer == null) {
+                    // If no racer is selected, redirect to the RaceTeam page
+                    NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
+                    return;
+                }
+                
+                // Create the track with the current racer
                 track = RaceService.CreateTrack(problemSetIdentifier);
+                
+                // Set the name of the first car (player's car) to the current racer's name
+                if (track.Cars.Count > 0) {
+                    track.Cars[0].Name = currentRacer.Name;
+                }
             } catch (MissingTeamMemberException ex) {
                 LogMessage(ex);
                 NavigationManager.NavigateTo("/Account/Manage/RaceTeam");

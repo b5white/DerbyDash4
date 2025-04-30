@@ -1,0 +1,192 @@
+.top-navbar {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.75rem 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 0.5rem;
+}
+
+.top-navbar-content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+/* Racer selector styling */
+.racer-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+.racer-selector:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.racer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #ff9800;
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.racer-dropdown-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.racer-dropdown-container label {
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 0.25rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.racer-dropdown {
+    width: auto;
+    min-width: 150px;
+    border-radius: 6px;
+    border: 2px solid #e0e0e0;
+    padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ff9800' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+    appearance: none;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    color: #333;
+    font-size: 0.95rem;
+}
+
+.racer-dropdown:focus {
+    border-color: #ff9800;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(255, 152, 0, 0.15);
+}
+
+.racer-dropdown:hover {
+    border-color: #ff9800;
+}
+
+.racer-dropdown option {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+}
+
+/* No racers message */
+.no-racers-message {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #fff3e0;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    color: #e65100;
+    font-size: 0.9rem;
+}
+
+.no-racers-message i {
+    font-size: 1.1rem;
+}
+
+.no-racers-message a {
+    color: #ff9800;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.25rem;
+}
+
+.no-racers-message a:hover {
+    text-decoration: underline;
+}
+
+/* Login prompt */
+.login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.login-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #ff9800;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.login-button:hover {
+    background-color: #f57c00;
+    transform: translateY(-2px);
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .top-navbar {
+        padding: 0.75rem 1rem;
+    }
+    
+    .top-navbar-content {
+        justify-content: center;
+    }
+    
+    .racer-selector {
+        width: 100%;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .login-prompt {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+    
+    .no-racers-message {
+        flex-direction: column;
+        text-align: center;
+        padding: 0.75rem;
+    }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+    .racer-dropdown-container label {
+        font-size: 0.75rem;
+    }
+    
+    .racer-dropdown {
+        font-size: 0.9rem;
+        padding: 0.4rem 2rem 0.4rem 0.5rem;
+    }
+    
+    .racer-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}

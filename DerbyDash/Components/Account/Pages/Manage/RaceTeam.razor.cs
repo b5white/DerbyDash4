@@ -1,4 +1,5 @@
 using DerbyDash.Data;
+using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
@@ -15,12 +16,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         [Inject]
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        //[Inject]
-        //internal IRaceTeamService RaceTeamService { get; set; } = default!;
+        
+        [Inject]
+        internal RacerService RacerService { get; set; } = default!;
+        
         [Inject] 
         public ILogger<RaceTeam> Logger { get; set; } = default!;
 
@@ -28,25 +33,34 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            raceTeam = new() {
-                new Racer { Name = "Alice" },
-                new Racer { Name = "Bob" },
-                new Racer { Name = "Charlie" }
-            };
-
-            //raceTeam.Clear();
-            //raceTeam.AddRange(await RaceTeamService.GetRacers());
+            try {
+                user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                // Get racers from the service
+                raceTeam = RacerService.GetRacers();
+            }
+            catch (Exception ex) {
+                Logger.LogError(ex, "Error loading race team");
+                raceTeam = new List<Racer>();
+            }
         }
 
         private async Task OnValidSubmitAsync() {
-            //Racer newTeamMember = new() {
-            //    UserName = user.UserName ?? "",
-            //    Name = Input.MemberName,
-            //};
-            //await RaceTeamService.AddRacer(newTeamMember);
-
-            RedirectManager.RedirectToCurrentPageWithStatus("The team member has been added", HttpContext);
+            try {
+                Racer newTeamMember = new() {
+                    UserName = user.UserName ?? "",
+                    Name = Input.MemberName,
+                };
+                
+                await RacerService.AddRacerAsync(newTeamMember);
+                raceTeam = RacerService.GetRacers(); // Refresh the list
+                
+                message = "The team member has been added";
+                Input = new(); // Clear the form
+            }
+            catch (Exception ex) {
+                Logger.LogError(ex, "Error adding racer");
+                message = "Error adding racer: " + ex.Message;
+            }
         }
 
         private sealed class InputModel {

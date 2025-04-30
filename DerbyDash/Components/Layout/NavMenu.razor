@@ -1,69 +1,112 @@
-﻿@implements IDisposable
-@rendermode InteractiveServer
+﻿@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.JSInterop
+@using Microsoft.AspNetCore.Components.Web
 
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">DerbyDash</a>
-    </div>
+<div class="sidebar-header">
+    <a class="navbar-brand" href="">
+        <div class="logo-container">
+            <img src="images/racehorse1.png" alt="Derby Dash Logo" class="logo-image" />
+            <div class="logo-text">
+                <span class="derby">Derby</span><span class="dash">Dash</span>
+            </div>
+        </div>
+    </a>
+    <input type="checkbox" title="Navigation menu" class="navbar-toggler" id="navbar-toggler" @onclick="ToggleNavMenu" />
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+<div @ref="navScrollableElement" class="nav-scrollable">
     <nav class="nav flex-column">
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <i class="nav-icon fas fa-home"></i>
+                <span class="nav-text">Home</span>
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
+        <div class="nav-item">
             <NavLink class="nav-link" href="RaceSetsMenu">
-                <img src="images/racehorse1.png" alt="Horse Head Icon" width="24" height="24" style="margin-right: 5px;" /> Races
+                <i class="nav-icon fas fa-flag-checkered"></i>
+                <span class="nav-text">Races</span>
             </NavLink>
         </div>
 
         <AuthorizeView>
             <Authorized>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                <div class="nav-divider">
+                    <span>Account</span>
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Account/Manage/RaceTeam">
+                        <i class="nav-icon fas fa-users"></i>
+                        <span class="nav-text">Race Team</span>
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
-                    <NavLink class="nav-link" @onclick="HandleLogoutClick">
-                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Logout
+
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="Account/Manage">
+                        <i class="nav-icon fas fa-user-circle"></i>
+                        <span class="nav-text">@context.User.Identity?.Name</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link logout-link" @onclick="HandleLogoutClick">
+                        <i class="nav-icon fas fa-sign-out-alt"></i>
+                        <span class="nav-text">Logout</span>
                     </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
-                <div class="nav-item px-3">
+                <div class="nav-divider">
+                    <span>Account</span>
+                </div>
+
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                        <i class="nav-icon fas fa-user-plus"></i>
+                        <span class="nav-text">Register</span>
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">
+
+                <div class="nav-item">
                     <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                        <i class="nav-icon fas fa-sign-in-alt"></i>
+                        <span class="nav-text">Login</span>
                     </NavLink>
                 </div>
             </NotAuthorized>
         </AuthorizeView>
-         <div class="version-number">
+    </nav>
+
+    <div class="version-number">
         Version @AppInfo.Version
     </div>
-    </nav>
 </div>
 
 @code {
-    private async Task HandleLogoutClick()
+    private ElementReference navScrollableElement; // Reference to the div
+
+    // Method to toggle the CSS class via JavaScript
+    private async Task ToggleNavMenu()
+    {
+        await JSRuntime.InvokeVoidAsync("toggleClass", navScrollableElement, "show-menu");
+    }
+
+    private void HandleLogoutClick() // Removed async Task
     {
         // Force a page reload to ensure proper logout
         NavigationManager.NavigateTo("/Account/LogoutPage", forceLoad: true);
     }
+
+    // Assuming AppInfo is defined elsewhere or remove if not needed
+    // public static class AppInfo { public static string Version = "1.0.0"; }
+
+    // No Dispose method here - it's in NavMenu.razor.cs
 }
 

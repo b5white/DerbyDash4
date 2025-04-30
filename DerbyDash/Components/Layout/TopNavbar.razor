@@ -1,0 +1,94 @@
+@using DerbyDash.Data
+@using DerbyDash.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@implements IDisposable
+@rendermode InteractiveServer
+
+@inject NavigationManager NavigationManager
+@inject RacerService RacerService
+
+<div class="top-navbar">
+    <div class="container-fluid">
+        <div class="top-navbar-content">
+            <AuthorizeView>
+                <Authorized>
+                    @if (Racers.Count == 0)
+                    {
+                        <div class="no-racers-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>No racers available. <a href="Account/Manage/RaceTeam">Add a racer</a></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="racer-selector">
+                            <div class="racer-icon">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <div class="racer-dropdown-container">
+                                <label for="currentRacer">Current Racer:</label>
+                                <select id="currentRacer" class="racer-dropdown" value="@SelectedRacerId" @onchange="OnRacerChanged">
+                                    @foreach (var racer in Racers)
+                                    {
+                                        <option value="@racer.Id">@racer.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <div class="login-prompt">
+                        <span>Sign in to create your race team</span>
+                        <a href="Account/Login" class="login-button">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Racer> Racers { get; set; } = new List<Racer>();
+    private string SelectedRacerId { get; set; } = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to racer changes
+        RacerService.OnRacerChanged += StateHasChanged;
+        
+        // Get racers from the service
+        Racers = RacerService.GetRacers();
+
+        // Set the selected racer to the current racer
+        var currentRacer = RacerService.GetCurrentRacer();
+        if (currentRacer != null)
+        {
+            SelectedRacerId = currentRacer.Id;
+        }
+        else if (Racers.Any())
+        {
+            SelectedRacerId = Racers.First().Id;
+            RacerService.SetCurrentRacer(SelectedRacerId);
+        }
+    }
+
+    private void OnRacerChanged(ChangeEventArgs e)
+    {
+        string newRacerId = e.Value?.ToString() ?? string.Empty;
+        if (!string.IsNullOrEmpty(newRacerId))
+        {
+            SelectedRacerId = newRacerId;
+            RacerService.SetCurrentRacer(newRacerId);
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe from racer changes
+        RacerService.OnRacerChanged -= StateHasChanged;
+    }
+}

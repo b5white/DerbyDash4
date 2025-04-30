@@ -24,6 +24,8 @@ namespace DerbyDash {
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<CustomAuthStateProvider>());
+            builder.Services.AddSingleton<Services.RacerService>();
+            builder.Services.AddScoped<Services.RaceService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
             builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
@@ -50,6 +52,7 @@ namespace DerbyDash {
             // Add Identity services
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 options.SignIn.RequireConfirmedAccount = true;
+                options.SignIn.RequireConfirmedEmail = true;
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;

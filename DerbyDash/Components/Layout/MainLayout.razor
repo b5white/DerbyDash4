@@ -1,6 +1,7 @@
 ﻿@inherits MainLayoutBase
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Routing
+@using DerbyDash.Data
 @inject NavigationManager NavigationManager
 
 <div class="page">
@@ -11,6 +12,7 @@
     <div class="main">
         @if (!IsAuthPage)
         {
+            <TopNavbar />
             <Breadcrumb />
         }
         <main>

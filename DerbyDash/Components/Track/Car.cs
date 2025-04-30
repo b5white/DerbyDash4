@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Data;
+﻿﻿﻿﻿using DerbyDash.Data;
 using DerbyDash.HelperUtilities;
 
 namespace DerbyDash.Components.Track {
@@ -25,6 +25,7 @@ namespace DerbyDash.Components.Track {
         public int ImageId { get; set; } = -1;
         public string ImageUrl { get => $"Racecar{ImageId}.png"; }
         public int RaceId = 0;
+        public string Name { get; set; } = string.Empty;
         public string FlexBasis { get; set; } = $"calc((100% - 170px) / 6)";
         const double SPEED_MULTIPLIER = RaceComponents.SPEED_MULTIPLIER;
 
