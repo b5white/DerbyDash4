@@ -18,13 +18,32 @@
 
 <StatusMessage Message="@statusMessage" />
 
-@if (emailConfirmationLink is not null) {
-    <p>
-        Normally this would be emailed: <a href="@emailConfirmationLink">Until then, click here to confirm your account</a>
-    </p>
-} else {
-    <p role="alert">Please check your email to confirm your account.</p>
-}
+<div class="alert alert-info">
+    <h4>Thank you for registering!</h4>
+    
+    @if (emailConfirmationLink is not null) {
+        <p>
+            <strong>Important:</strong> In a production environment, a confirmation link would be sent to your email.
+        </p>
+        <p>
+            For development purposes, you can <a href="@emailConfirmationLink" class="alert-link">click here to confirm your account</a>.
+        </p>
+    } else {
+        <p>
+            <strong>Please check your email to confirm your account.</strong>
+        </p>
+        <p>
+            A confirmation link has been sent to your email address. Click the link in the email to activate your account.
+        </p>
+        <p>
+            If you don't see the email, please check your spam folder.
+        </p>
+    }
+</div>
+
+<p>
+    After confirming your email, you'll be able to log in and start using Derby Dash!
+</p>
 
 @code {
     private string? emailConfirmationLink;

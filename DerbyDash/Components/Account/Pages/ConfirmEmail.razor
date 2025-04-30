@@ -8,20 +8,30 @@
 @attribute [AllowAnonymous]
 
 @inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Confirm email</PageTitle>
 
 <h1>Confirm email</h1>
 <StatusMessage Message="@statusMessage" />
-<p>Next Step: Add racers to your race team.</p>
-<p>
-    <a href="Account/Manage/RaceTeam">Add Racers</a>
-</p>
+
+@if (emailConfirmed)
+{
+    <div class="alert alert-success">
+        <p>Your email has been confirmed successfully!</p>
+        <p>Next step: <a href="Account/Manage/RaceTeam">Set up your Race Team</a> to start racing!</p>
+    </div>
+}
+else
+{
+    <p>There was a problem confirming your email. Please try again or contact support.</p>
+}
 
 
 @code {
     private string? statusMessage;
+    private bool emailConfirmed = false;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -32,9 +42,13 @@
     [SupplyParameterFromQuery]
     private string? Code { get; set; }
 
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
     protected override async Task OnInitializedAsync() {
         if (UserId is null || Code is null) {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         ApplicationUser? user = await UserManager.FindByIdAsync(UserId);
@@ -44,7 +58,20 @@
         } else {
             string code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             IdentityResult result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            
+            if (result.Succeeded) {
+                emailConfirmed = true;
+                statusMessage = "Thank you for confirming your email.";
+                
+                // Automatically sign in the user after email confirmation
+                await SignInManager.SignInAsync(user, isPersistent: false);
+                
+                // We don't automatically redirect to give the user a chance to see the confirmation message
+                // They can click the link to go to the Race Team page
+            } else {
+                emailConfirmed = false;
+                statusMessage = "Error confirming your email.";
+            }
         }
     }
 }
