@@ -1,7 +1,7 @@
 /* RaceSetsMenu.razor.css */
 
 .race-sets-container {
-    padding: 2rem;
+    padding: 1rem;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -145,7 +145,7 @@
 
 /* Animation for race car at bottom */
 .animation-section {
-    margin-top: 4rem;
+    margin-top: 2rem;
     position: relative;
     height: 180px;
     overflow: hidden;

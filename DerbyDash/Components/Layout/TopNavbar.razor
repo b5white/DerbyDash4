@@ -9,6 +9,15 @@
 
 <div class="top-navbar">
     <div class="container-fluid">
+        <div class="page-info">
+            <div class="page-title">
+                <i class="@GetPageIcon()"></i>
+                <h1>@GetPageTitle()</h1>
+            </div>
+            <div class="page-subtitle">
+                @GetPageMotivation()
+            </div>
+        </div>
         <div class="top-navbar-content">
             <AuthorizeView>
                 <Authorized>
@@ -26,13 +35,18 @@
                                 <i class="fas fa-user-astronaut"></i>
                             </div>
                             <div class="racer-dropdown-container">
-                                <label for="currentRacer">Current Racer:</label>
-                                <select id="currentRacer" class="racer-dropdown" value="@SelectedRacerId" @onchange="OnRacerChanged">
-                                    @foreach (var racer in Racers)
-                                    {
-                                        <option value="@racer.Id">@racer.Name</option>
-                                    }
-                                </select>
+                                <label for="currentRacer">
+                                    <i class="fas fa-exchange-alt"></i> Select Your Racer
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="currentRacer" class="racer-dropdown" value="@SelectedRacerId" @onchange="OnRacerChanged" title="Click to change your active racer">
+                                        @foreach (var racer in Racers)
+                                        {
+                                            <option value="@racer.Id">@racer.Name</option>
+                                        }
+                                    </select>
+                                    <div class="select-hint">Choose who will race</div>
+                                </div>
                             </div>
                         </div>
                     }
@@ -53,11 +67,15 @@
 @code {
     private List<Racer> Racers { get; set; } = new List<Racer>();
     private string SelectedRacerId { get; set; } = string.Empty;
+    private string CurrentUrl => NavigationManager.Uri;
 
     protected override void OnInitialized()
     {
         // Subscribe to racer changes
         RacerService.OnRacerChanged += StateHasChanged;
+        
+        // Subscribe to navigation changes
+        NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
         
         // Get racers from the service
         Racers = RacerService.GetRacers();
@@ -86,9 +104,81 @@
         }
     }
 
+    private string GetPageTitle()
+    {
+        if (CurrentUrl.Contains("/RaceSetsMenu"))
+            return "Race Sets";
+        else if (CurrentUrl.Contains("/Account/Manage/RaceTeam"))
+            return "Race Team Management";
+        else if (CurrentUrl.Contains("/Account/Manage"))
+            return "Account Settings";
+        else if (CurrentUrl.Contains("/Account/Register"))
+            return "Join Derby Dash";
+        else if (CurrentUrl.Contains("/Account/Login"))
+            return "Welcome Back";
+        else if (CurrentUrl.Contains("/Race/"))
+            return "Race Time!";
+        else
+            return "Derby Dash";
+    }
+
+    private string GetPageIcon()
+    {
+        if (CurrentUrl.Contains("/RaceSetsMenu"))
+            return "fas fa-flag-checkered";
+        else if (CurrentUrl.Contains("/Account/Manage/RaceTeam"))
+            return "fas fa-users";
+        else if (CurrentUrl.Contains("/Account/Manage"))
+            return "fas fa-user-cog";
+        else if (CurrentUrl.Contains("/Account/Register"))
+            return "fas fa-user-plus";
+        else if (CurrentUrl.Contains("/Account/Login"))
+            return "fas fa-sign-in-alt";
+        else if (CurrentUrl.Contains("/Race/"))
+            return "fas fa-tachometer-alt";
+        else
+            return "fas fa-home";
+    }
+
+    private string GetPageMotivation()
+    {
+        // Random motivational messages for different pages
+        if (CurrentUrl.Contains("/RaceSetsMenu"))
+            return "Choose your challenge and start your engines!";
+        else if (CurrentUrl.Contains("/Account/Manage/RaceTeam"))
+            return "Build your dream team of math champions!";
+        else if (CurrentUrl.Contains("/Account/Manage"))
+            return "Customize your racing experience!";
+        else if (CurrentUrl.Contains("/Account/Register"))
+            return "Create an account and start your math racing journey!";
+        else if (CurrentUrl.Contains("/Account/Login"))
+            return "Ready to race? Log in and hit the track!";
+        else if (CurrentUrl.Contains("/Race/"))
+        {
+            // Different motivational messages for race page
+            string[] raceMotivations = new[]
+            {
+                "Solve fast, race faster!",
+                "The checkered flag awaits the quickest mind!",
+                "Math skills in the fast lane!",
+                "Calculate your way to victory!",
+                "Speed and accuracy win the race!"
+            };
+            
+            // Use a deterministic but seemingly random selection based on the day
+            int dayOfYear = DateTime.Now.DayOfYear;
+            return raceMotivations[dayOfYear % raceMotivations.Length];
+        }
+        else
+            return "Race through math challenges and become a champion!";
+    }
+
     public void Dispose()
     {
         // Unsubscribe from racer changes
         RacerService.OnRacerChanged -= StateHasChanged;
+        
+        // Unsubscribe from navigation changes
+        NavigationManager.LocationChanged -= (sender, e) => StateHasChanged();
     }
 }

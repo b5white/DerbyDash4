@@ -126,6 +126,8 @@
 @media (max-width: 640px) {
     .sidebar-header {
         padding: 0.75rem;
+        height: 3.5rem; /* Fixed height for the sidebar header */
+        box-sizing: border-box;
     }
     
     .logo-text {
@@ -140,6 +142,7 @@
     .nav-scrollable {
         position: absolute;
         width: 100%;
+        top: 3.5rem; /* Position below the sidebar header */
         background-image: linear-gradient(180deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
         box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
         border-bottom-left-radius: 8px;

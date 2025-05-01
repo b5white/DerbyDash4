@@ -66,7 +66,13 @@ main {
         top: 0;
         left: 0;
         right: 0;
+        height: auto;
         z-index: 1001;
+    }
+    
+    /* Add margin-top to the main div to prevent content from being hidden under the sidebar */
+    .main {
+        margin-top: 3.5rem; /* Height of the sidebar header */
     }
 }
 
@@ -96,6 +102,11 @@ main {
     
     main {
         padding: 1rem;
+    }
+    
+    /* Reset margin for desktop view */
+    .main {
+        margin-top: 0;
     }
 }
 
