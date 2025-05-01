@@ -10,7 +10,11 @@ namespace DerbyDash.Services {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
-        private List<Racer> raceTeam;
+        private List<Racer> raceTeam = new() {
+                new Racer { Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
+                new Racer { Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
+                new Racer { Name = "Charlie" }
+            };
         private Racer? Active;
 
         public RaceTeamService(
@@ -26,12 +30,8 @@ namespace DerbyDash.Services {
             _userManager = userManager;
         }
 
-        public async Task<List<Racer>> GetRacers() {
-            return raceTeam = new() {
-                new Racer { Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
-                new Racer { Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
-                new Racer { Name = "Charlie" }
-            };
+        public async Task<List<Racer>> GetRacers(ApplicationUser user) {
+            return raceTeam;
         }
 
         public async Task<Racer> AddRacer(Racer racer) {

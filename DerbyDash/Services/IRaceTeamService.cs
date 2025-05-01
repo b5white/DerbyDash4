@@ -2,7 +2,7 @@
 
 namespace DerbyDash.Services {
     public interface IRaceTeamService {
-        public Task<List<Racer>> GetRacers();
+        public Task<List<Racer>> GetRacers(ApplicationUser user);
         public Task<Racer> AddRacer(Racer racer);
         public Task UpdateRacer(Racer racer);
         public Task RemoveRacer(string racerId);

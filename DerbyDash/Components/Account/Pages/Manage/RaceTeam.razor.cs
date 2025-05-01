@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class RaceTeam {
         private string? message;
-        private ApplicationUser user = default!;
+        private ApplicationUser user = new ApplicationUser { NormalizedUserName = "USER@GMAIL.COM" };
 
         private List<Racer> raceTeam = new();
 
@@ -30,24 +30,44 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            try {
-            	//user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-
-                raceTeam.Clear();
-                raceTeam.AddRange(await RaceTeamService.GetRacers());
-            } catch (Exception ex) {
-                Logger.LogError(ex, "OnInitializedAsync");
-            }
+            await ReloadUsers();
         }
 
         private async Task OnValidSubmitAsync() {
-            Racer newTeamMember = new() {
-                UserName = user.UserName ?? "",
-                Name = Input.MemberName,
-            };
-            await RaceTeamService.AddRacer(newTeamMember);
+            try {
+                Racer newTeamMember = new() {
+                    UserName = user.NormalizedUserName ?? "",
+                    Name = Input.MemberName,
+                };
+                await RaceTeamService.AddRacer(newTeamMember);
+                try {
+                    Racer? racer = await RaceTeamService.GetActiveRacer();
+                } catch (MissingTeamMemberException) {  // ActiveRacer is null                  
+                    await RaceTeamService.SetActiveRacer(newTeamMember);
+                }
+                await ReloadUsers();
+                // Clear the input field after adding the racer
+                Input.MemberName = string.Empty;
 
-            RedirectManager.RedirectToCurrentPageWithStatus("The team member has been added", HttpContext);
+                message = "The team member has been added";
+            } catch (DuplicateRacerException) {
+                // Preserve the entered name and show error
+                message = $"Error: '{Input.MemberName}' already exists on the team";
+            } catch (Exception ex) {
+                Logger.LogError(ex, "OnValidSubmitAsync");
+            }
+            // Refresh the UI
+            StateHasChanged();
+        }
+
+        private async Task ReloadUsers() {
+            try {
+                // user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                raceTeam.Clear();
+                raceTeam.AddRange(await RaceTeamService.GetRacers(user));
+            } catch (Exception ex) {
+                Logger.LogError(ex, "OnInitializedAsync");
+            }
         }
 
         private sealed class InputModel {
