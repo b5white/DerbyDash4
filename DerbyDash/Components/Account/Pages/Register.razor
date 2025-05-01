@@ -41,46 +41,46 @@
                 <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger" role="alert" />
-                    
+
                     <div class="form-group">
                         <label for="Input.Email">Email Address</label>
-                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" 
-                            autocomplete="username" aria-required="true" placeholder="Enter your email" />
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
+                                   autocomplete="username" aria-required="true" placeholder="Enter your email" />
                         <ValidationMessage For="() => Input.Email" class="validation-message" />
                     </div>
-                    
+
                     <div class="password-tips">
                         <h3><i class="fas fa-shield-alt"></i> Password Tips</h3>
                         <ul>
                             <li>Teach your kids to use best practices for passwords</li>
-                            <li>Pick 3 or more words that are easy for you to remember</li>                            
+                            <li>Pick 3 or more words that are easy for you to remember</li>
                             <li>Choose words that woud be hard for others to guess</li>
                             <li>At least 12 characters is best</li>
                             <li>Use different passwords for different websites</li>
                         </ul>
                         <div class="example">Example: JulieLikesMath</div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="Input.Password">Password</label>
-                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password" 
-                            class="form-control" autocomplete="new-password" aria-required="true" 
-                            placeholder="Create a password" />
+                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password"
+                                   class="form-control" autocomplete="new-password" aria-required="true"
+                                   placeholder="Create a password" />
                         <ValidationMessage For="() => Input.Password" class="validation-message" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="Input.ConfirmPassword">Confirm Password</label>
-                        <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword" 
-                            class="form-control" autocomplete="new-password" aria-required="true" 
-                            placeholder="Confirm your password" />
+                        <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
+                                   class="form-control" autocomplete="new-password" aria-required="true"
+                                   placeholder="Confirm your password" />
                         <ValidationMessage For="() => Input.ConfirmPassword" class="validation-message" />
                     </div>
-                    
+
                     <button type="submit" class="btn btn-register">
                         <i class="fas fa-user-plus"></i> Create Account
                     </button>
-                    
+
                     <div class="register-links">
                         <p>
                             Already have an account? <a href="Account/Login">Sign in</a>
@@ -103,8 +103,7 @@
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-    public async Task RegisterUser(EditContext editContext)
-    {
+    public async Task RegisterUser(EditContext editContext) {
         var user = CreateUser();
         string email = Input.Email.Trim();
         await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
@@ -112,8 +111,7 @@
         await emailStore.SetEmailAsync(user, email, CancellationToken.None);
         var result = await UserManager.CreateAsync(user, Input.Password);
 
-        if (!result.Succeeded)
-        {
+        if (!result.Succeeded) {
             identityErrors = result.Errors;
             return;
         }
@@ -138,30 +136,23 @@
         RedirectManager.RedirectTo(ReturnUrl);
     }
 
-    private ApplicationUser CreateUser()
-    {
-        try
-        {
+    private ApplicationUser CreateUser() {
+        try {
             return Activator.CreateInstance<ApplicationUser>();
-        }
-        catch
-        {
+        } catch {
             throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
                 $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
-    {
-        if (!UserManager.SupportsUserEmail)
-        {
+    private IUserEmailStore<ApplicationUser> GetEmailStore() {
+        if (!UserManager.SupportsUserEmail) {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
         return (IUserEmailStore<ApplicationUser>)UserStore;
     }
 
-    private sealed class InputModel
-    {
+    private sealed class InputModel {
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]
