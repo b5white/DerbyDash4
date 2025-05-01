@@ -28,8 +28,8 @@ namespace DerbyDash.Services {
 
         public async Task<List<Racer>> GetRacers() {
             return raceTeam = new() {
-                new Racer { Name = "Alice" },
-                new Racer { Name = "Bob" },
+                new Racer { Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
+                new Racer { Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
                 new Racer { Name = "Charlie" }
             };
         }
