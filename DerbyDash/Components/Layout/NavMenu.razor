@@ -29,7 +29,7 @@
         </div>
 
         <div class="nav-item">
-            <NavLink class="nav-link" href="RaceSetsMenu">
+            <NavLink class="nav-link" href="RaceSetsMenu" Match="NavLinkMatch.All">
                 <i class="nav-icon fas fa-flag-checkered"></i>
                 <span class="nav-text">Races</span>
             </NavLink>
@@ -42,16 +42,16 @@
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Manage/RaceTeam">
+                    <NavLink class="nav-link" href="Account/Manage/RaceTeam" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-users"></i>
                         <span class="nav-text">Race Team</span>
                     </NavLink>
                 </div>
 
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Manage">
+                <div class="nav-item profile-item">
+                    <NavLink class="nav-link profile-link" href="Account/Manage" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-user-circle"></i>
-                        <span class="nav-text">@context.User.Identity?.Name</span>
+                        <span class="nav-text">Profile</span>
                     </NavLink>
                 </div>
 
@@ -68,14 +68,14 @@
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Register">
+                    <NavLink class="nav-link" href="Account/Register" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <span class="nav-text">Register</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Login">
+                    <NavLink class="nav-link" href="Account/Login" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-sign-in-alt"></i>
                         <span class="nav-text">Login</span>
                     </NavLink>
