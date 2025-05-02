@@ -1,6 +1,7 @@
 using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
+using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +27,8 @@ namespace DerbyDash {
                 sp.GetRequiredService<CustomAuthStateProvider>());
             builder.Services.AddSingleton<Services.RacerService>();
             builder.Services.AddScoped<Services.RaceService>();
+            builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
+            //builder.Services.AddScoped<RaceService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
             builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
@@ -44,6 +47,7 @@ namespace DerbyDash {
                 );
                 return userManager;
             });
+
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));

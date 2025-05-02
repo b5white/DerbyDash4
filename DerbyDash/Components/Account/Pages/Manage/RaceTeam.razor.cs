@@ -7,9 +7,9 @@ using System.ComponentModel.DataAnnotations;
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class RaceTeam {
         private string? message;
-        private ApplicationUser user = default!;
+        private ApplicationUser user = new ApplicationUser { NormalizedUserName = "USER@GMAIL.COM" };
 
-        private List<Racer> raceTeam;
+        private List<Racer> raceTeam = new();
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
