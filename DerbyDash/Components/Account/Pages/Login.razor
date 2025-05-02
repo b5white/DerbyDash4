@@ -8,9 +8,7 @@
 
 @attribute [AllowAnonymous]
 
-@inject SignInManager<ApplicationUser> SignInManager
-@inject ILogger<Login> Logger
-@inject NavigationManager NavigationManager
+
 @inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Log in - Derby Dash</PageTitle>
@@ -49,7 +47,7 @@
                     <div class="form-group">
                         <label for="Input.Password">Password</label>
                         <div class="password-input-container">
-                            <input type="@(showPassword ? "text" : "password")" @bind="Input.Password"
+                            <InputText type="@(showPassword ? "text" : "password")" @bind-Value="Input.Password"
                                 id="Input.Password" class="form-control" autocomplete="current-password"
                                 aria-required="true" placeholder="Enter your password" />
                             <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility"
@@ -95,4 +93,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> 

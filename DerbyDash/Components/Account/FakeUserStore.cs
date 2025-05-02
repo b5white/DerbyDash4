@@ -1,42 +1,65 @@
-﻿﻿using DerbyDash.Components.Pages;
-using DerbyDash.Data;
-using Microsoft.AspNetCore.Components;
+﻿﻿using DerbyDash.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DerbyDash.Components.Account {
-    public class FakeUserStore:
-        IUserStore<ApplicationUser>,
-        IUserPasswordStore<ApplicationUser>,
-        IUserEmailStore<ApplicationUser>,
-        IDisposable {
+    // Note: This is an IN-MEMORY store. Users are lost when the application restarts.
+    public class FakeUserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser> {
+        private readonly ILogger<FakeUserStore> _logger;
+        private readonly List<ApplicationUser> _users;
 
-        private readonly ILogger<FakeUserStore>? _logger;
-        private List<ApplicationUser> _users;
-
-        public FakeUserStore(ILogger<FakeUserStore>? logger = null) {
+        public FakeUserStore(ILogger<FakeUserStore> logger) {
             _logger = logger;
-            _users = new List<ApplicationUser> {
+            _logger?.LogWarning("FakeUserStore constructor");
+
+            // Initialize with some default users
+            _users = new List<ApplicationUser>
+            {
+                // --- ADD THIS USER ---
+                new ApplicationUser {
+                    Id = Guid.NewGuid().ToString(), // Or use a fixed Guid string if needed elsewhere
+                    UserName = "test@gmail.com",
+                    NormalizedUserName = "TEST@GMAIL.COM", // Important for lookups
+                    Email = "test@gmail.com",
+                    NormalizedEmail = "TEST@GMAIL.COM", // Important for lookups
+                    EmailConfirmed = true, // Set to true to bypass email confirmation check
+                    PasswordHash = "" // Can be empty or placeholder since we bypass the check
+                },
+                // --- END OF ADDED USER ---
+
+                // Keep other existing test users if you have them
                 new ApplicationUser {
                     Id = Guid.NewGuid().ToString(),
-                    UserName = "test",
-                    NormalizedUserName = "TEST",
-                    Email = "test@gmail.com",
-                    NormalizedEmail = "TEST@GMAIL.COM",
+                    UserName = "test@example.com",
+                    NormalizedUserName = "TEST@EXAMPLE.COM",
+                    Email = "test@example.com",
+                    NormalizedEmail = "TEST@EXAMPLE.COM",
                     EmailConfirmed = true,
-                    PasswordHash = "AQAAAAIAAYagAAAAECazbytJhsyR0U7FJHmN/9VBKGoLrqqfnSEm9x5tdD7QA5f4mLkLX5pFKYzLE5nc8w=="
+                    PasswordHash = "" // Example: Add a hashed password if needed for other tests
+                                      // For testing, you might use UserManager.PasswordHasher.HashPassword(user, "Password123!")
+                                      // But for the bypass, the hash doesn't matter.
                 }
+                // Add more users as needed
             };
         }
 
-        // Required by IUserStore
+        // --- Existing methods below ---
+
         public Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken) {
+            _logger?.LogWarning($"FakeUserStore CreateAsync {user.Email}");
+            user.Id ??= Guid.NewGuid().ToString(); // Ensure user has an ID
             _users.Add(user);
             return Task.FromResult(IdentityResult.Success);
         }
 
         public Task<string> GetUserIdAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.Id);
+
         public Task<string?> GetUserNameAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.UserName);
         public Task SetUserNameAsync(ApplicationUser user, string? userName, CancellationToken cancellationToken) {
@@ -54,16 +77,18 @@ namespace DerbyDash.Components.Account {
         public Task<ApplicationUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
             => Task.FromResult(_users.FirstOrDefault(u => u.NormalizedEmail == normalizedEmail));
 
-        // Other IUserStore methods 
+        // Other IUserStore methods
         public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
             => Task.FromResult(_users.FirstOrDefault(u => u.Id == userId));
 
         public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) {
-            return Task.FromResult(_users.FirstOrDefault(u => u.NormalizedEmail == normalizedUserName));
+            // Changed this to search by NormalizedUserName as intended
+            return Task.FromResult(_users.FirstOrDefault(u => u.NormalizedUserName == normalizedUserName));
         }
 
         // Required by IUserPasswordStore
         public Task<bool> HasPasswordAsync(ApplicationUser user, CancellationToken cancellationToken)
+            // Return true even if PasswordHash is empty, as we bypass the check later
             => Task.FromResult(true);
         public Task<string?> GetPasswordHashAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.PasswordHash);
@@ -78,7 +103,6 @@ namespace DerbyDash.Components.Account {
             user.Email = email;
             return Task.CompletedTask;
         }
-
         public Task<string> GetEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.Email);
 
@@ -95,7 +119,7 @@ namespace DerbyDash.Components.Account {
             return Task.CompletedTask;
         }
 
-        // Dispose and other methods 
+        // Dispose and other methods
         public Task<IdentityResult> UpdateAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(IdentityResult.Success);
         public Task<IdentityResult> DeleteAsync(ApplicationUser user, CancellationToken cancellationToken)
