@@ -7,12 +7,13 @@ using System.ComponentModel.DataAnnotations;
 namespace DerbyDash.Components.Account.Pages {
     public partial class Login {
         private string? errorMessage;
+        private bool showPassword = false;
 
         [Inject]
         UserManager<ApplicationUser> UserManager { get; set; } = null!;
 
-        [CascadingParameter]
-        private HttpContext HttpContext { get; set; } = default!;
+        // [CascadingParameter]
+        // private HttpContext HttpContext { get; set; } = default!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -20,14 +21,19 @@ namespace DerbyDash.Components.Account.Pages {
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
+        private void TogglePasswordVisibility()
+        {   
+            showPassword = !showPassword;
+            StateHasChanged();
+        }
+
         protected override async Task OnInitializedAsync() {
-            if (HttpMethods.IsGet(HttpContext.Request.Method)) {
-                // Clear the existing external cookie to ensure a clean login process
-                await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
-            }
+            // No HttpContext usage in interactive mode
+            await Task.CompletedTask;
         }
 
         public async Task LoginUser() {
+            Console.WriteLine("Logging in user.");
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, set lockoutOnFailure: true
             SignInResult result;

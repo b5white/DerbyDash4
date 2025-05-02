@@ -1,7 +1,8 @@
-﻿using DerbyDash.Components.Pages;
+﻿﻿using DerbyDash.Components.Pages;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 
 namespace DerbyDash.Components.Account {
     public class FakeUserStore:
@@ -10,25 +11,22 @@ namespace DerbyDash.Components.Account {
         IUserEmailStore<ApplicationUser>,
         IDisposable {
 
-        [Inject]
-        public required ILogger<Race> _logger { get; set; }
-
+        private readonly ILogger<FakeUserStore>? _logger;
         private List<ApplicationUser> _users;
 
-        public FakeUserStore() {
-            if (_users == null) {
-                _users = new List<ApplicationUser> {
-                    new ApplicationUser {
-                        Id = Guid.NewGuid().ToString(),
-                        UserName = "test",
-                        NormalizedUserName = "TEST",
-                        Email = "test@gmail.com",
-                        NormalizedEmail = "TEST@GMAIL.COM",
-                        EmailConfirmed = true,
-                        PasswordHash = "AQAAAAIAAYagAAAAECazbytJhsyR0U7FJHmN/9VBKGoLrqqfnSEm9x5tdD7QA5f4mLkLX5pFKYzLE5nc8w=="
-                    }
-                };
-            }
+        public FakeUserStore(ILogger<FakeUserStore>? logger = null) {
+            _logger = logger;
+            _users = new List<ApplicationUser> {
+                new ApplicationUser {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = "test",
+                    NormalizedUserName = "TEST",
+                    Email = "test@gmail.com",
+                    NormalizedEmail = "TEST@GMAIL.COM",
+                    EmailConfirmed = true,
+                    PasswordHash = "AQAAAAIAAYagAAAAECazbytJhsyR0U7FJHmN/9VBKGoLrqqfnSEm9x5tdD7QA5f4mLkLX5pFKYzLE5nc8w=="
+                }
+            };
         }
 
         // Required by IUserStore
@@ -103,7 +101,7 @@ namespace DerbyDash.Components.Account {
         public Task<IdentityResult> DeleteAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(IdentityResult.Success);
         public void Dispose() {
-            _logger.LogWarning("FakeUserStore destructor");
+            // _logger?.LogWarning("FakeUserStore destructor");
         }
     }
 }

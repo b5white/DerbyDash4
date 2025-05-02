@@ -1,4 +1,5 @@
 ﻿@page "/Account/Login"
+@rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
 @using Microsoft.AspNetCore.Authentication
@@ -26,7 +27,8 @@
                 <div class="racing-stripe"></div>
                 <div class="login-image-content">
                     <h2>Race to Learn!</h2>
-                    <p>Solve math problems and beat your opponents in exciting races. Track your progress and become the ultimate math racing champion!</p>
+                    <p>Solve math problems and beat your opponents in exciting races. Track your progress and become the
+                        ultimate math racing champion!</p>
                 </div>
                 <div class="checkered-pattern"></div>
             </div>
@@ -36,44 +38,52 @@
                 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger" role="alert" />
-                    
+
                     <div class="form-group">
                         <label for="Input.Email">Email Address</label>
-                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" 
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
                             autocomplete="username" aria-required="true" placeholder="Enter your email" />
                         <ValidationMessage For="() => Input.Email" class="validation-message" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="Input.Password">Password</label>
-                        <InputText type="password" @bind-Value="Input.Password" id="Input.Password" 
-                            class="form-control" autocomplete="current-password" aria-required="true" 
-                            placeholder="Enter your password" />
+                        <div class="password-input-container">
+                            <input type="@(showPassword ? "text" : "password")" @bind="Input.Password"
+                                id="Input.Password" class="form-control" autocomplete="current-password"
+                                aria-required="true" placeholder="Enter your password" />
+                            <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility"
+                                tabindex="-1">
+                                <i class="@(showPassword ? "fas fa-eye-slash" : "fas fa-eye")" aria-hidden="true"></i>
+                                <span class="sr-only">@(showPassword ? "Hide" : "Show") password</span>
+                            </button>
+                        </div>
                         <ValidationMessage For="() => Input.Password" class="validation-message" />
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-check-label">
                             <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
                             Remember me
                         </label>
                     </div>
-                    
+
                     <button type="submit" class="btn btn-login">
                         <i class="fas fa-flag-checkered"></i> Start Your Engines
                     </button>
-                    
+
                     <div class="login-divider">
                         <span>OR</span>
                     </div>
-                    
+
                     <div class="login-links">
                         <p>
                             <a href="Account/ForgotPassword">Forgot your password?</a>
                         </p>
                         <p>
-                            Don't have an account? 
-                            <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                            Don't have an account?
+                            <a
+                                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
                                 Sign up now
                             </a>
                         </p>
@@ -86,5 +96,3 @@
         </div>
     </div>
 </div>
-
-

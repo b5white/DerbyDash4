@@ -20,6 +20,7 @@ namespace DerbyDash {
 
             // Add Scoped services
             builder.Services.AddCascadingAuthenticationState();
+            builder.Services.AddRazorComponents();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<CustomAuthStateProvider>();
@@ -31,7 +32,8 @@ namespace DerbyDash {
             //builder.Services.AddScoped<RaceService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
+            builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider => 
+                new FakeUserStore(provider.GetService<ILogger<FakeUserStore>>()));
             //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
             builder.Services.AddScoped<UserManager<IdentityUser>>(provider => {
                 var userManager = new UserManager<IdentityUser>(
