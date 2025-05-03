@@ -6,6 +6,11 @@ html, body {
     overflow-x: hidden;
 }
 
+.main-content {
+    height: calc(100vh - env(keyboard-inset-height, 0px));
+    overflow-y: auto;
+}
+
 /* Utility classes */
 .ignoremouseclick {
     pointer-events: none;

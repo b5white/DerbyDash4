@@ -1,6 +1,7 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
+using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using DerbyDash.HelperUtilities;
 using DerbyDash.Services;
@@ -17,7 +18,7 @@ namespace DerbyDash.Components.Pages {
         public required RaceService RaceService { get; set; }
 
         [Inject]
-        public required RacerService RacerService { get; set; }
+        public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
         public required NavigationManager NavigationManager { get; set; }
@@ -407,17 +408,17 @@ namespace DerbyDash.Components.Pages {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
-                // Get the current racer from the RacerService
-                var currentRacer = RacerService.GetCurrentRacer();
+                // Get the current racer from the _raceTeamService
+                Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
                     NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
                     return;
                 }
-                
+
                 // Create the track with the current racer
                 track = RaceService.CreateTrack(problemSetIdentifier);
-                
+
                 // Set the name of the first car (player's car) to the current racer's name
                 if (track.Cars.Count > 0) {
                     track.Cars[0].Name = currentRacer.Name;

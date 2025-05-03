@@ -16,17 +16,17 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         [Inject]
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-        
+
         [Inject]
         internal IdentityUserAccessor UserAccessor { get; set; } = default!;
-        
+
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        
+
         [Inject]
-        internal RacerService RacerService { get; set; } = default!;
-        
-        [Inject] 
+        internal IRaceTeamService RaceTeamService { get; set; } = default!;
+
+        [Inject]
         public ILogger<RaceTeam> Logger { get; set; } = default!;
 
         [SupplyParameterFromForm]
@@ -36,9 +36,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             try {
                 user = await UserAccessor.GetRequiredUserAsync(HttpContext);
                 // Get racers from the service
-                raceTeam = RacerService.GetRacers();
-            }
-            catch (Exception ex) {
+                raceTeam = await RaceTeamService.GetRacers(user);
+            } catch (Exception ex) {
                 Logger.LogError(ex, "Error loading race team");
                 raceTeam = new List<Racer>();
             }
@@ -50,14 +49,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     UserName = user.UserName ?? "",
                     Name = Input.MemberName,
                 };
-                
-                await RacerService.AddRacerAsync(newTeamMember);
-                raceTeam = RacerService.GetRacers(); // Refresh the list
-                
+
+                await RaceTeamService.AddRacer(newTeamMember);
+                raceTeam = await RaceTeamService.GetRacers(user); // Refresh the list
+
                 message = "The team member has been added";
                 Input = new(); // Clear the form
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 Logger.LogError(ex, "Error adding racer");
                 message = "Error adding racer: " + ex.Message;
             }

@@ -87,10 +87,10 @@
                         <span class="nav-text">Login</span>
                     </NavLink>
                 </div>
-                
             </NotAuthorized>
         </AuthorizeView>
     </nav>
+
     <div class="version-number">
         Version @AppInfo.Version
     </div>
@@ -100,15 +100,11 @@
     private ElementReference navScrollableElement; // Reference to the div
 
     // Method to toggle the CSS class via JavaScript
-    private async Task ToggleNavMenu()
-    {   
-        
+    private async Task ToggleNavMenu() {
         await JSRuntime.InvokeVoidAsync("toggleClass", navScrollableElement, "show-menu");
     }
 
-    private void HandleLogoutClick() // Removed async Task
-    {   
-        Console.WriteLine("ToggleNavMenu called"); // Debugging line
+    private void HandleLogoutClick() {
         // Force a page reload to ensure proper logout
         NavigationManager.NavigateTo("/Account/LogoutPage", forceLoad: true);
     }

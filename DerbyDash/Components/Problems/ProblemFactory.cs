@@ -1,7 +1,12 @@
 ﻿namespace DerbyDash.Components.Problems {
     public static class ProblemFactory {
         private static readonly Dictionary<string, Type> problemTypeMap = new Dictionary<string, Type> {
-            { "addition-2stable",  typeof(Addition2sTable) }
+            { "addition-2stable",  typeof(Addition2sTable) },
+            { "addition-3stable",  typeof(Addition3sTable) },
+            { "addition-4stable",  typeof(Addition4sTable) },
+            { "addition-5stable",  typeof(Addition5sTable) },
+            { "addition-1digitsimple",  typeof(Addition1DigitsSimple) },
+            { "addition-1digit",        typeof(Addition1Digits) },
         };
 
         public static ProblemManagerBase CreateProblemManager(string problemTypeName) {
