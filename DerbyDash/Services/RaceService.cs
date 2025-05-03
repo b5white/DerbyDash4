@@ -3,15 +3,15 @@ using DerbyDash.Data;
 
 namespace DerbyDash.Services {
     public class RaceService {
+        private readonly IRaceTeamService _raceTeamService;
         private RaceComponents track = new();
         private readonly ILogger<RaceService> _logger;
-        private readonly RaceTeamService RaceTeamService;
         public float TotalDistance = 200;
         private Random random = new Random();
 
-        public RaceService(ILogger<RaceService> logger, RaceTeamService raceTeamService) {
+        public RaceService(ILogger<RaceService> logger, IRaceTeamService raceTeamService) {
             _logger = logger;
-            RaceTeamService = raceTeamService;
+            _raceTeamService = raceTeamService;
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {

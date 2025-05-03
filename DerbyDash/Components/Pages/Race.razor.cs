@@ -18,7 +18,7 @@ namespace DerbyDash.Components.Pages {
         public required RaceService RaceService { get; set; }
 
         [Inject]
-        public required RaceTeamService RaceTeamService { get; set; }
+        public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
         public required NavigationManager NavigationManager { get; set; }
@@ -408,7 +408,7 @@ namespace DerbyDash.Components.Pages {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
-                // Get the current racer from the RaceTeamService
+                // Get the current racer from the _raceTeamService
                 Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
