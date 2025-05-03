@@ -1,17 +1,17 @@
-﻿﻿using DerbyDash.Components.Track;
+﻿using DerbyDash.Components.Track;
 using DerbyDash.Data;
 
 namespace DerbyDash.Services {
     public class RaceService {
         private RaceComponents track = new();
         private readonly ILogger<RaceService> _logger;
-        private readonly RacerService _racerService;
+        private readonly RaceTeamService RaceTeamService;
         public float TotalDistance = 200;
         private Random random = new Random();
 
-        public RaceService(ILogger<RaceService> logger, RacerService racerService) {
+        public RaceService(ILogger<RaceService> logger, RaceTeamService raceTeamService) {
             _logger = logger;
-            _racerService = racerService;
+            RaceTeamService = raceTeamService;
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {

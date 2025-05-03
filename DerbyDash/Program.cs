@@ -25,7 +25,6 @@ namespace DerbyDash {
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<CustomAuthStateProvider>());
-            builder.Services.AddSingleton<Services.RacerService>();
             builder.Services.AddScoped<Services.RaceService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             //builder.Services.AddScoped<RaceService>();
