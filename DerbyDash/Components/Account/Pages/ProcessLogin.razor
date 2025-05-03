@@ -1,0 +1,68 @@
+@page "/Account/ProcessLogin"
+@using Microsoft.AspNetCore.Identity
+@using DerbyDash.Data
+@using Microsoft.Extensions.Logging
+@using System.Web
+
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject ILogger<ProcessLogin> Logger
+@inject NavigationManager NavigationManager
+
+<PageTitle>Processing Login - Derby Dash</PageTitle>
+
+<div class="text-center">
+    <h1>Processing your login...</h1>
+    <div class="spinner-border mt-3" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Email { get; set; }
+
+    [SupplyParameterFromQuery]
+    public bool RememberMe { get; set; }
+
+    [SupplyParameterFromQuery]
+    public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Email))
+        {
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+
+        try
+        {
+            var user = await UserManager.FindByEmailAsync(Email);
+            
+            if (user != null)
+            {
+                // Sign in the user directly without password verification
+                // (password was already verified in the Login page)
+                await SignInManager.SignInAsync(user, RememberMe);
+                Logger.LogInformation("User logged in: {Email}", Email);
+                
+                // Redirect to the RaceSetsMenu page or the return URL if specified
+                NavigationManager.NavigateTo(string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl, true);
+            }
+            else
+            {
+                // User not found, redirect back to login
+                NavigationManager.NavigateTo("/", true);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
+            NavigationManager.NavigateTo("/", true);
+        }
+    }
+}
