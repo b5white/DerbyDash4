@@ -26,11 +26,17 @@ namespace DerbyDash {
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
                 sp.GetRequiredService<CustomAuthStateProvider>());
-            builder.Services.AddScoped<Services.RaceService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
-            //builder.Services.AddScoped<RaceService>();
+            builder.Services.AddScoped<RaceService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+            builder.Services.ConfigureApplicationCookie(cookieOptions => {
+                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
+                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
             builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider => 
                 new FakeUserStore(provider.GetService<ILogger<FakeUserStore>>()));
             //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();

@@ -10,6 +10,8 @@ using System.Text.Encodings.Web;
 namespace DerbyDash.Components.Account.Pages {
     public partial class Register {
         private IEnumerable<IdentityError>? identityErrors;
+        private bool showPassword = false;
+        private bool showConfirmPassword = false;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -66,6 +68,16 @@ namespace DerbyDash.Components.Account.Pages {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
             return (IUserEmailStore<ApplicationUser>)UserStore;
+        }
+
+        private void TogglePasswordVisibility() {
+            showPassword = !showPassword;
+            StateHasChanged();
+        }
+
+        private void ToggleConfirmPasswordVisibility() {
+            showConfirmPassword = !showConfirmPassword;
+            StateHasChanged();
         }
 
         private sealed class InputModel {
