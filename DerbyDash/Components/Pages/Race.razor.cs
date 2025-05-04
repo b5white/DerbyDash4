@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DerbyDash.Components.Layout;
+﻿﻿﻿﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -145,6 +145,17 @@ namespace DerbyDash.Components.Pages {
                 catch (Exception ex) {
                     _logger.LogError(ex, "Error refreshing last played race cookie");
                 }
+            }
+            
+            // Refresh the active racer cookie if there is an active racer
+            try {
+                Racer? activeRacer = await RaceTeamService.GetActiveRacer();
+                if (activeRacer != null) {
+                    await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
+                }
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error refreshing active racer cookie");
             }
             
             await Reset();
