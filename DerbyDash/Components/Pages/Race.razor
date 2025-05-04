@@ -12,7 +12,7 @@
             <p class="race-subtitle">Ready to race with numbers?</p>
         </div>
 
-        <EditForm EditContext="@editContext" OnValidSubmit="StartClick" FormName="StartRaceForm">
+        <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartRaceForm">
             <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
             <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
                 <div class="button-content">
@@ -34,7 +34,7 @@
                 <i class="fas fa-exclamation-circle"></i>
                 <p>The system ran into a problem and couldn't calculate your results.</p>
             </div>
-            <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+            <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())">
                 <button class="retry-button" type="submit" tabindex="0" autofocus="autofocus">
                     <i class="fas fa-redo"></i> Try again
                 </button>
@@ -51,7 +51,7 @@
             </div>
 
             <!-- Move the play again button up, right after the header -->
-            <EditForm EditContext="@editContext" OnValidSubmit="StartClick">
+            <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())">
                 <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
                     <i class="fas fa-play"></i> Play Again
                 </button>

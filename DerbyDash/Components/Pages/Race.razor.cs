@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Layout;
+﻿﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -8,6 +8,7 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.JSInterop;
 using System.Timers;
 using Timer = System.Timers.Timer;
 
@@ -28,6 +29,9 @@ namespace DerbyDash.Components.Pages {
 
         [Inject]
         public required ILogger<Race> _logger { get; set; }
+
+        [Inject]
+        public required IJSRuntime JSRuntime { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
@@ -94,7 +98,7 @@ namespace DerbyDash.Components.Pages {
             FlashTimer.AutoReset = false;
         }
 
-        private void Reset() {
+        private async Task Reset() {
             _logger.LogInformation("Reset");
             if (!Running) {
                 RaceTime = 0;
@@ -104,7 +108,7 @@ namespace DerbyDash.Components.Pages {
                 Answer = "";
                 Started = true;
                 Running = true;
-                CreateProblems();
+                await CreateProblems();
                 InitializeTrack(ProblemClassString);
                 ScaleRace(0);
                 encouragingWord = encouragingWords[Random.Shared.Next(0, encouragingWords.Length)];
@@ -132,17 +136,25 @@ namespace DerbyDash.Components.Pages {
         }
 
 
-        private void StartClick() {
-            Reset();
+        private async Task StartClick() {
+            await Reset();
         }
 
-        private void CreateProblems() {
+        private async Task CreateProblems() {
             _logger.LogInformation("CreateProblems");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
             }
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
+            }
+            
+            try {
+                // Save the last played race in a cookie (90 days expiration)
+                await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error saving last played race to cookie");
             }
         }
 
@@ -261,10 +273,10 @@ namespace DerbyDash.Components.Pages {
             });
         }
 
-        public void HandleKeyPress(KeyboardEventArgs e) {
+        public async Task HandleKeyPress(KeyboardEventArgs e) {
             if (e.Key == "Enter") {
                 if (!Running || RaceTime > 0) {
-                    StartClick();
+                    await StartClick();
                 } else {
                     Answer = "";
                 }
