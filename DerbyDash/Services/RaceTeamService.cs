@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Data;
+﻿﻿﻿﻿﻿﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -34,19 +34,28 @@ namespace DerbyDash.Services {
         }
 
         public async Task<List<Racer>> GetRacers() {
-            string name = await GetUserName("GetRacers");
-            if (string.IsNullOrEmpty(name)) {
+            try {
+                // Try to get the username, but don't fail if we can't
+                try {
+                    string name = await GetUserName("GetRacers");
+                    _logger.LogInformation($"Getting racers for user: {name}");
+                } catch (Exception ex) {
+                    _logger.LogWarning(ex, "Could not get username, but continuing");
+                    // Continue even if we can't get the username
+                }
+                
+                // Return a copy of the race team to avoid modification issues
+                return raceTeam.ToList();
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
-            ApplicationUser user = await GetUserByNameAsync(name);
-            if (user == null) {
-                return new List<Racer>();
-            }
-            return await GetRacers(user);
         }
 
         public async Task<List<Racer>> GetRacers(ApplicationUser user) {
-            return raceTeam;
+            // Return the same data as GetRacers() for consistency
+            return await GetRacers();
         }
 
         public async Task<Racer?> GetRacerByIdAsync(string racerId) {
@@ -61,10 +70,21 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer> AddRacer(Racer racer) {
+            // Generate a unique ID if not provided
+            if (string.IsNullOrEmpty(racer.Id)) {
+                racer.Id = Guid.NewGuid().ToString();
+            }
+            
             raceTeam.Add(racer);
+            
+            // Set as active racer if none is selected
             if (Active is null) {
                 Active = racer;
             }
+            
+            // Notify subscribers that the racer list has changed
+            OnRacerChanged?.Invoke();
+            
             return racer;
         }
 
@@ -87,20 +107,27 @@ namespace DerbyDash.Services {
 
         public async Task SetActiveRacer(Racer racer) {
             Active = racer;
+            // Notify subscribers that the active racer has changed
+            OnRacerChanged?.Invoke();
         }
 
         public async Task<string> GetUserName(string purpose) {
-            AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
-            if (authState == null) {
-                _logger.LogError($"No authentication state found when trying to {purpose}.");
-                throw new MissingUserException();
+            try {
+                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
+                if (authState == null) {
+                    _logger.LogError($"No authentication state found when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                string? userName = authState?.User?.Identity?.Name;
+                if (userName == null) {
+                    _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                return userName;
+            } catch (Exception ex) {
+                _logger.LogError(ex, $"Error getting username for {purpose}");
+                throw new MissingUserException("Could not determine username", ex);
             }
-            string? userName = authState?.User?.Identity?.Name;
-            if (userName == null) {
-                _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
-                throw new MissingUserException();
-            }
-            return userName;
         }
     }
 }

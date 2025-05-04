@@ -33,7 +33,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
+            // Subscribe to racer changes
+            RaceTeamService.OnRacerChanged += HandleRacerChanged;
+            
             await ReloadUsers();
+        }
+        
+        private async void HandleRacerChanged()
+        {
+            await ReloadUsers();
+            StateHasChanged();
         }
 
         private async Task OnValidSubmitAsync() {
@@ -44,8 +53,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 };
 
                 await RaceTeamService.AddRacer(newTeamMember);
-                raceTeam = await RaceTeamService.GetRacers(user); // Refresh the list
-
+                // The list will be refreshed via the OnRacerChanged event
+                
                 message = "The team member has been added";
                 Input = new(); // Clear the form
             } catch (Exception ex) {
@@ -56,11 +65,24 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         private async Task ReloadUsers() {
             try {
-                user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                // Try to get the current user
+                try {
+                    user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                } catch (Exception ex) {
+                    Logger.LogWarning(ex, "Could not get user, but continuing");
+                    // Continue even if we can't get the user
+                }
+                
+                // Get the racers directly from the service
                 raceTeam.Clear();
-                raceTeam.AddRange(await RaceTeamService.GetRacers(user));
+                var racers = await RaceTeamService.GetRacers();
+                raceTeam.AddRange(racers);
+                
+                Logger.LogInformation($"Loaded {raceTeam.Count} racers");
             } catch (Exception ex) {
-                Logger.LogError(ex, "OnInitializedAsync");
+                Logger.LogError(ex, "Error in ReloadUsers");
+                // Initialize with empty list to avoid null reference exceptions
+                raceTeam = new List<Racer>();
             }
         }
 
@@ -69,6 +91,12 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [DataType(DataType.Text)]
             [Display(Name = "Racing name")]
             public string MemberName { get; set; } = "";
+        }
+        
+        public void Dispose()
+        {
+            // Unsubscribe from racer changes
+            RaceTeamService.OnRacerChanged -= HandleRacerChanged;
         }
     }
 }

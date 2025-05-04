@@ -5,41 +5,58 @@ using Microsoft.AspNetCore.Components;
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
-        private Racer SelectedRacer { get; set; }
+        private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
         private string CurrentUrl => NavigationManager.Uri;
 
-        protected override void OnInitialized() {
+        protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
-            RaceTeamService.OnRacerChanged += StateHasChanged;
+            RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
             // Subscribe to navigation changes
             NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
 
-            // Get racers from the service
-            try {
-                Racers = RaceTeamService.GetRacers().GetAwaiter().GetResult();
-            } catch (Exception) {
-                // user isn't logged in. Nothing to do here.
-                return;
-            }
-
-            // Set the selected racer to the current racer
-            Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
-            if (currentRacer != null) {
-                SelectedRacer = currentRacer;
-            } else if (Racers.Any()) {
-                SelectedRacer = Racers.First();
-                RaceTeamService.SetActiveRacer(SelectedRacer);
-            }
+            await LoadRacers();
         }
 
-        private void OnRacerChanged(ChangeEventArgs e) {
+        private async Task LoadRacers() {
+            try {
+                // Get racers from the service
+                Racers = await RaceTeamService.GetRacers();
+                
+                if (Racers.Count > 0) {
+                    // Set the selected racer to the current racer
+                    Racer? currentRacer = await RaceTeamService.GetActiveRacer();
+                    
+                    if (currentRacer != null) {
+                        SelectedRacer = currentRacer;
+                    } else {
+                        // If no active racer, set the first one as active
+                        SelectedRacer = Racers.First();
+                        await RaceTeamService.SetActiveRacer(SelectedRacer);
+                    }
+                } else {
+                    // Initialize with an empty racer to avoid null reference exceptions
+                    SelectedRacer = new Racer { Id = "", Name = "" };
+                }
+            } catch (Exception) {
+                // User isn't logged in or other error occurred. Initialize with empty lists.
+                Racers = new List<Racer>();
+                SelectedRacer = new Racer { Id = "", Name = "" };
+            }
+        }
+        
+        private async void HandleRacerChanged() {
+            await LoadRacers();
+            StateHasChanged();
+        }
+
+        private async Task OnRacerChanged(ChangeEventArgs e) {
             string newRacerId = e.Value?.ToString() ?? string.Empty;
             if (!string.IsNullOrEmpty(newRacerId)) {
-                Racer? newRacer = RaceTeamService.GetRacerByIdAsync(newRacerId).GetAwaiter().GetResult();
+                Racer? newRacer = await RaceTeamService.GetRacerByIdAsync(newRacerId);
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
-                    RaceTeamService.SetActiveRacer(newRacer);
+                    await RaceTeamService.SetActiveRacer(newRacer);
                     StateHasChanged();
                 }
             }
@@ -111,7 +128,7 @@ namespace DerbyDash.Components.Layout {
 
         public void Dispose() {
             // Unsubscribe from racer changes
-            RaceTeamService.OnRacerChanged -= StateHasChanged;
+            RaceTeamService.OnRacerChanged -= HandleRacerChanged;
 
             // Unsubscribe from navigation changes
             NavigationManager.LocationChanged -= (sender, e) => StateHasChanged();
