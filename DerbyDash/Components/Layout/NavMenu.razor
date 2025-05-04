@@ -34,6 +34,13 @@
                 <span class="nav-text">Races</span>
             </NavLink>
         </div>
+        
+        <div class="nav-item">
+            <NavLink class="nav-link" href="aboutdemo" Match="NavLinkMatch.All">
+                <i class="nav-icon fas fa-question-circle"></i>
+                <span class="nav-text">About Demo</span>
+            </NavLink>
+        </div>
 
         <AuthorizeView>
             <Authorized>
@@ -63,7 +70,7 @@
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
                         <i class="nav-icon fas fa-info-circle"></i>
                         <span class="nav-text">About DerbyDash</span>
                     </NavLink>
@@ -96,7 +103,7 @@
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
                         <i class="nav-icon fas fa-info-circle"></i>
                         <span class="nav-text">About DerbyDash</span>
                     </NavLink>

@@ -1,7 +1,8 @@
 @page "/about"
-@page "/about/{location?}"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager NavigationManager
 @attribute [AllowAnonymous]
 
 <PageTitle>About DerbyDash</PageTitle>
@@ -70,12 +71,47 @@
                 </p>
             </section>
         }
+        
+        @if (ShowDebugInfo)
+        {
+            <div class="debug-info">
+                <h4>Debug Information</h4>
+                <p>Current Location Parameter: <strong>@(Location ?? "null")</strong></p>
+                <p>Current Welcome Message: <strong>@WelcomeMessage</strong></p>
+                <div class="alert alert-info">
+                    <strong>Important:</strong> The URL format for location-specific pages is <code>/about?location=location</code>, not <code>/about/location</code>. 
+                    This is because we're using query parameters, not route parameters.
+                </div>
+                <p>Try these links:</p>
+                <div>
+                    <a href="/about" class="btn btn-sm btn-outline-primary">Default About</a>
+                    <a href="/about?location=iowa" class="btn btn-sm btn-outline-success">Iowa</a>
+                    <a href="/about?location=arizona" class="btn btn-sm btn-outline-info">Arizona</a>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
 @code {
-    [Parameter]
-    public string? Location { get; set; }
+    private string? Location { get; set; }
+
+    // Set to true to show debug information, false for production
+    private bool ShowDebugInfo = false;
+
+    protected override void OnInitialized()
+    {
+        // Parse query string parameters
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("location", out var locationParam))
+        {
+            Location = locationParam.ToString();
+        }
+        
+        // Log the location parameter for debugging
+        Console.WriteLine($"About page initialized with Location: {Location ?? "null"}");
+        base.OnInitialized();
+    }
 
     private string WelcomeMessage => Location?.ToLower() switch
     {

@@ -88,6 +88,24 @@
     color: #d68c00;
 }
 
+.debug-info {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.debug-info h4 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.debug-info .btn {
+    margin-right: 0.5rem;
+    margin-top: 0.5rem;
+}
+
 @media (max-width: 768px) {
     .about-container {
         padding: 1.5rem;
