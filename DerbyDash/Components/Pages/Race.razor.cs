@@ -418,11 +418,6 @@ namespace DerbyDash.Components.Pages {
 
                 // Create the track with the current racer
                 track = RaceService.CreateTrack(problemSetIdentifier);
-
-                // Set the name of the first car (player's car) to the current racer's name
-                if (track.Cars.Count > 0) {
-                    track.Cars[0].Name = currentRacer.Name;
-                }
             } catch (MissingTeamMemberException ex) {
                 LogMessage(ex);
                 NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
