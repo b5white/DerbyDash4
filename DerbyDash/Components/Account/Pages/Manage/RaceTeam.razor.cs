@@ -33,14 +33,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            try {
-                user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-                // Get racers from the service
-                raceTeam = await RaceTeamService.GetRacers(user);
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error loading race team");
-                raceTeam = new List<Racer>();
-            }
+            await ReloadUsers();
         }
 
         private async Task OnValidSubmitAsync() {
@@ -58,6 +51,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error adding racer");
                 message = "Error adding racer: " + ex.Message;
+            }
+        }
+
+        private async Task ReloadUsers() {
+            try {
+                user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                raceTeam.Clear();
+                raceTeam.AddRange(await RaceTeamService.GetRacers(user));
+            } catch (Exception ex) {
+                Logger.LogError(ex, "OnInitializedAsync");
             }
         }
 

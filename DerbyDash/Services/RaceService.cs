@@ -1,4 +1,5 @@
-﻿using DerbyDash.Components.Track;
+﻿
+using DerbyDash.Components.Track;
 using DerbyDash.Data;
 
 namespace DerbyDash.Services {
@@ -12,6 +13,11 @@ namespace DerbyDash.Services {
         public RaceService(ILogger<RaceService> logger, IRaceTeamService raceTeamService) {
             _logger = logger;
             _raceTeamService = raceTeamService;
+        }
+
+        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
+            _logger.LogInformation("GetRacesByTeamMemberIdAsync");
+            return new List<Race>();
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {

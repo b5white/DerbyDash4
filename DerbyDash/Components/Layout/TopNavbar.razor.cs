@@ -16,7 +16,12 @@ namespace DerbyDash.Components.Layout {
             NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
 
             // Get racers from the service
-            Racers = RaceTeamService.GetRacers(new ApplicationUser() { UserName = "test@gmail.com" }).GetAwaiter().GetResult();
+            try {
+                Racers = RaceTeamService.GetRacers().GetAwaiter().GetResult();
+            } catch (Exception) {
+                // user isn't logged in. Nothing to do here.
+                return;
+            }
 
             // Set the selected racer to the current racer
             Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();

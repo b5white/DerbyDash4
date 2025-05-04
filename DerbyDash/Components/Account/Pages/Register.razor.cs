@@ -42,8 +42,7 @@ namespace DerbyDash.Components.Account.Pages {
             var callbackUrl = NavigationManager.GetUriWithQueryParameters(
                 NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-
-            await SignInManager.SignInAsync(user, isPersistent: false);
+            await SignInManager.SignInAsync(user, isPersistent: true);
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
                 RedirectManager.RedirectTo(

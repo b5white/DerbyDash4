@@ -33,12 +33,28 @@ namespace DerbyDash.Services {
             _userManager = userManager;
         }
 
+        public async Task<List<Racer>> GetRacers() {
+            string name = await GetUserName("GetRacers");
+            if (string.IsNullOrEmpty(name)) {
+                return new List<Racer>();
+            }
+            ApplicationUser user = await GetUserByNameAsync(name);
+            if (user == null) {
+                return new List<Racer>();
+            }
+            return await GetRacers(user);
+        }
+
         public async Task<List<Racer>> GetRacers(ApplicationUser user) {
             return raceTeam;
         }
 
         public async Task<Racer?> GetRacerByIdAsync(string racerId) {
             return raceTeam.FirstOrDefault(r => r.Id == racerId);
+        }
+
+        public async Task<ApplicationUser?> GetUserByNameAsync(string name) {
+            return raceTeam.FirstOrDefault(r => r.NormalizedUserName == name.ToUpper());
         }
 
         public async Task<Racer> AddRacer(Racer racer) {

@@ -5,7 +5,6 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace DerbyDash {
     public class Program {
@@ -17,6 +16,11 @@ namespace DerbyDash {
                 .AddInteractiveServerComponents();
             //    .AddInteractiveWebAssemblyComponents()
             //    .AddAuthenticationStateSerialization();
+
+            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             // Add Scoped services
             builder.Services.AddCascadingAuthenticationState();
@@ -56,11 +60,6 @@ namespace DerbyDash {
                 return userManager;
             });
 
-            string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
             // Add Identity services
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 options.SignIn.RequireConfirmedAccount = true;
@@ -79,8 +78,15 @@ namespace DerbyDash {
             builder.Services.AddAuthentication(options => {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
             })
-                .AddIdentityCookies();
-
+                //.AddIdentityCookies()
+                .AddCookie(IdentityConstants.ApplicationScheme, options => {
+                    options.LoginPath = "/login";
+                    options.Cookie.HttpOnly = true;
+                    options.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                    options.SlidingExpiration = true;              // Optional: Reset expiration if active
+                    options.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
+                });
             // Add authorization services
             builder.Services.AddAuthorization();
 
