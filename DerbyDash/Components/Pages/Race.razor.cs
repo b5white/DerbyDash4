@@ -1,4 +1,4 @@
-﻿﻿﻿using DerbyDash.Components.Layout;
+﻿﻿﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -137,6 +137,16 @@ namespace DerbyDash.Components.Pages {
 
 
         private async Task StartClick() {
+            // If we already have a ProblemClassString, refresh the cookie with a new 90-day expiration
+            if (!string.IsNullOrEmpty(ProblemClassString)) {
+                try {
+                    await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
+                }
+                catch (Exception ex) {
+                    _logger.LogError(ex, "Error refreshing last played race cookie");
+                }
+            }
+            
             await Reset();
         }
 

@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -38,9 +38,13 @@ namespace DerbyDash.Components.Pages {
             // Get the last played race from cookie
             lastPlayedRace = await JSRuntime.InvokeAsync<string>("getCookie", "lastPlayedRace");
 
-            // If there's a last played race, navigate to it
+            // If there's a last played race, refresh the cookie with a new 90-day expiration and navigate to it
             if (!string.IsNullOrEmpty(lastPlayedRace))
             {
+                // Refresh the cookie with a new 90-day expiration
+                await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", lastPlayedRace, 90);
+                
+                // Navigate to the last played race
                 NavigationManager.NavigateTo($"/race/{lastPlayedRace}");
             }
             else
