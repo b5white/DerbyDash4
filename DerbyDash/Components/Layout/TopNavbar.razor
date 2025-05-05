@@ -21,6 +21,16 @@
         <div class="top-navbar-content">
             <AuthorizeView>
                 <Authorized>
+                    <div class="user-avatar-navbar">
+                        @if (UserAvatarFileName != null)
+                        {
+                            <img src="/images/avatars/@UserAvatarFileName" class="navbar-avatar-img" alt="User Avatar" />
+                        }
+                        else if (!string.IsNullOrEmpty(UserInitial))
+                        {
+                            <div class="navbar-avatar-default">@UserInitial</div>
+                        }
+                    </div>
                     @if (Racers.Count == 0) {
                         <div class="no-racers-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -59,4 +69,41 @@
         </div>
     </div>
 </div>
+
+<style>
+.user-avatar-navbar {
+    display: flex;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+.navbar-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #ff9800;
+    box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+    object-fit: cover;
+    margin-right: 0.5rem;
+}
+.navbar-avatar-default {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.5rem;
+    box-shadow: 0 2px 8px rgba(255,152,0,0.10);
+}
+</style>
+
+@code {
+    // Expose avatar properties for use in markup
+    private string? GetUserAvatarFileName() => UserAvatarFileName;
+    private string? GetUserInitial() => UserInitial;
+}
 

@@ -1,12 +1,18 @@
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
         private string CurrentUrl => NavigationManager.Uri;
+        [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        private string? UserAvatarFileName;
+        private string? UserInitial;
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
@@ -16,6 +22,7 @@ namespace DerbyDash.Components.Layout {
             NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
 
             await LoadRacers();
+            await LoadUserAvatar();
         }
 
         private async Task LoadRacers() {
@@ -124,6 +131,15 @@ namespace DerbyDash.Components.Layout {
                 return raceMotivations[dayOfYear % raceMotivations.Length];
             } else
                 return "Race through math challenges and become a champion!";
+        }
+
+        private async Task LoadUserAvatar() {
+            var authState = await AuthStateTask;
+            var user = await UserManager.GetUserAsync(authState.User);
+            if (user != null) {
+                UserAvatarFileName = user.AvatarFileName;
+                UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
+            }
         }
 
         public void Dispose() {
