@@ -43,8 +43,6 @@ namespace DerbyDash {
                 cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
                 cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
             });
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider =>
-                new FakeUserStore(provider.GetService<ILogger<FakeUserStore>>()));
             //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
             builder.Services.AddScoped<UserManager<IdentityUser>>(provider => {
                 var userManager = new UserManager<IdentityUser>(

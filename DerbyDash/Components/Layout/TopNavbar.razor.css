@@ -482,3 +482,12 @@
         background: linear-gradient(135deg, #f9f9f9 0%, #fff8e1 100%);
     }
 }
+
+/* Style for the user email */
+.navbar-user-email {
+    margin-left: 0.75rem; /* Space between avatar and email */
+    font-size: 0.9rem;
+    color: #495057; /* Adjust color as needed */
+    font-weight: 500;
+    white-space: nowrap; /* Prevent email from wrapping */
+}

@@ -4,9 +4,6 @@
 @implements IDisposable
 @rendermode InteractiveServer
 
-@inject NavigationManager NavigationManager
-@inject IRaceTeamService RaceTeamService
-
 <div class="top-navbar">
     <div class="container-fluid">
         <div class="page-info">
@@ -29,6 +26,11 @@
                         else if (!string.IsNullOrEmpty(UserInitial))
                         {
                             <div class="navbar-avatar-default">@UserInitial</div>
+                        }
+                        @* Add user email display *@
+                        @if (!string.IsNullOrEmpty(UserEmail))
+                        {
+                            <span class="navbar-user-email">@UserEmail</span> 
                         }
                     </div>
                     @if (Racers.Count == 0) {

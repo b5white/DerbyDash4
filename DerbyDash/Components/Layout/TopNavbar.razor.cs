@@ -2,27 +2,38 @@ using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         private string CurrentUrl => NavigationManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         private string? UserAvatarFileName;
         private string? UserInitial;
+        private string? UserEmail; // Add property for email
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
-            // Subscribe to navigation changes
-            NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
+            // Subscribe to navigation changes and refresh user avatar when navigation occurs
+            NavigationManager.LocationChanged += HandleLocationChanged;
 
             await LoadRacers();
             await LoadUserAvatar();
+        }
+        
+        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+        {
+            // Refresh user avatar when navigation occurs
+            await LoadUserAvatar();
+            StateHasChanged();
         }
 
         private async Task LoadRacers() {
@@ -135,19 +146,40 @@ namespace DerbyDash.Components.Layout {
 
         private async Task LoadUserAvatar() {
             var authState = await AuthStateTask;
-            var user = await UserManager.GetUserAsync(authState.User);
-            if (user != null) {
-                UserAvatarFileName = user.AvatarFileName;
-                UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (!string.IsNullOrEmpty(userId)) {
+                // Use FindByIdAsync to ensure we get a fresh copy from the database
+                var user = await UserManager.FindByIdAsync(userId);
+                
+                if (user != null) {
+                    UserAvatarFileName = user.AvatarFileName;
+                    UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
+                    UserEmail = user.Email; // Store the user's email
+                }
+                else // Clear fields if user not found (e.g., after logout)
+                {
+                    UserAvatarFileName = null;
+                    UserInitial = null;
+                    UserEmail = null;
+                }
+            }
+            else // Clear fields if not authenticated
+            {
+                UserAvatarFileName = null;
+                UserInitial = null;
+                UserEmail = null;
             }
         }
 
-        public void Dispose() {
+        void IDisposable.Dispose() {
             // Unsubscribe from racer changes
-            RaceTeamService.OnRacerChanged -= HandleRacerChanged;
+            if (RaceTeamService != null)
+                RaceTeamService.OnRacerChanged -= HandleRacerChanged;
 
             // Unsubscribe from navigation changes
-            NavigationManager.LocationChanged -= (sender, e) => StateHasChanged();
+            if (NavigationManager != null)
+                NavigationManager.LocationChanged -= HandleLocationChanged;
         }
     }
 }
