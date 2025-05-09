@@ -4,6 +4,47 @@ window.toggleClass = (element, className) => {
     }
 };
 
+// Initialize Bootstrap accordion
+window.initializeAccordion = () => {
+    // Check if Bootstrap is available
+    if (typeof bootstrap !== 'undefined') {
+        // Get all accordion items
+        const accordionItems = document.querySelectorAll('.accordion-item');
+        
+        // Initialize each accordion item
+        accordionItems.forEach(item => {
+            const button = item.querySelector('.accordion-button');
+            const collapseId = button?.getAttribute('data-bs-target')?.substring(1);
+            
+            if (collapseId) {
+                const collapseElement = document.getElementById(collapseId);
+                if (collapseElement) {
+                    // Create a new collapse instance
+                    new bootstrap.Collapse(collapseElement, {
+                        toggle: false
+                    });
+                    
+                    // Add click event listener to toggle the collapse
+                    button.addEventListener('click', function() {
+                        const isCollapsed = button.classList.contains('collapsed');
+                        if (isCollapsed) {
+                            button.classList.remove('collapsed');
+                            button.setAttribute('aria-expanded', 'true');
+                            collapseElement.classList.add('show');
+                        } else {
+                            button.classList.add('collapsed');
+                            button.setAttribute('aria-expanded', 'false');
+                            collapseElement.classList.remove('show');
+                        }
+                    });
+                }
+            }
+        });
+    } else {
+        console.warn('Bootstrap is not available. Accordion functionality may be limited.');
+    }
+};
+
 // Set a cookie with a specified expiration time
 window.setCookie = (name, value, days) => {
     let expires = "";
