@@ -1,15 +1,9 @@
-﻿﻿using DerbyDash.Data;
+﻿using DerbyDash.Data;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace DerbyDash.Components.Account {
     // Note: This is an IN-MEMORY store. Users are lost when the application restarts.
-    public class FakeUserStore : IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser> {
+    public class FakeUserStore: IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser> {
         private readonly ILogger<FakeUserStore> _logger;
         private readonly List<ApplicationUser> _users;
 
@@ -20,7 +14,6 @@ namespace DerbyDash.Components.Account {
             // Initialize with some default users
             _users = new List<ApplicationUser>
             {
-                // --- ADD THIS USER ---
                 new ApplicationUser {
                     Id = Guid.NewGuid().ToString(), // Or use a fixed Guid string if needed elsewhere
                     UserName = "test@gmail.com",
@@ -30,9 +23,7 @@ namespace DerbyDash.Components.Account {
                     EmailConfirmed = true, // Set to true to bypass email confirmation check
                     PasswordHash = "" // Can be empty or placeholder since we bypass the check
                 },
-                // --- END OF ADDED USER ---
 
-                // Keep other existing test users if you have them
                 new ApplicationUser {
                     Id = Guid.NewGuid().ToString(),
                     UserName = "test@example.com",
@@ -44,11 +35,8 @@ namespace DerbyDash.Components.Account {
                                       // For testing, you might use UserManager.PasswordHasher.HashPassword(user, "Password123!")
                                       // But for the bypass, the hash doesn't matter.
                 }
-                // Add more users as needed
             };
         }
-
-        // --- Existing methods below ---
 
         public Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken) {
             _logger?.LogWarning($"FakeUserStore CreateAsync {user.Email}");

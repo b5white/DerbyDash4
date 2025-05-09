@@ -2,14 +2,9 @@
 @rendermode InteractiveServer
 
 @using System.ComponentModel.DataAnnotations
-@using Microsoft.AspNetCore.Authentication
-@using Microsoft.AspNetCore.Identity
 @using DerbyDash.Data
 
 @attribute [AllowAnonymous]
-
-
-@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Log in - Derby Dash</PageTitle>
 
@@ -62,7 +57,7 @@
                     <div class="form-group">
                         <label class="form-check-label">
                             <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                            Remember me
+                            Keep me logged in with cookies.
                         </label>
                     </div>
 
@@ -81,7 +76,7 @@
                         <p>
                             Don't have an account?
                             <a
-                                href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                                href="@(NavManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
                                 Sign up now
                             </a>
                         </p>

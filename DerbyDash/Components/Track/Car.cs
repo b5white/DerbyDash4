@@ -1,4 +1,4 @@
-﻿﻿﻿﻿using DerbyDash.Data;
+﻿using DerbyDash.Data;
 using DerbyDash.HelperUtilities;
 
 namespace DerbyDash.Components.Track {

@@ -54,7 +54,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task<ApplicationUser?> GetUserByNameAsync(string name) {
-            return raceTeam.FirstOrDefault(r => r.NormalizedUserName == name.ToUpper());
+            return new ApplicationUser() { UserName = name };
         }
 
         public async Task<Racer> AddRacer(Racer racer) {

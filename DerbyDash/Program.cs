@@ -5,6 +5,7 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace DerbyDash {
     public class Program {
@@ -24,7 +25,6 @@ namespace DerbyDash {
 
             // Add Scoped services
             builder.Services.AddCascadingAuthenticationState();
-            builder.Services.AddRazorComponents();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<CustomAuthStateProvider>();
@@ -35,13 +35,6 @@ namespace DerbyDash {
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-            builder.Services.ConfigureApplicationCookie(cookieOptions => {
-                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
-                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-            });
             builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider =>
                 new FakeUserStore(provider.GetService<ILogger<FakeUserStore>>()));
             //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
@@ -70,22 +63,25 @@ namespace DerbyDash {
                 options.Password.RequireUppercase = false;
                 options.Password.RequiredLength = 8;
             })
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddSignInManager()
-            .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager()
+                .AddDefaultTokenProviders();
 
             // Add authentication services
             builder.Services.AddAuthentication(options => {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
             })
                 //.AddIdentityCookies()
-                .AddCookie(IdentityConstants.ApplicationScheme, options => {
-                    options.LoginPath = "/login";
-                    options.Cookie.HttpOnly = true;
-                    options.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                    options.SlidingExpiration = true;              // Optional: Reset expiration if active
-                    options.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
+                .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
+                    cookieOptions.LoginPath = "/login";
+                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
+                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                    cookieOptions.Cookie.Name = "DerbyDash";
+                    cookieOptions.Cookie.IsEssential = true;
                 });
             // Add authorization services
             builder.Services.AddAuthorization();
@@ -117,7 +113,9 @@ namespace DerbyDash {
                 .AddInteractiveServerRenderMode();
             //    .AddInteractiveWebAssemblyRenderMode()
             //    .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
-
+            app.MapGet("/debug/routes",
+                (IEnumerable<EndpointDataSource> sources) =>
+                string.Join("\n", sources.SelectMany(s => s.Endpoints)));
             app.Run();
         }
     }

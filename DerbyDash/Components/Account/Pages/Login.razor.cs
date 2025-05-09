@@ -1,10 +1,7 @@
 using DerbyDash.Data;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
-using DerbyDash.Components.Account; // Assuming StatusMessage is here or adjust namespace
 
 namespace DerbyDash.Components.Account.Pages {
     public partial class Login {
@@ -15,16 +12,10 @@ namespace DerbyDash.Components.Account.Pages {
         private UserManager<ApplicationUser> UserManager { get; set; } = null!;
 
         [Inject]
-        private SignInManager<ApplicationUser> SignInManager { get; set; } = null!; // Inject SignInManager if needed later, though ProcessLogin handles it
-
-        [Inject]
         private ILogger<Login> Logger { get; set; } = null!;
 
         [Inject]
-        private NavigationManager NavigationManager { get; set; } = null!;
-
-        // [CascadingParameter]
-        // private HttpContext HttpContext { get; set; } = default!;
+        private NavigationManager NavManager { get; set; } = null!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -32,8 +23,7 @@ namespace DerbyDash.Components.Account.Pages {
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        private void TogglePasswordVisibility()
-        {
+        private void TogglePasswordVisibility() {
             showPassword = !showPassword;
             // No need for StateHasChanged() here as Blazor handles UI updates for bound values on events
         }
@@ -47,7 +37,7 @@ namespace DerbyDash.Components.Account.Pages {
             Console.WriteLine("Logging in user.");
 
             // Clear any existing error message
-            errorMessage = null;
+            errorMessage = "";
 
             // Basic form validation check (though DataAnnotationsValidator handles this too)
             if (string.IsNullOrWhiteSpace(Input.Email) || string.IsNullOrWhiteSpace(Input.Password)) {
@@ -72,9 +62,7 @@ namespace DerbyDash.Components.Account.Pages {
                 {
                     Logger.LogWarning("Bypassing password check for test user: {Email}", Input.Email);
                     isPasswordValid = true; // Force password validation to pass
-                }
-                else
-                {
+                } else {
                     // --- ORIGINAL PASSWORD CHECK ---
                     // Check the password for any other user
                     isPasswordValid = await UserManager.CheckPasswordAsync(user, Input.Password);
@@ -120,16 +108,14 @@ namespace DerbyDash.Components.Account.Pages {
                 string defaultReturnUrl = "/RaceSetsMenu";
                 var returnUrl = ReturnUrl ?? defaultReturnUrl;
                 // Ensure ReturnUrl is a local URL before redirecting
-                if (!Uri.IsWellFormedUriString(returnUrl, UriKind.Relative))
-                {
+                if (!Uri.IsWellFormedUriString(returnUrl, UriKind.Relative)) {
                     Logger.LogWarning("Invalid ReturnUrl provided: {ReturnUrl}. Redirecting to default.", returnUrl);
                     returnUrl = defaultReturnUrl;
                 }
 
                 Logger.LogInformation("Redirecting user {Email} to ProcessLogin with ReturnUrl: {ReturnUrl}", Input.Email, returnUrl);
-                NavigationManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(Input.Email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
-            }
-            catch (Exception ex) {
+                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(Input.Email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
+            } catch (Exception ex) {
                 errorMessage = $"Error: An unexpected error occurred during login attempt."; // Avoid exposing ex.Message directly to user
                 Logger.LogError(ex, "Error during login attempt for user: {Email}", Input.Email);
             }
@@ -144,8 +130,9 @@ namespace DerbyDash.Components.Account.Pages {
             [DataType(DataType.Password)]
             public string Password { get; set; } = "";
 
-            [Display(Name = "Remember me?")]
-            public bool RememberMe { get; set; }
+            [Display(Name = "Use Cookies to stay logged in?")]
+            public bool RememberMe { get; set; } = true;
+            public string ReturnUrl { get; set; } = "";
         }
     }
 }
