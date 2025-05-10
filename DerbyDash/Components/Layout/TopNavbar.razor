@@ -18,21 +18,7 @@
         <div class="top-navbar-content">
             <AuthorizeView>
                 <Authorized>
-                    <div class="user-avatar-navbar">
-                        @if (UserAvatarFileName != null)
-                        {
-                            <img src="/images/avatars/@UserAvatarFileName" class="navbar-avatar-img" alt="User Avatar" />
-                        }
-                        else if (!string.IsNullOrEmpty(UserInitial))
-                        {
-                            <div class="navbar-avatar-default">@UserInitial</div>
-                        }
-                        @* Add user email display *@
-                        @if (!string.IsNullOrEmpty(UserEmail))
-                        {
-                            <span class="navbar-user-email">@UserEmail</span> 
-                        }
-                    </div>
+                    
                     @if (Racers.Count == 0) {
                         <div class="no-racers-message">
                             <i class="fas fa-exclamation-circle"></i>
@@ -41,7 +27,18 @@
                     } else {
                         <div class="racer-selector">
                             <div class="racer-icon">
-                                <i class="fas fa-user-astronaut"></i>
+                                @if (UserAvatarFileName != null)
+                                {
+                                    <img src="/images/avatars/@UserAvatarFileName" class="racer-avatar-img" alt="User Avatar" />
+                                }
+                                else if (!string.IsNullOrEmpty(UserInitial))
+                                {
+                                    <div class="racer-avatar-default">@UserInitial</div>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-user-astronaut"></i>
+                                }
                             </div>
                             <div class="racer-dropdown-container">
                                 <label for="currentRacer">
