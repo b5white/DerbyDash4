@@ -1,4 +1,5 @@
-@page "/Account/LogoutPage"
+@page "/Account/Logout"
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Identity
 @using DerbyDash.Data
 @using Microsoft.AspNetCore.Components.Authorization
@@ -8,6 +9,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
 @inject CustomAuthStateProvider AuthStateProvider
+@inject ILogger<Logout> Logger
 
 <PageTitle>Logging out...</PageTitle>
 
@@ -19,15 +21,29 @@
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        // Sign out the user
-        await SignInManager.SignOutAsync();
-        
-        // Notify our custom auth state provider about the logout
-        AuthStateProvider.NotifyUserLogout();
-        
-        // Redirect to home page with force reload to ensure the UI updates
-        NavigationManager.NavigateTo("/", forceLoad: true);
+    
+    protected override async Task OnInitializedAsync() {
+        if (await IsLoggedIn()) {
+            Logger.LogInformation("OnInitializedAsync called.");
+            try {
+                await SignInManager.SignOutAsync();
+                AuthStateProvider.NotifyUserLogout();
+
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error during logout.");
+            }
+        }
+    }       
+
+    protected override void OnAfterRender(bool firstRender) {
+        if (firstRender) {
+            Logger.LogInformation("OnAfterRender called.");
+            NavigationManager.NavigateTo("/", forceLoad: true);
+        }
+    }
+
+    private async Task<bool> IsLoggedIn() {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        return authState.User.Identity?.IsAuthenticated ?? false;
     }
 }

@@ -38,20 +38,21 @@ namespace DerbyDash.Components.Account.Pages {
 
             // Clear any existing error message
             errorMessage = "";
-
+            string email = Input.Email.Trim();
+            string password = Input.Password.Trim();
             // Basic form validation check (though DataAnnotationsValidator handles this too)
-            if (string.IsNullOrWhiteSpace(Input.Email) || string.IsNullOrWhiteSpace(Input.Password)) {
+            if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) {
                 errorMessage = "Error: Email and password are required.";
                 return;
             }
 
             try {
                 // First, find the user by email
-                var user = await UserManager.FindByEmailAsync(Input.Email.Trim());
+                var user = await UserManager.FindByEmailAsync(email);
 
                 if (user == null) {
                     errorMessage = "Error: Invalid login attempt. Please check your email and password.";
-                    Logger.LogWarning("Failed login attempt for non-existent user: {Email}", Input.Email);
+                    Logger.LogWarning("Failed login attempt for non-existent user: {Email}", email);
                     return;
                 }
 
@@ -65,14 +66,14 @@ namespace DerbyDash.Components.Account.Pages {
                 } else {
                     // --- ORIGINAL PASSWORD CHECK ---
                     // Check the password for any other user
-                    isPasswordValid = await UserManager.CheckPasswordAsync(user, Input.Password);
+                    isPasswordValid = await UserManager.CheckPasswordAsync(user, password);
                 }
                 // --- END OF FAKE LOGIN MODIFICATION ---
 
                 if (!isPasswordValid) {
                     // This message will now only show for non-test users with wrong passwords
                     errorMessage = "Error: Invalid login attempt. Please check your email and password.";
-                    Logger.LogWarning("Failed login attempt (incorrect password) for user: {Email}", Input.Email);
+                    Logger.LogWarning("Failed login attempt (incorrect password) for user: {Email}", email);
                     return;
                 }
 
@@ -82,24 +83,24 @@ namespace DerbyDash.Components.Account.Pages {
                         errorMessage = "Error: You must confirm your email before logging in.";
                         // Optionally, provide a link to resend confirmation
                         // Example: errorMessage += " <a href='/Account/ResendEmailConfirmation'>Resend confirmation</a>";
-                        Logger.LogWarning("Login failed: Email not confirmed for user {Email}", Input.Email);
+                        Logger.LogWarning("Login failed: Email not confirmed for user {Email}", email);
                         return;
                     }
                 } catch (NotSupportedException) {
                     // Email confirmation not supported by the store, continue with login
-                    Logger.LogInformation("Email confirmation feature not supported by the store for user {Email}", Input.Email);
+                    Logger.LogInformation("Email confirmation feature not supported by the store for user {Email}", email);
                 }
 
                 // Check if account is locked out - skip if not supported
                 try {
                     if (await UserManager.IsLockedOutAsync(user)) {
                         errorMessage = "Error: Account locked out. Please try again later or contact support.";
-                        Logger.LogWarning("User account locked out: {Email}", Input.Email);
+                        Logger.LogWarning("User account locked out: {Email}", email);
                         return;
                     }
                 } catch (NotSupportedException) {
                     // Lockout not supported by the store, continue with login
-                    Logger.LogInformation("User lockout feature not supported by the store for user {Email}", Input.Email);
+                    Logger.LogInformation("User lockout feature not supported by the store for user {Email}", email);
                 }
 
                 // If we get here, the user is valid and can be signed in
@@ -113,11 +114,11 @@ namespace DerbyDash.Components.Account.Pages {
                     returnUrl = defaultReturnUrl;
                 }
 
-                Logger.LogInformation("Redirecting user {Email} to ProcessLogin with ReturnUrl: {ReturnUrl}", Input.Email, returnUrl);
-                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(Input.Email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
+                Logger.LogInformation("Redirecting user {Email} to ProcessLogin with ReturnUrl: {ReturnUrl}", email, returnUrl);
+                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
             } catch (Exception ex) {
                 errorMessage = $"Error: An unexpected error occurred during login attempt."; // Avoid exposing ex.Message directly to user
-                Logger.LogError(ex, "Error during login attempt for user: {Email}", Input.Email);
+                Logger.LogError(ex, "Error during login attempt for user: {Email}", email);
             }
         }
 

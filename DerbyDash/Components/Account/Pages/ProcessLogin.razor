@@ -31,38 +31,52 @@
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    protected override async Task OnInitializedAsync()
-    {
-        if (string.IsNullOrEmpty(Email))
-        {
-            NavigationManager.NavigateTo("/", true);
-            return;
-        }
+    @inject CustomAuthStateProvider AuthStateProvider 
 
-        try
-        {
-            var user = await UserManager.FindByEmailAsync(Email);
-            
-            if (user != null)
-            {
-                // Sign in the user directly without password verification
-                // (password was already verified in the Login page)
-                await SignInManager.SignInAsync(user, RememberMe);
-                Logger.LogInformation("User logged in: {Email}", Email);
-                
-                // Redirect to the RaceSetsMenu page or the return URL if specified
-                NavigationManager.NavigateTo(string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl, true);
+    static string targetUrl = "";
+
+    protected override async Task OnInitializedAsync() {
+        if (!await IsLoggedIn()) {
+
+            if (string.IsNullOrEmpty(Email)) {
+                targetUrl = "/";
+                return;
             }
-            else
-            {
-                // User not found, redirect back to login
-                NavigationManager.NavigateTo("/", true);
+
+            try {
+                var user = await UserManager.FindByEmailAsync(Email);
+
+                if (user != null) {
+                    // Sign in the user directly without password verification
+                    // (password was already verified in the Login page)
+                    await SignInManager.SignInAsync(user, RememberMe);
+                    Logger.LogInformation("User logged in: {Email}", Email);
+
+                    targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
+                } else {
+                    // User not found, redirect back to login
+                    targetUrl = "/";
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
+                targetUrl = "/";
             }
         }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
-            NavigationManager.NavigateTo("/", true);
+    }
+
+    protected override void OnAfterRender(bool firstRender) {
+        if (firstRender) {
+            // Check if targetUrl is not null or empty before navigating
+            if (!string.IsNullOrEmpty(targetUrl)) {
+                NavigationManager.NavigateTo(targetUrl, forceLoad: true);
+            } else {
+                Logger.LogWarning("Navigation aborted: targetUrl is null or empty.");
+            }
         }
+    }
+
+    private async Task<bool> IsLoggedIn() {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        return authState.User.Identity?.IsAuthenticated ?? false;
     }
 }
