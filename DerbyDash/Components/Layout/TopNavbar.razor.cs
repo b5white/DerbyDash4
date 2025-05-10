@@ -1,45 +1,80 @@
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
-        private Racer SelectedRacer { get; set; }
+        private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
+        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         private string CurrentUrl => NavigationManager.Uri;
+        [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        private string? UserAvatarFileName;
+        private string? UserInitial;
+        private string? UserEmail; // Add property for email
 
-        protected override void OnInitialized() {
+        protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
-            RaceTeamService.OnRacerChanged += StateHasChanged;
+            RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
-            // Subscribe to navigation changes
-            NavigationManager.LocationChanged += (sender, e) => StateHasChanged();
+            // Subscribe to navigation changes and refresh user avatar when navigation occurs
+            NavigationManager.LocationChanged += HandleLocationChanged;
 
-            // Get racers from the service
-            try {
-                Racers = RaceTeamService.GetRacers().GetAwaiter().GetResult();
-            } catch (Exception) {
-                // user isn't logged in. Nothing to do here.
-                return;
-            }
-
-            // Set the selected racer to the current racer
-            Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
-            if (currentRacer != null) {
-                SelectedRacer = currentRacer;
-            } else if (Racers.Any()) {
-                SelectedRacer = Racers.First();
-                RaceTeamService.SetActiveRacer(SelectedRacer);
-            }
+            await LoadRacers();
+            await LoadUserAvatar();
+        }
+        
+        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
+        {
+            // Refresh user avatar when navigation occurs
+            await LoadUserAvatar();
+            StateHasChanged();
         }
 
-        private void OnRacerChanged(ChangeEventArgs e) {
+        private async Task LoadRacers() {
+            try {
+                // Get racers from the service
+                Racers = await RaceTeamService.GetRacers();
+                
+                if (Racers.Count > 0) {
+                    // Set the selected racer to the current racer
+                    Racer? currentRacer = await RaceTeamService.GetActiveRacer();
+                    
+                    if (currentRacer != null) {
+                        SelectedRacer = currentRacer;
+                    } else {
+                        // If no active racer, set the first one as active
+                        SelectedRacer = Racers.First();
+                        await RaceTeamService.SetActiveRacer(SelectedRacer);
+                    }
+                } else {
+                    // Initialize with an empty racer to avoid null reference exceptions
+                    SelectedRacer = new Racer { Id = "", Name = "" };
+                }
+            } catch (Exception) {
+                // User isn't logged in or other error occurred. Initialize with empty lists.
+                Racers = new List<Racer>();
+                SelectedRacer = new Racer { Id = "", Name = "" };
+            }
+        }
+        
+        private async void HandleRacerChanged() {
+            await LoadRacers();
+            StateHasChanged();
+        }
+
+        private async Task OnRacerChanged(ChangeEventArgs e) {
             string newRacerId = e.Value?.ToString() ?? string.Empty;
             if (!string.IsNullOrEmpty(newRacerId)) {
-                Racer? newRacer = RaceTeamService.GetRacerByIdAsync(newRacerId).GetAwaiter().GetResult();
+                Racer? newRacer = await RaceTeamService.GetRacerByIdAsync(newRacerId);
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
-                    RaceTeamService.SetActiveRacer(newRacer);
+                    await RaceTeamService.SetActiveRacer(newRacer);
                     StateHasChanged();
                 }
             }
@@ -109,12 +144,42 @@ namespace DerbyDash.Components.Layout {
                 return "Race through math challenges and become a champion!";
         }
 
-        public void Dispose() {
+        private async Task LoadUserAvatar() {
+            var authState = await AuthStateTask;
+            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            
+            if (!string.IsNullOrEmpty(userId)) {
+                // Use FindByIdAsync to ensure we get a fresh copy from the database
+                var user = await UserManager.FindByIdAsync(userId);
+                
+                if (user != null) {
+                    UserAvatarFileName = user.AvatarFileName;
+                    UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
+                    UserEmail = user.Email; // Store the user's email
+                }
+                else // Clear fields if user not found (e.g., after logout)
+                {
+                    UserAvatarFileName = null;
+                    UserInitial = null;
+                    UserEmail = null;
+                }
+            }
+            else // Clear fields if not authenticated
+            {
+                UserAvatarFileName = null;
+                UserInitial = null;
+                UserEmail = null;
+            }
+        }
+
+        void IDisposable.Dispose() {
             // Unsubscribe from racer changes
-            RaceTeamService.OnRacerChanged -= StateHasChanged;
+            if (RaceTeamService != null)
+                RaceTeamService.OnRacerChanged -= HandleRacerChanged;
 
             // Unsubscribe from navigation changes
-            NavigationManager.LocationChanged -= (sender, e) => StateHasChanged();
+            if (NavigationManager != null)
+                NavigationManager.LocationChanged -= HandleLocationChanged;
         }
     }
 }

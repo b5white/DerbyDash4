@@ -34,6 +34,20 @@
                 <span class="nav-text">Races</span>
             </NavLink>
         </div>
+        
+        <div class="nav-item">
+            <NavLink class="nav-link" href="aboutdemo" Match="NavLinkMatch.All">
+                <i class="nav-icon fas fa-question-circle"></i>
+                <span class="nav-text">About Demo</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item">
+            <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All">
+                <i class="nav-icon fas fa-question-circle"></i>
+                <span class="nav-text">FAQ</span>
+            </NavLink>
+        </div>
 
         <AuthorizeView>
             <Authorized>
@@ -63,6 +77,13 @@
                 </div>
 
                 <div class="nav-item">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
+                        <i class="nav-icon fas fa-info-circle"></i>
+                        <span class="nav-text">About DerbyDash</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item">
                     <NavLink class="nav-link logout-link" @onclick="HandleLogoutClick">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
                         <span class="nav-text">Logout</span>
@@ -85,6 +106,13 @@
                     <NavLink class="nav-link" href="Account/Login" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-sign-in-alt"></i>
                         <span class="nav-text">Login</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
+                        <i class="nav-icon fas fa-info-circle"></i>
+                        <span class="nav-text">About DerbyDash</span>
                     </NavLink>
                 </div>
             </NotAuthorized>

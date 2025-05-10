@@ -1,0 +1,176 @@
+@page "/faq"
+@rendermode InteractiveServer
+@using DerbyDash.Services
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
+@inject IFAQService FAQService
+@inject IJSRuntime JSRuntime
+
+<PageTitle>FAQ - Derby Dash</PageTitle>
+
+<div class="faq-container">
+    <div class="faq-header">
+        <div class="race-flag left"></div>
+        <h1>Race Track Guide</h1>
+        <div class="race-flag right"></div>
+    </div>
+    
+    <div class="faq-intro">
+        <p>Ready to zoom through math problems? Find answers to all your racing questions here!</p>
+    </div>
+
+    <div class="faq-content">
+        @if (isLoading)
+        {
+            <div class="loading-container">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading FAQ data...</p>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger" role="alert">
+                @errorMessage
+            </div>
+        }
+        else if (categories == null || !categories.Any())
+        {
+            <div class="alert alert-warning" role="alert">
+                No FAQ categories found. Please check the data file.
+            </div>
+        }
+        else
+        {
+            <div class="faq-categories-container">
+                @{
+                    bool foundActiveCategory = false;
+                    
+                    @foreach (var category in categories)
+                    {
+                        bool isActive = selectedCategory == category;
+                        
+                        <button class="category-button @(isActive ? "active" : "")" 
+                                @onclick="() => ToggleCategorySelection(category)">
+                            @category
+                        </button>
+                        
+                        if (isActive)
+                        {
+                            foundActiveCategory = true;
+                            
+                            <div class="faq-items">
+                                @if (filteredFAQs != null && filteredFAQs.Any())
+                                {
+                                    <div class="accordion" id="faqAccordion">
+                                        @foreach (var (faq, index) in filteredFAQs.Select((f, i) => (f, i)))
+                                        {
+                                            var headingId = $"heading{index}";
+                                            var collapseId = $"collapse{index}";
+                                            var isExpanded = expandedItems.Contains(index);
+
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="@headingId">
+                                                    <button class="accordion-button @(isExpanded ? "" : "collapsed")" 
+                                                            type="button" 
+                                                            @onclick="() => ToggleAccordionItem(index)">
+                                                        @faq.Question
+                                                    </button>
+                                                </h2>
+                                                <div class="accordion-collapse @(isExpanded ? "show" : "")" 
+                                                     aria-labelledby="@headingId">
+                                                    <div class="accordion-body">
+                                                        @faq.Answer
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="no-faqs">
+                                        <p>No FAQs found for this category.</p>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    
+                    if (!foundActiveCategory && filteredFAQs != null && filteredFAQs.Any())
+                    {
+                        <div class="faq-items">
+                            <div class="no-faqs">
+                                <p>Select a category to see questions.</p>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<string> categories = new List<string>();
+    private List<DerbyDash.Data.FAQ> allFAQs = new List<DerbyDash.Data.FAQ>();
+    private List<DerbyDash.Data.FAQ> filteredFAQs = new List<DerbyDash.Data.FAQ>();
+    private string selectedCategory;
+    private bool isLoading = true;
+    private string errorMessage;
+    private HashSet<int> expandedItems = new HashSet<int>(); // All items closed by default
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            allFAQs = await FAQService.GetAllFAQsAsync();
+            categories = await FAQService.GetCategoriesAsync();
+            
+            // Don't select any category by default
+            selectedCategory = null;
+            filteredFAQs = new List<DerbyDash.Data.FAQ>();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading FAQ data: {ex.Message}";
+            Console.WriteLine(errorMessage);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleAccordionItem(int index)
+    {
+        if (expandedItems.Contains(index))
+        {
+            expandedItems.Remove(index);
+        }
+        else
+        {
+            expandedItems.Add(index);
+        }
+    }
+
+    private void ToggleCategorySelection(string category)
+    {
+        // If the same category is clicked again, deselect it
+        if (selectedCategory == category)
+        {
+            selectedCategory = null;
+            filteredFAQs = new List<DerbyDash.Data.FAQ>();
+        }
+        else
+        {
+            // Select the new category
+            selectedCategory = category;
+            filteredFAQs = allFAQs.Where(f => f.Category == category).ToList();
+        }
+        
+        // Reset expanded items when changing category - all closed by default
+        expandedItems.Clear();
+    }
+}

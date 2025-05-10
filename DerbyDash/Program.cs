@@ -32,6 +32,7 @@ namespace DerbyDash {
                 sp.GetRequiredService<CustomAuthStateProvider>());
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             builder.Services.AddScoped<RaceService>();
+            builder.Services.AddScoped<IFAQService, FAQService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 

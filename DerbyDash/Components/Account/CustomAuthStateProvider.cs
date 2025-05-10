@@ -8,7 +8,8 @@ namespace DerbyDash.Components.Account {
             var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
             var authState = Task.FromResult(new AuthenticationState(anonymousUser));
 
-            base.NotifyAuthenticationStateChanged(authState);
+            base.SetAuthenticationState(authState);  // this change didn't seem to help
+           //  base.NotifyAuthenticationStateChanged(authState);
         }
     }
 }

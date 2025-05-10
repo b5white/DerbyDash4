@@ -2,6 +2,7 @@
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.JSInterop;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -10,6 +11,7 @@ namespace DerbyDash.Services {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IJSRuntime _jsRuntime;
         private List<Racer> raceTeam = new() {
                 new Racer { Id = "1", Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
                 new Racer { Id = "2", Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
@@ -25,28 +27,42 @@ namespace DerbyDash.Services {
             ILogger<RaceTeamService> logger,
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor,
-            UserManager<ApplicationUser> userManager) {
+            UserManager<ApplicationUser> userManager,
+            IJSRuntime jsRuntime) {
             _authorizationState = authorizationState;
             _logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
+            _jsRuntime = jsRuntime;
+            
+            // Load the active racer from cookie on initialization
+            LoadActiveRacerFromCookieAsync().ConfigureAwait(false);
         }
 
         public async Task<List<Racer>> GetRacers() {
-            string name = await GetUserName("GetRacers");
-            if (string.IsNullOrEmpty(name)) {
+            try {
+                // Try to get the username, but don't fail if we can't
+                try {
+                    string name = await GetUserName("GetRacers");
+                    _logger.LogInformation($"Getting racers for user: {name}");
+                } catch (Exception ex) {
+                    _logger.LogWarning(ex, "Could not get username, but continuing");
+                    // Continue even if we can't get the username
+                }
+                
+                // Return a copy of the race team to avoid modification issues
+                return raceTeam.ToList();
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
-            ApplicationUser user = await GetUserByNameAsync(name);
-            if (user == null) {
-                return new List<Racer>();
-            }
-            return await GetRacers(user);
         }
 
         public async Task<List<Racer>> GetRacers(ApplicationUser user) {
-            return raceTeam;
+            // Return the same data as GetRacers() for consistency
+            return await GetRacers();
         }
 
         public async Task<Racer?> GetRacerByIdAsync(string racerId) {
@@ -58,10 +74,21 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer> AddRacer(Racer racer) {
+            // Generate a unique ID if not provided
+            if (string.IsNullOrEmpty(racer.Id)) {
+                racer.Id = Guid.NewGuid().ToString();
+            }
+            
             raceTeam.Add(racer);
+            
+            // Set as active racer if none is selected
             if (Active is null) {
                 Active = racer;
             }
+            
+            // Notify subscribers that the racer list has changed
+            OnRacerChanged?.Invoke();
+            
             return racer;
         }
 
@@ -79,25 +106,72 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer?> GetActiveRacer() {
+            // If no active racer is set, try to load it from cookie
+            if (Active == null) {
+                await LoadActiveRacerFromCookieAsync();
+            }
+            
             return Active;
         }
 
         public async Task SetActiveRacer(Racer racer) {
             Active = racer;
+            
+            // Save the active racer ID in a cookie with 90-day expiration
+            try {
+                await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racer.Id, 90);
+                _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie");
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, $"Error saving active racer {racer.Name} (ID: {racer.Id}) to cookie");
+            }
+            
+            // Notify subscribers that the active racer has changed
+            OnRacerChanged?.Invoke();
+        }
+        
+        // Load the active racer from cookie
+        private async Task LoadActiveRacerFromCookieAsync() {
+            try {
+                // Get the last active racer ID from cookie
+                string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", "lastActiveRacer");
+                
+                if (!string.IsNullOrEmpty(racerId)) {
+                    // Find the racer with the saved ID
+                    Racer? racer = await GetRacerByIdAsync(racerId);
+                    
+                    if (racer != null) {
+                        // Set as active racer without saving to cookie again
+                        Active = racer;
+                        _logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie");
+                        
+                        // Refresh the cookie with a new 90-day expiration
+                        await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racerId, 90);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                _logger.LogError(ex, "Error loading active racer from cookie");
+            }
         }
 
         public async Task<string> GetUserName(string purpose) {
-            AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
-            if (authState == null) {
-                _logger.LogError($"No authentication state found when trying to {purpose}.");
-                throw new MissingUserException();
+            try {
+                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
+                if (authState == null) {
+                    _logger.LogError($"No authentication state found when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                string? userName = authState?.User?.Identity?.Name;
+                if (userName == null) {
+                    _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                return userName;
+            } catch (Exception ex) {
+                _logger.LogError(ex, $"Error getting username for {purpose}");
+                throw new MissingUserException("Could not determine username", ex);
             }
-            string? userName = authState?.User?.Identity?.Name;
-            if (userName == null) {
-                _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
-                throw new MissingUserException();
-            }
-            return userName;
         }
     }
 }

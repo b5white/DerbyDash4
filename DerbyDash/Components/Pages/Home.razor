@@ -3,6 +3,7 @@
 @using DerbyDash.Components.Layout
 @using DerbyDash.Components.MenuPages
 @attribute [AllowAnonymous]
+@rendermode InteractiveServer
 
 <PageTitle>@appName - Math Racing Game</PageTitle>
 
@@ -24,9 +25,9 @@
         <h1 class="app-title">@appName</h1>
         <p class="app-subtitle">Race to math success! Solve problems and speed to victory!</p>
         
-        <a href="/RaceSetsMenu" class="start-button">
+        <button @onclick="StartRacing" class="start-button">
             Start Racing
-        </a>
+        </button>
         
         <div class="race-gif-container">
             <img src="@selectedGif" alt="Horse racing" class="race-gif" />
