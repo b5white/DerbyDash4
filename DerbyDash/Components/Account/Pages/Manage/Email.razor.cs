@@ -23,7 +23,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         //[Inject]
         //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
-        internal NavigationManager NavigationManager { get; set; } = default!;
+        internal NavigationManager NavManager { get; set; } = default!;
         [Inject]
         public ILogger<ChangePassword> Logger { get; set; } = default!;
 
@@ -47,8 +47,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             string userId = await UserManager.GetUserIdAsync(user);
             string code = await UserManager.GenerateChangeEmailTokenAsync(user, Input.NewEmail);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            string callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
+            string callbackUrl = NavManager.GetUriWithQueryParameters(
+                NavManager.ToAbsoluteUri("Account/ConfirmEmailChange").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["email"] = Input.NewEmail, ["code"] = code });
 
             await EmailSender.SendConfirmationLinkAsync(user, Input.NewEmail, HtmlEncoder.Default.Encode(callbackUrl));
@@ -64,8 +64,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             string userId = await UserManager.GetUserIdAsync(user);
             string code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            string callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            string callbackUrl = NavManager.GetUriWithQueryParameters(
+                NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code });
 
             await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));

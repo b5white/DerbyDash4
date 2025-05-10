@@ -39,12 +39,13 @@ namespace DerbyDash.Components.Account.Pages {
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = NavigationManager.GetUriWithQueryParameters(
-                NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            var callbackUrl = NavManager.GetUriWithQueryParameters(
+                NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
             await SignInManager.SignInAsync(user, isPersistent: true);
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
+                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
                 RedirectManager.RedirectTo(
                     "Account/RegisterConfirmation",
                     new() { ["email"] = email, ["returnUrl"] = ReturnUrl });

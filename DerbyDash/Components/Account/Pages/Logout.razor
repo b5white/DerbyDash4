@@ -7,7 +7,7 @@
 @using System.Security.Claims
 
 @inject SignInManager<ApplicationUser> SignInManager
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavManager
 @inject CustomAuthStateProvider AuthStateProvider
 @inject ILogger<Logout> Logger
 
@@ -38,7 +38,7 @@
     protected override void OnAfterRender(bool firstRender) {
         if (firstRender) {
             Logger.LogInformation("OnAfterRender called.");
-            NavigationManager.NavigateTo("/", forceLoad: true);
+            NavManager.NavigateTo("/", forceLoad: true);
         }
     }
 

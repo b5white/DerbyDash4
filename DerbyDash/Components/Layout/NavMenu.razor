@@ -3,7 +3,7 @@
 @using Microsoft.JSInterop
 @using Microsoft.AspNetCore.Components.Web
 
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JSRuntime
 
@@ -134,7 +134,7 @@
 
     private void HandleLogoutClick() {
         // Force a page reload to ensure proper logout
-        NavigationManager.NavigateTo("/Account/Logout", forceLoad: true);
+        NavManager.NavigateTo("/Account/Logout", forceLoad: true);
     }
 
     // Assuming AppInfo is defined elsewhere or remove if not needed

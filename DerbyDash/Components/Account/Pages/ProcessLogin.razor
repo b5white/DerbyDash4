@@ -10,7 +10,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<ProcessLogin> Logger
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavManager
 
 <PageTitle>Processing Login - Derby Dash</PageTitle>
 
@@ -68,7 +68,7 @@
         if (firstRender) {
             // Check if targetUrl is not null or empty before navigating
             if (!string.IsNullOrEmpty(targetUrl)) {
-                NavigationManager.NavigateTo(targetUrl, forceLoad: true);
+                NavManager.NavigateTo(targetUrl, forceLoad: true);
             } else {
                 Logger.LogWarning("Navigation aborted: targetUrl is null or empty.");
             }

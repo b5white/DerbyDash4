@@ -9,9 +9,9 @@ namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
-        [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+        [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
-        private string CurrentUrl => NavigationManager.Uri;
+        private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         private string? UserAvatarFileName;
@@ -23,14 +23,13 @@ namespace DerbyDash.Components.Layout {
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
-            NavigationManager.LocationChanged += HandleLocationChanged;
+            NavManager.LocationChanged += HandleLocationChanged;
 
             await LoadRacers();
             await LoadUserAvatar();
         }
-        
-        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e)
-        {
+
+        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
             // Refresh user avatar when navigation occurs
             await LoadUserAvatar();
             StateHasChanged();
@@ -40,11 +39,11 @@ namespace DerbyDash.Components.Layout {
             try {
                 // Get racers from the service
                 Racers = await RaceTeamService.GetRacers();
-                
+
                 if (Racers.Count > 0) {
                     // Set the selected racer to the current racer
                     Racer? currentRacer = await RaceTeamService.GetActiveRacer();
-                    
+
                     if (currentRacer != null) {
                         SelectedRacer = currentRacer;
                     } else {
@@ -62,7 +61,7 @@ namespace DerbyDash.Components.Layout {
                 SelectedRacer = new Racer { Id = "", Name = "" };
             }
         }
-        
+
         private async void HandleRacerChanged() {
             await LoadRacers();
             StateHasChanged();
@@ -147,25 +146,23 @@ namespace DerbyDash.Components.Layout {
         private async Task LoadUserAvatar() {
             var authState = await AuthStateTask;
             var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            
+
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
                 var user = await UserManager.FindByIdAsync(userId);
-                
+
                 if (user != null) {
                     UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
-                }
-                else // Clear fields if user not found (e.g., after logout)
-                {
+                } else // Clear fields if user not found (e.g., after logout)
+                  {
                     UserAvatarFileName = null;
                     UserInitial = null;
                     UserEmail = null;
                 }
-            }
-            else // Clear fields if not authenticated
-            {
+            } else // Clear fields if not authenticated
+              {
                 UserAvatarFileName = null;
                 UserInitial = null;
                 UserEmail = null;
@@ -178,8 +175,8 @@ namespace DerbyDash.Components.Layout {
                 RaceTeamService.OnRacerChanged -= HandleRacerChanged;
 
             // Unsubscribe from navigation changes
-            if (NavigationManager != null)
-                NavigationManager.LocationChanged -= HandleLocationChanged;
+            if (NavManager != null)
+                NavManager.LocationChanged -= HandleLocationChanged;
         }
     }
 }

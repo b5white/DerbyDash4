@@ -2,7 +2,7 @@
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Routing
 @using DerbyDash.Data
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavManager
 
 <div class="page">
     <div class="sidebar">
@@ -28,11 +28,11 @@
 </div>
 
 @code {
-    private bool IsAuthPage => NavigationManager.Uri.Contains("/Account/");
+    private bool IsAuthPage => NavManager.Uri.Contains("/Account/");
 
     protected override void OnInitialized()
     {
-        NavigationManager.LocationChanged += LocationChanged;
+        NavManager.LocationChanged += LocationChanged;
         base.OnInitialized();
     }
 
@@ -43,6 +43,6 @@
 
     public void Dispose()
     {
-        NavigationManager.LocationChanged -= LocationChanged;
+        NavManager.LocationChanged -= LocationChanged;
     }
 }

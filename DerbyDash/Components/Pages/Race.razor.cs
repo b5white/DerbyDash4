@@ -22,7 +22,7 @@ namespace DerbyDash.Components.Pages {
         public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
-        public required NavigationManager NavigationManager { get; set; }
+        public required NavigationManager NavManager { get; set; }
 
         [Inject]
         public required IConfiguration configuration { get; set; }
@@ -141,23 +141,21 @@ namespace DerbyDash.Components.Pages {
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
-                }
-                catch (Exception ex) {
+                } catch (Exception ex) {
                     _logger.LogError(ex, "Error refreshing last played race cookie");
                 }
             }
-            
+
             // Refresh the active racer cookie if there is an active racer
             try {
                 Racer? activeRacer = await RaceTeamService.GetActiveRacer();
                 if (activeRacer != null) {
                     await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.LogError(ex, "Error refreshing active racer cookie");
             }
-            
+
             await Reset();
         }
 
@@ -169,12 +167,11 @@ namespace DerbyDash.Components.Pages {
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
             }
-            
+
             try {
                 // Save the last played race in a cookie (90 days expiration)
                 await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.LogError(ex, "Error saving last played race to cookie");
             }
         }
@@ -407,7 +404,7 @@ namespace DerbyDash.Components.Pages {
 
         private void GoBack() {
             StopPeriodicTimer();
-            NavigationManager.NavigateTo("javascript:history.back()");
+            NavManager.NavigateTo("javascript:history.back()");
         }
 
         private void CalculateAverage() {
@@ -445,7 +442,7 @@ namespace DerbyDash.Components.Pages {
                 Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
-                    NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
+                    NavManager.NavigateTo("/Account/Manage/RaceTeam");
                     return;
                 }
 
@@ -453,10 +450,10 @@ namespace DerbyDash.Components.Pages {
                 track = RaceService.CreateTrack(problemSetIdentifier);
             } catch (MissingTeamMemberException ex) {
                 LogMessage(ex);
-                NavigationManager.NavigateTo("/Account/Manage/RaceTeam");
+                NavManager.NavigateTo("/Account/Manage/RaceTeam");
             } catch (MissingUserException ex) {
                 LogMessage(ex);
-                NavigationManager.NavigateTo("/Account/login");
+                NavManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
             }

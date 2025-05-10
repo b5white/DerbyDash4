@@ -1,18 +1,16 @@
 ﻿using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Routing;
-using System.Collections.Generic;
 
 namespace DerbyDash.Components.Layout {
 
     public partial class Breadcrumb: ComponentBase {
         [Inject]
-        protected NavigationManager NavigationManager { get; set; } = null!;
+        protected NavigationManager NavManager { get; set; } = null!;
 
         protected List<BreadcrumbItem> Breadcrumbs { get; set; } = new List<BreadcrumbItem>();
 
         protected override void OnInitialized() {
             base.OnInitialized();
-            string uri = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+            string uri = NavManager.ToBaseRelativePath(NavManager.Uri);
             string key = StripPath(uri);
             UpdateBreadcrumbs(key);
             StateHasChanged();

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
 
 namespace DerbyDash.Components.Layout {
@@ -6,17 +5,17 @@ namespace DerbyDash.Components.Layout {
         private string? currentUrl;
 
         protected override void OnInitialized() {
-            currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-            NavigationManager.LocationChanged += OnLocationChanged;
+            currentUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
+            NavManager.LocationChanged += OnLocationChanged;
         }
 
         private void OnLocationChanged(object? sender, LocationChangedEventArgs e) {
-            currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+            currentUrl = NavManager.ToBaseRelativePath(e.Location);
             StateHasChanged();
         }
 
         public void Dispose() {
-            NavigationManager.LocationChanged -= OnLocationChanged;
+            NavManager.LocationChanged -= OnLocationChanged;
         }
     }
 }

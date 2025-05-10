@@ -2,7 +2,7 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.WebUtilities
-@inject NavigationManager NavigationManager
+@inject NavigationManager NavManager
 @attribute [AllowAnonymous]
 
 <PageTitle>About DerbyDash</PageTitle>
@@ -102,7 +102,7 @@
     protected override void OnInitialized()
     {
         // Parse query string parameters
-        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
         if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("location", out var locationParam))
         {
             Location = locationParam.ToString();
