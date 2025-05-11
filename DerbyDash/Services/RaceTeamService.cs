@@ -1,4 +1,4 @@
-﻿using DerbyDash.Data;
+﻿﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -122,10 +122,24 @@ namespace DerbyDash.Services {
         public async Task SetActiveRacer(Racer racer) {
             Active = racer;
 
-            // Save the active racer ID in a cookie with 90-day expiration
             try {
-                await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racer.Id, 90);
-                _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie");
+                // Get the current user's ID or email for the cookie name
+                string userIdentifier = "guest";
+                try {
+                    var userName = await GetUserName("SetActiveRacer");
+                    if (!string.IsNullOrEmpty(userName)) {
+                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
+                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
+                    }
+                } catch (Exception) {
+                    // If we can't get the username, use "guest" as the identifier
+                    _logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                }
+
+                // Save the active racer ID in a user-specific cookie with 90-day expiration
+                string cookieName = $"lastActiveRacer_{userIdentifier}";
+                await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racer.Id, 90);
+                _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie for user {userIdentifier}");
             } catch (Exception ex) {
                 _logger.LogError(ex, $"Error saving active racer {racer.Name} (ID: {racer.Id}) to cookie");
             }
@@ -137,8 +151,22 @@ namespace DerbyDash.Services {
         // Load the active racer from cookie
         private async Task LoadActiveRacerFromCookieAsync() {
             try {
-                // Get the last active racer ID from cookie
-                string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", "lastActiveRacer");
+                // Get the current user's ID or email for the cookie name
+                string userIdentifier = "guest";
+                try {
+                    var userName = await GetUserName("LoadActiveRacer");
+                    if (!string.IsNullOrEmpty(userName)) {
+                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
+                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
+                    }
+                } catch (Exception) {
+                    // If we can't get the username, use "guest" as the identifier
+                    _logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                }
+
+                // Get the last active racer ID from the user-specific cookie
+                string cookieName = $"lastActiveRacer_{userIdentifier}";
+                string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", cookieName);
 
                 if (!string.IsNullOrEmpty(racerId)) {
                     // Find the racer with the saved ID
@@ -147,10 +175,10 @@ namespace DerbyDash.Services {
                     if (racer != null) {
                         // Set as active racer without saving to cookie again
                         Active = racer;
-                        _logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie");
+                        _logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie for user {userIdentifier}");
 
                         // Refresh the cookie with a new 90-day expiration
-                        await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racerId, 90);
+                        await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racerId, 90);
                     }
                 }
             } catch (Exception ex) {

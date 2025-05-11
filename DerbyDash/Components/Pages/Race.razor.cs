@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Layout;
+﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -137,12 +137,13 @@ namespace DerbyDash.Components.Pages {
 
 
         private async Task StartClick() {
-            // If we already have a ProblemClassString, refresh the cookie with a new 90-day expiration
+            // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
-                    await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
+                    // Save the last played race to the database
+                    await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
                 } catch (Exception ex) {
-                    _logger.LogError(ex, "Error refreshing last played race cookie");
+                    _logger.LogError(ex, "Error saving last played race to database");
                 }
             }
 
@@ -169,10 +170,10 @@ namespace DerbyDash.Components.Pages {
             }
 
             try {
-                // Save the last played race in a cookie (90 days expiration)
-                await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", ProblemClassString, 90);
+                // Save the last played race to the database
+                await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race to cookie");
+                _logger.LogError(ex, "Error saving last played race to database");
             }
         }
 
