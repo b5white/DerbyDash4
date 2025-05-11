@@ -155,14 +155,12 @@ namespace DerbyDash.Components.Layout {
                     UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
-                } else // Clear fields if user not found (e.g., after logout)
-                  {
+                } else { // Clear fields if user not found (e.g., after logout)                  
                     UserAvatarFileName = null;
                     UserInitial = null;
                     UserEmail = null;
                 }
-            } else // Clear fields if not authenticated
-              {
+            } else { // Clear fields if not authenticated              
                 UserAvatarFileName = null;
                 UserInitial = null;
                 UserEmail = null;

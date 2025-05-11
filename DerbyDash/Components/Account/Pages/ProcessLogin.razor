@@ -55,11 +55,11 @@
                     targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
                 } else {
                     // User not found, redirect back to login
-                    targetUrl = "/";
+                    targetUrl = "";
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
-                targetUrl = "/";
+                targetUrl = "";
             }
         }
     }

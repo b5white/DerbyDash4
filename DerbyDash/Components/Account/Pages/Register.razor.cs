@@ -34,23 +34,19 @@ namespace DerbyDash.Components.Account.Pages {
                 return;
             }
 
-            Logger.LogInformation("User created a new account with password.");
-
             var userId = await UserManager.GetUserIdAsync(user);
+            Logger.LogInformation("User created a new account with password. {email} {userId}", email, userId);
+
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = NavManager.GetUriWithQueryParameters(
                 NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-            await SignInManager.SignInAsync(user, isPersistent: true);
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
-                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
-                RedirectManager.RedirectTo(
-                    "Account/RegisterConfirmation",
-                    new() { ["email"] = email, ["returnUrl"] = ReturnUrl });
+                ReturnUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
+                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe=false&returnUrl={Uri.EscapeDataString(ReturnUrl)}", true);
             }
-
             RedirectManager.RedirectTo(ReturnUrl);
         }
 

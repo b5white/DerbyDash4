@@ -35,34 +35,39 @@ namespace DerbyDash.Services {
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _jsRuntime = jsRuntime;
-            
+
             // Load the active racer from cookie on initialization
             LoadActiveRacerFromCookieAsync().ConfigureAwait(false);
         }
 
         public async Task<List<Racer>> GetRacers() {
+            ApplicationUser user;
+            string name;
             try {
                 // Try to get the username, but don't fail if we can't
                 try {
-                    string name = await GetUserName("GetRacers");
+                    name = await GetUserName("GetRacers");
                     _logger.LogInformation($"Getting racers for user: {name}");
                 } catch (Exception ex) {
                     _logger.LogWarning(ex, "Could not get username, but continuing");
                     // Continue even if we can't get the username
+                    return new List<Racer>();
                 }
-                
-                // Return a copy of the race team to avoid modification issues
-                return raceTeam.ToList();
-            }
-            catch (Exception ex) {
+
+                user = await GetUserByNameAsync(name);
+                if (user == null) {
+                    return new List<Racer>();
+                }
+            } catch (Exception ex) {
                 _logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
+            return await GetRacers(user);
         }
 
         public async Task<List<Racer>> GetRacers(ApplicationUser user) {
             // Return the same data as GetRacers() for consistency
-            return await GetRacers();
+            return raceTeam;
         }
 
         public async Task<Racer?> GetRacerByIdAsync(string racerId) {
@@ -78,17 +83,17 @@ namespace DerbyDash.Services {
             if (string.IsNullOrEmpty(racer.Id)) {
                 racer.Id = Guid.NewGuid().ToString();
             }
-            
+
             raceTeam.Add(racer);
-            
+
             // Set as active racer if none is selected
             if (Active is null) {
                 Active = racer;
             }
-            
+
             // Notify subscribers that the racer list has changed
             OnRacerChanged?.Invoke();
-            
+
             return racer;
         }
 
@@ -110,47 +115,45 @@ namespace DerbyDash.Services {
             if (Active == null) {
                 await LoadActiveRacerFromCookieAsync();
             }
-            
+
             return Active;
         }
 
         public async Task SetActiveRacer(Racer racer) {
             Active = racer;
-            
+
             // Save the active racer ID in a cookie with 90-day expiration
             try {
                 await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racer.Id, 90);
                 _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie");
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.LogError(ex, $"Error saving active racer {racer.Name} (ID: {racer.Id}) to cookie");
             }
-            
+
             // Notify subscribers that the active racer has changed
             OnRacerChanged?.Invoke();
         }
-        
+
         // Load the active racer from cookie
         private async Task LoadActiveRacerFromCookieAsync() {
             try {
                 // Get the last active racer ID from cookie
                 string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", "lastActiveRacer");
-                
+
                 if (!string.IsNullOrEmpty(racerId)) {
                     // Find the racer with the saved ID
                     Racer? racer = await GetRacerByIdAsync(racerId);
-                    
+
                     if (racer != null) {
                         // Set as active racer without saving to cookie again
                         Active = racer;
                         _logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie");
-                        
+
                         // Refresh the cookie with a new 90-day expiration
                         await _jsRuntime.InvokeVoidAsync("setCookie", "lastActiveRacer", racerId, 90);
                     }
                 }
-            }
-            catch (Exception ex) {
+            } catch (Exception ex) {
                 _logger.LogError(ex, "Error loading active racer from cookie");
             }
         }
