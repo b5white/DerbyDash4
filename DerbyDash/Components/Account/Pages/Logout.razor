@@ -1,5 +1,4 @@
 @page "/Account/Logout"
-@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Identity
 @using DerbyDash.Data
 @using Microsoft.AspNetCore.Components.Authorization
@@ -7,7 +6,7 @@
 @using System.Security.Claims
 
 @inject SignInManager<ApplicationUser> SignInManager
-@inject NavigationManager NavManager
+@inject IdentityRedirectManager RedirectManager
 @inject CustomAuthStateProvider AuthStateProvider
 @inject ILogger<Logout> Logger
 
@@ -27,20 +26,16 @@
             Logger.LogInformation("OnInitializedAsync called.");
             try {
                 await SignInManager.SignOutAsync();
-                AuthStateProvider.NotifyUserLogout();
+            //    AuthStateProvider.NotifyUserLogout();
+                RedirectManager.RedirectTo("/");
 
+            } catch (NavigationException ex) {
+                throw;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during logout.");
             }
         }
     }       
-
-    protected override void OnAfterRender(bool firstRender) {
-        if (firstRender) {
-            Logger.LogInformation("OnAfterRender called.");
-            NavManager.NavigateTo("/", forceLoad: true);
-        }
-    }
 
     private async Task<bool> IsLoggedIn() {
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();

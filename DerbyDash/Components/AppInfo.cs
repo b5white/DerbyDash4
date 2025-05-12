@@ -3,7 +3,7 @@
 namespace DerbyDash.Components {
 
     public static class AppInfo {
-        static string BuildNo = "0427";
+        static string BuildNo = "0428";
  
         public static string Version = GitVersionInformation.Major + "." + GitVersionInformation.Minor + "." + GitVersionInformation.BuildMetaData + "." + BuildNo;
     }

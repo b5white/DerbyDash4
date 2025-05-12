@@ -5,12 +5,11 @@
 @using System.Web
 
 @attribute [AllowAnonymous]
-@rendermode InteractiveServer
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<ProcessLogin> Logger
-@inject NavigationManager NavManager
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>Processing Login - Derby Dash</PageTitle>
 
@@ -47,31 +46,20 @@
                 var user = await UserManager.FindByEmailAsync(Email);
 
                 if (user != null) {
+                    targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
                     // Sign in the user directly without password verification
                     // (password was already verified in the Login page)
                     await SignInManager.SignInAsync(user, RememberMe);
                     Logger.LogInformation("User logged in: {Email}", Email);
-
-                    targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
                 } else {
                     // User not found, redirect back to login
-                    targetUrl = "";
+                    targetUrl = "/Account/Login";
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
-                targetUrl = "";
+                targetUrl = "/Account/Login";
             }
-        }
-    }
-
-    protected override void OnAfterRender(bool firstRender) {
-        if (firstRender) {
-            // Check if targetUrl is not null or empty before navigating
-            if (!string.IsNullOrEmpty(targetUrl)) {
-                NavManager.NavigateTo(targetUrl, forceLoad: true);
-            } else {
-                Logger.LogWarning("Navigation aborted: targetUrl is null or empty.");
-            }
+            RedirectManager.RedirectTo(targetUrl);
         }
     }
 
