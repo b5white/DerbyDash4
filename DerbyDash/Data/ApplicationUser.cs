@@ -6,7 +6,5 @@ namespace DerbyDash.Data {
     public class ApplicationUser: IdentityUser {
         [Column("ActiveFamilyMemberId")]
         public string? ActiveRacerId { get; set; }
-        // Avatar image file name (e.g., "1.png", "2.png", "3.png")
-        public string? AvatarFileName { get; set; }
     }
 }

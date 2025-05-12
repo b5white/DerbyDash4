@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
-    public partial class RaceTeam {
+    public partial class RaceTeam: IDisposable {
         private string? message;
         private ApplicationUser user = new ApplicationUser { NormalizedUserName = "USER@GMAIL.COM" };
 
@@ -35,12 +35,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
-            
+
             await ReloadUsers();
         }
-        
-        private async void HandleRacerChanged()
-        {
+
+        private async void HandleRacerChanged() {
             await ReloadUsers();
             StateHasChanged();
         }
@@ -54,7 +53,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                 await RaceTeamService.AddRacer(newTeamMember);
                 // The list will be refreshed via the OnRacerChanged event
-                
+
                 message = "The team member has been added";
                 Input = new(); // Clear the form
             } catch (Exception ex) {
@@ -72,12 +71,12 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     Logger.LogWarning(ex, "Could not get user, but continuing");
                     // Continue even if we can't get the user
                 }
-                
+
                 // Get the racers directly from the service
                 raceTeam.Clear();
                 var racers = await RaceTeamService.GetRacers();
                 raceTeam.AddRange(racers);
-                
+
                 Logger.LogInformation($"Loaded {raceTeam.Count} racers");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in ReloadUsers");
@@ -92,9 +91,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [Display(Name = "Racing name")]
             public string MemberName { get; set; } = "";
         }
-        
-        public void Dispose()
-        {
+
+        public void Dispose() {
             // Unsubscribe from racer changes
             RaceTeamService.OnRacerChanged -= HandleRacerChanged;
         }
