@@ -45,7 +45,7 @@ namespace DerbyDash.Components.Account.Pages {
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
                 ReturnUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
-                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe=false&returnUrl={Uri.EscapeDataString(ReturnUrl)}", true);
+                RedirectManager.RedirectTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe=false&returnUrl={Uri.EscapeDataString(ReturnUrl)}");
             }
             RedirectManager.RedirectTo(ReturnUrl);
         }

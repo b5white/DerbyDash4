@@ -1,11 +1,12 @@
 using DerbyDash.Data;
+using DerbyDash.Exceptions;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
-    public partial class RaceTeam {
+    public partial class RaceTeam: IDisposable {
         private string? message;
         private ApplicationUser user = new ApplicationUser { NormalizedUserName = "USER@GMAIL.COM" };
 
@@ -35,12 +36,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
-            
             await ReloadUsers();
         }
-        
-        private async void HandleRacerChanged()
-        {
+
+        private async void HandleRacerChanged() {
             await ReloadUsers();
             StateHasChanged();
         }
@@ -48,15 +47,18 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private async Task OnValidSubmitAsync() {
             try {
                 Racer newTeamMember = new() {
-                    UserName = user.UserName ?? "",
+                    UserName = user.NormalizedUserName ?? "",
                     Name = Input.MemberName,
                 };
 
                 await RaceTeamService.AddRacer(newTeamMember);
                 // The list will be refreshed via the OnRacerChanged event
-                
+
                 message = "The team member has been added";
                 Input = new(); // Clear the form
+            } catch (DuplicateRacerException) {
+                // Preserve the entered name and show error
+                message = $"Error: '{Input.MemberName}' already exists on the team";
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error adding racer");
                 message = "Error adding racer: " + ex.Message;
@@ -77,9 +79,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 
                 // Get the racers directly from the service
                 raceTeam.Clear();
-                var racers = await RaceTeamService.GetRacers();
-                raceTeam.AddRange(racers);
-                
+                raceTeam.AddRange(await RaceTeamService.GetRacers());
                 Logger.LogInformation($"Loaded {raceTeam.Count} racers");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in ReloadUsers");
@@ -94,9 +94,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [Display(Name = "Racing name")]
             public string MemberName { get; set; } = "";
         }
-        
-        public void Dispose()
-        {
+
+        public void Dispose() {
             // Unsubscribe from racer changes
             RaceTeamService.OnRacerChanged -= HandleRacerChanged;
         }

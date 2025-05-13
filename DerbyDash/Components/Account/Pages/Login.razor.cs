@@ -15,7 +15,10 @@ namespace DerbyDash.Components.Account.Pages {
         private ILogger<Login> Logger { get; set; } = null!;
 
         [Inject]
-        private NavigationManager NavManager { get; set; } = null!;
+        private NavigationManager NavManager { get; set; } = default!;
+
+        [Inject]
+        private IdentityRedirectManager RedirectManager { get; set; } = null!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -115,11 +118,21 @@ namespace DerbyDash.Components.Account.Pages {
                 }
 
                 Logger.LogInformation("Redirecting user {Email} to ProcessLogin with ReturnUrl: {ReturnUrl}", email, returnUrl);
-                NavManager.NavigateTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}&returnUrl={Uri.EscapeDataString(returnUrl)}", true);
+                RedirectToAccountProcessLogin(email, Input.RememberMe, returnUrl);
+            } catch (NavigationException ex) {
+                throw;
             } catch (Exception ex) {
                 errorMessage = $"Error: An unexpected error occurred during login attempt."; // Avoid exposing ex.Message directly to user
                 Logger.LogError(ex, "Error during login attempt for user: {Email}", email);
             }
+        }
+        void RedirectToAccountProcessLogin(string email, bool rememberMe, string returnUrl) {
+            var queryParams = new Dictionary<string, object?> {
+                { "email", email },
+                { "rememberMe", rememberMe },
+                { "returnUrl", returnUrl }
+            };
+            RedirectManager.RedirectTo("/Account/ProcessLogin", queryParams);
         }
 
         private sealed class InputModel {
