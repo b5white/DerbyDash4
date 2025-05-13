@@ -6,8 +6,8 @@ using System.ComponentModel.DataAnnotations;
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Index {
         private ApplicationUser user = default!;
-        private string? username;
-        private string? phoneNumber;
+        private string? username = null;
+        private string? phoneNumber = null;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -25,12 +25,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //username = await UserManager.GetUserNameAsync(user);
             //phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
             //Input.PhoneNumber ??= phoneNumber;
+            return Task.CompletedTask;
         }
 
         private async Task OnValidSubmitAsync() {

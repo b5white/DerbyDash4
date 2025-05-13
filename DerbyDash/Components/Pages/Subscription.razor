@@ -1,0 +1,244 @@
+@page "/subscription"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Authorization
+@using DerbyDash.Services
+@using DerbyDash.Data
+@attribute [AllowAnonymous]
+@inject ISubscriptionService SubscriptionService
+
+<PageTitle>Subscription - Derby Dash</PageTitle>
+
+<div class="subscription-container">
+    <div class="subscription-header">
+        <div class="race-flag left"></div>
+        <h1>Subscription Overview</h1>
+        <div class="race-flag right"></div>
+    </div>
+    
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading subscription data...</p>
+        </div>
+    }
+    else if (userSubscription == null)
+    {
+        <div class="alert alert-warning" role="alert">
+            No subscription found. Please contact support.
+        </div>
+    }
+    else
+    {
+        <div class="subscription-content">
+            <div class="subscription-card">
+                <div class="subscription-section current-plan">
+                    <p class="section-title">Current Subscription (@userSubscription.Type.ToString())</p>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: @(userSubscription.ProgressPercentage)%"></div>
+                    </div>
+                    <p class="section-info">
+                        @if (userSubscription.IsPaused)
+                        {
+                            <span class="paused-badge">PAUSED</span>
+                        }
+                        else if (userSubscription.Status == SubscriptionStatus.Cancelled)
+                        {
+                            <span class="cancelled-badge">CANCELLED</span>
+                        }
+                        else
+                        {
+                            @userSubscription.DaysRemaining <text> days left</text> @(userSubscription.IsTrial ? " on trial" : "")
+                        }
+                    </p>
+                </div>
+
+                <div class="subscription-section auto-renewal">
+                    <p class="section-title">Auto-renewal is @(userSubscription.AutoRenewal ? "on" : "off")</p>
+                    <button class="action-button" @onclick="ToggleAutoRenewal" disabled="@(userSubscription.Status == SubscriptionStatus.Cancelled)">
+                        @(userSubscription.AutoRenewal ? "Turn Off" : "Turn On")
+                    </button>
+                </div>
+
+                <div class="subscription-section referral-credits">
+                    <div class="credits-display">
+                        <span class="credits-count">@userSubscription.ReferralCredits</span>
+                        <span class="credits-label">Referral Credits</span>
+                    </div>
+                    <div class="credits-action">
+                        <button class="action-button" @onclick="UseReferralCredit" disabled="@(userSubscription.ReferralCredits <= 0)">
+                            Pay It Forward
+                        </button>
+                    </div>
+                </div>
+
+                <div class="subscription-section upgrade">
+                    <div class="section-info-block">
+                        <p class="section-title">Upgrade / Renew</p>
+                        <p class="section-description">Use your credits when you renew<br>your subscription.</p>
+                    </div>
+                    <button class="action-button" @onclick="ToggleRenewOptions">
+                        @(showRenewOptions ? "Hide Options" : "Renew")
+                    </button>
+                </div>
+
+                @if (showRenewOptions)
+                {
+                    <div class="subscription-section renew-options">
+                        <div class="renew-option-buttons">
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Monthly ? "selected" : "")" 
+                                    @onclick="() => SelectRenewalType(SubscriptionType.Monthly)">
+                                Monthly
+                            </button>
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Annual ? "selected" : "")" 
+                                    @onclick="() => SelectRenewalType(SubscriptionType.Annual)">
+                                Annual
+                            </button>
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Lifetime ? "selected" : "")" 
+                                    @onclick="() => SelectRenewalType(SubscriptionType.Lifetime)">
+                                Lifetime
+                            </button>
+                        </div>
+                        <button class="action-button confirm-button" @onclick="RenewSubscription">
+                            Confirm Renewal
+                        </button>
+                    </div>
+                }
+
+                <div class="subscription-section pause">
+                    <div class="section-info-block">
+                        <p class="section-title">@(userSubscription.IsPaused ? "Resume" : "Pause") Subscription</p>
+                        <p class="section-description">
+                            @if (userSubscription.IsPaused)
+                            {
+                                <span>Your subscription is currently paused.<br>Resume to continue using premium features.</span>
+                            }
+                            else
+                            {
+                                <span>Temporarily pause your subscription.<br>You can restart whenever convenient for you.</span>
+                            }
+                        </p>
+                    </div>
+                    <button class="action-button" @onclick="TogglePauseSubscription" disabled="@(userSubscription.Status == SubscriptionStatus.Cancelled)">
+                        @(userSubscription.IsPaused ? "Resume" : "Pause")
+                    </button>
+                </div>
+
+                <div class="subscription-section cancel">
+                    <div class="section-info-block">
+                        <p class="section-title">Cancel Subscription</p>
+                        <p class="section-description">You can cancel your subscription<br>at any time. It will not auto-renew.</p>
+                    </div>
+                    <button class="action-button" @onclick="CancelSubscription" disabled="@(userSubscription.Status == SubscriptionStatus.Cancelled)">
+                        @(userSubscription.Status == SubscriptionStatus.Cancelled ? "Cancelled" : "Cancel")
+                    </button>
+                </div>
+
+                <div class="subscription-section special-offers">
+                    <p class="section-title">Special Offers</p>
+                    <div class="offers-progress-bar">
+                        <div class="offers-progress-fill" style="width: @(userSubscription.SpecialOffersProgress)%"></div>
+                    </div>
+                </div>
+
+                <div class="subscription-footer">
+                    <a href="#" class="footer-link">Special Offers</a>
+                    <a href="#" class="footer-link">Payment Details</a>
+                    <a href="/faq" class="footer-link">FAQ</a>
+                    <a href="#" class="footer-link">Contact Support</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Data.Subscription? userSubscription;
+    private bool isLoading = true;
+    private bool showRenewOptions = false;
+    private SubscriptionType selectedRenewalType = SubscriptionType.Monthly;
+    private string userId = "demo-user"; // For demo purposes
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // For demo, we'll use a fixed user ID
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading subscription: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void ToggleRenewOptions()
+    {
+        showRenewOptions = !showRenewOptions;
+    }
+
+    private void SelectRenewalType(SubscriptionType type)
+    {
+        selectedRenewalType = type;
+    }
+
+    private async Task ToggleAutoRenewal()
+    {
+        if (userSubscription != null)
+        {
+            await SubscriptionService.ToggleAutoRenewalAsync(userId);
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+        }
+    }
+
+    private async Task TogglePauseSubscription()
+    {
+        if (userSubscription != null)
+        {
+            if (userSubscription.IsPaused)
+            {
+                await SubscriptionService.ResumeSubscriptionAsync(userId);
+            }
+            else
+            {
+                await SubscriptionService.PauseSubscriptionAsync(userId);
+            }
+            
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+        }
+    }
+
+    private async Task CancelSubscription()
+    {
+        if (userSubscription != null && userSubscription.Status != SubscriptionStatus.Cancelled)
+        {
+            await SubscriptionService.CancelSubscriptionAsync(userId);
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+        }
+    }
+
+    private async Task RenewSubscription()
+    {
+        if (userSubscription != null)
+        {
+            await SubscriptionService.RenewSubscriptionAsync(userId, selectedRenewalType);
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+            showRenewOptions = false;
+        }
+    }
+
+    private async Task UseReferralCredit()
+    {
+        if (userSubscription != null && userSubscription.ReferralCredits > 0)
+        {
+            await SubscriptionService.UseReferralCreditAsync(userId);
+            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+        }
+    }
+}

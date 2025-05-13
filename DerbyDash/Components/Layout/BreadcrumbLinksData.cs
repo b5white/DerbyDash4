@@ -55,7 +55,8 @@ namespace DerbyDash.Components.Layout {
             { "multiplicationmenu", new BreadcrumbLinksItem { Title = "Multiplication", Url = "/MultiplicationMenu", Parent = "RaceSetsMenu"} },
             { "divisionmenu", new BreadcrumbLinksItem { Title = "Division", Url = "/DivisionMenu", Parent = "RaceSetsMenu"} },
             { "fractionsmenu", new BreadcrumbLinksItem { Title = "Fractions", Url = "/FractionsMenu", Parent = "RaceSetsMenu"} },
-            { "decimalsmenu", new BreadcrumbLinksItem { Title = "Decimals", Url = "/DecimalsMenu", Parent = "RaceSetsMenu"} }
+            { "decimalsmenu", new BreadcrumbLinksItem { Title = "Decimals", Url = "/DecimalsMenu", Parent = "RaceSetsMenu"} },
+            { "subscription", new BreadcrumbLinksItem { Title = "Subscription", Url = "/subscription", Parent = ""} }
         };
     }
 }

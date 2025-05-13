@@ -7,7 +7,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class ChangePassword {
         private string? message;
         private ApplicationUser user = default!;
-        private bool hasPassword;
+        // Remove unused field
+        // private bool hasPassword;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -25,12 +26,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //hasPassword = await UserManager.HasPasswordAsync(user);
             //if (!hasPassword) {
             //    RedirectManager.RedirectTo("Account/Manage/SetPassword");
             //}
+            return Task.CompletedTask;
         }
 
         private async Task OnValidSubmitAsync() {

@@ -18,7 +18,7 @@ namespace DerbyDash.Services
     public class FAQService : IFAQService
     {
         private readonly IWebHostEnvironment _webHostEnvironment;
-        private List<FAQ> _cachedFAQs;
+        private List<FAQ>? _cachedFAQs;
 
         public FAQService(IWebHostEnvironment webHostEnvironment)
         {

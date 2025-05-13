@@ -42,7 +42,7 @@ namespace DerbyDash.Services {
             await Execute(Options.SendGridKey, subject, message, toEmail);
         }
 
-        public async Task Execute(string apiKey, string subject, string message, string toEmail) {
+        public Task Execute(string apiKey, string subject, string message, string toEmail) {
             //SendGridClient client = new SendGridClient(apiKey);
             //SendGridMessage msg = new SendGridMessage() {
             //    From = new EmailAddress(Options.SenderEmail, Options.SenderName),
@@ -59,6 +59,8 @@ namespace DerbyDash.Services {
             //_logger.LogInformation(response.IsSuccessStatusCode
             //                       ? $"Email to {toEmail} queued successfully!"
             //                       : $"Failure Email to {toEmail}");
+            
+            return Task.CompletedTask;
         }
     }
 }

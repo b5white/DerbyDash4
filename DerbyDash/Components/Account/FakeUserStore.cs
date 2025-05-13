@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Components.Account {
     // Note: This is an IN-MEMORY store. Users are lost when the application restarts.
     public class FakeUserStore: IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser> {
-        private readonly ILogger<FakeUserStore> _logger;
+        private readonly ILogger<FakeUserStore> _logger = null!;
         private readonly List<ApplicationUser> _users;
 
         public FakeUserStore(ILogger<FakeUserStore> logger) {
@@ -62,14 +62,14 @@ namespace DerbyDash.Components.Account {
             return Task.CompletedTask;
         }
 
-        public Task<ApplicationUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        public Task<ApplicationUser?> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
             => Task.FromResult(_users.FirstOrDefault(u => u.NormalizedEmail == normalizedEmail));
 
         // Other IUserStore methods
-        public Task<ApplicationUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        public Task<ApplicationUser?> FindByIdAsync(string userId, CancellationToken cancellationToken)
             => Task.FromResult(_users.FirstOrDefault(u => u.Id == userId));
 
-        public Task<ApplicationUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) {
+        public Task<ApplicationUser?> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken) {
             // Changed this to search by NormalizedUserName as intended
             return Task.FromResult(_users.FirstOrDefault(u => u.NormalizedUserName == normalizedUserName));
         }
@@ -87,16 +87,16 @@ namespace DerbyDash.Components.Account {
         }
 
         // Required by IUserEmailStore
-        public Task SetEmailAsync(ApplicationUser user, string email, CancellationToken cancellationToken) {
+        public Task SetEmailAsync(ApplicationUser user, string? email, CancellationToken cancellationToken) {
             user.Email = email;
             return Task.CompletedTask;
         }
-        public Task<string> GetEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
+        public Task<string?> GetEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.Email);
 
-        public Task<string> GetNormalizedEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
+        public Task<string?> GetNormalizedEmailAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(user.NormalizedEmail);
-        public Task SetNormalizedEmailAsync(ApplicationUser user, string normalizedEmail, CancellationToken cancellationToken) {
+        public Task SetNormalizedEmailAsync(ApplicationUser user, string? normalizedEmail, CancellationToken cancellationToken) {
             user.NormalizedEmail = normalizedEmail;
             return Task.CompletedTask;
         }

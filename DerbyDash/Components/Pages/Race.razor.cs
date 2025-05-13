@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Components.Layout;
+﻿﻿﻿﻿﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -46,7 +46,6 @@ namespace DerbyDash.Components.Pages {
         private int speedIncrement = 1;
         private string Answer = "";
         private long starttime = 0;
-        private long calctime = 0;
         private float prevAverage = 0;
         private float improvedTime = 0;
         private double currentDistance = 0;
@@ -54,7 +53,6 @@ namespace DerbyDash.Components.Pages {
         public int currentResultIndex = 0;
         private int currentTimeIndex = 0;
         private float[] ElapsedAnswerTimes = new float[50];
-        int PeriodicTimerSpan = 200000;  // 1/5 of a second
         private PeriodicTimer periodicTimer = new(TimeSpan.FromMicroseconds(10000000));
         private CancellationTokenSource PeriodicTimerToken = new CancellationTokenSource();
         private Timer InactivityTimer = new Timer(1000);
@@ -64,15 +62,8 @@ namespace DerbyDash.Components.Pages {
         private string encouragingWord = "";
         private bool ReceivedError = false;
         private RaceComponents track = new();
-        private int Margin = 10;
-        private int MarginTop = 0;
-        private string FlexBasis = "";
         private bool ShowDebug = false;
         private EditContext editContext = new EditContext(new object());
-
-        private bool startLineHasDisappeared = false; // Track disappearance state
-        private double previousScrollOffset = 0; // Track scroll cycled
-        private int startLineAnimationCycles = 0;
 
         private const int INACTIVITY_TIMER_INTERVAL = 4000; // 4 seconds
         private const int FLASH_TIMER_INTERVAL = 800; // 0.8 seconds
@@ -122,13 +113,14 @@ namespace DerbyDash.Components.Pages {
                 // No need to manage start line visibility - it's handled by CSS now
 
                 // Delay the start of inactivity timer
-                Task.Run(async () => {
+                // Using FireAndForget pattern since we don't need to wait for this to complete
+                Utilities.FireAndForget(async () => {
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
-                        await InvokeAsync(() => {
+                        await InvokeAsync(async () => {
                             InactivityTimer.Start();
                             starttime = DateTime.Now.Ticks;
-                            StartPeriodicTimerAsync();
+                            await StartPeriodicTimerAsync();
                         });
                     }
                 });
@@ -220,8 +212,6 @@ namespace DerbyDash.Components.Pages {
             const double TOP_MARGIN = 0.0;
             const float TOP_MULTIPLIER = 7.0f;
             const float TRACK_HEIGHT = 70.0f;
-            const float INITIAL_START_LINE_TOP = TRACK_HEIGHT * TOP_MULTIPLIER;
-            const float FALL_BEHIND_TIME_THRESHOLD = 7.0f;
 
             double relativePosition;
 

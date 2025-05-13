@@ -16,7 +16,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         //       internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
 
-        private async Task OnSubmitAsync() {
+        private Task OnSubmitAsync() {
             //var user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //await UserManager.SetTwoFactorEnabledAsync(user, false);
             //await UserManager.ResetAuthenticatorKeyAsync(user);
@@ -29,6 +29,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             //    "Account/Manage/EnableAuthenticator",
             //    "Your authenticator app key has been reset, you will need to configure your authenticator app using the new key.",
             //    HttpContext);
+            
+            return Task.CompletedTask;
         }
     }
 }

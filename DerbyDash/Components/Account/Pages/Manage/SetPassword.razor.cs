@@ -24,13 +24,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
 
             //var hasPassword = await UserManager.HasPasswordAsync(user);
             //if (hasPassword) {
             //    RedirectManager.RedirectTo("Account/Manage/ChangePassword");
             //}
+            return Task.CompletedTask;
         }
 
         private async Task OnValidSubmitAsync() {

@@ -1,4 +1,4 @@
-﻿﻿
+﻿﻿﻿﻿
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -30,9 +30,9 @@ namespace DerbyDash.Services {
             _authStateProvider = authStateProvider;
         }
 
-        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
+        public Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
             _logger.LogInformation("GetRacesByTeamMemberIdAsync");
-            return new List<Race>();
+            return Task.FromResult(new List<Race>());
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {
