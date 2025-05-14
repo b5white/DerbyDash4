@@ -11,9 +11,9 @@
         // TODO Add a cookie service to handle all cookie read/write actions like save the last racer.
         // TODO Add a feedback page so users can report errors
         // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
-        // TODO Subscription page
-        // TODO Subscription service with the fake data
-        // TODO Add a link to the FAQ page from the Subscription page.
-        // TODO Move avatar to Racer
+        // DONE Subscription page
+        // DONE Subscription service with the fake data
+        // DONE Add a link to the FAQ page from the Subscription page.
+        // DONE Move avatar to Racer
     }
 }

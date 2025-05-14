@@ -67,3 +67,55 @@ window.getCookie = (name) => {
     }
     return null;
 };
+
+// Get browser information for feedback form
+window.getBrowserInfo = () => {
+    const userAgent = navigator.userAgent;
+    const browserInfo = {
+        browser: '',
+        version: '',
+        os: '',
+        device: 'Desktop'
+    };
+    
+    // Detect browser and version
+    if (userAgent.indexOf("Firefox") > -1) {
+        browserInfo.browser = "Firefox";
+        browserInfo.version = userAgent.match(/Firefox\/([0-9.]+)/)[1];
+    } else if (userAgent.indexOf("Edge") > -1 || userAgent.indexOf("Edg/") > -1) {
+        browserInfo.browser = "Edge";
+        const edgeMatch = userAgent.match(/Edge\/([0-9.]+)/) || userAgent.match(/Edg\/([0-9.]+)/);
+        browserInfo.version = edgeMatch ? edgeMatch[1] : "";
+    } else if (userAgent.indexOf("Chrome") > -1) {
+        browserInfo.browser = "Chrome";
+        browserInfo.version = userAgent.match(/Chrome\/([0-9.]+)/)[1];
+    } else if (userAgent.indexOf("Safari") > -1 && userAgent.indexOf("Chrome") === -1) {
+        browserInfo.browser = "Safari";
+        browserInfo.version = userAgent.match(/Version\/([0-9.]+)/)[1];
+    } else if (userAgent.indexOf("MSIE") > -1 || userAgent.indexOf("Trident/") > -1) {
+        browserInfo.browser = "Internet Explorer";
+        const ieMatch = userAgent.match(/MSIE ([0-9.]+)/) || userAgent.match(/rv:([0-9.]+)/);
+        browserInfo.version = ieMatch ? ieMatch[1] : "";
+    } else {
+        browserInfo.browser = "Unknown";
+    }
+    
+    // Detect OS
+    if (userAgent.indexOf("Windows") > -1) {
+        browserInfo.os = "Windows";
+    } else if (userAgent.indexOf("Mac") > -1) {
+        browserInfo.os = "MacOS";
+    } else if (userAgent.indexOf("Linux") > -1) {
+        browserInfo.os = "Linux";
+    } else if (userAgent.indexOf("Android") > -1) {
+        browserInfo.os = "Android";
+        browserInfo.device = "Mobile";
+    } else if (userAgent.indexOf("iPhone") > -1 || userAgent.indexOf("iPad") > -1) {
+        browserInfo.os = "iOS";
+        browserInfo.device = userAgent.indexOf("iPad") > -1 ? "Tablet" : "Mobile";
+    } else {
+        browserInfo.os = "Unknown";
+    }
+    
+    return `${browserInfo.browser} ${browserInfo.version} on ${browserInfo.os} (${browserInfo.device})`;
+};
