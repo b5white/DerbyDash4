@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿using DerbyDash.Components.Layout;
+﻿﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -74,6 +74,8 @@ namespace DerbyDash.Components.Pages {
         public ProblemsBase? ProblemClass { get; set; }
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
         public float FinishTime = 0;
+        private bool _inactivityTimerDisposed = false;
+private bool _flashTimerDisposed = false;
 
         TrackContainer? trackContainerInstance;
 
@@ -110,7 +112,23 @@ namespace DerbyDash.Components.Pages {
                 }
                 problem = problems!.Next();
 
-                // No need to manage start line visibility - it's handled by CSS now
+
+                // Ensure timers are recreated if they've been disposed
+
+                if (InactivityTimer == null || _inactivityTimerDisposed) {
+                    InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
+                    InactivityTimer.Elapsed += ShowAnswer;
+                    InactivityTimer.AutoReset = false;
+                    _inactivityTimerDisposed = false;
+                }
+                
+
+                if (FlashTimer == null || _flashTimerDisposed) {
+                    FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
+                    FlashTimer.Elapsed += HideAnswer;
+                    FlashTimer.AutoReset = false;
+                    _flashTimerDisposed = false;
+                }
 
                 // Delay the start of inactivity timer
                 // Using FireAndForget pattern since we don't need to wait for this to complete
@@ -118,9 +136,16 @@ namespace DerbyDash.Components.Pages {
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
                         await InvokeAsync(async () => {
-                            InactivityTimer.Start();
-                            starttime = DateTime.Now.Ticks;
-                            await StartPeriodicTimerAsync();
+
+
+
+                            // Check again if timer is disposed before starting  
+
+                            if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                                InactivityTimer.Start();
+                                starttime = DateTime.Now.Ticks;
+                                StartPeriodicTimerAsync().ConfigureAwait(false);
+                            }
                         });
                     }
                 });
@@ -129,7 +154,7 @@ namespace DerbyDash.Components.Pages {
 
 
         private async Task StartClick() {
-            // If we already have a ProblemClassString, save it to the database
+            // If we already have a ProblemClassString, save it to the database kitten
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     // Save the last played race to the database

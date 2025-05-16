@@ -3,5 +3,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Data {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options): IdentityDbContext<ApplicationUser>(options) {
+        public DbSet<Feedback> Feedbacks { get; set; }
     }
 }
