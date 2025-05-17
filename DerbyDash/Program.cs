@@ -34,6 +34,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<FeedbackService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 

@@ -1,0 +1,334 @@
+@page "/admin/feedback"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@using DerbyDash.Data
+@using DerbyDash.Services
+@using Microsoft.AspNetCore.Authorization
+@using System.Globalization
+@inject FeedbackService FeedbackService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Feedback Management - Derby Dash</PageTitle>
+
+<div class="container mt-4">
+    <h1>Feedback Management</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Filter Options</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Filter by Type:</label>
+                                <select class="form-select" @bind="selectedType">
+                                    <option value="">All Types</option>
+                                    <option value="Bug Report">Bug Report</option>
+                                    <option value="Feature Request">Feature Request</option>
+                                    <option value="General Feedback">General Feedback</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Filter by Status:</label>
+                                <select class="form-select" @bind="selectedStatus">
+                                    <option value="">All Status</option>
+                                    <option value="Resolved">Resolved</option>
+                                    <option value="Unresolved">Unresolved</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button class="btn btn-primary d-block w-100" @onclick="ApplyFilters">Apply Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (loading)
+    {
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (feedbackList == null || !feedbackList.Any())
+    {
+        <div class="alert alert-info">
+            No feedback submissions found.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Date</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Subject</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var feedback in feedbackList)
+                    {
+                        <tr>
+                            <td>@feedback.Id</td>
+                            <td>@feedback.SubmittedAt.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</td>
+                            <td>@feedback.Name</td>
+                            <td>@feedback.FeedbackType</td>
+                            <td>@feedback.Subject</td>
+                            <td>
+                                @if (feedback.IsResolved)
+                                {
+                                    <span class="badge bg-success">Resolved</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning">Unresolved</span>
+                                }
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-info me-1" @onclick="() => ViewFeedbackDetails(feedback.Id)">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                @if (!feedback.IsResolved)
+                                {
+                                    <button class="btn btn-sm btn-success me-1" @onclick="() => OpenResolveDialog(feedback)">
+                                        <i class="bi bi-check-circle"></i> Resolve
+                                    </button>
+                                }
+                                <button class="btn btn-sm btn-danger" @onclick="() => DeleteFeedback(feedback.Id)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    @if (showResolveDialog)
+    {
+        <div class="modal fade show" style="display: block;" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Resolve Feedback</h5>
+                        <button type="button" class="btn-close" @onclick="CloseResolveDialog"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Admin Notes:</label>
+                            <textarea class="form-control" rows="4" @bind="adminNotes"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseResolveDialog">Cancel</button>
+                        <button type="button" class="btn btn-success" @onclick="ResolveFeedback">Resolve</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        </div>
+    }
+
+    @if (showDetailsDialog && selectedFeedback != null)
+    {
+        <div class="modal fade show" style="display: block;" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Feedback Details</h5>
+                        <button type="button" class="btn-close" @onclick="CloseDetailsDialog"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>ID:</strong> @selectedFeedback.Id</p>
+                                <p><strong>Name:</strong> @selectedFeedback.Name</p>
+                                <p><strong>Email:</strong> @selectedFeedback.Email</p>
+                                <p><strong>Type:</strong> @selectedFeedback.FeedbackType</p>
+                                <p><strong>Submitted:</strong> @selectedFeedback.SubmittedAt.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Status:</strong> @(selectedFeedback.IsResolved ? "Resolved" : "Unresolved")</p>
+                                @if (selectedFeedback.IsResolved && selectedFeedback.ResolvedAt.HasValue)
+                                {
+                                    <p><strong>Resolved At:</strong> @selectedFeedback.ResolvedAt.Value.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</p>
+                                }
+                                <p><strong>Contact Consent:</strong> @(selectedFeedback.ContactConsent ? "Yes" : "No")</p>
+                                <p><strong>Browser Info:</strong> @selectedFeedback.BrowserInfo</p>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h6 class="mb-0">Subject: @selectedFeedback.Subject</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>@selectedFeedback.Message</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @if (selectedFeedback.IsResolved && !string.IsNullOrEmpty(selectedFeedback.AdminNotes))
+                        {
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header bg-success text-white">
+                                            <h6 class="mb-0">Admin Notes</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>@selectedFeedback.AdminNotes</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="CloseDetailsDialog">Close</button>
+                        @if (!selectedFeedback.IsResolved)
+                        {
+                            <button type="button" class="btn btn-success" @onclick="() => OpenResolveDialog(selectedFeedback)">Resolve</button>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Feedback> feedbackList;
+    private bool loading = true;
+    private string selectedType = "";
+    private string selectedStatus = "";
+    private bool showResolveDialog = false;
+    private bool showDetailsDialog = false;
+    private Feedback selectedFeedback;
+    private string adminNotes = "";
+    private int selectedFeedbackId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeedback();
+    }
+
+    private async Task LoadFeedback()
+    {
+        loading = true;
+        feedbackList = await FeedbackService.GetAllFeedbackAsync();
+        loading = false;
+    }
+
+    private async Task ApplyFilters()
+    {
+        loading = true;
+
+        if (string.IsNullOrEmpty(selectedType) && string.IsNullOrEmpty(selectedStatus))
+        {
+            feedbackList = await FeedbackService.GetAllFeedbackAsync();
+        }
+        else if (!string.IsNullOrEmpty(selectedType) && string.IsNullOrEmpty(selectedStatus))
+        {
+            feedbackList = await FeedbackService.GetFeedbackByTypeAsync(selectedType);
+        }
+        else if (string.IsNullOrEmpty(selectedType) && !string.IsNullOrEmpty(selectedStatus))
+        {
+            bool isResolved = selectedStatus == "Resolved";
+            feedbackList = await FeedbackService.GetFeedbackByStatusAsync(isResolved);
+        }
+        else
+        {
+            // Both filters applied
+            bool isResolved = selectedStatus == "Resolved";
+            var typeFiltered = await FeedbackService.GetFeedbackByTypeAsync(selectedType);
+            feedbackList = typeFiltered.Where(f => f.IsResolved == isResolved).ToList();
+        }
+
+        loading = false;
+    }
+
+    private async Task ViewFeedbackDetails(int id)
+    {
+        selectedFeedback = await FeedbackService.GetFeedbackByIdAsync(id);
+        if (selectedFeedback != null)
+        {
+            showDetailsDialog = true;
+        }
+    }
+
+    private void OpenResolveDialog(Feedback feedback)
+    {
+        selectedFeedbackId = feedback.Id;
+        adminNotes = "";
+        showResolveDialog = true;
+        
+        // If we're already viewing details, close that dialog
+        if (showDetailsDialog)
+        {
+            showDetailsDialog = false;
+        }
+    }
+
+    private void CloseResolveDialog()
+    {
+        showResolveDialog = false;
+        adminNotes = "";
+    }
+
+    private void CloseDetailsDialog()
+    {
+        showDetailsDialog = false;
+        selectedFeedback = null;
+    }
+
+    private async Task ResolveFeedback()
+    {
+        if (await FeedbackService.ResolveFeedbackAsync(selectedFeedbackId, adminNotes))
+        {
+            showResolveDialog = false;
+            await LoadFeedback();
+            
+            // If we were viewing details, refresh them
+            if (selectedFeedback != null && selectedFeedback.Id == selectedFeedbackId)
+            {
+                await ViewFeedbackDetails(selectedFeedbackId);
+            }
+        }
+    }
+
+    private async Task DeleteFeedback(int id)
+    {
+        if (await FeedbackService.DeleteFeedbackAsync(id))
+        {
+            await LoadFeedback();
+            
+            // If we were viewing details of the deleted feedback, close the dialog
+            if (selectedFeedback != null && selectedFeedback.Id == id)
+            {
+                showDetailsDialog = false;
+            }
+        }
+    }
+}
