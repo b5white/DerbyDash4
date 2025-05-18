@@ -1,9 +1,11 @@
 @page "/admin/feedback"
+@layout AdminLayout
 @* @attribute [Authorize(Roles = "Admin")] *@
 @using DerbyDash.Data
 @using DerbyDash.Services
 @using Microsoft.AspNetCore.Authorization
 @using System.Globalization
+@using DerbyDash.Components.Layout
 @inject FeedbackService FeedbackService
 @inject NavigationManager NavigationManager
 
@@ -103,9 +105,9 @@
                                 }
                             </td>
                             <td>
-                                <button class="btn btn-sm btn-info me-1" @onclick="() => ViewFeedbackDetails(feedback.Id)">
+                                <a href="@($"/admin/feedback/{feedback.Id}")" class="btn btn-sm btn-info me-1">
                                     <i class="bi bi-eye"></i> View
-                                </button>
+                                </a>
                                 @if (!feedback.IsResolved)
                                 {
                                     <button class="btn btn-sm btn-success me-1" @onclick="() => OpenResolveDialog(feedback)">
@@ -148,74 +150,7 @@
         </div>
     }
 
-    @if (showDetailsDialog && selectedFeedback != null)
-    {
-        <div class="modal fade show" style="display: block;" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Feedback Details</h5>
-                        <button type="button" class="btn-close" @onclick="CloseDetailsDialog"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>ID:</strong> @selectedFeedback.Id</p>
-                                <p><strong>Name:</strong> @selectedFeedback.Name</p>
-                                <p><strong>Email:</strong> @selectedFeedback.Email</p>
-                                <p><strong>Type:</strong> @selectedFeedback.FeedbackType</p>
-                                <p><strong>Submitted:</strong> @selectedFeedback.SubmittedAt.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Status:</strong> @(selectedFeedback.IsResolved ? "Resolved" : "Unresolved")</p>
-                                @if (selectedFeedback.IsResolved && selectedFeedback.ResolvedAt.HasValue)
-                                {
-                                    <p><strong>Resolved At:</strong> @selectedFeedback.ResolvedAt.Value.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</p>
-                                }
-                                <p><strong>Contact Consent:</strong> @(selectedFeedback.ContactConsent ? "Yes" : "No")</p>
-                                <p><strong>Browser Info:</strong> @selectedFeedback.BrowserInfo</p>
-                            </div>
-                        </div>
-                        <div class="row mt-3">
-                            <div class="col-12">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">Subject: @selectedFeedback.Subject</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <p>@selectedFeedback.Message</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        @if (selectedFeedback.IsResolved && !string.IsNullOrEmpty(selectedFeedback.AdminNotes))
-                        {
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <div class="card">
-                                        <div class="card-header bg-success text-white">
-                                            <h6 class="mb-0">Admin Notes</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>@selectedFeedback.AdminNotes</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="CloseDetailsDialog">Close</button>
-                        @if (!selectedFeedback.IsResolved)
-                        {
-                            <button type="button" class="btn btn-success" @onclick="() => OpenResolveDialog(selectedFeedback)">Resolve</button>
-                        }
-                    </div>
-                </div>
-            </div>
-            <div class="modal-backdrop fade show"></div>
-        </div>
-    }
+
 </div>
 
 @code {
@@ -224,8 +159,6 @@
     private string selectedType = "";
     private string selectedStatus = "";
     private bool showResolveDialog = false;
-    private bool showDetailsDialog = false;
-    private Feedback selectedFeedback;
     private string adminNotes = "";
     private int selectedFeedbackId;
 
@@ -269,26 +202,11 @@
         loading = false;
     }
 
-    private async Task ViewFeedbackDetails(int id)
-    {
-        selectedFeedback = await FeedbackService.GetFeedbackByIdAsync(id);
-        if (selectedFeedback != null)
-        {
-            showDetailsDialog = true;
-        }
-    }
-
     private void OpenResolveDialog(Feedback feedback)
     {
         selectedFeedbackId = feedback.Id;
         adminNotes = "";
         showResolveDialog = true;
-        
-        // If we're already viewing details, close that dialog
-        if (showDetailsDialog)
-        {
-            showDetailsDialog = false;
-        }
     }
 
     private void CloseResolveDialog()
@@ -297,24 +215,12 @@
         adminNotes = "";
     }
 
-    private void CloseDetailsDialog()
-    {
-        showDetailsDialog = false;
-        selectedFeedback = null;
-    }
-
     private async Task ResolveFeedback()
     {
         if (await FeedbackService.ResolveFeedbackAsync(selectedFeedbackId, adminNotes))
         {
             showResolveDialog = false;
             await LoadFeedback();
-            
-            // If we were viewing details, refresh them
-            if (selectedFeedback != null && selectedFeedback.Id == selectedFeedbackId)
-            {
-                await ViewFeedbackDetails(selectedFeedbackId);
-            }
         }
     }
 
@@ -323,12 +229,6 @@
         if (await FeedbackService.DeleteFeedbackAsync(id))
         {
             await LoadFeedback();
-            
-            // If we were viewing details of the deleted feedback, close the dialog
-            if (selectedFeedback != null && selectedFeedback.Id == id)
-            {
-                showDetailsDialog = false;
-            }
         }
     }
 }

@@ -157,6 +157,40 @@
     opacity: 0.5;
 }
 
+/* Feedback View Page */
+.feedback-message {
+    border-left: 4px solid #007bff;
+    background-color: #f8f9fa;
+}
+
+.admin-response {
+    border-left: 4px solid #28a745;
+}
+
+.feedback-details-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.feedback-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.feedback-meta-item {
+    display: flex;
+    align-items: center;
+}
+
+.feedback-meta-item i {
+    margin-right: 0.5rem;
+    color: #6c757d;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .admin-sidebar {
