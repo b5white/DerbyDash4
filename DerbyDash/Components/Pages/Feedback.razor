@@ -97,16 +97,14 @@
 
 @code {
     private FeedbackModel feedbackModel = new FeedbackModel();
-    private bool isSubmitted = false;
-    private bool firstRender = true;
+    private bool isSubmitted = false;    
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             // Auto-detect browser information
-            feedbackModel.BrowserInfo = await JSRuntime.InvokeAsync<string>("getBrowserInfo");
-            this.firstRender = false;
+            feedbackModel.BrowserInfo = await JSRuntime.InvokeAsync<string>("getBrowserInfo");            
             StateHasChanged();
         }
     }

@@ -36,12 +36,21 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             await ReloadUsers();
         }
 
-        private async void HandleRacerChanged() {
-            await ReloadUsers();
-            StateHasChanged();
+        private void HandleRacerChanged() {
+            _ = HandleRacerChangedAsync();
+        }
+
+        private async Task HandleRacerChangedAsync() {
+            try {
+                await ReloadUsers();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+            }
         }
 
         private async Task OnValidSubmitAsync() {

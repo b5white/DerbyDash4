@@ -9,9 +9,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Preferences {
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
-        [Inject] internal IdentityRedirectManager RedirectManager { get; set; } = default!;
+        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = null!;
         [Inject] private NavigationManager NavManager { get; set; } = default!;
+        [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
 
         public class PreferencesModel {
             public string? Avatar { get; set; }
@@ -38,7 +38,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 SaveMessage = "Error: Could not load user data.";
             } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
+                //    Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
 
                 // Set default avatar if user doesn't have one yet
                 if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {

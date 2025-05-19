@@ -29,7 +29,7 @@
                 AuthStateProvider.NotifyUserAuthentication();
                 RedirectManager.RedirectTo("/");
 
-            } catch (NavigationException ex) {
+            } catch (NavigationException) {
                 throw;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during logout.");

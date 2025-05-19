@@ -14,19 +14,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         [Inject]
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-
         [Inject]
         public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-
         //[Inject]
         //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
-
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-
         [Inject]
         public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
-
         [Inject]
         public ILogger<ChangePassword> Logger { get; set; } = default!;
 

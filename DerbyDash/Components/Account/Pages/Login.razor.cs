@@ -119,7 +119,7 @@ namespace DerbyDash.Components.Account.Pages {
 
                 Logger.LogInformation("Redirecting user {Email} to ProcessLogin with ReturnUrl: {ReturnUrl}", email, returnUrl);
                 RedirectToAccountProcessLogin(email, Input.RememberMe, returnUrl);
-            } catch (NavigationException ex) {
+            } catch (NavigationException) {
                 throw;
             } catch (Exception ex) {
                 errorMessage = $"Error: An unexpected error occurred during login attempt."; // Avoid exposing ex.Message directly to user

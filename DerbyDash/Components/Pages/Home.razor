@@ -3,7 +3,8 @@
 @using DerbyDash.Components.Layout
 @using DerbyDash.Components.MenuPages
 @attribute [AllowAnonymous]
-@rendermode InteractiveServer
+
+@inject IdentityRedirectManager RedirectManager
 
 <PageTitle>@appName - Math Racing Game</PageTitle>
 

@@ -1,5 +1,5 @@
 ﻿using DerbyDash.Data;
-using DerbyDash.HelperUtilities;
+using DerbyDash.Utilities;
 
 namespace DerbyDash.Components.Track {
     public class Car {
@@ -111,7 +111,7 @@ namespace DerbyDash.Components.Track {
                     } else {
                         currentDistance += currentSpeed * (currentTime - times[index, i - 1]) * SPEED_MULTIPLIER;
                     }
-                    if (!Utilities.AreDoublesEqual(currentDistance, distances[index, i] * SPEED_MULTIPLIER, 0.0001)) {
+                    if (!UtilityMethods.AreDoublesEqual(currentDistance, distances[index, i] * SPEED_MULTIPLIER, 0.0001)) {
                         Console.WriteLine($">Car:{index}, index:{i}, currentDistance:{currentDistance}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{distances[index, i] * SPEED_MULTIPLIER}");
                     }
                     currentSpeed++; // Assumes speed increment of 1

@@ -1,10 +1,10 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace DerbyDash.HelperUtilities {
-    public static class Utilities {
+namespace DerbyDash.Utilities {
+    public static class UtilityMethods {
         private static readonly char[] padding = { '=' };
-        private static readonly ILogger _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("HelperUtilities");
+        private static readonly ILogger _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("UtilityMethods");
 
         public static string BytesToString(byte[] bytes) {
             try {

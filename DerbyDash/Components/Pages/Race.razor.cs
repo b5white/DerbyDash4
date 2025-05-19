@@ -1,10 +1,10 @@
-﻿﻿﻿﻿﻿﻿using DerbyDash.Components.Layout;
+﻿using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
-using DerbyDash.HelperUtilities;
 using DerbyDash.Services;
+using DerbyDash.Utilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
@@ -114,7 +114,7 @@ namespace DerbyDash.Components.Pages {
 
                 // Delay the start of inactivity timer
                 // Using FireAndForget pattern since we don't need to wait for this to complete
-                Utilities.FireAndForget(async () => {
+                UtilityMethods.FireAndForget(async () => {
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
                         await InvokeAsync(async () => {
@@ -308,7 +308,7 @@ namespace DerbyDash.Components.Pages {
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                Utilities.FireAndForget(() => UpdateResultsAsync(FinishTime));
+                UtilityMethods.FireAndForget(() => UpdateResultsAsync(FinishTime));
                 Running = true;
                 problems = null;
             }
@@ -387,7 +387,7 @@ namespace DerbyDash.Components.Pages {
             currentResultIndex = -1;
             for (int i = previousRaces.Count - 1; i >= 0; i--) {
                 previousResults[i] = (float)previousRaces[i].TotalTime;
-                if (Utilities.AreDoublesEqual(previousResults[i], timeSpan, 0.000001)) {
+                if (UtilityMethods.AreDoublesEqual(previousResults[i], timeSpan, 0.000001)) {
                     currentResultIndex = i;
                 }
             }

@@ -15,8 +15,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
 
-        [Inject] public UserManager<ApplicationUser> UserManager { get; set; } = default!;
-        [Inject] public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+        [Inject]
+        public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        [Inject]
+        public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
         //[Inject]
         //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]

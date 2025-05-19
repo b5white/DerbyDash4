@@ -1,4 +1,4 @@
-﻿﻿using DerbyDash.Data;
+﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -42,7 +42,12 @@ namespace DerbyDash.Services {
         }
 
         public async Task<List<Racer>> GetRacers() {
-            ApplicationUser user;
+        	raceTeam = await GetRacersInternal();
+        	return raceTeam;
+        }
+        
+        public async Task<List<Racer>> GetRacersInternal() {
+            ApplicationUser? user;
             string name;
             try {
                 // Try to get the username, but don't fail if we can't
@@ -55,11 +60,10 @@ namespace DerbyDash.Services {
                     return new List<Racer>();
                 }
 
-                var retrievedUser = await GetUserByNameAsync(name);
-                if (retrievedUser == null) {
+                user = await GetUserByNameAsync(name);
+                if (user == null) {
                     return new List<Racer>();
                 }
-                user = retrievedUser;
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
@@ -99,22 +103,17 @@ namespace DerbyDash.Services {
             return Task.FromResult(racer);
         }
 
-        public Task UpdateRacer(Racer racer) {
+        public async Task UpdateRacer(Racer racer) {
             // Implementation would go here
-            return Task.CompletedTask;
+            return;
         }
 
-        public Task RemoveRacer(string racerId) {
+        public async Task RemoveRacer(string racerId) {
             // Implementation would go here
-            return Task.CompletedTask;
+            return;
         }
 
-        public Racer ActiveRacer {
-            get => GetActiveRacer().GetAwaiter().GetResult();
-            set => SetActiveRacer(value).Wait();
-        }
-
-        public async Task<Racer> GetActiveRacer() {
+        public async Task<Racer?> GetActiveRacer() {
             // If no active racer is set, try to load it from cookie
             if (Active == null) {
                 try {
@@ -173,10 +172,10 @@ namespace DerbyDash.Services {
             if (Active != null) {
                 return;
             }
-            
+
             try {
                 // We'll try to use JS interop and catch any exceptions if we're prerendering
-                
+
                 // Get the current user's ID or email for the cookie name
                 string userIdentifier = "guest";
                 try {

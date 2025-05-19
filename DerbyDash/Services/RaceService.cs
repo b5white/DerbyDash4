@@ -1,9 +1,7 @@
-﻿﻿﻿﻿
-using DerbyDash.Components.Track;
+﻿using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceService {
@@ -17,12 +15,11 @@ namespace DerbyDash.Services {
         private Random random = new Random();
 
         public RaceService(
-            ILogger<RaceService> logger, 
+            ILogger<RaceService> logger,
             IRaceTeamService raceTeamService,
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            AuthenticationStateProvider authStateProvider) 
-        {
+            AuthenticationStateProvider authStateProvider) {
             _logger = logger;
             _raceTeamService = raceTeamService;
             _context = context;
@@ -69,8 +66,8 @@ namespace DerbyDash.Services {
             return track;
         }
 
-        public Task SaveRaceAsync(RaceComponents track) {
-            return Task.CompletedTask;
+        public async Task SaveRaceAsync(RaceComponents track) {
+            return;
         }
 
         public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
@@ -86,17 +83,17 @@ namespace DerbyDash.Services {
             try {
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
-                
+
                 if (user.Identity?.IsAuthenticated == true) {
                     var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    
+
                     if (!string.IsNullOrEmpty(userId)) {
                         var appUser = await _userManager.FindByIdAsync(userId);
-                        
+
                         if (appUser != null) {
                             appUser.LastPlayedRace = problemClassString;
                             appUser.LastPlayedTime = DateTime.UtcNow;
-                            
+
                             await _userManager.UpdateAsync(appUser);
                             _logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
                         }
@@ -115,20 +112,20 @@ namespace DerbyDash.Services {
             try {
                 var authState = await _authStateProvider.GetAuthenticationStateAsync();
                 var user = authState.User;
-                
+
                 if (user.Identity?.IsAuthenticated == true) {
                     var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    
+
                     if (!string.IsNullOrEmpty(userId)) {
                         var appUser = await _userManager.FindByIdAsync(userId);
-                        
+
                         if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
                             _logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
                             return appUser.LastPlayedRace;
                         }
                     }
                 }
-                
+
                 return null;
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error retrieving last played race from database");

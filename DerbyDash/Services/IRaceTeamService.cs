@@ -9,8 +9,7 @@ namespace DerbyDash.Services {
         public Task<Racer> AddRacer(Racer racer);
         public Task UpdateRacer(Racer racer);
         public Task RemoveRacer(string racerId);
-        public Racer ActiveRacer { get; set; }
-        public Task<Racer> GetActiveRacer();
+        public Task<Racer?> GetActiveRacer();
         public Task SetActiveRacer(Racer racer);
         public Task<string> GetUserName(string purpose);
     }

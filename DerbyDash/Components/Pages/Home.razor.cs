@@ -1,18 +1,14 @@
-﻿﻿using DerbyDash.Services;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace DerbyDash.Components.Pages {
 
     public partial class Home: ComponentBase {
         [Inject]
-        public required NavigationManager NavManager { get; set; }
-
-        [Inject]
         public required IJSRuntime JSRuntime { get; set; }
 
-        [Inject]
-        public required RaceService RaceService { get; set; }
+        //       [Inject]
+        //       public required RaceService RaceService { get; set; }
 
         [Inject]
         public required ILogger<Home> Logger { get; set; }
@@ -42,25 +38,25 @@ namespace DerbyDash.Components.Pages {
         private async Task StartRacing() {
             try {
                 // Get the last played race from the database
-                lastPlayedRace = await RaceService.GetLastPlayedRaceAsync();
+                //   lastPlayedRace = await RaceService.GetLastPlayedRaceAsync();
 
                 // If there's a last played race, navigate to it
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {
                     Logger.LogInformation($"Navigating to last played race: {lastPlayedRace}");
-                    
+
                     // Navigate to the last played race
-                    NavManager.NavigateTo($"/race/{lastPlayedRace}");
+                    RedirectManager.RedirectTo($"/race/{lastPlayedRace}");
                 } else {
                     Logger.LogInformation("No last played race found, navigating to race selection menu");
-                    
+
                     // Default navigation if no last played race is found
-                    NavManager.NavigateTo("/RaceSetsMenu");
+                    RedirectManager.RedirectTo("/RaceSetsMenu");
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error retrieving last played race");
-                
+
                 // Navigate to race selection menu if there's an error
-                NavManager.NavigateTo("/RaceSetsMenu");
+                RedirectManager.RedirectTo("/RaceSetsMenu");
             }
         }
     }

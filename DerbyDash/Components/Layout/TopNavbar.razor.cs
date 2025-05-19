@@ -1,3 +1,4 @@
+using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
@@ -10,6 +11,7 @@ namespace DerbyDash.Components.Layout {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
         [Inject] private NavigationManager NavManager { get; set; } = default!;
+        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
@@ -152,7 +154,7 @@ namespace DerbyDash.Components.Layout {
                 var user = await UserManager.FindByIdAsync(userId);
 
                 if (user != null) {
-                    UserAvatarFileName = user.AvatarFileName;
+                    //        UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  
