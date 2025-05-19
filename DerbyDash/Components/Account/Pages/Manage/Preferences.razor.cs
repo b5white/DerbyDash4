@@ -9,8 +9,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Preferences {
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
+        [Inject] internal IdentityRedirectManager RedirectManager { get; set; } = default!;
+        [Inject] private NavigationManager NavManager { get; set; } = default!;
 
         public class PreferencesModel {
             public string? Avatar { get; set; }
@@ -113,7 +114,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                     // Navigate to refresh layout components like TopNavbar using the updated auth state
                     // forceLoad: false should be sufficient now that RefreshSignInAsync is called
-                    NavManager.NavigateTo(NavManager.Uri, forceLoad: false);
+                    RedirectManager.RedirectTo(NavManager.Uri);
                 } else {
                     Logger.LogError("UserManager.UpdateAsync failed for user '{UserId}'. Errors: {Errors}",
                         currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
