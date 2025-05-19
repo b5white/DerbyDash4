@@ -13,6 +13,7 @@ namespace DerbyDash.Components.Layout {
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
+        [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
         private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
@@ -31,10 +32,18 @@ namespace DerbyDash.Components.Layout {
             await LoadUserAvatar();
         }
 
-        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
+        private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
+            _ = HandleLocationChangedAsync();
+        }
+
+        private async Task HandleLocationChangedAsync() {
             // Refresh user avatar when navigation occurs
-            await LoadUserAvatar();
-            StateHasChanged();
+            try {
+                await LoadUserAvatar();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleLocationChangedAsync");
+            }
         }
 
         private async Task LoadRacers() {
@@ -64,9 +73,17 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleRacerChanged() {
-            await LoadRacers();
-            StateHasChanged();
+        private void HandleRacerChanged() {
+            _ = HandleRacerChangedAsync();
+        }
+
+        private async Task HandleRacerChangedAsync() {
+            try {
+                await LoadRacers();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+            }
         }
 
         private async Task OnRacerChanged(ChangeEventArgs e) {
