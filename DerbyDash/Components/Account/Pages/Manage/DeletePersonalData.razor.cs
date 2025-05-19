@@ -7,7 +7,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class DeletePersonalData {
         private string? message;
         private ApplicationUser user = default!;
-        private bool requirePassword;
+        private bool requirePassword = false;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -27,10 +27,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             Input ??= new();
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //requirePassword = await UserManager.HasPasswordAsync(user);
+            return Task.CompletedTask;
         }
 
         private async Task OnValidSubmitAsync() {

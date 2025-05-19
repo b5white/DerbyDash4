@@ -8,9 +8,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         public const string LinkLoginCallbackAction = "LinkLoginCallback";
 
         private ApplicationUser user = default!;
-        private IList<UserLoginInfo>? currentLogins;
-        private IList<AuthenticationScheme>? otherLogins;
-        private bool showRemoveButton;
+        private IList<UserLoginInfo>? currentLogins = new List<UserLoginInfo>();
+        private IList<AuthenticationScheme>? otherLogins = new List<AuthenticationScheme>();
+        private bool showRemoveButton = false;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -36,7 +36,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromQuery]
         private string? Action { get; set; }
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //currentLogins = await UserManager.GetLoginsAsync(user);
             //otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
@@ -53,6 +53,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             //if (HttpMethods.IsGet(HttpContext.Request.Method) && Action == LinkLoginCallbackAction) {
             //    await OnGetLinkLoginCallbackAsync();
             //}
+            return Task.CompletedTask;
         }
 
         private async Task OnSubmitAsync() {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿﻿using DerbyDash.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace DerbyDash.Components.Pages {
@@ -9,6 +10,12 @@ namespace DerbyDash.Components.Pages {
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
+
+        [Inject]
+        public required RaceService RaceService { get; set; }
+
+        [Inject]
+        public required ILogger<Home> Logger { get; set; }
 
         private string appName = "Derby Dash";
         private string selectedGif = "";
@@ -33,18 +40,26 @@ namespace DerbyDash.Components.Pages {
 
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
-            // Get the last played race from cookie
-            lastPlayedRace = await JSRuntime.InvokeAsync<string>("getCookie", "lastPlayedRace");
+            try {
+                // Get the last played race from the database
+                lastPlayedRace = await RaceService.GetLastPlayedRaceAsync();
 
-            // If there's a last played race, refresh the cookie with a new 90-day expiration and navigate to it
-            if (!string.IsNullOrEmpty(lastPlayedRace)) {
-                // Refresh the cookie with a new 90-day expiration
-                await JSRuntime.InvokeVoidAsync("setCookie", "lastPlayedRace", lastPlayedRace, 90);
-
-                // Navigate to the last played race
-                NavManager.NavigateTo($"/race/{lastPlayedRace}");
-            } else {
-                // Default navigation if no last played race is found
+                // If there's a last played race, navigate to it
+                if (!string.IsNullOrEmpty(lastPlayedRace)) {
+                    Logger.LogInformation($"Navigating to last played race: {lastPlayedRace}");
+                    
+                    // Navigate to the last played race
+                    NavManager.NavigateTo($"/race/{lastPlayedRace}");
+                } else {
+                    Logger.LogInformation("No last played race found, navigating to race selection menu");
+                    
+                    // Default navigation if no last played race is found
+                    NavManager.NavigateTo("/RaceSetsMenu");
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error retrieving last played race");
+                
+                // Navigate to race selection menu if there's an error
                 NavManager.NavigateTo("/RaceSetsMenu");
             }
         }

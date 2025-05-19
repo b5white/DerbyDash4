@@ -67,6 +67,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         private async Task ReloadUsers() {
             try {
+                // Check if the user is authenticated before trying to get the user
+                if (HttpContext.User.Identity?.IsAuthenticated == true) {
+                    try {
+                        user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+                    } catch (Exception) {
+                        // Use the default user we already have
+                        // No need to log a warning as this is expected for unauthenticated users
+                    }
+                }
+                
                 // Get the racers directly from the service
                 raceTeam.Clear();
                 raceTeam.AddRange(await RaceTeamService.GetRacers());

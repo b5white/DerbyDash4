@@ -116,9 +116,9 @@
     private List<string> categories = new List<string>();
     private List<DerbyDash.Data.FAQ> allFAQs = new List<DerbyDash.Data.FAQ>();
     private List<DerbyDash.Data.FAQ> filteredFAQs = new List<DerbyDash.Data.FAQ>();
-    private string selectedCategory;
+    private string? selectedCategory = null;
     private bool isLoading = true;
-    private string errorMessage;
+    private string errorMessage = string.Empty;
     private HashSet<int> expandedItems = new HashSet<int>(); // All items closed by default
 
     protected override async Task OnInitializedAsync()

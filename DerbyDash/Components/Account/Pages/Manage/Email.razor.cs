@@ -10,8 +10,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Email {
         private string? message;
         private ApplicationUser user = default!;
-        private string? email;
-        private bool isEmailConfirmed;
+        private string? email = null;
+        private bool isEmailConfirmed = false;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -30,12 +30,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm(FormName = "change-email")]
         private InputModel Input { get; set; } = new();
 
-        protected override async Task OnInitializedAsync() {
+        protected override Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //email = await UserManager.GetEmailAsync(user);
             //isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
 
             //Input.NewEmail ??= email;
+            return Task.CompletedTask;
         }
 
         private async Task OnValidSubmitAsync() {

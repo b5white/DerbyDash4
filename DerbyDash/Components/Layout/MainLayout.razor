@@ -41,8 +41,9 @@
         StateHasChanged();
     }
 
-    public void Dispose()
+    public new void Dispose()
     {
         NavManager.LocationChanged -= LocationChanged;
+        base.Dispose();
     }
 }
