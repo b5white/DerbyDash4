@@ -16,9 +16,9 @@ namespace DerbyDash.Services {
 
 
         private List<Racer> raceTeam = new() {
-                new Racer { Id = "1", Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
-                new Racer { Id = "2", Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
-                new Racer { Id = "3", Name = "Charlie" }
+                new Racer { Id = 1, Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
+                new Racer { Id = 2, Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
+                new Racer { Id = 3, Name = "Charlie" }
             };
         private Racer? Active;
 
@@ -75,7 +75,7 @@ namespace DerbyDash.Services {
             return Task.FromResult(raceTeam);
         }
 
-        public Task<Racer?> GetRacerByIdAsync(string racerId) {
+        public Task<Racer?> GetRacerByIdAsync(int racerId) {
             return Task.FromResult(raceTeam.FirstOrDefault(r => r.Id == racerId));
         }
 
@@ -85,8 +85,10 @@ namespace DerbyDash.Services {
 
         public Task<Racer> AddRacer(Racer racer) {
             // Generate a unique ID if not provided
-            if (string.IsNullOrEmpty(racer.Id)) {
-                racer.Id = Guid.NewGuid().ToString();
+            if (racer.Id <= 0) {
+                // Find the maximum ID and increment by 1
+                int maxId = raceTeam.Count > 0 ? raceTeam.Max(r => r.Id) : 0;
+                racer.Id = maxId + 1;
             }
 
             raceTeam.Add(racer);
@@ -107,7 +109,7 @@ namespace DerbyDash.Services {
             return Task.CompletedTask;
         }
 
-        public Task RemoveRacer(string racerId) {
+        public Task RemoveRacer(int racerId) {
             // Implementation would go here
             return Task.CompletedTask;
         }
@@ -161,7 +163,7 @@ namespace DerbyDash.Services {
 
                 // Save the active racer ID in a user-specific cookie with 90-day expiration
                 string cookieName = $"lastActiveRacer_{userIdentifier}";
-                await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racer.Id, 90);
+                await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racer.Id.ToString(), 90);
                 _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie for user {userIdentifier}");
             } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
                 // This is expected during prerendering, so just log at debug level
@@ -196,9 +198,9 @@ namespace DerbyDash.Services {
         string cookieName = $"lastActiveRacer_{userIdentifier}";
         string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", cookieName);
 
-        if (!string.IsNullOrEmpty(racerId)) {
+        if (!string.IsNullOrEmpty(racerId) && int.TryParse(racerId, out int racerIdInt)) {
             // Find the racer with the saved ID
-            Racer? racer = await GetRacerByIdAsync(racerId);
+            Racer? racer = await GetRacerByIdAsync(racerIdInt);
 
             if (racer != null) {
                 // Set as active racer without saving to cookie again

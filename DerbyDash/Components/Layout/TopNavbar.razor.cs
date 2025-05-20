@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
-        private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
+        private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         private string CurrentUrl => NavManager.Uri;
@@ -54,12 +54,12 @@ namespace DerbyDash.Components.Layout {
                     }
                 } else {
                     // Initialize with an empty racer to avoid null reference exceptions
-                    SelectedRacer = new Racer { Id = "", Name = "" };
+                    SelectedRacer = new Racer { Id = 0, Name = "" };
                 }
             } catch (Exception) {
                 // User isn't logged in or other error occurred. Initialize with empty lists.
                 Racers = new List<Racer>();
-                SelectedRacer = new Racer { Id = "", Name = "" };
+                SelectedRacer = new Racer { Id = 0, Name = "" };
             }
         }
 
@@ -73,8 +73,8 @@ namespace DerbyDash.Components.Layout {
         }
 
         private async Task OnRacerChanged(ChangeEventArgs e) {
-            string newRacerId = e.Value?.ToString() ?? string.Empty;
-            if (!string.IsNullOrEmpty(newRacerId)) {
+            string newRacerIdStr = e.Value?.ToString() ?? string.Empty;
+            if (!string.IsNullOrEmpty(newRacerIdStr) && int.TryParse(newRacerIdStr, out int newRacerId)) {
                 Racer? newRacer = await RaceTeamService.GetRacerByIdAsync(newRacerId);
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
