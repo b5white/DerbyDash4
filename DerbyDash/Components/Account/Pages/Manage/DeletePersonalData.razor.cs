@@ -13,6 +13,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private HttpContext HttpContext { get; set; } = default!;
 
         [Inject]
+        public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+        [Inject]
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
         public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
@@ -44,6 +46,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.SignOutAsync();
+            AuthStateProvider.NotifyUserAuthentication();
 
             string userId = await UserManager.GetUserIdAsync(user);
             Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);

@@ -66,6 +66,9 @@
     [SupplyParameterFromQuery]
     private string? Action { get; set; }
 
+    [Inject]
+    public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+    
     private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
 
     protected override async Task OnInitializedAsync()
@@ -168,6 +171,7 @@
                 }
 
                 await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                AuthStateProvider.NotifyUserAuthentication();
                 RedirectManager.RedirectTo(ReturnUrl);
             }
         }

@@ -26,10 +26,10 @@
             Logger.LogInformation("OnInitializedAsync called.");
             try {
                 await SignInManager.SignOutAsync();
-            //    AuthStateProvider.NotifyUserLogout();
+                AuthStateProvider.NotifyUserAuthentication();
                 RedirectManager.RedirectTo("/");
 
-            } catch (NavigationException ex) {
+            } catch (NavigationException) {
                 throw;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during logout.");

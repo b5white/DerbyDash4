@@ -15,8 +15,7 @@
     <h4>Choose Your Avatar</h4>
     <EditForm Model="Model" OnValidSubmit="OnSubmitAsync" FormName="preferences">
         <div class="avatar-options">
-            @foreach (var avatar in Avatars)
-            {
+            @foreach (var avatar in Avatars) {
                 @* Use onclick on the label to explicitly call SelectAvatar *@
                 <label class="avatar-label" @onclick="() => SelectAvatar(avatar)">
                     <input type="radio" name="avatar" value="@avatar" checked="@(Model.Avatar == avatar)" />
@@ -26,18 +25,13 @@
         </div>
         <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
     </EditForm>
-    @if (SaveMessage != null)
-    {
+    @if (SaveMessage != null) {
         <div class="alert @(SaveMessage.StartsWith("Error") || SaveMessage.StartsWith("Please") ? "alert-warning" : "alert-success") mt-2">@SaveMessage</div>
     }
-    
+
     <!-- Debug info (can be removed in production) -->
     <div class="mt-3 small text-muted">
         <div>Current Model.Avatar: @(Model.Avatar ?? "None")</div>
-        <div>Current user.AvatarFileName: @(user?.AvatarFileName ?? "None")</div>
+        @*         <div>Current user.AvatarFileName: @(user?.AvatarFileName ?? "None")</div> *@
     </div>
 </div>
-
-@* @code block removed - logic moved to Preferences.razor.cs *@
-
-@* <style> block removed - styles moved to Preferences.razor.css *@

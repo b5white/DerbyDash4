@@ -59,7 +59,7 @@ namespace DerbyDash.Services {
             //_logger.LogInformation(response.IsSuccessStatusCode
             //                       ? $"Email to {toEmail} queued successfully!"
             //                       : $"Failure Email to {toEmail}");
-            
+
             return Task.CompletedTask;
         }
     }

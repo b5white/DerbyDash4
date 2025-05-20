@@ -10,6 +10,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         // Remove unused field
         // private bool hasPassword;
 
+        [Inject]
+        public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
 
@@ -43,6 +46,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserAuthentication();
             Logger.LogInformation("User changed their password successfully.");
 
             RedirectManager.RedirectToCurrentPageWithStatus("Your password has been changed", HttpContext);

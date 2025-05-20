@@ -9,6 +9,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Preferences {
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = null!;
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
 
@@ -37,7 +38,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 SaveMessage = "Error: Could not load user data.";
             } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
+                //    Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
 
                 // Set default avatar if user doesn't have one yet
                 if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
@@ -113,7 +114,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                     // Navigate to refresh layout components like TopNavbar using the updated auth state
                     // forceLoad: false should be sufficient now that RefreshSignInAsync is called
-                    NavManager.NavigateTo(NavManager.Uri, forceLoad: false);
+                    RedirectManager.RedirectTo(NavManager.Uri);
                 } else {
                     Logger.LogError("UserManager.UpdateAsync failed for user '{UserId}'. Errors: {Errors}",
                         currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));

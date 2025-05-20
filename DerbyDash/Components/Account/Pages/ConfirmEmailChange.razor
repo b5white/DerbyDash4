@@ -18,6 +18,9 @@
 @code {
     private string? message;
 
+    [Inject]
+    public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
@@ -63,6 +66,7 @@
         }
 
         await SignInManager.RefreshSignInAsync(user);
+        AuthStateProvider.NotifyUserAuthentication();
         message = "Thank you for confirming your email change.";
     }
 }

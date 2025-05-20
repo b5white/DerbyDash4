@@ -16,6 +16,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+
         protected override Task OnInitializedAsync() {
             //       user = await UserAccessor.GetRequiredUserAsync(HttpContext);
 

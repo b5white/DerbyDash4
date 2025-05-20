@@ -27,6 +27,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
 
+        [Inject] public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+
         [SupplyParameterFromForm]
         private string? LoginProvider { get; set; }
 
@@ -63,6 +65,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserAuthentication();
             RedirectManager.RedirectToCurrentPageWithStatus("The external login was removed.", HttpContext);
         }
 

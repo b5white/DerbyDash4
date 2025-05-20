@@ -1,3 +1,4 @@
+using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
@@ -10,7 +11,9 @@ namespace DerbyDash.Components.Layout {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
         [Inject] private NavigationManager NavManager { get; set; } = default!;
+        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
+        [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
         private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
@@ -30,10 +33,18 @@ namespace DerbyDash.Components.Layout {
             await LoadUserAvatar();
         }
 
-        private async void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
+        private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
+            _ = HandleLocationChangedAsync();
+        }
+
+        private async Task HandleLocationChangedAsync() {
             // Refresh user avatar when navigation occurs
-            await LoadUserAvatar();
-            StateHasChanged();
+            try {
+                await LoadUserAvatar();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleLocationChangedAsync");
+            }
         }
 
         private async Task LoadRacers() {
@@ -157,7 +168,7 @@ namespace DerbyDash.Components.Layout {
                 var user = await UserManager.FindByIdAsync(userId);
 
                 if (user != null) {
-                    UserAvatarFileName = user.AvatarFileName;
+                    //        UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  

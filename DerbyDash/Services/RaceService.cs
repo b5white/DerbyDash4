@@ -1,8 +1,7 @@
-﻿﻿using DerbyDash.Components.Track;
+using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceService {
@@ -16,12 +15,11 @@ namespace DerbyDash.Services {
         private Random random = new Random();
 
         public RaceService(
-            ILogger<RaceService> logger, 
+            ILogger<RaceService> logger,
             IRaceTeamService raceTeamService,
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            AuthenticationStateProvider authStateProvider) 
-        {
+            AuthenticationStateProvider authStateProvider) {
             _logger = logger;
             _raceTeamService = raceTeamService;
             _context = context;
@@ -68,8 +66,8 @@ namespace DerbyDash.Services {
             return track;
         }
 
-        public Task SaveRaceAsync(RaceComponents track) {
-            return Task.CompletedTask;
+        public async Task SaveRaceAsync(RaceComponents track) {
+            return;
         }
 
         public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {

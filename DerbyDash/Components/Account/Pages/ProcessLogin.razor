@@ -50,6 +50,7 @@
                     // Sign in the user directly without password verification
                     // (password was already verified in the Login page)
                     await SignInManager.SignInAsync(user, RememberMe);
+                    AuthStateProvider.NotifyUserAuthentication();
                     Logger.LogInformation("User logged in: {Email}", Email);
                 } else {
                     // User not found, redirect back to login

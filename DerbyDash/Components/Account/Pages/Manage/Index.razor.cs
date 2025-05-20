@@ -20,7 +20,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+        [Inject]
+        public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+        [Inject]
+        public ILogger<ChangePassword> Logger { get; set; } = default!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -43,6 +46,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserAuthentication();
             RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
         }
 
