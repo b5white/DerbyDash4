@@ -62,7 +62,33 @@
 
     private string GetActiveClass(string href)
     {
-        var currentUri = NavigationManager.Uri;
-        return currentUri.Contains(href) ? "active" : "";
+        // Get the relative path from the current URI
+        var currentPath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        
+        // Handle the root admin path
+        if (href == "/admin")
+        {
+            // Only active if we're exactly at /admin
+            return currentPath == "admin" ? "active" : "";
+        }
+        
+        // For other admin sections
+        // Remove the leading slash for comparison
+        string hrefWithoutSlash = href.Substring(1);
+        
+        // Check if the current path matches the menu item's path
+        if (currentPath == hrefWithoutSlash)
+        {
+            return "active";
+        }
+        
+        // Check if we're on a sub-page of the current section
+        // For example, /admin/feedback/123 should highlight the Feedback menu item
+        if (currentPath.StartsWith(hrefWithoutSlash + "/"))
+        {
+            return "active";
+        }
+        
+        return "";
     }
 }

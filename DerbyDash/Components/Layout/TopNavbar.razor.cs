@@ -17,10 +17,11 @@ namespace DerbyDash.Components.Layout {
         private string? UserAvatarFileName;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
+        public ILogger<TopNavbar> Logger { get; set; } = default!;
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
-            RaceTeamService.OnRacerChanged += HandleRacerChanged;
+            RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
             NavManager.LocationChanged += HandleLocationChanged;
@@ -62,9 +63,13 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleRacerChanged() {
-            await LoadRacers();
-            StateHasChanged();
+        private async void HandleRacerChangedAsync() {
+            try {
+                await LoadRacers();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+            }
         }
 
         private async Task OnRacerChanged(ChangeEventArgs e) {
@@ -170,7 +175,7 @@ namespace DerbyDash.Components.Layout {
         void IDisposable.Dispose() {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
-                RaceTeamService.OnRacerChanged -= HandleRacerChanged;
+                RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;
 
             // Unsubscribe from navigation changes
             if (NavManager != null)
