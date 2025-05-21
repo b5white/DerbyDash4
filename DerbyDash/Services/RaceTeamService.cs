@@ -119,27 +119,27 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer> GetActiveRacer() {
-    // Try to load from cookie if we haven't already attempted to do so
-    if (!_triedLoadingFromCookie) {
-        try {
-            await LoadActiveRacerFromCookieAsync();
-            _triedLoadingFromCookie = true;
-        } catch (Exception ex) {
-            _logger.LogError(ex, "Error loading active racer, using default");
-            // If loading fails, keep the current Active value or set a default
+            // Try to load from cookie if we haven't already attempted to do so
+            if (!_triedLoadingFromCookie) {
+                try {
+                    await LoadActiveRacerFromCookieAsync();
+                    _triedLoadingFromCookie = true;
+                } catch (Exception ex) {
+                    Logger.LogError(ex, "Error loading active racer, using default");
+                    // If loading fails, keep the current Active value or set a default
+                    if (Active == null) {
+                        Active = raceTeam.FirstOrDefault();
+                    }
+                }
+            }
+
+            // If still null (which shouldn't happen), return the first racer
             if (Active == null) {
                 Active = raceTeam.FirstOrDefault();
             }
+
+            return Active!;
         }
-    }
-
-    // If still null (which shouldn't happen), return the first racer
-    if (Active == null) {
-        Active = raceTeam.FirstOrDefault();
-    }
-
-    return Active!;
-}
 
         public async Task SetActiveRacer(Racer racer) {
             Active = racer;
@@ -176,54 +176,54 @@ namespace DerbyDash.Services {
 
         // Load the active racer from cookie
         private async Task LoadActiveRacerFromCookieAsync() {
-    try {
-        // We'll try to use JS interop and catch any exceptions if we're prerendering
-        
-        // Get the current user's ID or email for the cookie name
-        string userIdentifier = "guest";
-        try {
-            var userName = await GetUserName("LoadActiveRacer");
-            if (!string.IsNullOrEmpty(userName)) {
-                // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
-                userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
-            }
-        } catch (Exception) {
-            // If we can't get the username, use "guest" as the identifier
-            Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
-        }
+            try {
+                // We'll try to use JS interop and catch any exceptions if we're prerendering
 
-        // Get the last active racer ID from the user-specific cookie
-        string cookieName = $"lastActiveRacer_{userIdentifier}";
-        string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", cookieName);
+                // Get the current user's ID or email for the cookie name
+                string userIdentifier = "guest";
+                try {
+                    var userName = await GetUserName("LoadActiveRacer");
+                    if (!string.IsNullOrEmpty(userName)) {
+                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
+                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
+                    }
+                } catch (Exception) {
+                    // If we can't get the username, use "guest" as the identifier
+                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                }
 
-        if (!string.IsNullOrEmpty(racerId) && int.TryParse(racerId, out int racerIdInt)) {
-            // Find the racer with the saved ID
-            Racer? racer = await GetRacerByIdAsync(racerIdInt);
+                // Get the last active racer ID from the user-specific cookie
+                string cookieName = $"lastActiveRacer_{userIdentifier}";
+                string? racerId = await _jsRuntime.InvokeAsync<string>("getCookie", cookieName);
+
+                if (!string.IsNullOrEmpty(racerId) && int.TryParse(racerId, out int racerIdInt)) {
+                    // Find the racer with the saved ID
+                    Racer? racer = await GetRacerByIdAsync(racerIdInt);
 
                     if (racer != null) {
                         // Set as active racer without saving to cookie again
                         Active = racer;
                         Logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie for user {userIdentifier}");
 
-                // Refresh the cookie with a new 90-day expiration
-                await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racerId, 90);
-            }
-        } else {
-            // If no cookie found or racer not found, keep the current Active value
-            // or set the first racer as active if Active is null
-            if (Active == null) {
-                Active = raceTeam.FirstOrDefault();
+                        // Refresh the cookie with a new 90-day expiration
+                        await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racerId, 90);
+                    }
+                } else {
+                    // If no cookie found or racer not found, keep the current Active value
+                    // or set the first racer as active if Active is null
+                    if (Active == null) {
+                        Active = raceTeam.FirstOrDefault();
+                    }
+                }
+            } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
+                // This is expected during prerendering, so just log at debug level
+                Logger.LogDebug("Skipping cookie load during prerendering");
+                // Don't change Active here, keep whatever value it has
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error loading active racer from cookie");
+                // Don't change Active here, keep whatever value it has
             }
         }
-    } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
-        // This is expected during prerendering, so just log at debug level
-        _logger.LogDebug("Skipping cookie load during prerendering");
-        // Don't change Active here, keep whatever value it has
-    } catch (Exception ex) {
-        _logger.LogError(ex, "Error loading active racer from cookie");
-        // Don't change Active here, keep whatever value it has
-    }
-}
 
         public async Task<string> GetUserName(string purpose) {
             try {
@@ -234,7 +234,7 @@ namespace DerbyDash.Services {
                 }
                 string? userName = authState?.User?.Identity?.Name;
                 if (string.IsNullOrEmpty(userName)) {
-                    _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
+                    Logger.LogError($"Unable to determine the user name when trying to {purpose}.");
                     throw new MissingUserException();
                 }
                 return userName;
@@ -252,23 +252,23 @@ namespace DerbyDash.Services {
             try {
                 var authState = await _authorizationState.GetAuthenticationStateAsync();
                 var user = authState.User;
-                
+
                 if (user.Identity?.IsAuthenticated == true) {
                     var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    
+
                     if (!string.IsNullOrEmpty(userId)) {
                         var appUser = await _userManager.FindByIdAsync(userId);
-                        
+
                         if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
-                            _logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
+                            Logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
                             return appUser.LastPlayedRace;
                         }
                     }
                 }
-                
+
                 return null;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error retrieving last played race from database");
+                Logger.LogError(ex, "Error retrieving last played race from database");
                 return null;
             }
         }
@@ -282,24 +282,24 @@ namespace DerbyDash.Services {
             try {
                 var authState = await _authorizationState.GetAuthenticationStateAsync();
                 var user = authState.User;
-                
+
                 if (user.Identity?.IsAuthenticated == true) {
                     var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                    
+
                     if (!string.IsNullOrEmpty(userId)) {
                         var appUser = await _userManager.FindByIdAsync(userId);
-                        
+
                         if (appUser != null) {
                             appUser.LastPlayedRace = problemClassString;
                             appUser.LastPlayedTime = DateTime.UtcNow;
-                            
+
                             await _userManager.UpdateAsync(appUser);
-                            _logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
+                            Logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
                         }
                     }
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race to database");
+                Logger.LogError(ex, "Error saving last played race to database");
             }
         }
     }
