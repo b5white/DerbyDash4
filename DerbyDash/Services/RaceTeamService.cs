@@ -45,11 +45,13 @@ namespace DerbyDash.Services {
         }
 
         public async Task<List<Racer>> GetRacers() {
+            Logger.LogInformation("GetRacers");
             raceTeam = await GetRacersInternal();
             return raceTeam;
         }
 
         public async Task<List<Racer>> GetRacersInternal() {
+            Logger.LogInformation("GetRacersInternal");
             ApplicationUser? user;
             string name;
             try {
@@ -75,19 +77,23 @@ namespace DerbyDash.Services {
         }
 
         public Task<List<Racer>> GetRacers(ApplicationUser user) {
+            Logger.LogInformation("GetRacers for ID: {ID}", user.Id);
             // Return the same data as GetRacers() for consistency
             return Task.FromResult(raceTeam);
         }
 
         public Task<Racer?> GetRacerByIdAsync(int racerId) {
+            Logger.LogInformation("GetRacerByIdAsync for ID: {ID}", racerId);
             return Task.FromResult(raceTeam.FirstOrDefault(r => r.Id == racerId));
         }
 
         public Task<ApplicationUser?> GetUserByNameAsync(string name) {
+            Logger.LogInformation("GetUserByNameAsync for name: {name}", name);
             return Task.FromResult<ApplicationUser?>(new ApplicationUser() { UserName = name });
         }
 
         public Task<Racer> AddRacer(Racer racer) {
+            Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
                 // Find the maximum ID and increment by 1
@@ -109,16 +115,19 @@ namespace DerbyDash.Services {
         }
 
         public async Task UpdateRacer(Racer racer) {
+            Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
             // Implementation would go here
             return;
         }
 
-        public Task RemoveRacer(int racerId) {
+        public async Task RemoveRacer(int racerId) {
+            Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
             // Implementation would go here
             return;
         }
 
         public async Task<Racer> GetActiveRacer() {
+            Logger.LogInformation("GetActiveRacer");
             // Try to load from cookie if we haven't already attempted to do so
             if (!_triedLoadingFromCookie) {
                 try {
@@ -142,6 +151,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task SetActiveRacer(Racer racer) {
+            Logger.LogInformation("SetActiveRacer ID: {ID}", racer.Id);
             Active = racer;
 
             try {
@@ -176,6 +186,7 @@ namespace DerbyDash.Services {
 
         // Load the active racer from cookie
         private async Task LoadActiveRacerFromCookieAsync() {
+            Logger.LogInformation("LoadActiveRacerFromCookieAsync");
             try {
                 // We'll try to use JS interop and catch any exceptions if we're prerendering
 
@@ -226,6 +237,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task<string> GetUserName(string purpose) {
+            Logger.LogInformation("GetUserName for {purpose}", purpose);
             try {
                 AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
                 if (authState == null) {
@@ -259,10 +271,11 @@ namespace DerbyDash.Services {
                     if (!string.IsNullOrEmpty(userId)) {
                         var appUser = await _userManager.FindByIdAsync(userId);
 
-                        if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
-                            Logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
-                            return appUser.LastPlayedRace;
-                        }
+                        // TODO reinstitute
+                        // if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
+                        //    Logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
+                        //    return appUser.LastPlayedRace;
+                        //}
                     }
                 }
 
@@ -290,8 +303,9 @@ namespace DerbyDash.Services {
                         var appUser = await _userManager.FindByIdAsync(userId);
 
                         if (appUser != null) {
-                            appUser.LastPlayedRace = problemClassString;
-                            appUser.LastPlayedTime = DateTime.UtcNow;
+                            // TODO reinstitute
+                            // appUser.LastPlayedRace = problemClassString;
+                            // appUser.LastPlayedTime = DateTime.UtcNow;
 
                             await _userManager.UpdateAsync(appUser);
                             Logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");

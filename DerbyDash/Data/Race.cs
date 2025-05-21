@@ -8,10 +8,8 @@ namespace DerbyDash.Data {
         [Key]
         public int Id { get; set; }
         [ForeignKey("Racer")]
-        [MaxLength(256)]
         [Column("FamilyMemberId")]
-
-        public string RacerId { get; set; } = "";
+        public int RacerId { get; set; }
         [Required]
         public DateTime RaceDateTime { get; set; } = DateTime.Now;
         [Required]

@@ -1,14 +1,10 @@
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Services {
     public class RaceService {
         private readonly IRaceTeamService _raceTeamService;
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AuthenticationStateProvider _authStateProvider;
         private RaceComponents track = new();
         private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
@@ -17,19 +13,15 @@ namespace DerbyDash.Services {
         public RaceService(
             ILogger<RaceService> logger,
             IRaceTeamService raceTeamService,
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            AuthenticationStateProvider authStateProvider) {
+            ApplicationDbContext context) {
             Logger = logger;
             _raceTeamService = raceTeamService;
             _context = context;
-            _userManager = userManager;
-            _authStateProvider = authStateProvider;
         }
 
-        public Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
+        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
             Logger.LogInformation("GetRacesByTeamMemberIdAsync");
-            return Task.FromResult(new List<Race>());
+            return new List<Race>();
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {
@@ -92,4 +84,3 @@ namespace DerbyDash.Services {
         }
     }
 }
-

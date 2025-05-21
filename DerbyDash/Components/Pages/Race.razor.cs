@@ -1,5 +1,4 @@
 using DerbyDash.Components.Layout;
-using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -76,7 +75,7 @@ namespace DerbyDash.Components.Pages {
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
         public float FinishTime = 0;
         private bool _inactivityTimerDisposed = false;
-private bool _flashTimerDisposed = false;
+        private bool _flashTimerDisposed = false;
 
         TrackContainer? trackContainerInstance;
 
@@ -122,7 +121,7 @@ private bool _flashTimerDisposed = false;
                     InactivityTimer.AutoReset = false;
                     _inactivityTimerDisposed = false;
                 }
-                
+
 
                 if (FlashTimer == null || _flashTimerDisposed) {
                     FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
@@ -137,11 +136,7 @@ private bool _flashTimerDisposed = false;
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
                         await InvokeAsync(async () => {
-
-
-
                             // Check again if timer is disposed before starting  
-
                             if (InactivityTimer != null && !_inactivityTimerDisposed) {
                                 InactivityTimer.Start();
                                 starttime = DateTime.Now.Ticks;
@@ -155,7 +150,7 @@ private bool _flashTimerDisposed = false;
 
 
         private async Task StartClick() {
-            // If we already have a ProblemClassString, save it to the database kitten
+            // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     // Save the last played race to the database
