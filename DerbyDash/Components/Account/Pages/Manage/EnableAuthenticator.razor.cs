@@ -31,11 +31,12 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
 
             //await LoadSharedKeyAndQrCodeUriAsync(user);
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         private async Task OnValidSubmitAsync() {

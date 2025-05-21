@@ -21,6 +21,7 @@ namespace DerbyDash.Services {
 
         public async Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
             Logger.LogInformation("GetRacesByTeamMemberIdAsync");
+            await Task.CompletedTask; // Just to use 'await'
             return new List<Race>();
         }
 
@@ -59,6 +60,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task SaveRaceAsync(RaceComponents track) {
+            await Task.CompletedTask; // Just to use 'await'
             return;
         }
 

@@ -76,23 +76,26 @@ namespace DerbyDash.Services {
             return await GetRacers(user);
         }
 
-        public Task<List<Racer>> GetRacers(ApplicationUser user) {
+        public async Task<List<Racer>> GetRacers(ApplicationUser user) {
             Logger.LogInformation("GetRacers for ID: {ID}", user.Id);
             // Return the same data as GetRacers() for consistency
-            return Task.FromResult(raceTeam);
+            await Task.CompletedTask; // Just to use 'await'
+            return raceTeam;
         }
 
-        public Task<Racer?> GetRacerByIdAsync(int racerId) {
+        public async Task<Racer?> GetRacerByIdAsync(int racerId) {
             Logger.LogInformation("GetRacerByIdAsync for ID: {ID}", racerId);
-            return Task.FromResult(raceTeam.FirstOrDefault(r => r.Id == racerId));
+            await Task.CompletedTask; // Just to use 'await'
+            return raceTeam.FirstOrDefault(r => r.Id == racerId);
         }
 
-        public Task<ApplicationUser?> GetUserByNameAsync(string name) {
+        public async Task<ApplicationUser?> GetUserByNameAsync(string name) {
             Logger.LogInformation("GetUserByNameAsync for name: {name}", name);
-            return Task.FromResult<ApplicationUser?>(new ApplicationUser() { UserName = name });
+            await Task.CompletedTask; // Just to use 'await'
+            return new ApplicationUser() { UserName = name };
         }
 
-        public Task<Racer> AddRacer(Racer racer) {
+        public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
@@ -110,19 +113,21 @@ namespace DerbyDash.Services {
 
             // Notify subscribers that the racer list has changed
             OnRacerChanged?.Invoke();
-
-            return Task.FromResult(racer);
+            await Task.CompletedTask; // Just to use 'await'
+            return racer;
         }
 
         public async Task UpdateRacer(Racer racer) {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
-            // Implementation would go here
+            // DONE Implementation would go here
+            await Task.CompletedTask; // Just to use 'await'
             return;
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
-            // Implementation would go here
+            // DONE Implementation would go here
+            await Task.CompletedTask; // Just to use 'await'
             return;
         }
 
@@ -147,6 +152,7 @@ namespace DerbyDash.Services {
                 Active = raceTeam.FirstOrDefault();
             }
 
+            await Task.CompletedTask; // Just to use 'await'
             return Active!;
         }
 

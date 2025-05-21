@@ -38,7 +38,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromQuery]
         private string? Action { get; set; }
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //currentLogins = await UserManager.GetLoginsAsync(user);
             //otherLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync())
@@ -55,7 +55,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             //if (HttpMethods.IsGet(HttpContext.Request.Method) && Action == LinkLoginCallbackAction) {
             //    await OnGetLinkLoginCallbackAsync();
             //}
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         private async Task OnSubmitAsync() {

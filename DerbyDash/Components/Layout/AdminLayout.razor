@@ -1,5 +1,6 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.Build.Framework
 @* @attribute [Authorize(Roles = "Admin")] *@
 
 <div class="admin-layout">
@@ -58,7 +59,8 @@
 </div>
 
 @code {
-    [Inject] private NavigationManager NavigationManager { get; set; }
+    [Inject]     
+    public required NavigationManager NavigationManager { get; set; }
 
     private string GetActiveClass(string href)
     {

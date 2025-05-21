@@ -176,8 +176,8 @@
 </div>
 
 @code {
-    private List<Feedback> allFeedback;
-    private List<Feedback> recentFeedback;
+    private List<Feedback> allFeedback = new();
+    private List<Feedback> recentFeedback = new();
     private int feedbackCount = 0;
     private int unresolvedCount = 0;
     private int bugReportCount = 0;

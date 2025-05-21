@@ -1,84 +1,63 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using DerbyDash.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace DerbyDash.Services
-{
-    public class FeedbackService
-    {
+namespace DerbyDash.Services {
+    public class FeedbackService {
         private readonly ApplicationDbContext _context;
 
-        public FeedbackService(ApplicationDbContext context)
-        {
+        public FeedbackService(ApplicationDbContext context) {
             _context = context;
         }
 
-        public async Task<List<Feedback>> GetAllFeedbackAsync()
-        {
+        public async Task<List<Feedback>> GetAllFeedbackAsync() {
             return await _context.Feedbacks
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByTypeAsync(string type)
-        {
+        public async Task<List<Feedback>> GetFeedbackByTypeAsync(string type) {
             return await _context.Feedbacks
                 .Where(f => f.FeedbackType == type)
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved)
-        {
+        public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved) {
             return await _context.Feedbacks
                 .Where(f => f.IsResolved == isResolved)
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
 
-        public async Task<Feedback> GetFeedbackByIdAsync(int id)
-        {
+        public async Task<Feedback?> GetFeedbackByIdAsync(int id) {
             return await _context.Feedbacks.FindAsync(id);
         }
 
-        public async Task<bool> AddFeedbackAsync(Feedback feedback)
-        {
-            try
-            {
+        public async Task<bool> AddFeedbackAsync(Feedback feedback) {
+            try {
                 feedback.SubmittedAt = DateTime.UtcNow;
                 feedback.IsResolved = false;
-                
+
                 await _context.Feedbacks.AddAsync(feedback);
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
         }
 
-        public async Task<bool> UpdateFeedbackAsync(Feedback feedback)
-        {
-            try
-            {
+        public async Task<bool> UpdateFeedbackAsync(Feedback feedback) {
+            try {
                 _context.Feedbacks.Update(feedback);
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
         }
 
-        public async Task<bool> ResolveFeedbackAsync(int id, string adminNotes)
-        {
-            try
-            {
+        public async Task<bool> ResolveFeedbackAsync(int id, string adminNotes) {
+            try {
                 var feedback = await _context.Feedbacks.FindAsync(id);
                 if (feedback == null)
                     return false;
@@ -90,17 +69,13 @@ namespace DerbyDash.Services
                 _context.Feedbacks.Update(feedback);
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
         }
 
-        public async Task<bool> DeleteFeedbackAsync(int id)
-        {
-            try
-            {
+        public async Task<bool> DeleteFeedbackAsync(int id) {
+            try {
                 var feedback = await _context.Feedbacks.FindAsync(id);
                 if (feedback == null)
                     return false;
@@ -108,9 +83,7 @@ namespace DerbyDash.Services
                 _context.Feedbacks.Remove(feedback);
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
+            } catch {
                 return false;
             }
         }

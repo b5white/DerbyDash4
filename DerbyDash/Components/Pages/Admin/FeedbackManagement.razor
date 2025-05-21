@@ -30,7 +30,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Filter by Type:</label>
-                                <select class="form-select" value="@selectedType" @onchange="@(e => selectedType = e.Value.ToString())">
+                                <select class="form-select" value="@selectedType" @onchange="@(e => selectedType = e.Value?.ToString() ?? "")">
                                     <option value="">All Types</option>
                                     <option value="Bug Report">Bug Report</option>
                                     <option value="Feature Request">Feature Request</option>
@@ -42,7 +42,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Filter by Status:</label>
-                                <select class="form-select" value="@selectedStatus" @onchange="@(e => selectedStatus = e.Value.ToString())">
+                                <select class="form-select" value="@selectedStatus" @onchange="@(e => selectedStatus = e.Value?.ToString() ?? "")">
                                     <option value="">All Status</option>
                                     <option value="Resolved">Resolved</option>
                                     <option value="Unresolved">Unresolved</option>
@@ -180,7 +180,7 @@
                 <div class="modal-body" style="padding: 1rem;">
                     <div class="mb-3">
                         <label class="form-label" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">Admin Notes:</label>
-                        <textarea class="form-control" rows="4" value="@adminNotes" @oninput="@(e => adminNotes = e.Value.ToString())" 
+                        <textarea class="form-control" rows="4" value="@adminNotes" @oninput="@(e => adminNotes = e.Value?.ToString() ?? "")"
                                   style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;"></textarea>
                     </div>
                 </div>
@@ -232,7 +232,7 @@
 </div>
 
 @code {
-    private List<Feedback> feedbackList;
+    private List<Feedback> feedbackList = new();
     private bool loading = true;
     private string selectedType = "";
     private string selectedStatus = "";

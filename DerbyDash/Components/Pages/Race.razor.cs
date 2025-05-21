@@ -140,7 +140,7 @@ namespace DerbyDash.Components.Pages {
                             if (InactivityTimer != null && !_inactivityTimerDisposed) {
                                 InactivityTimer.Start();
                                 starttime = DateTime.Now.Ticks;
-                                StartPeriodicTimerAsync().ConfigureAwait(false);
+                                await StartPeriodicTimerAsync().ConfigureAwait(false);
                             }
                         });
                     }
@@ -154,7 +154,8 @@ namespace DerbyDash.Components.Pages {
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     // Save the last played race to the database
-                    await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
+                    // TODO This should be in the RaceTeamService
+                    //   await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
                 } catch (Exception ex) {
                     Logger.LogError(ex, "Error saving last played race to database");
                 }

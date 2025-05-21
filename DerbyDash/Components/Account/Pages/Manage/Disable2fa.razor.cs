@@ -17,13 +17,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //       user = await UserAccessor.GetRequiredUserAsync(HttpContext);
 
             //if (HttpMethods.IsGet(HttpContext.Request.Method) && !await UserManager.GetTwoFactorEnabledAsync(user)) {
             //    throw new InvalidOperationException("Cannot disable 2FA for user as it's not currently enabled.");
             //}
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         private async Task OnSubmitAsync() {
