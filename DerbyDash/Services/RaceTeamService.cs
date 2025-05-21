@@ -7,7 +7,7 @@ using Microsoft.JSInterop;
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
         private readonly AuthenticationStateProvider _authorizationState;
-        private readonly ILogger<RaceTeamService> _logger;
+        private readonly ILogger<RaceTeamService> Logger;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -30,7 +30,7 @@ namespace DerbyDash.Services {
             UserManager<ApplicationUser> userManager,
             IJSRuntime jsRuntime) {
             _authorizationState = authorizationState;
-            _logger = logger;
+            Logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
@@ -42,10 +42,10 @@ namespace DerbyDash.Services {
         }
 
         public async Task<List<Racer>> GetRacers() {
-        	raceTeam = await GetRacersInternal();
-        	return raceTeam;
+            raceTeam = await GetRacersInternal();
+            return raceTeam;
         }
-        
+
         public async Task<List<Racer>> GetRacersInternal() {
             ApplicationUser? user;
             string name;
@@ -53,9 +53,9 @@ namespace DerbyDash.Services {
                 // Try to get the username, but don't fail if we can't
                 try {
                     name = await GetUserName("GetRacers");
-                    _logger.LogInformation($"Getting racers for user: {name}");
+                    Logger.LogInformation($"Getting racers for user: {name}");
                 } catch (Exception ex) {
-                    _logger.LogWarning(ex, "Could not get username, but continuing");
+                    Logger.LogWarning(ex, "Could not get username, but continuing");
                     // Continue even if we can't get the username
                     return new List<Racer>();
                 }
@@ -65,7 +65,7 @@ namespace DerbyDash.Services {
                     return new List<Racer>();
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error in GetRacers()");
+                Logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
             return await GetRacers(user);
@@ -119,7 +119,7 @@ namespace DerbyDash.Services {
                 try {
                     await LoadActiveRacerFromCookieAsync();
                 } catch (Exception ex) {
-                    _logger.LogError(ex, "Error loading active racer, using default");
+                    Logger.LogError(ex, "Error loading active racer, using default");
                     // If loading fails, set a default
                     Active = raceTeam.FirstOrDefault();
                 }
@@ -148,18 +148,18 @@ namespace DerbyDash.Services {
                     }
                 } catch (Exception) {
                     // If we can't get the username, use "guest" as the identifier
-                    _logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
                 }
 
                 // Save the active racer ID in a user-specific cookie with 90-day expiration
                 string cookieName = $"lastActiveRacer_{userIdentifier}";
                 await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racer.Id, 90);
-                _logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie for user {userIdentifier}");
+                Logger.LogInformation($"Saved active racer {racer.Name} (ID: {racer.Id}) to cookie for user {userIdentifier}");
             } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
                 // This is expected during prerendering, so just log at debug level
-                _logger.LogDebug("Skipping cookie save during prerendering");
+                Logger.LogDebug("Skipping cookie save during prerendering");
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error saving active racer {racer.Name} (ID: {racer.Id}) to cookie");
+                Logger.LogError(ex, $"Error saving active racer {racer.Name} (ID: {racer.Id}) to cookie");
             }
 
             // Notify subscribers that the active racer has changed
@@ -186,7 +186,7 @@ namespace DerbyDash.Services {
                     }
                 } catch (Exception) {
                     // If we can't get the username, use "guest" as the identifier
-                    _logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
                 }
 
                 // Get the last active racer ID from the user-specific cookie
@@ -200,7 +200,7 @@ namespace DerbyDash.Services {
                     if (racer != null) {
                         // Set as active racer without saving to cookie again
                         Active = racer;
-                        _logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie for user {userIdentifier}");
+                        Logger.LogInformation($"Loaded active racer {racer.Name} (ID: {racer.Id}) from cookie for user {userIdentifier}");
 
                         // Refresh the cookie with a new 90-day expiration
                         await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racerId, 90);
@@ -211,11 +211,11 @@ namespace DerbyDash.Services {
                 }
             } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
                 // This is expected during prerendering, so just log at debug level
-                _logger.LogDebug("Skipping cookie load during prerendering");
+                Logger.LogDebug("Skipping cookie load during prerendering");
                 // Set a default active racer
                 Active = raceTeam.FirstOrDefault();
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error loading active racer from cookie");
+                Logger.LogError(ex, "Error loading active racer from cookie");
                 // Set a default active racer
                 Active = raceTeam.FirstOrDefault();
             }
@@ -225,17 +225,17 @@ namespace DerbyDash.Services {
             try {
                 AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
                 if (authState == null) {
-                    _logger.LogError($"No authentication state found when trying to {purpose}.");
+                    Logger.LogError($"No authentication state found when trying to {purpose}.");
                     throw new MissingUserException();
                 }
                 string? userName = authState?.User?.Identity?.Name;
                 if (userName == null) {
-                    _logger.LogError($"Unable to determine the user name when trying to {purpose}.");
+                    Logger.LogError($"Unable to determine the user name when trying to {purpose}.");
                     throw new MissingUserException();
                 }
                 return userName;
             } catch (Exception ex) {
-                _logger.LogError(ex, $"Error getting username for {purpose}");
+                Logger.LogError(ex, $"Error getting username for {purpose}");
                 throw new MissingUserException("Could not determine username", ex);
             }
         }

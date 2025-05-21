@@ -28,7 +28,7 @@ namespace DerbyDash.Components.Pages {
         public required IConfiguration configuration { get; set; }
 
         [Inject]
-        public required ILogger<Race> _logger { get; set; }
+        public required ILogger<Race> Logger { get; set; }
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
@@ -78,7 +78,7 @@ namespace DerbyDash.Components.Pages {
         TrackContainer? trackContainerInstance;
 
         protected override void OnInitialized() {
-            _logger.LogInformation("OnInitialized");
+            Logger.LogInformation("OnInitialized");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
@@ -90,7 +90,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task Reset() {
-            _logger.LogInformation("Reset");
+            Logger.LogInformation("Reset");
             if (!Running) {
                 RaceTime = 0;
                 CurrentRacerFinished = false;
@@ -135,7 +135,7 @@ namespace DerbyDash.Components.Pages {
                     // Save the last played race to the database
                     await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
                 } catch (Exception ex) {
-                    _logger.LogError(ex, "Error saving last played race to database");
+                    Logger.LogError(ex, "Error saving last played race to database");
                 }
             }
 
@@ -146,14 +146,14 @@ namespace DerbyDash.Components.Pages {
                     await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error refreshing active racer cookie");
+                Logger.LogError(ex, "Error refreshing active racer cookie");
             }
 
             await Reset();
         }
 
         private async Task CreateProblems() {
-            _logger.LogInformation("CreateProblems");
+            Logger.LogInformation("CreateProblems");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
             }
@@ -165,7 +165,7 @@ namespace DerbyDash.Components.Pages {
                 // Save the last played race to the database
                 await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race to database");
+                Logger.LogError(ex, "Error saving last played race to database");
             }
         }
 
@@ -263,7 +263,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void SynchronizeAnimationStart() {
-            _logger.LogInformation("SynchronizeAnimationStart");
+            Logger.LogInformation("SynchronizeAnimationStart");
             // Reset any existing animations
             track.IsAnyCarAtTop = false;
 
@@ -301,7 +301,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void EndRace() {
-            _logger.LogInformation("EndRace");
+            Logger.LogInformation("EndRace");
             if (Running) {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
@@ -377,7 +377,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void ResetResults(float timeSpan) {
-            _logger.LogInformation("ResetResults");
+            Logger.LogInformation("ResetResults");
             List<Car> previousRaces = track.Cars
                 .Where(car => car.TotalTime > 0)
                 .OrderBy(car => car.TotalTime)  // take the 5 fastest
@@ -399,7 +399,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CalculateAverage() {
-            _logger.LogInformation("CalculateAverage");
+            Logger.LogInformation("CalculateAverage");
             int count = 0;
             float total = 0;
 
@@ -424,7 +424,7 @@ namespace DerbyDash.Components.Pages {
         //}
 
         public void InitializeTrack(string? problemSetIdentifier) {
-            _logger.LogInformation("InitializeTrack");
+            Logger.LogInformation("InitializeTrack");
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
@@ -514,7 +514,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task StartPeriodicTimerAsync() {
-            _logger.LogInformation("StartPeriodicTimerAsync");
+            Logger.LogInformation("StartPeriodicTimerAsync");
             // Create a new CancellationTokenSource each time the timer is started
             PeriodicTimerToken = new CancellationTokenSource();
             periodicTimer = new(TimeSpan.FromMicroseconds(PERIODIC_TIMER_SPAN_MICROSECONDS));
@@ -534,7 +534,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void StopPeriodicTimer() {
-            _logger.LogInformation("StopPeriodicTimer");
+            Logger.LogInformation("StopPeriodicTimer");
             // Cancel the token and dispose of the timer
             PeriodicTimerToken.Cancel();
             periodicTimer.Dispose();
@@ -549,14 +549,14 @@ namespace DerbyDash.Components.Pages {
         }
 
         public void LogMessage(Exception E, string message = "") {
-            _logger.LogError(E, message);
+            Logger.LogError(E, message);
             if (E.InnerException != null) {
                 LogMessage(E.InnerException);
             }
         }
 
         public void LogMessage(string message) {
-            _logger.LogWarning(message);
+            Logger.LogWarning(message);
         }
 
         public void Dispose() {

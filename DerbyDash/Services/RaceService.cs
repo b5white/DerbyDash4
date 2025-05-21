@@ -10,7 +10,7 @@ namespace DerbyDash.Services {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AuthenticationStateProvider _authStateProvider;
         private RaceComponents track = new();
-        private readonly ILogger<RaceService> _logger;
+        private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
         private Random random = new Random();
 
@@ -20,7 +20,7 @@ namespace DerbyDash.Services {
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
             AuthenticationStateProvider authStateProvider) {
-            _logger = logger;
+            Logger = logger;
             _raceTeamService = raceTeamService;
             _context = context;
             _userManager = userManager;
@@ -28,7 +28,7 @@ namespace DerbyDash.Services {
         }
 
         public Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
-            _logger.LogInformation("GetRacesByTeamMemberIdAsync");
+            Logger.LogInformation("GetRacesByTeamMemberIdAsync");
             return Task.FromResult(new List<Race>());
         }
 
@@ -95,12 +95,12 @@ namespace DerbyDash.Services {
                             appUser.LastPlayedTime = DateTime.UtcNow;
 
                             await _userManager.UpdateAsync(appUser);
-                            _logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
+                            Logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
                         }
                     }
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race to database");
+                Logger.LogError(ex, "Error saving last played race to database");
             }
         }
 
@@ -120,7 +120,7 @@ namespace DerbyDash.Services {
                         var appUser = await _userManager.FindByIdAsync(userId);
 
                         if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
-                            _logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
+                            Logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
                             return appUser.LastPlayedRace;
                         }
                     }
@@ -128,7 +128,7 @@ namespace DerbyDash.Services {
 
                 return null;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error retrieving last played race from database");
+                Logger.LogError(ex, "Error retrieving last played race from database");
                 return null;
             }
         }

@@ -4,7 +4,7 @@ using System.Text;
 namespace DerbyDash.Utilities {
     public static class UtilityMethods {
         private static readonly char[] padding = { '=' };
-        private static readonly ILogger _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("UtilityMethods");
+        private static readonly ILogger Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger("UtilityMethods");
 
         public static string BytesToString(byte[] bytes) {
             try {
@@ -58,7 +58,7 @@ namespace DerbyDash.Utilities {
                 try {
                     await taskFactory();
                 } catch (Exception ex) {
-                    _logger.LogError(ex, "Error");
+                    Logger.LogError(ex, "Error");
                 }
             });
         }

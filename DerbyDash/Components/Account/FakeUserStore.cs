@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Components.Account {
     // Note: This is an IN-MEMORY store. Users are lost when the application restarts.
     public class FakeUserStore: IUserStore<ApplicationUser>, IUserPasswordStore<ApplicationUser>, IUserEmailStore<ApplicationUser> {
-        private readonly ILogger<FakeUserStore> _logger = null!;
+        private readonly ILogger<FakeUserStore> Logger = null!;
         private readonly List<ApplicationUser> _users;
 
         public FakeUserStore(ILogger<FakeUserStore> logger) {
-            _logger = logger;
-            _logger?.LogWarning("FakeUserStore constructor");
+            Logger = logger;
+            Logger?.LogWarning("FakeUserStore constructor");
 
             // Initialize with some default users
             _users = new List<ApplicationUser>
@@ -39,7 +39,7 @@ namespace DerbyDash.Components.Account {
         }
 
         public Task<IdentityResult> CreateAsync(ApplicationUser user, CancellationToken cancellationToken) {
-            _logger?.LogWarning($"FakeUserStore CreateAsync {user.Email}");
+            Logger?.LogWarning($"FakeUserStore CreateAsync {user.Email}");
             user.Id ??= Guid.NewGuid().ToString(); // Ensure user has an ID
             _users.Add(user);
             return Task.FromResult(IdentityResult.Success);
@@ -113,7 +113,7 @@ namespace DerbyDash.Components.Account {
         public Task<IdentityResult> DeleteAsync(ApplicationUser user, CancellationToken cancellationToken)
             => Task.FromResult(IdentityResult.Success);
         public void Dispose() {
-            // _logger?.LogWarning("FakeUserStore destructor");
+            // Logger?.LogWarning("FakeUserStore destructor");
         }
     }
 }
