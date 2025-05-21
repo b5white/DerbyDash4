@@ -1,4 +1,4 @@
-﻿using DerbyDash.Components.Track;
+using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -80,28 +80,7 @@ namespace DerbyDash.Services {
         /// <param name="problemClassString">The identifier of the race (e.g., "addition-4stable")</param>
         /// <returns>A task representing the asynchronous operation</returns>
         public async Task SaveLastPlayedRaceAsync(string problemClassString) {
-            try {
-                var authState = await _authStateProvider.GetAuthenticationStateAsync();
-                var user = authState.User;
-
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-
-                        if (appUser != null) {
-                            appUser.LastPlayedRace = problemClassString;
-                            appUser.LastPlayedTime = DateTime.UtcNow;
-
-                            await _userManager.UpdateAsync(appUser);
-                            Logger.LogInformation($"Saved last played race '{problemClassString}' for user {userId}");
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race to database");
-            }
+            await _raceTeamService.SaveLastPlayedRaceAsync(problemClassString);
         }
 
         /// <summary>
@@ -109,28 +88,7 @@ namespace DerbyDash.Services {
         /// </summary>
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
-            try {
-                var authState = await _authStateProvider.GetAuthenticationStateAsync();
-                var user = authState.User;
-
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-
-                        if (appUser != null && !string.IsNullOrEmpty(appUser.LastPlayedRace)) {
-                            Logger.LogInformation($"Retrieved last played race '{appUser.LastPlayedRace}' for user {userId}");
-                            return appUser.LastPlayedRace;
-                        }
-                    }
-                }
-
-                return null;
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error retrieving last played race from database");
-                return null;
-            }
+            return await _raceTeamService.GetLastPlayedRaceAsync();
         }
     }
 }

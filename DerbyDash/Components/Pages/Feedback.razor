@@ -3,9 +3,11 @@
 @using Microsoft.AspNetCore.Authorization
 @using System.ComponentModel.DataAnnotations
 @using DerbyDash.Services
+@using DerbyDash.Data
 @attribute [AllowAnonymous]
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
+@inject FeedbackService FeedbackService
 
 <PageTitle>Feedback - Derby Dash</PageTitle>
 
@@ -111,10 +113,41 @@
 
     private async Task HandleValidSubmit()
     {
-        // In a real application, you would send this data to a service
-        // For now, we'll just simulate a successful submission
-        await Task.Delay(1000); // Simulate network request
-        isSubmitted = true;
+        try
+        {
+            // Convert the FeedbackModel to Feedback entity
+            var feedbackEntity = new DerbyDash.Data.Feedback
+            {
+                Name = feedbackModel.Name,
+                Email = feedbackModel.Email,
+                FeedbackType = feedbackModel.FeedbackType,
+                Subject = feedbackModel.Subject,
+                Message = feedbackModel.Message,
+                BrowserInfo = feedbackModel.BrowserInfo,
+                ContactConsent = feedbackModel.ContactConsent,
+                SubmittedAt = DateTime.UtcNow,
+                IsResolved = false
+            };
+
+            // Save to database
+            bool success = await FeedbackService.AddFeedbackAsync(feedbackEntity);
+            
+            if (success)
+            {
+                isSubmitted = true;
+            }
+            else
+            {
+                // Handle error - could add an error message here
+                await JSRuntime.InvokeVoidAsync("alert", "There was an error submitting your feedback. Please try again.");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log the exception and show error message
+            await JSRuntime.InvokeVoidAsync("console.error", ex.Message);
+            await JSRuntime.InvokeVoidAsync("alert", "An unexpected error occurred. Please try again later.");
+        }
     }
 
     private void ResetForm()

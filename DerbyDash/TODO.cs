@@ -8,8 +8,8 @@
         // DONE Default the Remeber Me to true, rename, use to save cookies or not.
         // TODO Repeat for Registration page and pass to email conf
         // DONE FAQ page
-        // TODO Add a cookie service to handle all cookie read/write actions like save the last racer.
-        // TODO Add a feedback page so users can report errors
+        // DONE Add a cookie service to handle all cookie read/write actions like save the last racer.
+        // DONE Add a feedback page so users can report errors
         // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
         // DONE Subscription page
         // DONE Subscription service with the fake data

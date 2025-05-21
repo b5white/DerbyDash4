@@ -28,37 +28,38 @@
             </NavLink>
         </div>
 
-        <div class="nav-item">
-            <NavLink class="nav-link" href="RaceSetsMenu" Match="NavLinkMatch.All">
-                <i class="nav-icon fas fa-flag-checkered"></i>
-                <span class="nav-text">Races</span>
+        <div class="nav-item featured-item">
+            <NavLink class="nav-link featured-link" href="RaceSetsMenu" Match="NavLinkMatch.All">
+                <i class="nav-icon fas fa-flag-checkered" style="color: #ffcc00;"></i>
+                <span class="nav-text" style="font-weight: bold; font-size: 1.1em; color: #ffcc00;">Races</span>
+                <span class="featured-indicator">🏆</span>
             </NavLink>
         </div>
         
         <div class="nav-item">
-            <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All">
+            <NavLink class="nav-link" href="aboutdemo" Match="NavLinkMatch.All">
                 <i class="nav-icon fas fa-question-circle"></i>
-                <span class="nav-text">FAQ</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item">
-            <NavLink class="nav-link" href="feedback" Match="NavLinkMatch.All">
-                <i class="nav-icon fas fa-comment-alt"></i>
-                <span class="nav-text">Feedback</span>
+                <span class="nav-text">About Demo</span>
             </NavLink>
         </div>
 
         <AuthorizeView>
             <Authorized>
                 <div class="nav-divider">
-                    <span>Account</span>
+                    <span>Resources</span>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Manage/RaceTeam" Match="NavLinkMatch.All">
-                        <i class="nav-icon fas fa-users"></i>
-                        <span class="nav-text">Race Team</span>
+                    <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All">
+                        <i class="nav-icon fas fa-question-circle"></i>
+                        <span class="nav-text">FAQ</span>
+                    </NavLink>
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link" href="feedback" Match="NavLinkMatch.All">
+                        <i class="nav-icon fas fa-comment-alt"></i>
+                        <span class="nav-text">Feedback</span>
                     </NavLink>
                 </div>
 
@@ -73,13 +74,6 @@
                     <NavLink class="nav-link pay-it-forward-link" href="PayItForward" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-gift"></i>
                         <span class="nav-text">Pay it Forward</span>
-                    </NavLink>
-                </div>
-
-                <div class="nav-item">
-                    <NavLink class="nav-link subscription-link" href="subscription" Match="NavLinkMatch.All">
-                        <i class="nav-icon fas fa-star"></i>
-                        <span class="nav-text">Subscription</span>
                     </NavLink>
                 </div>
 
@@ -99,7 +93,7 @@
             </Authorized>
             <NotAuthorized>
                 <div class="nav-divider">
-                    <span>Account</span>
+                    <span>Resources</span>
                 </div>
 
                 <div class="nav-item">

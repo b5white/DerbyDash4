@@ -1,7 +1,7 @@
 ﻿<CascadingAuthenticationState>
     <Router AppAssembly="typeof(Program).Assembly">
         <Found Context="routeData">
-            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@GetLayoutType(routeData)">
                 <NotAuthorized>
                     <RedirectToLogin />
                 </NotAuthorized>
@@ -10,9 +10,22 @@
         </Found>
         <NotFound>
             <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="typeof(Layout.MainLayout)">
+            <LayoutView Layout="typeof(DerbyDash.Components.Layout.MainLayout)">
                 <p role="alert">Sorry, there's nothing at this address.</p>
             </LayoutView>
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private Type GetLayoutType(RouteData routeData)
+    {
+        // Use AdminLayout for admin pages
+        if (routeData.PageType.Namespace?.Contains("Admin") == true)
+        {
+            return typeof(DerbyDash.Components.Layout.AdminLayout);
+        }
+        
+        return typeof(DerbyDash.Components.Layout.MainLayout);
+    }
+}

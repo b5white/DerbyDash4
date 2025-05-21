@@ -34,6 +34,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            builder.Services.AddScoped<FeedbackService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
@@ -90,7 +91,7 @@ namespace DerbyDash {
 
             WebApplication app = builder.Build();
 
-            app.MapGet("/throwerror", () => {
+            app.MapGet("/throwerror", async () => {
                 throw new Exception("Simulated exception");
             });
 

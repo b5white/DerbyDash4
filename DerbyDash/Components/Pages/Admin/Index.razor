@@ -1,0 +1,237 @@
+@page "/admin"
+@* @attribute [Authorize(Roles = "Admin")] *@
+@using Microsoft.AspNetCore.Authorization
+@using DerbyDash.Services
+@using DerbyDash.Data
+@inject FeedbackService FeedbackService
+
+<PageTitle>Admin Dashboard - Derby Dash</PageTitle>
+
+<div class="admin-dashboard">
+    <h1>Admin Dashboard</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="dashboard-card-icon bg-primary">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <div class="dashboard-card-content">
+                        <h5 class="card-title">Feedback</h5>
+                        <h2 class="card-value">@feedbackCount</h2>
+                        <p class="card-text">@unresolvedCount unresolved</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/feedback" class="btn btn-sm btn-primary">Manage Feedback</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="dashboard-card-icon bg-success">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="dashboard-card-content">
+                        <h5 class="card-title">Users</h5>
+                        <h2 class="card-value">--</h2>
+                        <p class="card-text">-- new this week</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/users" class="btn btn-sm btn-success">Manage Users</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="dashboard-card-icon bg-warning">
+                        <i class="bi bi-flag"></i>
+                    </div>
+                    <div class="dashboard-card-content">
+                        <h5 class="card-title">Races</h5>
+                        <h2 class="card-value">--</h2>
+                        <p class="card-text">-- upcoming</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/races" class="btn btn-sm btn-warning">Manage Races</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card dashboard-card">
+                <div class="card-body">
+                    <div class="dashboard-card-icon bg-info">
+                        <i class="bi bi-gear"></i>
+                    </div>
+                    <div class="dashboard-card-content">
+                        <h5 class="card-title">Settings</h5>
+                        <h2 class="card-value">--</h2>
+                        <p class="card-text">System configuration</p>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="/admin/settings" class="btn btn-sm btn-info">Manage Settings</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Feedback</h5>
+                </div>
+                <div class="card-body">
+                    @if (recentFeedback == null || !recentFeedback.Any())
+                    {
+                        <p class="text-muted">No feedback submissions yet.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Type</th>
+                                        <th>Subject</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var feedback in recentFeedback)
+                                    {
+                                        <tr>
+                                            <td>@feedback.SubmittedAt.ToString("MM/dd/yyyy")</td>
+                                            <td>@feedback.FeedbackType</td>
+                                            <td>@feedback.Subject</td>
+                                            <td>
+                                                @if (feedback.IsResolved)
+                                                {
+                                                    <span class="badge bg-success">Resolved</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-warning">Unresolved</span>
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-end mt-3">
+                            <a href="/admin/feedback" class="btn btn-sm btn-primary">View All Feedback</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Feedback by Type</h5>
+                </div>
+                <div class="card-body">
+                    <div class="feedback-stats">
+                        <div class="feedback-stat-item">
+                            <div class="stat-label">Bug Reports</div>
+                            <div class="progress">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: @GetPercentage("Bug Report")%" aria-valuenow="@GetPercentage("Bug Report")" aria-valuemin="0" aria-valuemax="100">@bugReportCount</div>
+                            </div>
+                        </div>
+                        <div class="feedback-stat-item">
+                            <div class="stat-label">Feature Requests</div>
+                            <div class="progress">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @GetPercentage("Feature Request")%" aria-valuenow="@GetPercentage("Feature Request")" aria-valuemin="0" aria-valuemax="100">@featureRequestCount</div>
+                            </div>
+                        </div>
+                        <div class="feedback-stat-item">
+                            <div class="stat-label">General Feedback</div>
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: @GetPercentage("General Feedback")%" aria-valuenow="@GetPercentage("General Feedback")" aria-valuemin="0" aria-valuemax="100">@generalFeedbackCount</div>
+                            </div>
+                        </div>
+                        <div class="feedback-stat-item">
+                            <div class="stat-label">Other</div>
+                            <div class="progress">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: @GetPercentage("Other")%" aria-valuenow="@GetPercentage("Other")" aria-valuemin="0" aria-valuemax="100">@otherFeedbackCount</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Feedback> allFeedback;
+    private List<Feedback> recentFeedback;
+    private int feedbackCount = 0;
+    private int unresolvedCount = 0;
+    private int bugReportCount = 0;
+    private int featureRequestCount = 0;
+    private int generalFeedbackCount = 0;
+    private int otherFeedbackCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFeedbackData();
+    }
+
+    private async Task LoadFeedbackData()
+    {
+        allFeedback = await FeedbackService.GetAllFeedbackAsync();
+        
+        if (allFeedback != null)
+        {
+            feedbackCount = allFeedback.Count;
+            unresolvedCount = allFeedback.Count(f => !f.IsResolved);
+            
+            // Get counts by type
+            bugReportCount = allFeedback.Count(f => f.FeedbackType == "Bug Report");
+            featureRequestCount = allFeedback.Count(f => f.FeedbackType == "Feature Request");
+            generalFeedbackCount = allFeedback.Count(f => f.FeedbackType == "General Feedback");
+            otherFeedbackCount = allFeedback.Count(f => f.FeedbackType != "Bug Report" && 
+                                                    f.FeedbackType != "Feature Request" && 
+                                                    f.FeedbackType != "General Feedback");
+            
+            // Get recent feedback (last 5)
+            recentFeedback = allFeedback
+                .OrderByDescending(f => f.SubmittedAt)
+                .Take(5)
+                .ToList();
+        }
+    }
+
+    private int GetPercentage(string feedbackType)
+    {
+        if (feedbackCount == 0)
+            return 0;
+            
+        switch (feedbackType)
+        {
+            case "Bug Report":
+                return (int)Math.Round((double)bugReportCount / feedbackCount * 100);
+            case "Feature Request":
+                return (int)Math.Round((double)featureRequestCount / feedbackCount * 100);
+            case "General Feedback":
+                return (int)Math.Round((double)generalFeedbackCount / feedbackCount * 100);
+            case "Other":
+                return (int)Math.Round((double)otherFeedbackCount / feedbackCount * 100);
+            default:
+                return 0;
+        }
+    }
+}

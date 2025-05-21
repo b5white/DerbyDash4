@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Components.Layout {
     public partial class TopNavbar {
         private List<Racer> Racers { get; set; } = new List<Racer>();
-        private Racer SelectedRacer { get; set; } = new Racer { Id = "", Name = "" };
+        private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
@@ -20,10 +20,11 @@ namespace DerbyDash.Components.Layout {
         private string? UserAvatarFileName;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
+        public ILogger<TopNavbar> Logger { get; set; } = default!;
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
-            RaceTeamService.OnRacerChanged += HandleRacerChanged;
+            RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
             NavManager.LocationChanged += HandleLocationChanged;
@@ -64,20 +65,16 @@ namespace DerbyDash.Components.Layout {
                     }
                 } else {
                     // Initialize with an empty racer to avoid null reference exceptions
-                    SelectedRacer = new Racer { Id = "", Name = "" };
+                    SelectedRacer = new Racer { Id = 0, Name = "" };
                 }
             } catch (Exception) {
                 // User isn't logged in or other error occurred. Initialize with empty lists.
                 Racers = new List<Racer>();
-                SelectedRacer = new Racer { Id = "", Name = "" };
+                SelectedRacer = new Racer { Id = 0, Name = "" };
             }
         }
 
-        private void HandleRacerChanged() {
-            _ = HandleRacerChangedAsync();
-        }
-
-        private async Task HandleRacerChangedAsync() {
+        private async void HandleRacerChangedAsync() {
             try {
                 await LoadRacers();
                 StateHasChanged();
@@ -87,8 +84,8 @@ namespace DerbyDash.Components.Layout {
         }
 
         private async Task OnRacerChanged(ChangeEventArgs e) {
-            string newRacerId = e.Value?.ToString() ?? string.Empty;
-            if (!string.IsNullOrEmpty(newRacerId)) {
+            string newRacerIdStr = e.Value?.ToString() ?? string.Empty;
+            if (!string.IsNullOrEmpty(newRacerIdStr) && int.TryParse(newRacerIdStr, out int newRacerId)) {
                 Racer? newRacer = await RaceTeamService.GetRacerByIdAsync(newRacerId);
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
@@ -189,7 +186,7 @@ namespace DerbyDash.Components.Layout {
         void IDisposable.Dispose() {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
-                RaceTeamService.OnRacerChanged -= HandleRacerChanged;
+                RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;
 
             // Unsubscribe from navigation changes
             if (NavManager != null)
