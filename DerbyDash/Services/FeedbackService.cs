@@ -23,7 +23,7 @@ namespace DerbyDash.Services
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByTypeAsync(string type)
+        public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type)
         {
             return await _context.Feedbacks
                 .Where(f => f.FeedbackType == type)

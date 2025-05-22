@@ -30,12 +30,12 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Filter by Type:</label>
-                                <select class="form-select" value="@selectedType" @onchange="@(e => selectedType = e.Value.ToString())">
+                                <select class="form-select" @bind="selectedFeedbackType">
                                     <option value="">All Types</option>
-                                    <option value="Bug Report">Bug Report</option>
-                                    <option value="Feature Request">Feature Request</option>
-                                    <option value="General Feedback">General Feedback</option>
-                                    <option value="Other">Other</option>
+                                    <option value="@FeedbackType.BugReport">Bug Report</option>
+                                    <option value="@FeedbackType.FeatureRequest">Feature Request</option>
+                                    <option value="@FeedbackType.GeneralFeedback">General Feedback</option>
+                                    <option value="@FeedbackType.Question">Question</option>
                                 </select>
                             </div>
                         </div>
@@ -235,6 +235,7 @@
     private List<Feedback> feedbackList;
     private bool loading = true;
     private string selectedType = "";
+    private FeedbackType? selectedFeedbackType = null;
     private string selectedStatus = "";
     private bool showResolveDialog = false;
     private bool showDeleteDialog = false;
@@ -257,7 +258,7 @@
     {
         try
         {
-            Console.WriteLine($"ApplyFilters called - Type: '{selectedType}', Status: '{selectedStatus}'");
+            Console.WriteLine($"ApplyFilters called - Type: '{selectedFeedbackType}', Status: '{selectedStatus}'");
             loading = true;
             
             // First get all feedback
@@ -265,9 +266,9 @@
             Console.WriteLine($"Total feedback items: {allFeedback.Count}");
             
             // Apply type filter if selected
-            if (!string.IsNullOrEmpty(selectedType))
+            if (selectedFeedbackType != null)
             {
-                allFeedback = allFeedback.Where(f => f.FeedbackType == selectedType).ToList();
+                allFeedback = allFeedback.Where(f => f.FeedbackType == selectedFeedbackType).ToList();
                 Console.WriteLine($"After type filter: {allFeedback.Count} items");
             }
             
@@ -298,6 +299,7 @@
     private async Task ClearFilters()
     {
         selectedType = "";
+        selectedFeedbackType = null;
         selectedStatus = "";
         await LoadFeedback();
     }

@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace DerbyDash.Data
 {
@@ -17,7 +18,7 @@ namespace DerbyDash.Data
         public string Email { get; set; } = string.Empty;
         
         [Required]
-        public string FeedbackType { get; set; } = string.Empty;
+        public FeedbackType FeedbackType { get; set; }
         
         [Required]
         [StringLength(200)]
@@ -38,5 +39,14 @@ namespace DerbyDash.Data
         public string? AdminNotes { get; set; }
         
         public DateTime? ResolvedAt { get; set; }
+    }
+    
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum FeedbackType
+    {
+        BugReport,
+        FeatureRequest,
+        GeneralFeedback,
+        Question
     }
 }

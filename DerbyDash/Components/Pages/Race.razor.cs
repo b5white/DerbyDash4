@@ -397,6 +397,9 @@ private bool _flashTimerDisposed = false;
                     CalculateAverage();
                 });
                 await RaceService.SaveRaceAsync(track);
+                
+                // Increment the race count for the current racer and team total
+                await RaceTeamService.IncrementRaceCountAsync();
             } catch (Exception ex) {
                 LogMessage(ex);
             }

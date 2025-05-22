@@ -18,9 +18,10 @@ namespace DerbyDash.Components.Layout {
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         private string? UserAvatarFileName;
+        private int CurrentRacerRaceCount { get; set; } = 0;
+        private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
-        public ILogger<TopNavbar> Logger { get; set; } = default!;
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
@@ -63,14 +64,23 @@ namespace DerbyDash.Components.Layout {
                         SelectedRacer = Racers.First();
                         await RaceTeamService.SetActiveRacer(SelectedRacer);
                     }
+                    
+                    // Load race counts
+                    CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
+                    TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
                 } else {
                     // Initialize with an empty racer to avoid null reference exceptions
                     SelectedRacer = new Racer { Id = 0, Name = "" };
+                    CurrentRacerRaceCount = 0;
+                    TeamRaceCount = 0;
                 }
-            } catch (Exception) {
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error loading racers");
                 // User isn't logged in or other error occurred. Initialize with empty lists.
                 Racers = new List<Racer>();
                 SelectedRacer = new Racer { Id = 0, Name = "" };
+                CurrentRacerRaceCount = 0;
+                TeamRaceCount = 0;
             }
         }
 
@@ -90,6 +100,10 @@ namespace DerbyDash.Components.Layout {
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
                     await RaceTeamService.SetActiveRacer(newRacer);
+                    
+                    // Update the current racer race count
+                    CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
+                    
                     StateHasChanged();
                 }
             }

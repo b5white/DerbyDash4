@@ -12,5 +12,7 @@ namespace DerbyDash.Data {
         public string? LastPlayedRace { get; set; }
         // Last time the user played a race
         public DateTime? LastPlayedTime { get; set; }
+        // Total number of races played by all team members
+        public int TeamRaceCount { get; set; } = 0;
     }
 }

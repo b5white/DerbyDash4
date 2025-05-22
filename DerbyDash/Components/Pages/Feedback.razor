@@ -56,10 +56,10 @@
                     <label for="feedbackType">Feedback Type</label>
                     <InputSelect id="feedbackType" @bind-Value="feedbackModel.FeedbackType" class="form-control">
                         <option value="">-- Select Feedback Type --</option>
-                        <option value="Bug Report">Bug Report</option>
-                        <option value="Feature Request">Feature Request</option>
-                        <option value="General Feedback">General Feedback</option>
-                        <option value="Question">Question</option>
+                        <option value="@FeedbackType.BugReport">Bug Report</option>
+                        <option value="@FeedbackType.FeatureRequest">Feature Request</option>
+                        <option value="@FeedbackType.GeneralFeedback">General Feedback</option>
+                        <option value="@FeedbackType.Question">Question</option>
                     </InputSelect>
                     <ValidationMessage For="@(() => feedbackModel.FeedbackType)" />
                 </div>
@@ -168,7 +168,7 @@
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Please select a feedback type")]
-        public string FeedbackType { get; set; } = string.Empty;
+        public FeedbackType FeedbackType { get; set; }
 
         [Required(ErrorMessage = "Please enter a subject")]
         [StringLength(200, ErrorMessage = "Subject is too long")]
