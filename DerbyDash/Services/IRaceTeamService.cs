@@ -9,17 +9,16 @@ namespace DerbyDash.Services {
         public Task<Racer> AddRacer(Racer racer);
         public Task UpdateRacer(Racer racer);
         public Task RemoveRacer(int racerId);
-        public Racer ActiveRacer { get; set; }
         public Task<Racer> GetActiveRacer();
         public Task SetActiveRacer(Racer racer);
-        public Task<string> GetUserName(string purpose);
-        
+        public Task<string> GetUserID(string purpose);
+
         /// <summary>
         /// Gets the last played race for the current user from database
         /// </summary>
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public Task<string?> GetLastPlayedRaceAsync();
-        
+
         /// <summary>
         /// Saves the last played race for the current user in the database
         /// </summary>

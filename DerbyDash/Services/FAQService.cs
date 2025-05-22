@@ -1,32 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using DerbyDash.Data;
-using Microsoft.AspNetCore.Hosting;
 
-namespace DerbyDash.Services
-{
-    public interface IFAQService
-    {
+namespace DerbyDash.Services {
+    public interface IFAQService {
         Task<List<FAQ>> GetAllFAQsAsync();
         Task<List<string>> GetCategoriesAsync();
         Task<List<FAQ>> GetFAQsByCategoryAsync(string category);
     }
 
-    public class FAQService : IFAQService
-    {
+    public class FAQService: IFAQService {
         private readonly IWebHostEnvironment _webHostEnvironment;
         private List<FAQ>? _cachedFAQs;
 
-        public FAQService(IWebHostEnvironment webHostEnvironment)
-        {
+        public FAQService(IWebHostEnvironment webHostEnvironment) {
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public async Task<List<FAQ>> GetAllFAQsAsync()
-        {
+        public async Task<List<FAQ>> GetAllFAQsAsync() {
             if (_cachedFAQs != null)
                 return _cachedFAQs;
 
@@ -34,52 +23,43 @@ namespace DerbyDash.Services
             return _cachedFAQs;
         }
 
-        public async Task<List<string>> GetCategoriesAsync()
-        {
+        public async Task<List<string>> GetCategoriesAsync() {
             var faqs = await GetAllFAQsAsync();
             return faqs.Select(f => f.Category).Distinct().OrderBy(c => c).ToList();
         }
 
-        public async Task<List<FAQ>> GetFAQsByCategoryAsync(string category)
-        {
+        public async Task<List<FAQ>> GetFAQsByCategoryAsync(string category) {
             var faqs = await GetAllFAQsAsync();
             return faqs.Where(f => f.Category == category).ToList();
         }
 
-        private Task<List<FAQ>> LoadFAQsFromCsvAsync()
-        {
-            try
-            {
+        private async Task<List<FAQ>> LoadFAQsFromCsvAsync() {
+            try {
                 var filePath = Path.Combine(_webHostEnvironment.WebRootPath, "data", "FAQ.csv");
-                
+
                 // Read the file manually to handle tab-delimited format
                 var faqs = new List<FAQ>();
-                var lines = File.ReadAllLines(filePath);
-                
+                var lines = await File.ReadAllLinesAsync(filePath);
+
                 // Skip header
-                for (int i = 1; i < lines.Length; i++)
-                {
+                for (int i = 1; i < lines.Length; i++) {
                     var line = lines[i];
                     var parts = line.Split('\t');
-                    
-                    if (parts.Length >= 3)
-                    {
-                        faqs.Add(new FAQ
-                        {
+
+                    if (parts.Length >= 3) {
+                        faqs.Add(new FAQ {
                             Category = parts[0].Trim(),
                             Question = parts[1].Trim(),
                             Answer = parts[2].Trim()
                         });
                     }
                 }
-                
-                return Task.FromResult(faqs);
-            }
-            catch (Exception ex)
-            {
+
+                return faqs;
+            } catch (Exception ex) {
                 Console.WriteLine($"Error loading FAQ data: {ex.Message}");
                 // Return an empty list in case of error
-                return Task.FromResult(new List<FAQ>());
+                return new List<FAQ>();
             }
         }
     }

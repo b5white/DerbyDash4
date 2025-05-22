@@ -92,6 +92,7 @@ namespace DerbyDash {
             WebApplication app = builder.Build();
 
             app.MapGet("/throwerror", async () => {
+                await Task.CompletedTask; // Just to use 'await'
                 throw new Exception("Simulated exception");
             });
 

@@ -8,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class RaceTeam: IDisposable {
         private string? message;
-        private ApplicationUser user = new ApplicationUser { NormalizedUserName = "USER@GMAIL.COM" };
 
         private List<Racer> raceTeam = new();
         protected int TeamRaceCount { get; set; } = 0;
@@ -52,7 +51,6 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private async Task OnValidSubmitAsync() {
             try {
                 Racer newTeamMember = new() {
-                    UserName = user.NormalizedUserName ?? "",
                     Name = Input.MemberName,
                     RaceCount = 0 // Initialize race count to 0
                 };

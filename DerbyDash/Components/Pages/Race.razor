@@ -50,7 +50,6 @@
                 <h2 class="encouraging-message">@encouragingWord</h2>
             </div>
 
-            <!-- Move the play again button up, right after the header -->
             <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())">
                 <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
                     <i class="fas fa-play"></i> Play Again
@@ -95,8 +94,12 @@
 } else {
     @if (problem != null) {
         <p class="TC">
-            <TrackContainer @ref="trackContainerInstance" Track="@track" Distance="@(track.Cars.Max(c => c.Distance))" ShowDebug="@ShowDebug"
-                            IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
+            <TrackContainer 
+                @ref="trackContainerInstance" 
+                Track="@track" 
+                Distance="@(track.Cars.Any() ? track.Cars.Max(c => c.Distance) : 0)"                                        
+                ShowDebug="@ShowDebug" 
+                IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
 
             <div class="stoplight-container">
                 <div class="stoplight">

@@ -1,5 +1,4 @@
 using DerbyDash.Components.Layout;
-using DerbyDash.Components.Layout;
 using DerbyDash.Components.Problems;
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
@@ -29,7 +28,7 @@ namespace DerbyDash.Components.Pages {
         public required IConfiguration configuration { get; set; }
 
         [Inject]
-        public required ILogger<Race> _logger { get; set; }
+        public required ILogger<Race> Logger { get; set; }
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
@@ -76,12 +75,12 @@ namespace DerbyDash.Components.Pages {
         public float RaceTime { get => track.RaceTime; set => track.RaceTime = value; }
         public float FinishTime = 0;
         private bool _inactivityTimerDisposed = false;
-private bool _flashTimerDisposed = false;
+        private bool _flashTimerDisposed = false;
 
         TrackContainer? trackContainerInstance;
 
         protected override void OnInitialized() {
-            _logger.LogInformation("OnInitialized");
+            Logger.LogInformation("OnInitialized");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
@@ -93,7 +92,7 @@ private bool _flashTimerDisposed = false;
         }
 
         private async Task Reset() {
-            _logger.LogInformation("Reset");
+            Logger.LogInformation("Reset");
             if (!Running) {
                 RaceTime = 0;
                 CurrentRacerFinished = false;
@@ -122,7 +121,7 @@ private bool _flashTimerDisposed = false;
                     InactivityTimer.AutoReset = false;
                     _inactivityTimerDisposed = false;
                 }
-                
+
 
                 if (FlashTimer == null || _flashTimerDisposed) {
                     FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
@@ -137,15 +136,11 @@ private bool _flashTimerDisposed = false;
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     if (Running && !Finished) {
                         await InvokeAsync(async () => {
-
-
-
                             // Check again if timer is disposed before starting  
-
                             if (InactivityTimer != null && !_inactivityTimerDisposed) {
                                 InactivityTimer.Start();
                                 starttime = DateTime.Now.Ticks;
-                                StartPeriodicTimerAsync().ConfigureAwait(false);
+                                await StartPeriodicTimerAsync().ConfigureAwait(false);
                             }
                         });
                     }
@@ -155,13 +150,14 @@ private bool _flashTimerDisposed = false;
 
 
         private async Task StartClick() {
-            // If we already have a ProblemClassString, save it to the database kitten
+            // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     // Save the last played race to the database
-                    await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
+                    // TODO This should be in the RaceTeamService
+                    //   await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
                 } catch (Exception ex) {
-                    _logger.LogError(ex, "Error saving last played race to database");
+                    Logger.LogError(ex, "Error saving last played race to database");
                 }
             }
 
@@ -172,14 +168,14 @@ private bool _flashTimerDisposed = false;
                     await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error refreshing active racer cookie");
+                Logger.LogError(ex, "Error refreshing active racer cookie");
             }
 
             await Reset();
         }
 
         private async Task CreateProblems() {
-            _logger.LogInformation("CreateProblems");
+            Logger.LogInformation("CreateProblems");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
             }
@@ -191,11 +187,11 @@ private bool _flashTimerDisposed = false;
                 // Save the last played race to the database
                 await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race to database");
+                Logger.LogError(ex, "Error saving last played race to database");
             }
         }
 
-        public void OnAfter() {
+        public async Task OnAfter() {
             InactivityTimer.Stop();
             if (isShowingAnswer) {
                 isShowingAnswer = false;
@@ -205,7 +201,7 @@ private bool _flashTimerDisposed = false;
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    CalculateNewDistance(GetTimespan(starttime));
+                    await CalculateNewDistance(GetTimespan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
@@ -217,7 +213,7 @@ private bool _flashTimerDisposed = false;
                     if (problems?.More ?? false) { // return false if problems is null
                         problem = problems.Next();
                     } else {
-                        EndRace();
+                        await EndRace();
                     }
                     ScaleRace(currentTimeIndex);
                     StateHasChanged();
@@ -289,7 +285,7 @@ private bool _flashTimerDisposed = false;
         }
 
         private void SynchronizeAnimationStart() {
-            _logger.LogInformation("SynchronizeAnimationStart");
+            Logger.LogInformation("SynchronizeAnimationStart");
             // Reset any existing animations
             track.IsAnyCarAtTop = false;
 
@@ -326,21 +322,22 @@ private bool _flashTimerDisposed = false;
             return answer; // Return the original string if the prefix doesn't match.
         }
 
-        private void EndRace() {
-            _logger.LogInformation("EndRace");
+        private async Task EndRace() {
+            Logger.LogInformation("EndRace");
             if (Running) {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                UtilityMethods.FireAndForget(() => UpdateResultsAsync(FinishTime));
+                await UpdateResultsAsync(FinishTime);
                 Running = true;
                 problems = null;
+                StateHasChanged();
             }
         }
 
-        private void CalculateNewDistance(double time) {
+        private async Task CalculateNewDistance(double time) {
             currentDistance = 0;
             int i;
 
@@ -359,7 +356,7 @@ private bool _flashTimerDisposed = false;
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
-                EndRace();
+                await EndRace();
             }
 
             bool wasCarAtTop = track.IsAnyCarAtTop;
@@ -370,7 +367,7 @@ private bool _flashTimerDisposed = false;
             }
         }
 
-        private bool CalculateOldDistance(double time) {
+        private async Task<bool> CalculateOldDistance(double time) {
             Boolean allFinished = true;
             for (int i = 1; i < track.Cars.Count; i++) {
                 double dist = track.Cars[i].CalculateCurrentDistance(time);
@@ -406,7 +403,7 @@ private bool _flashTimerDisposed = false;
         }
 
         private void ResetResults(float timeSpan) {
-            _logger.LogInformation("ResetResults");
+            Logger.LogInformation("ResetResults");
             List<Car> previousRaces = track.Cars
                 .Where(car => car.TotalTime > 0)
                 .OrderBy(car => car.TotalTime)  // take the 5 fastest
@@ -428,7 +425,7 @@ private bool _flashTimerDisposed = false;
         }
 
         private void CalculateAverage() {
-            _logger.LogInformation("CalculateAverage");
+            Logger.LogInformation("CalculateAverage");
             int count = 0;
             float total = 0;
 
@@ -442,6 +439,7 @@ private bool _flashTimerDisposed = false;
             if (prevAverage > 0) {
                 improvedTime = (average < prevAverage) ? (prevAverage - average) : 0;
             }
+            Logger.LogInformation("ave: {average} prev: {prevAverage} improv {improvedTime}", average, prevAverage, improvedTime);
             prevAverage = average;
         }
 
@@ -453,7 +451,7 @@ private bool _flashTimerDisposed = false;
         //}
 
         public void InitializeTrack(string? problemSetIdentifier) {
-            _logger.LogInformation("InitializeTrack");
+            Logger.LogInformation("InitializeTrack");
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
@@ -543,7 +541,7 @@ private bool _flashTimerDisposed = false;
         }
 
         private async Task StartPeriodicTimerAsync() {
-            _logger.LogInformation("StartPeriodicTimerAsync");
+            Logger.LogInformation("StartPeriodicTimerAsync");
             // Create a new CancellationTokenSource each time the timer is started
             PeriodicTimerToken = new CancellationTokenSource();
             periodicTimer = new(TimeSpan.FromMicroseconds(PERIODIC_TIMER_SPAN_MICROSECONDS));
@@ -551,19 +549,18 @@ private bool _flashTimerDisposed = false;
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     RaceTime = GetSpan(starttime);
-                    CalculateNewDistance(RaceTime);
-                    CalculateOldDistance(RaceTime);
+                    await CalculateNewDistance(RaceTime);
+                    await CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
                 }
             } catch (OperationCanceledException E) {
-                LogMessage(E, "Timer cancelled");
+                Logger.LogInformation("Timer cancelled");
             }
-            LogMessage("Timer stopped");
         }
 
         private void StopPeriodicTimer() {
-            _logger.LogInformation("StopPeriodicTimer");
+            Logger.LogInformation("StopPeriodicTimer");
             // Cancel the token and dispose of the timer
             PeriodicTimerToken.Cancel();
             periodicTimer.Dispose();
@@ -578,14 +575,14 @@ private bool _flashTimerDisposed = false;
         }
 
         public void LogMessage(Exception E, string message = "") {
-            _logger.LogError(E, message);
+            Logger.LogError(E, message);
             if (E.InnerException != null) {
                 LogMessage(E.InnerException);
             }
         }
 
         public void LogMessage(string message) {
-            _logger.LogWarning(message);
+            Logger.LogWarning(message);
         }
 
         public void Dispose() {

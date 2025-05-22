@@ -8,9 +8,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         //[Inject]
         //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //_ = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
     }
 }

@@ -30,13 +30,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm(FormName = "change-email")]
         private InputModel Input { get; set; } = new();
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //email = await UserManager.GetEmailAsync(user);
             //isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
 
             //Input.NewEmail ??= email;
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         private async Task OnValidSubmitAsync() {

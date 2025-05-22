@@ -9,6 +9,11 @@ namespace DerbyDash.Data
         [Key]
         public int Id { get; set; }
         
+        [StringLength(450)]
+        public string UserId { get; set; } = string.Empty;
+
+        public ApplicationUser User { get; set; } = null!;
+
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;

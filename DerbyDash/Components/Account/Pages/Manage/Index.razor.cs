@@ -28,13 +28,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //username = await UserManager.GetUserNameAsync(user);
             //phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
             //Input.PhoneNumber ??= phoneNumber;
-            return Task.CompletedTask;
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         private async Task OnValidSubmitAsync() {

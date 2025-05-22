@@ -28,17 +28,19 @@ namespace DerbyDash.Components.Layout {
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
-            NavManager.LocationChanged += HandleLocationChanged;
+            NavManager.LocationChanged += HandleLocationChangedAsync;
 
-            await LoadRacers();
             await LoadUserAvatar();
         }
 
-        private void HandleLocationChanged(object? sender, LocationChangedEventArgs e) {
-            _ = HandleLocationChangedAsync();
+        protected override async Task OnAfterRenderAsync(bool firstRender) {
+            if (firstRender) {
+                await LoadRacers();
+                StateHasChanged();
+            }
         }
 
-        private async Task HandleLocationChangedAsync() {
+        private async void HandleLocationChangedAsync(object? sender, LocationChangedEventArgs e) {
             // Refresh user avatar when navigation occurs
             try {
                 await LoadUserAvatar();
@@ -182,7 +184,8 @@ namespace DerbyDash.Components.Layout {
                 var user = await UserManager.FindByIdAsync(userId);
 
                 if (user != null) {
-                    //        UserAvatarFileName = user.AvatarFileName;
+                    // TODO reinstitute
+                    // UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  
@@ -204,7 +207,7 @@ namespace DerbyDash.Components.Layout {
 
             // Unsubscribe from navigation changes
             if (NavManager != null)
-                NavManager.LocationChanged -= HandleLocationChanged;
+                NavManager.LocationChanged -= HandleLocationChangedAsync;
         }
     }
 }

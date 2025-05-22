@@ -7,9 +7,6 @@ namespace DerbyDash.Components.Pages {
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
 
-        //       [Inject]
-        //       public required RaceService RaceService { get; set; }
-
         [Inject]
         public required ILogger<Home> Logger { get; set; }
 
@@ -37,8 +34,10 @@ namespace DerbyDash.Components.Pages {
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
             try {
+                // TODO reimplement this
                 // Get the last played race from the database
                 //   lastPlayedRace = await RaceService.GetLastPlayedRaceAsync();
+                await Task.CompletedTask; // Just to use 'await'
 
                 // If there's a last played race, navigate to it
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {

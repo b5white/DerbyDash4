@@ -23,13 +23,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
 
-        protected override Task OnInitializedAsync() {
+        protected override async Task OnInitializedAsync() {
             //var user = await UserAccessor.GetRequiredUserAsync(HttpContext);
             //canTrack = HttpContext.Features.Get<ITrackingConsentFeature>()?.CanTrack ?? true;
             //hasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(user) is not null;
             //is2faEnabled = await UserManager.GetTwoFactorEnabledAsync(user);
-            
-            return Task.CompletedTask;
+
+            await Task.CompletedTask; // Just to use 'await'
+            return;
             //isMachineRemembered = await SignInManager.IsTwoFactorClientRememberedAsync(user);
             //recoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(user);
         }

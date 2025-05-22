@@ -60,6 +60,10 @@
     margin-bottom: 0.8rem;
     position: relative;
 }
+.about-sentence p {
+    margin-bottom: 0.1rem;
+    position: relative;
+}
 
 .highlight-section {
     background-color: #f8f9ff;

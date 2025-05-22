@@ -1,35 +1,29 @@
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
-using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Services {
     public class RaceService {
         private readonly IRaceTeamService _raceTeamService;
         private readonly ApplicationDbContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly AuthenticationStateProvider _authStateProvider;
         private RaceComponents track = new();
-        private readonly ILogger<RaceService> _logger;
+        private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
         private Random random = new Random();
+        Racer? activeTeamMember;
 
         public RaceService(
             ILogger<RaceService> logger,
             IRaceTeamService raceTeamService,
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager,
-            AuthenticationStateProvider authStateProvider) {
-            _logger = logger;
+            ApplicationDbContext context) {
+            Logger = logger;
             _raceTeamService = raceTeamService;
             _context = context;
-            _userManager = userManager;
-            _authStateProvider = authStateProvider;
         }
 
-        public Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
-            _logger.LogInformation("GetRacesByTeamMemberIdAsync");
-            return Task.FromResult(new List<Race>());
+        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(int teamMemberId) {
+            Logger.LogInformation("GetRacesByTeamMemberIdAsync");
+            await Task.CompletedTask; // Just to use 'await'
+            return new List<Race>();
         }
 
         public RaceComponents CreateTrack(string problemSetIdentifier) {
@@ -67,6 +61,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task SaveRaceAsync(RaceComponents track) {
+            await Task.CompletedTask; // Just to use 'await'
             return;
         }
 
@@ -92,4 +87,3 @@ namespace DerbyDash.Services {
         }
     }
 }
-
