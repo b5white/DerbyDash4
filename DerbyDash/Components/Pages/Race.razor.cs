@@ -191,7 +191,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        public void OnAfter() {
+        public async Task OnAfter() {
             InactivityTimer.Stop();
             if (isShowingAnswer) {
                 isShowingAnswer = false;
@@ -201,7 +201,7 @@ namespace DerbyDash.Components.Pages {
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    CalculateNewDistance(GetTimespan(starttime));
+                    await CalculateNewDistance(GetTimespan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
@@ -213,7 +213,7 @@ namespace DerbyDash.Components.Pages {
                     if (problems?.More ?? false) { // return false if problems is null
                         problem = problems.Next();
                     } else {
-                        EndRace();
+                        await EndRace();
                     }
                     ScaleRace(currentTimeIndex);
                     StateHasChanged();
@@ -322,7 +322,7 @@ namespace DerbyDash.Components.Pages {
             return answer; // Return the original string if the prefix doesn't match.
         }
 
-        private void EndRace() {
+        private async Task EndRace() {
             Logger.LogInformation("EndRace");
             if (Running) {
                 FinishTime = GetTimespan(starttime);
@@ -330,13 +330,14 @@ namespace DerbyDash.Components.Pages {
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
                 InactivityTimer.Stop();
                 FlashTimer.Stop();
-                UtilityMethods.FireAndForget(() => UpdateResultsAsync(FinishTime));
+                await UpdateResultsAsync(FinishTime);
                 Running = true;
                 problems = null;
+                StateHasChanged();
             }
         }
 
-        private void CalculateNewDistance(double time) {
+        private async Task CalculateNewDistance(double time) {
             currentDistance = 0;
             int i;
 
@@ -355,7 +356,7 @@ namespace DerbyDash.Components.Pages {
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
-                EndRace();
+                await EndRace();
             }
 
             bool wasCarAtTop = track.IsAnyCarAtTop;
@@ -366,7 +367,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private bool CalculateOldDistance(double time) {
+        private async Task<bool> CalculateOldDistance(double time) {
             Boolean allFinished = true;
             for (int i = 1; i < track.Cars.Count; i++) {
                 double dist = track.Cars[i].CalculateCurrentDistance(time);
@@ -435,6 +436,7 @@ namespace DerbyDash.Components.Pages {
             if (prevAverage > 0) {
                 improvedTime = (average < prevAverage) ? (prevAverage - average) : 0;
             }
+            Logger.LogInformation("ave: {average} prev: {prevAverage} improv {improvedTime}", average, prevAverage, improvedTime);
             prevAverage = average;
         }
 
@@ -544,15 +546,14 @@ namespace DerbyDash.Components.Pages {
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     RaceTime = GetSpan(starttime);
-                    CalculateNewDistance(RaceTime);
-                    CalculateOldDistance(RaceTime);
+                    await CalculateNewDistance(RaceTime);
+                    await CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
                 }
             } catch (OperationCanceledException E) {
-                LogMessage(E, "Timer cancelled");
+                Logger.LogInformation("Timer cancelled");
             }
-            LogMessage("Timer stopped");
         }
 
         private void StopPeriodicTimer() {

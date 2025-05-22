@@ -9,6 +9,7 @@ namespace DerbyDash.Services {
         private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
         private Random random = new Random();
+        Racer? activeTeamMember;
 
         public RaceService(
             ILogger<RaceService> logger,
@@ -19,7 +20,7 @@ namespace DerbyDash.Services {
             _context = context;
         }
 
-        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(string teamMemberId) {
+        public async Task<List<Race>> GetRacesByTeamMemberIdAsync(int teamMemberId) {
             Logger.LogInformation("GetRacesByTeamMemberIdAsync");
             await Task.CompletedTask; // Just to use 'await'
             return new List<Race>();

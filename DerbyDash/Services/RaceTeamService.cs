@@ -21,6 +21,7 @@ namespace DerbyDash.Services {
                 new Racer { Id = 3, Name = "Charlie" }
             };
         private Racer? Active;
+        private string? UserId;
 
         // Event that components can subscribe to for updates
         public event Action? OnRacerChanged;
@@ -53,20 +54,21 @@ namespace DerbyDash.Services {
         public async Task<List<Racer>> GetRacersInternal() {
             Logger.LogInformation("GetRacersInternal");
             ApplicationUser? user;
-            string name;
+            string userId;
             try {
-                // Try to get the username, but don't fail if we can't
+                // Try to get the userId, but don't fail if we can't
                 try {
-                    name = await GetUserName("GetRacers");
-                    Logger.LogInformation($"Getting racers for user: {name}");
+                    userId = await GetUserID("GetRacers");
+                    Logger.LogInformation($"Getting racers for user: {userId}");
                 } catch (Exception ex) {
-                    Logger.LogWarning(ex, "Could not get username, but continuing");
-                    // Continue even if we can't get the username
+                    Logger.LogWarning(ex, "Could not get userId, but continuing");
+                    // Continue even if we can't get the userId
                     return new List<Racer>();
                 }
 
-                user = await GetUserByNameAsync(name);
+                user = await GetUserByIdAsync(userId);
                 if (user == null) {
+                    Logger.LogWarning("Could not get user, but continuing");
                     return new List<Racer>();
                 }
             } catch (Exception ex) {
@@ -89,8 +91,8 @@ namespace DerbyDash.Services {
             return raceTeam.FirstOrDefault(r => r.Id == racerId);
         }
 
-        public async Task<ApplicationUser?> GetUserByNameAsync(string name) {
-            Logger.LogInformation("GetUserByNameAsync for name: {name}", name);
+        public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
+            Logger.LogInformation("GetUserByIdAsync for userId: {userId}", userId);
             await Task.CompletedTask; // Just to use 'await'
             return new ApplicationUser() { UserName = name };
         }

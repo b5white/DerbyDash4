@@ -29,7 +29,7 @@ namespace DerbyDash.Services {
                 .ToListAsync();
         }
 
-        public async Task<Feedback?> GetFeedbackByIdAsync(int id) {
+        public async Task<Feedback> GetFeedbackByIdAsync(int id) {
             return await _context.Feedbacks.FindAsync(id);
         }
 
