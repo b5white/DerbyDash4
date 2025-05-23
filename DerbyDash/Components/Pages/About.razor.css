@@ -92,6 +92,47 @@
     color: #d68c00;
 }
 
+.cta-section {
+    background-color: #f0f8ff;
+    padding: 2.5rem;
+    border-radius: 8px;
+    border-left: 5px solid #007bff;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.cta-section h2 {
+    color: #007bff;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.cta-section p {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+.cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.cta-buttons .btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    min-width: 180px;
+}
+
+.cta-buttons .btn small {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: normal;
+    margin-top: 0.25rem;
+}
+
 .debug-info {
     margin-top: 2rem;
     padding: 1rem;
@@ -125,5 +166,23 @@
     
     .about-section .lead {
         font-size: 1.2rem;
+    }
+    
+    .cta-section {
+        padding: 1.5rem;
+    }
+    
+    .cta-section h2 {
+        font-size: 1.6rem;
+    }
+    
+    .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .cta-buttons .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
     }
 }

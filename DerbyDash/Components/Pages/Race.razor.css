@@ -1,4 +1,4 @@
-﻿/* Base styles */
+﻿﻿/* Base styles */
 html, body {
     margin: 0;
     padding: 0;
@@ -223,15 +223,15 @@ html, body {
 /* Stoplight animation */
 .stoplight-container {
     position: fixed;
-    top: 30%;
-    right: 15%;
+    bottom: 200px; /* Position above the question and answer area */
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     align-items: center;
     pointer-events: none;
     z-index: 1000;
     animation: fadeOutStoplight 0.5s ease-out 3s forwards;
-    /* transform: perspective(500px) rotateY(-10deg); */
 }
 
 @keyframes fadeOutStoplight {
@@ -242,38 +242,25 @@ html, body {
 .stoplight {
     background-color: #333;
     border-radius: 15px;
-    padding: 15px;
+    padding: 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-    border: 5px solid #222;
+    border: 4px solid #222;
     position: relative;
-    /* transform: perspective(500px) rotateY(-5deg); */
 }
 
-/* Stoplight arm - extending to the right */
-.stoplight::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: -100vw;
-    transform: translateY(-50%);
-    width: calc(100vw);
-    height: 15px;
-    background-color: #222;
-    z-index: -1;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-}
+/* Removed stoplight arm as requested */
 
 .light {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     opacity: 0.3;
     position: relative;
-    margin: 0 5px;
+    margin: 0 3px;
     box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -334,6 +321,9 @@ html, body {
 
 .problem-container {
     position: fixed;
+    bottom: 20px;
+    left: 0;
+    right: 0;
     z-index: 2000;
     opacity: 0;
     visibility: hidden;
@@ -614,8 +604,9 @@ html, body {
 
 @media (max-width: 768px) {
     .stoplight-container {
-        top: 70%;
-        right: 5%;
+        bottom: 180px;
+        left: 50%;
+        transform: translateX(-50%);
     }
     .problem-text {
         font-size: 24px;

@@ -1,4 +1,4 @@
-﻿﻿﻿using DerbyDash.Data;
+﻿﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -99,7 +99,7 @@ namespace DerbyDash.Services {
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
             Logger.LogInformation("GetUserByIdAsync for userId: {userId}", userId);
             await Task.CompletedTask; // Just to use 'await'
-            return new ApplicationUser() { UserName = name };
+            return new ApplicationUser() { UserName = "User_" + userId };
         }
 
         public async Task<Racer> AddRacer(Racer racer) {
@@ -264,6 +264,28 @@ namespace DerbyDash.Services {
                 throw new MissingUserException("Could not determine username", ex);
             }
         }
+        
+        public async Task<string> GetUserID(string purpose) {
+            Logger.LogInformation("GetUserID for {purpose}", purpose);
+            try {
+                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
+                if (authState == null) {
+                    Logger.LogError($"No authentication state found when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                
+                var userId = authState.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId)) {
+                    Logger.LogError($"Unable to determine the user ID when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                
+                return userId;
+            } catch (Exception ex) {
+                Logger.LogError(ex, $"Error getting user ID for {purpose}");
+                throw new MissingUserException("Could not determine user ID", ex);
+            }
+        }
 
         /// <summary>
         /// Gets the last played race for the current active racer
@@ -275,13 +297,13 @@ namespace DerbyDash.Services {
                  var activeRacer = await GetActiveRacer();
                 
                 if (activeRacer != null && !string.IsNullOrEmpty(activeRacer.LastPlayedRace)) {
-                    _logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
+                    Logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
                     return activeRacer.LastPlayedRace;
                 }
                 
                 return null;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error retrieving last played race for active racer");
+                Logger.LogError(ex, "Error retrieving last played race for active racer");
                 return null;
             }
         }
@@ -303,13 +325,13 @@ namespace DerbyDash.Services {
                     // Also update the LastRaced date to today
                     activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
                     
-                    _logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
+                    Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
                     
                     // Notify subscribers that the racer has been updated
                     OnRacerChanged?.Invoke();
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error saving last played race for active racer");
+                Logger.LogError(ex, "Error saving last played race for active racer");
             }
         }
         
@@ -347,12 +369,12 @@ namespace DerbyDash.Services {
                                 // Update the active racer reference
                                 Active = activeRacer;
                                 
-                                _logger.LogInformation($"Incremented race count for racer {activeRacer.Name} to {activeRacer.RaceCount}");
+                                Logger.LogInformation($"Incremented race count for racer {activeRacer.Name} to {activeRacer.RaceCount}");
                             }
                             
                             // Save changes to the database
                             await _userManager.UpdateAsync(appUser);
-                            _logger.LogInformation($"Incremented team race count for user {userId} to {appUser.TeamRaceCount}");
+                            Logger.LogInformation($"Incremented team race count for user {userId} to {appUser.TeamRaceCount}");
                             
                             // Notify subscribers that the racer data has changed
                             OnRacerChanged?.Invoke();
@@ -360,7 +382,7 @@ namespace DerbyDash.Services {
                     }
                 }
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error incrementing race counts");
+                Logger.LogError(ex, "Error incrementing race counts");
             }
         }
         
@@ -387,7 +409,7 @@ namespace DerbyDash.Services {
                 
                 return 0;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error getting team race count");
+                Logger.LogError(ex, "Error getting team race count");
                 return 0;
             }
         }
@@ -401,7 +423,7 @@ namespace DerbyDash.Services {
                 var activeRacer = await GetActiveRacer();
                 return activeRacer?.RaceCount ?? 0;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error getting current racer race count");
+                Logger.LogError(ex, "Error getting current racer race count");
                 return 0;
             }
         }
