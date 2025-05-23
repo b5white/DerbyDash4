@@ -200,12 +200,10 @@
             unresolvedCount = allFeedback.Count(f => !f.IsResolved);
             
             // Get counts by type
-            bugReportCount = allFeedback.Count(f => f.FeedbackType == "Bug Report");
-            featureRequestCount = allFeedback.Count(f => f.FeedbackType == "Feature Request");
-            generalFeedbackCount = allFeedback.Count(f => f.FeedbackType == "General Feedback");
-            otherFeedbackCount = allFeedback.Count(f => f.FeedbackType != "Bug Report" && 
-                                                    f.FeedbackType != "Feature Request" && 
-                                                    f.FeedbackType != "General Feedback");
+            bugReportCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.BugReport);
+            featureRequestCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.FeatureRequest);
+            generalFeedbackCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.GeneralFeedback);
+            otherFeedbackCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.Question);
             
             // Get recent feedback (last 5)
             recentFeedback = allFeedback

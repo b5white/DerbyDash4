@@ -203,13 +203,13 @@
     transition: all 0.6s ease;
 }
 
-.racer-selector:hover .racer-icon {
+/* .racer-selector:hover .racer-icon {
     transform: rotate(15deg);
 }
 
 .racer-selector:hover .racer-icon::after {
     transform: rotate(45deg) translate(50%, 50%);
-}
+} */
 
 .racer-dropdown-container {
     display: flex;

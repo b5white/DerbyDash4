@@ -10,6 +10,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private string? message;
 
         private List<Racer> raceTeam = new();
+        protected int TeamRaceCount { get; set; } = 0;
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -51,6 +52,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             try {
                 Racer newTeamMember = new() {
                     Name = Input.MemberName,
+                    RaceCount = 0 // Initialize race count to 0
                 };
 
                 await RaceTeamService.AddRacer(newTeamMember);
@@ -66,6 +68,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 message = "Error adding racer: " + ex.Message;
             }
         }
+        
+        protected async Task SetActiveRacer(Racer racer) {
+            try {
+                await RaceTeamService.SetActiveRacer(racer);
+                message = $"{racer.Name} is now the active racer.";
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error setting active racer");
+                message = "Error setting active racer.";
+            }
+        }
 
         private async Task ReloadUsers() {
             try {
@@ -73,11 +85,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 // The service handles its own user authentication
                 raceTeam.Clear();
                 raceTeam.AddRange(await RaceTeamService.GetRacers());
-                Logger.LogInformation($"Loaded {raceTeam.Count} racers");
+                
+                // Get team race count
+                TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
+                
+                Logger.LogInformation($"Loaded {raceTeam.Count} racers with {TeamRaceCount} total races");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in ReloadUsers");
                 // Initialize with empty list to avoid null reference exceptions
                 raceTeam = new List<Racer>();
+                TeamRaceCount = 0;
             }
         }
 

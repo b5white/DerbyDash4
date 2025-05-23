@@ -134,15 +134,21 @@ namespace DerbyDash.Components.Pages {
                 // Using FireAndForget pattern since we don't need to wait for this to complete
                 UtilityMethods.FireAndForget(async () => {
                     await Task.Delay(INITIAL_TIMER_DELAY);
-                    if (Running && !Finished) {
-                        await InvokeAsync(async () => {
-                            // Check again if timer is disposed before starting  
-                            if (InactivityTimer != null && !_inactivityTimerDisposed) {
-                                InactivityTimer.Start();
-                                starttime = DateTime.Now.Ticks;
-                                await StartPeriodicTimerAsync().ConfigureAwait(false);
-                            }
-                        });
+                    // Check if component is still active and timers are not disposed
+                    if (Running && !Finished && !_inactivityTimerDisposed) {
+                        try {
+                            await InvokeAsync(async () => {
+                                // Double-check timer is not disposed before starting
+                                if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                                    InactivityTimer.Start();
+                                    starttime = DateTime.Now.Ticks;
+                                    await StartPeriodicTimerAsync().ConfigureAwait(false);
+                                }
+                            });
+                        } catch (ObjectDisposedException) {
+                            // Safely handle the case where the timer was disposed
+                            Logger.LogInformation("Timer was disposed before it could be started");
+                        }
                     }
                 });
             }
@@ -192,10 +198,14 @@ namespace DerbyDash.Components.Pages {
         }
 
         public async Task OnAfter() {
-            InactivityTimer.Stop();
+            if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                InactivityTimer.Stop();
+            }
             if (isShowingAnswer) {
                 isShowingAnswer = false;
-                FlashTimer.Stop();
+                if (FlashTimer != null && !_flashTimerDisposed) {
+                    FlashTimer.Stop();
+                }
                 Answer = RemoveHint(Answer);
             }
             if (problem != null) {
@@ -223,7 +233,7 @@ namespace DerbyDash.Components.Pages {
                     }
                 }
             }
-            if (Running) {
+            if (Running && InactivityTimer != null && !_inactivityTimerDisposed) {
                 InactivityTimer.Start();
             }
         }
@@ -328,8 +338,12 @@ namespace DerbyDash.Components.Pages {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
-                InactivityTimer.Stop();
-                FlashTimer.Stop();
+                if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                    InactivityTimer.Stop();
+                }
+                if (FlashTimer != null && !_flashTimerDisposed) {
+                    FlashTimer.Stop();
+                }
                 await UpdateResultsAsync(FinishTime);
                 Running = true;
                 problems = null;
@@ -394,6 +408,9 @@ namespace DerbyDash.Components.Pages {
                     CalculateAverage();
                 });
                 await RaceService.SaveRaceAsync(track);
+                
+                // Increment the race count for the current racer and team total
+                await RaceTeamService.IncrementRaceCountAsync();
             } catch (Exception ex) {
                 LogMessage(ex);
             }
@@ -493,7 +510,9 @@ namespace DerbyDash.Components.Pages {
                 isShowingAnswer = true;
                 Answer = GetHint();   // prompt them with the correct answer
                 StateHasChanged();
-                FlashTimer.Start();
+                if (FlashTimer != null && !_flashTimerDisposed) {
+                    FlashTimer.Start();
+                }
             });
         }
 
@@ -502,8 +521,12 @@ namespace DerbyDash.Components.Pages {
                 isShowingAnswer = false;
                 Answer = "";
                 StateHasChanged();
-                FlashTimer.Stop();
-                InactivityTimer.Start();
+                if (FlashTimer != null && !_flashTimerDisposed) {
+                    FlashTimer.Stop();
+                }
+                if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                    InactivityTimer.Start();
+                }
             });
         }
 
@@ -584,8 +607,16 @@ namespace DerbyDash.Components.Pages {
 
         public void Dispose() {
             periodicTimer.Dispose();
-            InactivityTimer?.Dispose();
-            FlashTimer?.Dispose();
+            
+            if (InactivityTimer != null) {
+                InactivityTimer.Dispose();
+                _inactivityTimerDisposed = true;
+            }
+            
+            if (FlashTimer != null) {
+                FlashTimer.Dispose();
+                _flashTimerDisposed = true;
+            }
         }
 
         string[] encouragingWords = new string[] {

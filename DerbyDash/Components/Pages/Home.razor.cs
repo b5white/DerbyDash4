@@ -36,6 +36,9 @@ namespace DerbyDash.Components.Pages {
             return;
         }
 
+        [Inject]
+        public required NavigationManager NavManager { get; set; }
+
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
             try {
@@ -48,19 +51,19 @@ namespace DerbyDash.Components.Pages {
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {
                     Logger.LogInformation($"Navigating to last played race: {lastPlayedRace}");
 
-                    // Navigate to the last played race
-                    RedirectManager.RedirectTo($"/race/{lastPlayedRace}");
+                    // Navigate to the last played race using NavigationManager instead of RedirectManager
+                    NavManager.NavigateTo($"/race/{lastPlayedRace}");
                 } else {
                     Logger.LogInformation("No last played race found, navigating to race selection menu");
 
                     // Default navigation if no last played race is found
-                    RedirectManager.RedirectTo("/RaceSetsMenu");
+                    NavManager.NavigateTo("/RaceSetsMenu");
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error retrieving last played race");
 
                 // Navigate to race selection menu if there's an error
-                RedirectManager.RedirectTo("/RaceSetsMenu");
+                NavManager.NavigateTo("/RaceSetsMenu");
             }
         }
     }

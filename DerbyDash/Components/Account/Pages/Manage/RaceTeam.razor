@@ -15,18 +15,42 @@
 
 <h3>Current race team</h3>
 @if (raceTeam.Any()) {
-    @foreach (Racer fm in raceTeam) {
-        <div class="row">
-            <div class="col-xl-6">
-                @fm.Name
-            </div>
-        </div>
-    }
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Racer Name</th>
+                    <th>Races Completed</th>
+                    <th>Last Raced</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Racer racer in raceTeam) {
+                    <tr>
+                        <td>@racer.Name</td>
+                        <td>@racer.RaceCount</td>
+                        <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
+                                <i class="fas fa-check-circle"></i> Set Active
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="table-info">
+                    <td><strong>Team Total</strong></td>
+                    <td><strong>@TeamRaceCount</strong></td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 } else {
-    <div class="row">
-        <div class="col-xl-6">
-            is empty
-        </div>
+    <div class="alert alert-info">
+        Your race team is empty. Add racers to get started!
     </div>
 }
 
