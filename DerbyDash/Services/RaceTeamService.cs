@@ -3,6 +3,7 @@ using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
+using System.Security.Claims;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -99,13 +100,7 @@ namespace DerbyDash.Services {
 
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
-            // Check for duplicate userId (case-insensitive, and for this user)
-            bool exists = await _context.RaceTeam
-                .AnyAsync(rt => rt.UserId == racer.UserId && rt.Name == racer.Name);
 
-            if (exists) {
-                throw new DuplicateRacerException($"A racer named '{racer.Name}' already exists on your team.");
-            }
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
                 // Find the maximum ID and increment by 1
