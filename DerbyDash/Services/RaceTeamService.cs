@@ -94,11 +94,18 @@ namespace DerbyDash.Services {
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
             Logger.LogInformation("GetUserByIdAsync for userId: {userId}", userId);
             await Task.CompletedTask; // Just to use 'await'
-            return new ApplicationUser() { UserName = name };
+            return new ApplicationUser() { UserName = "name" };
         }
 
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
+            // Check for duplicate userId (case-insensitive, and for this user)
+            bool exists = await _context.RaceTeam
+                .AnyAsync(rt => rt.UserId == racer.UserId && rt.Name == racer.Name);
+
+            if (exists) {
+                throw new DuplicateRacerException($"A racer named '{racer.Name}' already exists on your team.");
+            }
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
                 // Find the maximum ID and increment by 1
@@ -154,7 +161,6 @@ namespace DerbyDash.Services {
                 Active = raceTeam.FirstOrDefault();
             }
 
-            await Task.CompletedTask; // Just to use 'await'
             return Active!;
         }
 
@@ -164,17 +170,14 @@ namespace DerbyDash.Services {
 
             try {
                 // Try to use JS interop, but catch the exception if we're prerendering
-                // Get the current user's ID or email for the cookie name
+                // Get the current user's ID for the cookie name
                 string userIdentifier = "guest";
                 try {
-                    var userName = await GetUserName("SetActiveRacer");
-                    if (!string.IsNullOrEmpty(userName)) {
-                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
-                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
-                    }
+                    var userId = await GetUserID("SetActiveRacer");
+                    userIdentifier = userId.ToString();
                 } catch (Exception) {
                     // If we can't get the username, use "guest" as the identifier
-                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                    Logger.LogWarning("Could not get userId for cookie, using guest instead");
                 }
 
                 // Save the active racer ID in a user-specific cookie with 90-day expiration
@@ -198,14 +201,11 @@ namespace DerbyDash.Services {
             try {
                 // We'll try to use JS interop and catch any exceptions if we're prerendering
 
-                // Get the current user's ID or email for the cookie name
+                // Get the current user's ID for the cookie name
                 string userIdentifier = "guest";
                 try {
-                    var userName = await GetUserName("LoadActiveRacer");
-                    if (!string.IsNullOrEmpty(userName)) {
-                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
-                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
-                    }
+                    var userId = await GetUserID("LoadActiveRacer");
+                    userIdentifier = userId.ToString();
                 } catch (Exception) {
                     // If we can't get the username, use "guest" as the identifier
                     Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
@@ -244,20 +244,29 @@ namespace DerbyDash.Services {
             }
         }
 
-        public async Task<string> GetUserName(string purpose) {
-            Logger.LogInformation("GetUserName for {purpose}", purpose);
+        public async Task<string> GetUserID(string purpose) {
+            Logger.LogInformation("GetUserID for {purpose}", purpose);
             try {
+                if (!string.IsNullOrEmpty(UserId)) {
+                    return UserId;
+                }
                 AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
                 if (authState == null) {
                     Logger.LogError($"No authentication state found when trying to {purpose}.");
                     throw new MissingUserException();
                 }
-                string? userName = authState?.User?.Identity?.Name;
-                if (string.IsNullOrEmpty(userName)) {
-                    Logger.LogError($"Unable to determine the user name when trying to {purpose}.");
+                ClaimsPrincipal? user = authState?.User;
+                if (user == null) {
+                    Logger.LogError($"No user ID found when trying to {purpose}.");
                     throw new MissingUserException();
                 }
-                return userName;
+                string? userId = _userManager.GetUserId(user!);
+                if (string.IsNullOrEmpty(userId)) {
+                    Logger.LogError($"Unable to determine the user userId when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                UserId = userId;
+                return userId;
             } catch (Exception ex) {
                 Logger.LogError(ex, $"Error getting username for {purpose}");
                 throw new MissingUserException("Could not determine username", ex);

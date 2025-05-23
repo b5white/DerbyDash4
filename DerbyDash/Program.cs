@@ -35,6 +35,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<FeedbackService>();
+            builder.Services.AddScoped<DatabaseKeepAliveService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
@@ -77,7 +78,7 @@ namespace DerbyDash {
             })
                 //.AddIdentityCookies()
                 .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
-                    cookieOptions.LoginPath = "/login";
+                    cookieOptions.LoginPath = "/Account/Login";
                     cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
                     cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
                     cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site

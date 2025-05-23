@@ -2,7 +2,9 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.WebUtilities
+@using DerbyDash.Services;
 @inject NavigationManager NavManager
+@inject DatabaseKeepAliveService DbKeepAlive
 @attribute [AllowAnonymous]
 
 <PageTitle>About DerbyDash</PageTitle>
@@ -111,22 +113,20 @@
     // Set to true to show debug information, false for production
     private bool ShowDebugInfo = false;
 
-    protected override void OnInitialized()
-    {
+    protected async override Task OnInitializedAsync() {
         // Parse query string parameters
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("location", out var locationParam))
-        {
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("location", out var locationParam)) {
             Location = locationParam.ToString();
         }
         
         // Log the location parameter for debugging
         Console.WriteLine($"About page initialized with Location: {Location ?? "null"}");
-        base.OnInitialized();
+        await DbKeepAlive.PingDatabaseAsync();
+        await base.OnInitializedAsync();
     }
 
-    private string WelcomeMessage => Location?.ToLower() switch
-    {
+    private string WelcomeMessage => Location?.ToLower() switch {
         "iowa" => "Welcome, Iowa Home School Conference Attendees!",
         "arizona" => "Welcome, Arizona Home School Conference Attendees!",
         _ => "Welcome!"
