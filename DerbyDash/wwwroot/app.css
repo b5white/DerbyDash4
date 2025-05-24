@@ -2,6 +2,132 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Login Required Message Styles */
+.login-required-message {
+    max-width: 500px;
+    margin: 20px auto;
+    text-align: center;
+}
+
+.race-login-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #dee2e6;
+    position: relative;
+    overflow: hidden;
+}
+
+.race-login-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, #ff4e50, #f9d423);
+}
+
+.race-login-icon {
+    background-color: #f8f9fa;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    border: 3px solid #e9ecef;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.race-login-icon .fas {
+    font-size: 30px;
+    color: #dc3545;
+}
+
+.login-required-message h3 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    color: #343a40;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.login-required-message p {
+    margin-bottom: 25px;
+    color: #495057;
+    font-size: 16px;
+}
+
+.race-login-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 25px;
+    text-align: left;
+    padding: 0 10px;
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.benefit-item .fas {
+    color: #28a745;
+    font-size: 18px;
+    width: 24px;
+}
+
+.benefit-item span {
+    color: #495057;
+    font-size: 15px;
+}
+
+.race-login-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.btn-race-login, .btn-race-register {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-race-login {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-race-login:hover {
+    background-color: #0069d9;
+    border-color: #0062cc;
+    transform: translateY(-2px);
+}
+
+.btn-race-register {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-race-register:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+    transform: translateY(-2px);
+}
+
 a, .btn-link {
     color: #006bb7;
 }

@@ -4,6 +4,7 @@
 @using DerbyDash.Components.Problems
 @using DerbyDash.Components.Layout
 @using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
 
 @if (!Started) {
     <div class="race-start-container">
@@ -12,15 +13,52 @@
             <p class="race-subtitle">Ready to race with numbers?</p>
         </div>
 
-        <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartRaceForm">
-            <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
-            <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
-                <div class="button-content">
-                    <i class="fas fa-flag-checkered"></i>
-                    <span>Start Race</span>
+        <AuthorizeView Context="authContext">
+            <Authorized>
+                <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartRaceForm">
+                    <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
+                    <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
+                        <div class="button-content">
+                            <i class="fas fa-flag-checkered"></i>
+                            <span>Start Race</span>
+                        </div>
+                    </button>
+                </EditForm>
+            </Authorized>
+            <NotAuthorized>
+                <div class="login-required-message">
+                    <div class="race-login-card">
+                        <div class="race-login-icon">
+                            <i class="fas fa-lock"></i>
+                        </div>
+                        <h3>Login Required</h3>
+                        <p>You need to be logged in to start this race and save your progress!</p>
+                        <div class="race-login-benefits">
+                            <div class="benefit-item">
+                                <i class="fas fa-trophy"></i>
+                                <span>Track your best times</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-chart-line"></i>
+                                <span>See your progress</span>
+                            </div>
+                            <div class="benefit-item">
+                                <i class="fas fa-medal"></i>
+                                <span>Compete on leaderboards</span>
+                            </div>
+                        </div>
+                        <div class="race-login-buttons">
+                            <a href="/Account/Login?returnUrl=@Uri.EscapeDataString(NavManager.Uri)" class="btn btn-primary btn-race-login">
+                                <i class="fas fa-sign-in-alt"></i> Log In
+                            </a>
+                            <a href="/Account/Register" class="btn btn-secondary btn-race-register">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </button>
-        </EditForm>
+            </NotAuthorized>
+        </AuthorizeView>
 
         <div class="race-instructions">
             <p>Solve math problems to accelerate your car.</p>

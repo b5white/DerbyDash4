@@ -9,11 +9,8 @@ namespace DerbyDash.Data
         [Key]
         public int Id { get; set; }
         
-        [StringLength(450)]
-        public string UserId { get; set; } = string.Empty;
-
-        public ApplicationUser User { get; set; } = null!;
-
+        // Removed UserId and User properties as they don't exist in the database
+        
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;

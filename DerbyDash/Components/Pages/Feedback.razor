@@ -4,10 +4,12 @@
 @using System.ComponentModel.DataAnnotations
 @using DerbyDash.Services
 @using DerbyDash.Data
+@using Microsoft.AspNetCore.Components.Authorization
 @attribute [AllowAnonymous]
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject FeedbackService FeedbackService
+@inject AuthenticationStateProvider AuthStateProvider
 
 <PageTitle>Feedback - Derby Dash</PageTitle>
 
@@ -115,7 +117,7 @@
     {
         try
         {
-            // Convert the FeedbackModel to Feedback entity
+            // Create the feedback entity
             var feedbackEntity = new DerbyDash.Data.Feedback
             {
                 Name = feedbackModel.Name,
@@ -128,6 +130,8 @@
                 SubmittedAt = DateTime.UtcNow,
                 IsResolved = false
             };
+            
+            // No longer setting UserId since it doesn't exist in the database
 
             // Save to database
             bool success = await FeedbackService.AddFeedbackAsync(feedbackEntity);

@@ -39,10 +39,16 @@ namespace DerbyDash.Services {
                 feedback.SubmittedAt = DateTime.UtcNow;
                 feedback.IsResolved = false;
 
+                // No longer need to handle UserId since it's been removed
+
                 await _context.Feedbacks.AddAsync(feedback);
                 await _context.SaveChangesAsync();
                 return true;
-            } catch {
+            } catch (Exception ex) {
+                Console.WriteLine($"Error adding feedback: {ex.Message}");
+                if (ex.InnerException != null) {
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+                }
                 return false;
             }
         }

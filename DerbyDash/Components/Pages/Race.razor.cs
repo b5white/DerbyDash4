@@ -6,6 +6,7 @@ using DerbyDash.Exceptions;
 using DerbyDash.Services;
 using DerbyDash.Utilities;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -32,6 +33,9 @@ namespace DerbyDash.Components.Pages {
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
+        
+        [Inject]
+        public required AuthenticationStateProvider AuthStateProvider { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
@@ -90,6 +94,8 @@ namespace DerbyDash.Components.Pages {
             FlashTimer.Elapsed += HideAnswer;
             FlashTimer.AutoReset = false;
         }
+        
+        // OnAfterRenderAsync is defined later in the file
 
         private async Task Reset() {
             Logger.LogInformation("Reset");
@@ -156,6 +162,16 @@ namespace DerbyDash.Components.Pages {
 
 
         private async Task StartClick() {
+            // Check if the user is logged in
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+            
+            if (!isAuthenticated) {
+                // User is not logged in, redirect to login page with return URL
+                NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
+                return;
+            }
+            
             // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
@@ -493,9 +509,14 @@ namespace DerbyDash.Components.Pages {
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             try {
+                // Try to focus the text input if it exists
                 await textInput.FocusAsync();
             } catch (Exception) {
+                // Ignore focus errors
             }
+            
+            // No need to check authentication status on first render
+            // The UI already shows a login message for unauthenticated users
         }
 
         public async void OnAfterIgnore() {
