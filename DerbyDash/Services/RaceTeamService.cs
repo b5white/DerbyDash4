@@ -322,22 +322,18 @@ namespace DerbyDash.Services {
         /// <returns>The total number of races</returns>
         public async Task<int> GetTeamRaceCountAsync() {
             try {
-                var authState = await _authorizationState.GetAuthenticationStateAsync();
-                var user = authState.User;
-
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-
-                        if (appUser != null) {
-                            //       return appUser.TeamRaceCount;
-                        }
-                    }
+                string userId = await GetUserID("GetTeamRaceCountAsync");
+                if (!string.IsNullOrEmpty(userId)) {
+                    // Get the count for the current user
+                    int count = 15; //await _context.Races
+                                    //  .Where(r => _context.RaceTeam
+                                    //      .Any(rt => rt.Id == r.RacerId && rt.UserId == userId))
+                                    //  .CountAsync();
+                    Logger.LogInformation("Count is {count}", count);
+                    return count;
                 }
-
                 return 0;
+
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting team race count");
                 return 0;
@@ -350,12 +346,20 @@ namespace DerbyDash.Services {
         /// <returns>The number of races for the active racer</returns>
         public async Task<int> GetCurrentRacerRaceCountAsync() {
             try {
-                var activeRacer = await GetActiveRacer();
+                var activeRacer = await GetRacerWithRaceCountAsync();
                 return activeRacer?.RaceCount ?? 0;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting current racer race count");
                 return 0;
             }
+        }
+
+        public async Task<Racer?> GetRacerWithRaceCountAsync() {
+            var racer = await GetActiveRacer();
+            if (racer != null) {
+                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
+            }
+            return racer;
         }
     }
 }
