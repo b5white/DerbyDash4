@@ -52,7 +52,6 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             try {
                 Racer newTeamMember = new() {
                     Name = Input.MemberName,
-                    RaceCount = 0 // Initialize race count to 0
                 };
 
                 await RaceTeamService.AddRacer(newTeamMember);
@@ -68,7 +67,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 message = "Error adding racer: " + ex.Message;
             }
         }
-        
+
         protected async Task SetActiveRacer(Racer racer) {
             try {
                 await RaceTeamService.SetActiveRacer(racer);
@@ -85,10 +84,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 // The service handles its own user authentication
                 raceTeam.Clear();
                 raceTeam.AddRange(await RaceTeamService.GetRacers());
-                
+
                 // Get team race count
                 TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
-                
+
                 Logger.LogInformation($"Loaded {raceTeam.Count} racers with {TeamRaceCount} total races");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in ReloadUsers");

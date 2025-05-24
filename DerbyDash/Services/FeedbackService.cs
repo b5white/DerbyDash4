@@ -15,8 +15,7 @@ namespace DerbyDash.Services {
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type)
-        {
+        public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type) {
             return await _context.Feedbacks
                 .Where(f => f.FeedbackType == type)
                 .OrderByDescending(f => f.SubmittedAt)

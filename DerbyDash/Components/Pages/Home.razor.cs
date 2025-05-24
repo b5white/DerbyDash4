@@ -1,4 +1,5 @@
-﻿﻿using Microsoft.AspNetCore.Components;
+﻿using DerbyDash.Services;
+using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
 namespace DerbyDash.Components.Pages {
@@ -6,9 +7,10 @@ namespace DerbyDash.Components.Pages {
     public partial class Home: ComponentBase {
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
-
         [Inject]
         public required ILogger<Home> Logger { get; set; }
+        [Inject]
+        public required DatabaseKeepAliveService DbKeepAlive { get; set; }
 
         private string appName = "Derby Dash";
         private string selectedGif = "";
@@ -24,11 +26,14 @@ namespace DerbyDash.Components.Pages {
             "images/horse-running7.gif"
         };
 
-        protected override void OnInitialized() {
+        protected async override Task OnInitializedAsync() {
             // Select a random GIF from the array
             Random random = new Random();
             int index = random.Next(gifs.Length);
             selectedGif = gifs[index];
+            await DbKeepAlive.PingDatabaseAsync();
+            await base.OnInitializedAsync();
+            return;
         }
 
         [Inject]

@@ -25,13 +25,7 @@ namespace DerbyDash.Services {
         /// <param name="problemClassString">The identifier of the race (e.g., "addition-4stable")</param>
         /// <returns>A task representing the asynchronous operation</returns>
         public Task SaveLastPlayedRaceAsync(string problemClassString);
-        
-        /// <summary>
-        /// Increments the race count for the current active racer and the team total
-        /// </summary>
-        /// <returns>A task representing the asynchronous operation</returns>
-        public Task IncrementRaceCountAsync();
-        
+
         /// <summary>
         /// Gets the total number of races completed by the current user's team
         /// </summary>

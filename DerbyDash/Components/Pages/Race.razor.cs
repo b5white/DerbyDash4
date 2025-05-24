@@ -138,6 +138,7 @@ namespace DerbyDash.Components.Pages {
 
                 // Delay the start of inactivity timer
                 // Using FireAndForget pattern since we don't need to wait for this to complete
+                // TODO break out into separate method
                 UtilityMethods.FireAndForget(async () => {
                     await Task.Delay(INITIAL_TIMER_DELAY);
                     // Check if component is still active and timers are not disposed
@@ -424,9 +425,6 @@ namespace DerbyDash.Components.Pages {
                     CalculateAverage();
                 });
                 await RaceService.SaveRaceAsync(track);
-                
-                // Increment the race count for the current racer and team total
-                await RaceTeamService.IncrementRaceCountAsync();
             } catch (Exception ex) {
                 LogMessage(ex);
             }
@@ -628,12 +626,12 @@ namespace DerbyDash.Components.Pages {
 
         public void Dispose() {
             periodicTimer.Dispose();
-            
+
             if (InactivityTimer != null) {
                 InactivityTimer.Dispose();
                 _inactivityTimerDisposed = true;
             }
-            
+
             if (FlashTimer != null) {
                 FlashTimer.Dispose();
                 _flashTimerDisposed = true;

@@ -1,8 +1,9 @@
-﻿﻿using DerbyDash.Data;
+﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
+using System.Security.Claims;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -25,11 +26,6 @@ namespace DerbyDash.Services {
 
         // Event that components can subscribe to for updates
         public event Action? OnRacerChanged;
-        
-        public Racer ActiveRacer {
-            get => GetActiveRacer().GetAwaiter().GetResult();
-            set => SetActiveRacer(value).Wait();
-        }
 
         public RaceTeamService(
             AuthenticationStateProvider authorizationState,
@@ -104,6 +100,8 @@ namespace DerbyDash.Services {
 
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
+            racer.UserId = await GetUserID("AddRacer");
+
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
                 // Find the maximum ID and increment by 1
@@ -124,14 +122,18 @@ namespace DerbyDash.Services {
             return racer;
         }
 
-        public Task UpdateRacer(Racer racer) {
-            // Implementation would go here
-            return Task.CompletedTask;
+        public async Task UpdateRacer(Racer racer) {
+            Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
+            // DONE Implementation would go here
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
-        public Task RemoveRacer(int racerId) {
-            // Implementation would go here
-            return Task.CompletedTask;
+        public async Task RemoveRacer(int racerId) {
+            Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
+            // DONE Implementation would go here
+            await Task.CompletedTask; // Just to use 'await'
+            return;
         }
 
         public async Task<Racer> GetActiveRacer() {
@@ -155,7 +157,6 @@ namespace DerbyDash.Services {
                 Active = raceTeam.FirstOrDefault();
             }
 
-            await Task.CompletedTask; // Just to use 'await'
             return Active!;
         }
 
@@ -165,17 +166,14 @@ namespace DerbyDash.Services {
 
             try {
                 // Try to use JS interop, but catch the exception if we're prerendering
-                // Get the current user's ID or email for the cookie name
+                // Get the current user's ID for the cookie name
                 string userIdentifier = "guest";
                 try {
-                    var userName = await GetUserName("SetActiveRacer");
-                    if (!string.IsNullOrEmpty(userName)) {
-                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
-                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
-                    }
+                    var userId = await GetUserID("SetActiveRacer");
+                    userIdentifier = userId.ToString();
                 } catch (Exception) {
-                    // If we can't get the username, use "guest" as the identifier
-                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                    // If we can't get the userId, use "guest" as the identifier
+                    Logger.LogWarning("Could not get userId for cookie, using guest instead");
                 }
 
                 // Save the active racer ID in a user-specific cookie with 90-day expiration
@@ -199,17 +197,14 @@ namespace DerbyDash.Services {
             try {
                 // We'll try to use JS interop and catch any exceptions if we're prerendering
 
-                // Get the current user's ID or email for the cookie name
+                // Get the current user's ID for the cookie name
                 string userIdentifier = "guest";
                 try {
-                    var userName = await GetUserName("LoadActiveRacer");
-                    if (!string.IsNullOrEmpty(userName)) {
-                        // Use a hash or sanitized version of the email/username to avoid special characters in cookie name
-                        userIdentifier = userName.Replace("@", "_at_").Replace(".", "_dot_");
-                    }
+                    var userId = await GetUserID("LoadActiveRacer");
+                    userIdentifier = userId.ToString();
                 } catch (Exception) {
-                    // If we can't get the username, use "guest" as the identifier
-                    Logger.LogWarning("Could not get username for cookie, using 'guest' instead");
+                    // If we can't get the userId, use "guest" as the identifier
+                    Logger.LogWarning("Could not get userId for cookie, using 'guest' instead");
                 }
 
                 // Get the last active racer ID from the user-specific cookie
@@ -245,62 +240,49 @@ namespace DerbyDash.Services {
             }
         }
 
-        public async Task<string> GetUserName(string purpose) {
-            Logger.LogInformation("GetUserName for {purpose}", purpose);
-            try {
-                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
-                if (authState == null) {
-                    Logger.LogError($"No authentication state found when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                string? userName = authState?.User?.Identity?.Name;
-                if (string.IsNullOrEmpty(userName)) {
-                    Logger.LogError($"Unable to determine the user name when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                return userName;
-            } catch (Exception ex) {
-                Logger.LogError(ex, $"Error getting username for {purpose}");
-                throw new MissingUserException("Could not determine username", ex);
-            }
-        }
-        
         public async Task<string> GetUserID(string purpose) {
             Logger.LogInformation("GetUserID for {purpose}", purpose);
             try {
+                if (!string.IsNullOrEmpty(UserId)) {
+                    return UserId;
+                }
                 AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
                 if (authState == null) {
                     Logger.LogError($"No authentication state found when trying to {purpose}.");
                     throw new MissingUserException();
                 }
-                
-                var userId = authState.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                if (string.IsNullOrEmpty(userId)) {
-                    Logger.LogError($"Unable to determine the user ID when trying to {purpose}.");
+                ClaimsPrincipal? user = authState?.User;
+                if (user == null) {
+                    Logger.LogError($"No user ID found when trying to {purpose}.");
                     throw new MissingUserException();
                 }
-                
+                string? userId = _userManager.GetUserId(user!);
+                if (string.IsNullOrEmpty(userId)) {
+                    Logger.LogError($"Unable to determine the user userId when trying to {purpose}.");
+                    throw new MissingUserException();
+                }
+                UserId = userId;
                 return userId;
             } catch (Exception ex) {
-                Logger.LogError(ex, $"Error getting user ID for {purpose}");
-                throw new MissingUserException("Could not determine user ID", ex);
+                Logger.LogError(ex, $"Error getting userId for {purpose}");
+                throw new MissingUserException("Could not determine userId", ex);
             }
         }
 
         /// <summary>
-        /// Gets the last played race for the current active racer
+        /// Gets the last played race for the current user from database
         /// </summary>
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
             try {
-               // Get the active racer
-                 var activeRacer = await GetActiveRacer();
-                
+                // Get the active racer
+                var activeRacer = await GetActiveRacer();
+
                 if (activeRacer != null && !string.IsNullOrEmpty(activeRacer.LastPlayedRace)) {
                     Logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
                     return activeRacer.LastPlayedRace;
                 }
-                
+
                 return null;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error retrieving last played race for active racer");
@@ -317,16 +299,16 @@ namespace DerbyDash.Services {
             try {
                 // Get the active racer
                 var activeRacer = await GetActiveRacer();
-                
+
                 if (activeRacer != null) {
                     // Update the LastPlayedRace property on the active racer
                     activeRacer.LastPlayedRace = problemClassString;
-                    
+
                     // Also update the LastRaced date to today
                     activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
-                    
+
                     Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
-                    
+
                     // Notify subscribers that the racer has been updated
                     OnRacerChanged?.Invoke();
                 }
@@ -334,98 +316,51 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error saving last played race for active racer");
             }
         }
-        
-        /// <summary>
-        /// Increments the race count for the current active racer and the team total
-        /// </summary>
-        /// <returns>A task representing the asynchronous operation</returns>
-        public async Task IncrementRaceCountAsync() {
-            try {
-                // Get the current user
-                var authState = await _authorizationState.GetAuthenticationStateAsync();
-                var user = authState.User;
 
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-                        
-                        if (appUser != null) {
-                            // Increment the team race count
-                            appUser.TeamRaceCount++;
-                            
-                            // Get the current active racer and increment their race count
-                            var activeRacer = await GetActiveRacer();
-                            if (activeRacer != null) {
-                                activeRacer.RaceCount++;
-                                
-                                // Update the racer in the list
-                                var racerIndex = raceTeam.FindIndex(r => r.Id == activeRacer.Id);
-                                if (racerIndex >= 0) {
-                                    raceTeam[racerIndex] = activeRacer;
-                                }
-                                
-                                // Update the active racer reference
-                                Active = activeRacer;
-                                
-                                Logger.LogInformation($"Incremented race count for racer {activeRacer.Name} to {activeRacer.RaceCount}");
-                            }
-                            
-                            // Save changes to the database
-                            await _userManager.UpdateAsync(appUser);
-                            Logger.LogInformation($"Incremented team race count for user {userId} to {appUser.TeamRaceCount}");
-                            
-                            // Notify subscribers that the racer data has changed
-                            OnRacerChanged?.Invoke();
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error incrementing race counts");
-            }
-        }
-        
         /// <summary>
         /// Gets the total number of races completed by the current user's team
         /// </summary>
         /// <returns>The total number of races</returns>
         public async Task<int> GetTeamRaceCountAsync() {
             try {
-                var authState = await _authorizationState.GetAuthenticationStateAsync();
-                var user = authState.User;
-
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-
-                        if (appUser != null) {
-                            return appUser.TeamRaceCount;
-                        }
-                    }
+                string userId = await GetUserID("GetTeamRaceCountAsync");
+                if (!string.IsNullOrEmpty(userId)) {
+                    // Get the count for the current user
+                    int count = 15; //await _context.Races
+                                    //  .Where(r => _context.RaceTeam
+                                    //      .Any(rt => rt.Id == r.RacerId && rt.UserId == userId))
+                                    //  .CountAsync();
+                    Logger.LogInformation("Count is {count}", count);
+                    return count;
                 }
-                
                 return 0;
+
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting team race count");
                 return 0;
             }
         }
-        
+
         /// <summary>
         /// Gets the number of races completed by the current active racer
         /// </summary>
         /// <returns>The number of races for the active racer</returns>
         public async Task<int> GetCurrentRacerRaceCountAsync() {
             try {
-                var activeRacer = await GetActiveRacer();
+                var activeRacer = await GetRacerWithRaceCountAsync();
                 return activeRacer?.RaceCount ?? 0;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting current racer race count");
                 return 0;
             }
+        }
+
+        public async Task<Racer?> GetRacerWithRaceCountAsync() {
+            var racer = await GetActiveRacer();
+            if (racer != null) {
+                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
+            }
+            return racer;
         }
     }
 }
