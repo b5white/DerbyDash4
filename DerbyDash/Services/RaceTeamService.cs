@@ -316,7 +316,7 @@ namespace DerbyDash.Services {
             }
         }
 
-         /// <summary>
+        /// <summary>
         /// Gets the total number of races completed by the current user's team
         /// </summary>
         /// <returns>The total number of races</returns>
@@ -332,7 +332,7 @@ namespace DerbyDash.Services {
                         var appUser = await _userManager.FindByIdAsync(userId);
 
                         if (appUser != null) {
-                            return appUser.TeamRaceCount;
+                            //       return appUser.TeamRaceCount;
                         }
                     }
                 }
