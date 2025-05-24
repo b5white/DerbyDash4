@@ -1,5 +1,6 @@
 ﻿namespace DerbyDash {
     class TODO {
+        // Filipe
         // DONE Hide the 2 factor link on the Profile page, AKA "/Account/Manage".
         //      Don't remove the code because we might want to add it back in later.
         // DONE Add a Preferences page with a link to it from the Profile page.
@@ -41,5 +42,13 @@
         //    See if after just 5 to 10 races they don't know their squares better.
         // TODO Redo the menu pages to use two columns of thinner buttons
         // TODO On the RaceTeam page, at runtime, vary the width of your screen. The hint words run over each other.
+        // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
+        //    Check  position, margin, padding, display, align-items, and parent.
+        //    Something has to be set differently for them to not be vertically aligned.
+
+        // Brad
+        // TODO Enable logging to the database
+        // TODO Enable email
+        // TODO Get Feedback and Subscription reading/writing to DB.
     }
 }
