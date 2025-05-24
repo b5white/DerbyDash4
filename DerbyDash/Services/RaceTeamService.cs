@@ -27,11 +27,6 @@ namespace DerbyDash.Services {
         // Event that components can subscribe to for updates
         public event Action? OnRacerChanged;
 
-        public Racer ActiveRacer {
-            get => GetActiveRacer().GetAwaiter().GetResult();
-            set => SetActiveRacer(value).Wait();
-        }
-
         public RaceTeamService(
             AuthenticationStateProvider authorizationState,
             ILogger<RaceTeamService> logger,
@@ -274,7 +269,7 @@ namespace DerbyDash.Services {
         }
 
         /// <summary>
-        /// Gets the last played race for the current active racer
+        /// Gets the last played race for the current user from database
         /// </summary>
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
@@ -321,58 +316,7 @@ namespace DerbyDash.Services {
             }
         }
 
-        /// <summary>
-        /// Increments the race count for the current active racer and the team total
-        /// </summary>
-        /// <returns>A task representing the asynchronous operation</returns>
-        public async Task IncrementRaceCountAsync() {
-            try {
-                // Get the current user
-                var authState = await _authorizationState.GetAuthenticationStateAsync();
-                var user = authState.User;
-
-                if (user.Identity?.IsAuthenticated == true) {
-                    var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-                    if (!string.IsNullOrEmpty(userId)) {
-                        var appUser = await _userManager.FindByIdAsync(userId);
-
-                        if (appUser != null) {
-                            // Increment the team race count
-                            appUser.TeamRaceCount++;
-
-                            // Get the current active racer and increment their race count
-                            var activeRacer = await GetActiveRacer();
-                            if (activeRacer != null) {
-                                activeRacer.RaceCount++;
-
-                                // Update the racer in the list
-                                var racerIndex = raceTeam.FindIndex(r => r.Id == activeRacer.Id);
-                                if (racerIndex >= 0) {
-                                    raceTeam[racerIndex] = activeRacer;
-                                }
-
-                                // Update the active racer reference
-                                Active = activeRacer;
-
-                                Logger.LogInformation($"Incremented race count for racer {activeRacer.Name} to {activeRacer.RaceCount}");
-                            }
-
-                            // Save changes to the database
-                            await _userManager.UpdateAsync(appUser);
-                            Logger.LogInformation($"Incremented team race count for user {userId} to {appUser.TeamRaceCount}");
-
-                            // Notify subscribers that the racer data has changed
-                            OnRacerChanged?.Invoke();
-                        }
-                    }
-                }
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error incrementing race counts");
-            }
-        }
-
-        /// <summary>
+         /// <summary>
         /// Gets the total number of races completed by the current user's team
         /// </summary>
         /// <returns>The total number of races</returns>
