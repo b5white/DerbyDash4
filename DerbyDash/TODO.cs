@@ -37,5 +37,9 @@
         // TODO Use ActiveRacer if its set instead of getting it from the cookie all the time.
         // TODO Use ActiveRacer in GetUserID if it is set
         // DONE Populate UserId in AddRacer
+        // TODO If race team has no races, then on the Race Team page, show a message that suggests they try the app with multiplying squares before handing it over to their kids so they can see how it works.
+        //    See if after just 5 to 10 races they don't know their squares better.
+        // TODO Redo the menu pages to use two columns of thinner buttons
+        // TODO On the RaceTeam page, at runtime, vary the width of your screen. The hint words run over each other.
     }
 }

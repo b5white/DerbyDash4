@@ -7,6 +7,7 @@
             { "addition-5stable",  typeof(Addition5sTable) },
             { "addition-1digitsimple",  typeof(Addition1DigitsSimple) },
             { "addition-1digit",        typeof(Addition1Digits) },
+            { "multiplication-squaressmall",        typeof(MultiplicationSquaresSmall) }
         };
 
         public static ProblemManagerBase CreateProblemManager(string problemTypeName) {
