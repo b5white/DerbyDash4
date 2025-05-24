@@ -15,5 +15,27 @@
         // DONE Subscription service with the fake data
         // DONE Add a link to the FAQ page from the Subscription page.
         // DONE Move avatar to Racer
+        // TODO Add an explainer page before the login page 
+        // TODO Add "You need to log in to race." to all menus if they are not logged in.
+        // TODO Handle the screen shift when using a phone so can still see top of page.
+        // TODO Move Get/Save LastRace from Race to Racer Service
+        // TODO Create a UserService to handle all user related actions
+        //    GetUserId
+        //    IsLoggedIn
+        //    Anything else using GetAuthenticationStateAsync
+        // TODO Save the Race position in the list at time it was first run, in Race
+        // TODO Get rid of anything related to saving race count in the database
+        //    We'll calculate it based on the number of races in the DB.
+        // TODO Send a date range to the GetCount routines indicating AllTime.
+        //    Or, instead of sending a data range, we could send a range type.
+        //    AllTime, Last Week, Last30Days, Last90Days, LastYear
+        //    That way, the routine itself is reponsible for the date details.
+        // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
+        //    I want Reset to be higher level and it has too many details.
+        // TODO Why do we have both @racer.RaceCount and @CurrentRacerRaceCount?
+        // TODO Move the css in topnavbar.razor over the the css file
+        // TODO Use ActiveRacer if its set instead of getting it from the cookie all the time.
+        // TODO Use ActiveRacer in GetUserID if it is set
+        // DONE Populate UserId in AddRacer
     }
 }
