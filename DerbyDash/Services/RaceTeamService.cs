@@ -100,6 +100,7 @@ namespace DerbyDash.Services {
 
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
+            racer.UserId = await GetUserID("AddRacer");
 
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
