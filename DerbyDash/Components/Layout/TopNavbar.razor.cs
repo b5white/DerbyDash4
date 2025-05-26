@@ -10,13 +10,13 @@ namespace DerbyDash.Components.Layout {
     public partial class TopNavbar : ComponentBase, IDisposable {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
-        
-        [Inject] private NavigationManager NavManager { get; set; } = default!;
+          [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        [Inject] private GameStateService GameStateService { get; set; } = default!;
         
         private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
@@ -26,8 +26,7 @@ namespace DerbyDash.Components.Layout {
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
-        
-        protected override async Task OnInitializedAsync() {
+          protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
 
@@ -36,6 +35,9 @@ namespace DerbyDash.Components.Layout {
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
             NavManager.LocationChanged += HandleLocationChangedAsync;
+
+            // Subscribe to game state changes
+            GameStateService.OnGameStateChanged += HandleGameStateChangedAsync;
 
             await LoadUserAvatar();
         }
@@ -209,6 +211,23 @@ namespace DerbyDash.Components.Layout {
                 UserInitial = null;
                 UserEmail = null;
             }
+        }        private async void HandleGameStateChangedAsync(bool isGameRunning) {
+            try {
+                await InvokeAsync(StateHasChanged);
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleGameStateChangedAsync");
+            }
+        }
+
+        private string GetNavbarClasses() {
+            var classes = new List<string>();
+            
+            // Check if we should hide the navbar on mobile when game is running
+            if (GameStateService.ShouldHideNavbarOnMobile()) {
+                classes.Add("game-running");
+            }
+            
+            return string.Join(" ", classes);
         }        void IDisposable.Dispose() {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
@@ -221,6 +240,10 @@ namespace DerbyDash.Components.Layout {
             // Unsubscribe from navigation changes
             if (NavManager != null)
                 NavManager.LocationChanged -= HandleLocationChangedAsync;
+
+            // Unsubscribe from game state changes
+            if (GameStateService != null)
+                GameStateService.OnGameStateChanged -= HandleGameStateChangedAsync;
         }
     }
 }

@@ -32,12 +32,14 @@ namespace DerbyDash.Components.Pages {
         public required ILogger<Race> Logger { get; set; }
 
         [Inject]
-        public required IJSRuntime JSRuntime { get; set; }
-          [Inject]
+        public required IJSRuntime JSRuntime { get; set; }        [Inject]
         public required IUserService UserService { get; set; }
 
         [Inject]
         public required AuthenticationStateProvider AuthStateProvider { get; set; }
+
+        [Inject]
+        public required GameStateService GameStateService { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
@@ -83,9 +85,7 @@ namespace DerbyDash.Components.Pages {
         private bool _inactivityTimerDisposed = false;
         private bool _flashTimerDisposed = false;
 
-        TrackContainer? trackContainerInstance;
-
-        protected override void OnInitialized() {
+        TrackContainer? trackContainerInstance;        protected override void OnInitialized() {
             Logger.LogInformation("OnInitialized");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
@@ -95,6 +95,9 @@ namespace DerbyDash.Components.Pages {
             FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
             FlashTimer.Elapsed += HideAnswer;
             FlashTimer.AutoReset = false;
+
+            // Notify GameStateService that we're on a race page
+            GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
         }
         
         // OnAfterRenderAsync is defined later in the file
@@ -106,9 +109,12 @@ namespace DerbyDash.Components.Pages {
                 CurrentRacerFinished = false;
                 Finished = false;
                 currentDistance = 0;
-                Answer = "";
-                Started = true;
+                Answer = "";                Started = true;
                 Running = true;
+                
+                // Notify GameStateService that the game is now running
+                GameStateService.SetGameRunning(true);
+                
                 await CreateProblems();
                 InitializeTrack(ProblemClassString);
                 ScaleRace(0);
@@ -356,9 +362,12 @@ namespace DerbyDash.Components.Pages {
                 }
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();
-                }
-                await UpdateResultsAsync(FinishTime);
-                Running = true;
+                }                await UpdateResultsAsync(FinishTime);
+                Running = false;
+                
+                // Notify GameStateService that the game has stopped
+                GameStateService.SetGameRunning(false);
+                
                 problems = null;
                 StateHasChanged();
             }
@@ -403,11 +412,13 @@ namespace DerbyDash.Components.Pages {
                 } else if (track.Cars[i].TotalTime == 0) {
                     track.Cars[i].TotalTime = time;
                 }
-            }
-
-            if (allFinished && CurrentRacerFinished && !Finished) {
+            }            if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
+                
+                // Notify GameStateService that the game has stopped
+                GameStateService.SetGameRunning(false);
+                
                 StopPeriodicTimer();
             }
 
@@ -618,9 +629,11 @@ namespace DerbyDash.Components.Pages {
 
         public void LogMessage(string message) {
             Logger.LogWarning(message);
-        }
-
-        public void Dispose() {
+        }        public void Dispose() {
+            // Reset game state when component is disposed
+            GameStateService.SetGameRunning(false);
+            GameStateService.SetCurrentRacePage("");
+            
             periodicTimer.Dispose();
 
             if (InactivityTimer != null) {

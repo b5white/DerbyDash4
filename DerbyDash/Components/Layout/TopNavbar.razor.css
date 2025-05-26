@@ -420,63 +420,14 @@
         padding: 0.75rem;
         width: 100%;
     }
-}
 
-/* Small mobile styles */
-@media (max-width: 480px) {
-    .top-navbar {
-        padding: 0.6rem 0.75rem;
-    }
-    
-    .page-title h1 {
-        font-size: 1.1rem;
-    }
-    
-    .page-title i {
-        width: 28px;
-        height: 28px;
-        font-size: 1rem;
-    }
-    
-    .page-subtitle {
-        font-size: 0.8rem;
-        margin-left: 2.5rem;
-    }
-    
-    .page-subtitle::before {
-        left: -1.2rem;
-        font-size: 0.9rem;
-    }
-    
-    .racer-selector {
-        padding: 0.5rem 0.75rem;
-        border-radius: 12px;
-    }
-    
-    .racer-dropdown-container label {
-        font-size: 0.75rem;
-    }
-    
-    .racer-dropdown {
-        font-size: 0.9rem;
-        padding: 0.4rem 2rem 0.4rem 0.5rem;
-        min-width: 150px;
-    }
-    
-    .racer-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-    
-    .racer-avatar-default {
-        font-size: 1.2rem;
-    }
-    
-    .select-hint {
+    /* Hide navbar when game is running on mobile */
+    .top-navbar.game-running {
         display: none;
     }
 }
+
+
 
 /* Desktop enhancements */
 @media (min-width: 1024px) {
