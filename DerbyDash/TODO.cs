@@ -45,8 +45,12 @@
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
+        // TODO Add progress panel with list of steps to each of the reg pages.
+        // TODO Change RaceTeam page to show progress panel if coming from reg, and profile menu if not.
+        // TODO Add current userId and racerId to feedback in service.
 
         // Brad
+        // TODO Stop deleting old races
         // TODO Enable logging to the database
         // TODO Enable email
         // TODO Get Feedback and Subscription reading/writing to DB.
