@@ -69,13 +69,11 @@ namespace DerbyDash.Components.Account.Pages {
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
               if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
-                Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
-            } else {
+                Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");            } else {
                 Logger.LogInformation("Email confirmation not required - automatically signing in user");
                 
                 // Automatically sign in the user when email confirmation is disabled
                 await SignInManager.SignInAsync(user, isPersistent: false);
-                AuthStateProvider.NotifyUserAuthentication();
                 Logger.LogInformation("User automatically signed in: {Email}", email);
             }
             

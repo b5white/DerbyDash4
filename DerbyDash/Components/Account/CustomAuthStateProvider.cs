@@ -2,15 +2,14 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;
 using System.Security.Claims;
 
-namespace DerbyDash.Components.Account {    public class CustomAuthStateProvider: ServerAuthenticationStateProvider {
+namespace DerbyDash.Components.Account {
+    public class CustomAuthStateProvider : ServerAuthenticationStateProvider {
         // This method is called when a user logs in to notify components of the state change
         public void NotifyUserAuthentication() {
-            // Get the current authentication state (should be authenticated after sign-in)
-            var currentAuthStateTask = GetAuthenticationStateAsync();
-            
-            // Notify all components that the authentication state has changed
-            // This will trigger the AuthenticationStateChanged event in all subscribed components
-            base.NotifyAuthenticationStateChanged(currentAuthStateTask);
+            // For Blazor Server, we should not call GetAuthenticationStateAsync manually
+            // Instead, just trigger a state change notification without getting the state
+            // The framework will automatically refresh the state when components request it
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal())));
         }
         
         // This method is called when a user logs out
