@@ -68,7 +68,7 @@ else
                 
                 // Automatically sign in the user after email confirmation
                 await SignInManager.SignInAsync(user, true);
-                AuthStateProvider.NotifyUserAuthentication();
+                AuthStateProvider.NotifyUserLogin();
 
                 // We don't automatically redirect to give the user a chance to see the confirmation message
                 // They can click the link to go to the Race Team page

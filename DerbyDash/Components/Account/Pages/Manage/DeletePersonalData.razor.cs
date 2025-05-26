@@ -46,7 +46,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 throw new InvalidOperationException("Unexpected error occurred deleting user.");
             }
             await SignInManager.SignOutAsync();
-            AuthStateProvider.NotifyUserAuthentication();
+            AuthStateProvider.NotifyUserLogout();
 
             string userId = await UserManager.GetUserIdAsync(user);
             Logger.LogInformation("User with ID '{UserId}' deleted themselves.", userId);

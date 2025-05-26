@@ -66,7 +66,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
-            AuthStateProvider.NotifyUserAuthentication();
+            AuthStateProvider.NotifyUserLogin();
             RedirectManager.RedirectToCurrentPageWithStatus("The external login was removed.", HttpContext);
         }
 
