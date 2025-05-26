@@ -7,25 +7,32 @@ using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
-    public partial class TopNavbar {
+    public partial class TopNavbar : ComponentBase, IDisposable {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
+        
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
+        [Inject] private IAvatarService AvatarService { get; set; } = default!;
+        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        
         private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
-        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        
         private string? UserAvatarFileName;
         private int CurrentRacerRaceCount { get; set; } = 0;
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
-
+        
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
+
+            // Subscribe to avatar changes
+            AvatarService.OnAvatarChanged += HandleAvatarChangedAsync;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
             NavManager.LocationChanged += HandleLocationChangedAsync;
@@ -84,14 +91,21 @@ namespace DerbyDash.Components.Layout {
                 CurrentRacerRaceCount = 0;
                 TeamRaceCount = 0;
             }
-        }
-
-        private async void HandleRacerChangedAsync() {
+        }        private async void HandleRacerChangedAsync() {
             try {
                 await LoadRacers();
                 StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+            }
+        }
+
+        private async void HandleAvatarChangedAsync() {
+            try {
+                await LoadUserAvatar();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleAvatarChangedAsync");
             }
         }
 
@@ -181,14 +195,11 @@ namespace DerbyDash.Components.Layout {
 
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
-                var user = await UserManager.FindByIdAsync(userId);
-
-                if (user != null) {
-                    // TODO reinstitute
-                    // UserAvatarFileName = user.AvatarFileName;
+                var user = await UserManager.FindByIdAsync(userId);                if (user != null) {
+                    UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
-                } else { // Clear fields if user not found (e.g., after logout)                  
+                }else { // Clear fields if user not found (e.g., after logout)                  
                     UserAvatarFileName = null;
                     UserInitial = null;
                     UserEmail = null;
@@ -198,12 +209,14 @@ namespace DerbyDash.Components.Layout {
                 UserInitial = null;
                 UserEmail = null;
             }
-        }
-
-        void IDisposable.Dispose() {
+        }        void IDisposable.Dispose() {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
                 RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;
+
+            // Unsubscribe from avatar changes
+            if (AvatarService != null)
+                AvatarService.OnAvatarChanged -= HandleAvatarChangedAsync;
 
             // Unsubscribe from navigation changes
             if (NavManager != null)

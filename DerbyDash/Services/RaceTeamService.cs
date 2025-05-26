@@ -48,13 +48,17 @@ namespace DerbyDash.Services {
             Logger.LogInformation("GetRacers");
             raceTeam = await GetRacersInternal();
             return raceTeam;
-        }
-
-        public async Task<List<Racer>> GetRacersInternal() {
+        }        public async Task<List<Racer>> GetRacersInternal() {
             Logger.LogInformation("GetRacersInternal");
             ApplicationUser? user;
             string userId;
             try {
+                // Check if user is authenticated first
+                if (!await _userService.IsLoggedInAsync()) {
+                    Logger.LogWarning("User is not authenticated when trying to GetRacers");
+                    return new List<Racer>();
+                }
+                
                 // Try to get the userId, but don't fail if we can't
                 try {
                     userId = await GetUserID("GetRacers");
@@ -241,6 +245,12 @@ namespace DerbyDash.Services {
             try {
                 if (!string.IsNullOrEmpty(UserId)) {
                     return UserId;
+                }
+                
+                // Check if user is authenticated first
+                if (!await _userService.IsLoggedInAsync()) {
+                    Logger.LogWarning("User is not authenticated when trying to {Purpose}", purpose);
+                    throw new MissingUserException("User is not authenticated");
                 }
                 
                 string userId = await _userService.GetUserIdAsync(purpose);

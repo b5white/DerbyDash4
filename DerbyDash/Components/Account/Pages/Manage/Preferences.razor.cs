@@ -1,4 +1,5 @@
 using DerbyDash.Data;
+using DerbyDash.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -6,12 +7,12 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
     [Authorize]
-    public partial class Preferences {
-        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    public partial class Preferences : ComponentBase {        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = null!;
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
+        [Inject] private IAvatarService AvatarService { get; set; } = default!;
 
         public class PreferencesModel {
             public string? Avatar { get; set; }
@@ -35,20 +36,18 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
             if (user == null) {
                 Logger.LogError("Failed to load user in OnInitializedAsync.");
-                SaveMessage = "Error: Could not load user data.";
-            } else {
+                SaveMessage = "Error: Could not load user data.";            } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                // TODO reinstitute
-                // Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
+                Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
 
                 // Set default avatar if user doesn't have one yet
-                //if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
-                //    Model.Avatar = Avatars[0]; // Default to first avatar
-                //    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
-                //} else {
-                //    Model.Avatar = user.AvatarFileName;
-                //    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
-                //}
+                if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
+                    Model.Avatar = Avatars[0]; // Default to first avatar
+                    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
+                } else {
+                    Model.Avatar = user.AvatarFileName;
+                    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
+                }
             }
         }
 
@@ -79,12 +78,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             Logger.LogInformation("Model.Avatar at submission time: {Avatar}", Model.Avatar ?? "null");
 
             // Check if an avatar is selected - use string.IsNullOrEmpty to properly check for null or empty strings
-            if (currentUser != null && !string.IsNullOrEmpty(Model.Avatar)) {
-                Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
+            if (currentUser != null && !string.IsNullOrEmpty(Model.Avatar)) {                Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
 
                 // Update the avatar filename
-                // TODO reinstitute
-                //currentUser.AvatarFileName = Model.Avatar;
+                currentUser.AvatarFileName = Model.Avatar;
 
                 // Save changes to the database
                 var result = await UserManager.UpdateAsync(currentUser);
@@ -95,20 +92,18 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     // Refresh the sign-in session to update the authentication cookie/principal
                     // REMOVED: This causes 'Headers already sent' error in interactive server mode
                     // await SignInManager.RefreshSignInAsync(currentUser);
-                    // Logger.LogInformation("SignInManager.RefreshSignInAsync called for user '{UserId}'", currentUser.Id);
-
-                    // *** Explicitly update the Model to reflect the saved state ***
-                    // TODO reinstitute
-                    // Model.Avatar = currentUser.AvatarFileName;
+                    // Logger.LogInformation("SignInManager.RefreshSignInAsync called for user '{UserId}'", currentUser.Id);                    // *** Explicitly update the Model to reflect the saved state ***
+                    Model.Avatar = currentUser.AvatarFileName;
                     Logger.LogInformation("Model.Avatar explicitly updated after save to: {Avatar}", Model.Avatar ?? "null");
 
                     // Update the local user reference (optional, as navigation will likely reload)
-                    user = currentUser;
-
-                    // Force a refresh of the user from the database to verify changes (optional debug step)
+                    user = currentUser;                    // Force a refresh of the user from the database to verify changes (optional debug step)
                     var refreshedUser = await UserManager.FindByIdAsync(userId);
-                    // TODO reinstitute
-                    // Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
+                    Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
+
+                    // Notify other components that the avatar has changed
+                    AvatarService.NotifyAvatarChanged();
+                    Logger.LogInformation("Avatar change notification sent for user '{UserId}'", currentUser.Id);
 
                     SaveMessage = "Preferences saved!";
                     StateHasChanged(); // Update UI to show message and reflect Model change
@@ -116,9 +111,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     // Show success message for a short delay
                     await Task.Delay(1200);
 
-                    // Navigate to refresh layout components like TopNavbar using the updated auth state
-                    // forceLoad: false should be sufficient now that RefreshSignInAsync is called
-                    RedirectManager.RedirectTo(NavManager.Uri);
+                    // Instead of using RedirectManager, use NavigationManager for interactive components
+                    NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
                 } else {
                     Logger.LogError("UserManager.UpdateAsync failed for user '{UserId}'. Errors: {Errors}",
                         currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));

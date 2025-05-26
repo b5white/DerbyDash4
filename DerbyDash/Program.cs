@@ -21,21 +21,21 @@ namespace DerbyDash {
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
-            builder.Services.AddDatabaseDeveloperPageExceptionFilter();
-
-            // Add Scoped services
+            builder.Services.AddDatabaseDeveloperPageExceptionFilter();            // Add Scoped services
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
+            
+            // Register both auth state providers
             builder.Services.AddScoped<CustomAuthStateProvider>();
-            builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-                sp.GetRequiredService<CustomAuthStateProvider>());            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<FeedbackService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
+            builder.Services.AddScoped<IAvatarService, AvatarService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();            // Add Identity services with Entity Framework stores
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {

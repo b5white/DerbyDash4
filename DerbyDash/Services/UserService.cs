@@ -22,9 +22,7 @@ namespace DerbyDash.Services {
             _authenticationStateProvider = authenticationStateProvider;
             _userManager = userManager;
             _logger = logger;
-        }
-
-        public async Task<string> GetUserIdAsync(string purpose = "") {
+        }        public async Task<string> GetUserIdAsync(string purpose = "") {
             var logContext = string.IsNullOrEmpty(purpose) ? "GetUserIdAsync" : $"GetUserIdAsync for {purpose}";
             _logger.LogInformation("{LogContext}", logContext);
 
@@ -35,20 +33,20 @@ namespace DerbyDash.Services {
                 }
 
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
-                if (authState == null) {
-                    _logger.LogError("No authentication state found when trying to {Purpose}", purpose);
+                if (authState?.User == null) {
+                    _logger.LogWarning("No authentication state found when trying to {Purpose}", purpose);
                     throw new MissingUserException("No authentication state available");
                 }
 
                 var user = authState.User;
-                if (user == null || !user.Identity?.IsAuthenticated == true) {
-                    _logger.LogError("No authenticated user found when trying to {Purpose}", purpose);
+                if (user?.Identity == null || !user.Identity.IsAuthenticated) {
+                    _logger.LogWarning("No authenticated user found when trying to {Purpose}", purpose);
                     throw new MissingUserException("User is not authenticated");
                 }
 
                 var userId = _userManager.GetUserId(user);
                 if (string.IsNullOrEmpty(userId)) {
-                    _logger.LogError("Unable to determine the user ID when trying to {Purpose}", purpose);
+                    _logger.LogWarning("Unable to determine the user ID when trying to {Purpose}", purpose);
                     throw new MissingUserException("Could not determine user ID");
                 }
 
@@ -56,6 +54,7 @@ namespace DerbyDash.Services {
                 _cachedUserId = userId;
                 _userIdCacheInitialized = true;
 
+                _logger.LogInformation("Successfully retrieved user ID for {Purpose}", purpose);
                 return userId;
             } catch (Exception ex) when (!(ex is MissingUserException)) {
                 _logger.LogError(ex, "Error getting user ID for {Purpose}", purpose);
