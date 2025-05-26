@@ -5,12 +5,12 @@ using Microsoft.JSInterop;
 namespace DerbyDash.Components.Pages {
 
     public partial class Home: ComponentBase {
-        [Inject]
-        public required IJSRuntime JSRuntime { get; set; }
-        [Inject]
-        public required ILogger<Home> Logger { get; set; }
-        [Inject]
-        public required DatabaseKeepAliveService DbKeepAlive { get; set; }
+        [Inject] public required IJSRuntime JSRuntime { get; set; }
+        [Inject] public required ILogger<Home> Logger { get; set; }
+        [Inject] public required NavigationManager NavManager { get; set; }
+        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
+
+        [Inject] public required DatabaseKeepAliveService DbKeepAlive { get; set; }
 
         private string appName = "Derby Dash";
         private string selectedGif = "";
@@ -34,11 +34,7 @@ namespace DerbyDash.Components.Pages {
             await DbKeepAlive.PingDatabaseAsync();
             await base.OnInitializedAsync();
             return;
-        }        [Inject]
-        public required NavigationManager NavManager { get; set; }
-        
-        [Inject]
-        public required IRaceTeamService RaceTeamService { get; set; }
+        }
 
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
@@ -48,12 +44,12 @@ namespace DerbyDash.Components.Pages {
 
                 // If there's a last played race, navigate to it
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {
-                    Logger.LogInformation($"Navigating to last played race: {lastPlayedRace}");
+                    Logger.LogInformation($"Navigating to last played race: /race/{lastPlayedRace}");
 
                     // Navigate to the last played race using NavigationManager instead of RedirectManager
                     NavManager.NavigateTo($"/race/{lastPlayedRace}");
                 } else {
-                    Logger.LogInformation("No last played race found, navigating to race selection menu");
+                    Logger.LogInformation("No last played race found, navigating to race selection menu  /RaceSetsMenu");
 
                     // Default navigation if no last played race is found
                     NavManager.NavigateTo("/RaceSetsMenu");
@@ -62,6 +58,7 @@ namespace DerbyDash.Components.Pages {
                 Logger.LogError(ex, "Error retrieving last played race");
 
                 // Navigate to race selection menu if there's an error
+                Logger.LogInformation($"Redirecting to /RaceSetsMenu");
                 NavManager.NavigateTo("/RaceSetsMenu");
             }
         }

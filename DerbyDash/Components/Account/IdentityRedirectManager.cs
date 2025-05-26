@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
 
 namespace DerbyDash.Components.Account {
-    internal sealed class IdentityRedirectManager(NavigationManager NavManager) {
+    internal sealed class IdentityRedirectManager(NavigationManager NavManager, ILogger<IdentityRedirectManager> Logger) {
         public const string StatusCookieName = "Identity.StatusMessage";
 
         private static readonly CookieBuilder StatusCookieBuilder = new() {
@@ -13,22 +13,22 @@ namespace DerbyDash.Components.Account {
         };
 
         [DoesNotReturn]
-        public void RedirectTo(string? uri) {
+        public void RedirectTo(string? uri, bool forceLoad = false) {
             uri ??= "";
 
             // Prevent open redirects.
             if (!Uri.IsWellFormedUriString(uri, UriKind.Relative)) {
                 uri = NavManager.ToBaseRelativePath(uri);
             }
-
+            Logger.LogInformation($"Redirecting to {uri}");
             // During static rendering, NavigateTo throws a NavigationException which is handled by the framework as a redirect.
             // So as long as this is called from a statically rendered Identity component, the InvalidOperationException is never thrown.
-            NavManager.NavigateTo(uri);
+            NavManager.NavigateTo(uri, forceLoad);
             throw new InvalidOperationException($"{nameof(IdentityRedirectManager)} can only be used during static rendering.");
         }
 
         [DoesNotReturn]
-        public void RedirectTo(string uri, Dictionary<string, object?> queryParameters) {
+        public void RedirectToWParams(string uri, Dictionary<string, object?> queryParameters) {
             var uriWithoutQuery = NavManager.ToAbsoluteUri(uri).GetLeftPart(UriPartial.Path);
             var newUri = NavManager.GetUriWithQueryParameters(uriWithoutQuery, queryParameters);
             RedirectTo(newUri);

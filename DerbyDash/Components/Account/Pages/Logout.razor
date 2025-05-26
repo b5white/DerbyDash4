@@ -8,30 +8,3 @@
 
 <h1>Logging out...</h1>
 <p>Please wait while we sign you out.</p>
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            // Check if user is logged in
-            if (await UserService.IsLoggedInAsync())
-            {
-                // Sign out the user
-                await SignInManager.SignOutAsync();
-                
-                // Notify the auth state provider that the user has been logged out
-                AuthStateProvider.NotifyUserLogout();
-                
-                Logger.LogInformation("User logged out successfully.");
-            }
-            // Use IdentityRedirectManager for redirect (non-interactive page)
-            RedirectManager.RedirectTo("/Welcome");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error during logout.");
-            RedirectManager.RedirectTo("/Welcome");
-        }
-    }
-}

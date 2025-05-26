@@ -10,7 +10,6 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<ProcessLogin> Logger
 @inject IdentityRedirectManager RedirectManager
-@inject DerbyDash.Services.IUserService UserService
 
 <PageTitle>Processing Login - Derby Dash</PageTitle>
 
@@ -31,17 +30,14 @@
     [SupplyParameterFromQuery]
     public string? ReturnUrl { get; set; }
 
-    @inject CustomAuthStateProvider AuthStateProvider 
+    @inject CustomAuthStateProvider AuthStateProvider
 
     static string targetUrl = "";
 
     protected override async Task OnInitializedAsync() {
-        if (!await IsLoggedIn()) {
-
-            if (string.IsNullOrEmpty(Email)) {
-                targetUrl = "/";
-                return;
-            }
+        if (string.IsNullOrEmpty(Email)) {
+            targetUrl = "/";
+        } else {
 
             try {
                 var user = await UserManager.FindByEmailAsync(Email);
@@ -61,9 +57,7 @@
                 Logger.LogError(ex, "Error during login processing for user: {Email}", Email);
                 targetUrl = "/Account/Login";
             }
-            RedirectManager.RedirectTo(targetUrl);
         }
-    }    private async Task<bool> IsLoggedIn() {
-        return await UserService.IsLoggedInAsync();
+        RedirectManager.RedirectTo(targetUrl);
     }
 }

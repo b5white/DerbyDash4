@@ -1,9 +1,7 @@
 ﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
-using System.Security.Claims;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -25,7 +23,9 @@ namespace DerbyDash.Services {
         private string? UserId;
 
         // Event that components can subscribe to for updates
-        public event Action? OnRacerChanged;        public RaceTeamService(
+        public event Action? OnRacerChanged;
+
+        public RaceTeamService(
             IUserService userService,
             ILogger<RaceTeamService> logger,
             ApplicationDbContext context,
@@ -48,7 +48,9 @@ namespace DerbyDash.Services {
             Logger.LogInformation("GetRacers");
             raceTeam = await GetRacersInternal();
             return raceTeam;
-        }        public async Task<List<Racer>> GetRacersInternal() {
+        }
+
+        public async Task<List<Racer>> GetRacersInternal() {
             Logger.LogInformation("GetRacersInternal");
             ApplicationUser? user;
             string userId;
@@ -58,7 +60,7 @@ namespace DerbyDash.Services {
                     Logger.LogWarning("User is not authenticated when trying to GetRacers");
                     return new List<Racer>();
                 }
-                
+
                 // Try to get the userId, but don't fail if we can't
                 try {
                     userId = await GetUserID("GetRacers");
@@ -126,14 +128,12 @@ namespace DerbyDash.Services {
 
         public async Task UpdateRacer(Racer racer) {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
-            // DONE Implementation would go here
             await Task.CompletedTask; // Just to use 'await'
             return;
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
-            // DONE Implementation would go here
             await Task.CompletedTask; // Just to use 'await'
             return;
         }
@@ -240,22 +240,23 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error loading active racer from cookie");
                 // Don't change Active here, keep whatever value it has
             }
-        }        public async Task<string> GetUserID(string purpose) {
+        }
+
+        public async Task<string> GetUserID(string purpose) {
             Logger.LogInformation("GetUserID for {purpose}", purpose);
             try {
                 if (!string.IsNullOrEmpty(UserId)) {
                     return UserId;
                 }
-                
+
                 // Check if user is authenticated first
                 if (!await _userService.IsLoggedInAsync()) {
                     Logger.LogWarning("User is not authenticated when trying to {Purpose}", purpose);
                     throw new MissingUserException("User is not authenticated");
                 }
-                
-                string userId = await _userService.GetUserIdAsync(purpose);
-                UserId = userId;
-                return userId;
+
+                UserId = await _userService.GetUserIdAsync(purpose);
+                return UserId;
             } catch (Exception ex) {
                 Logger.LogError(ex, $"Error getting userId for {purpose}");
                 throw new MissingUserException("Could not determine userId", ex);

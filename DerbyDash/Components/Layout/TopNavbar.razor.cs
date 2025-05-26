@@ -2,31 +2,30 @@ using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
-    public partial class TopNavbar : ComponentBase, IDisposable {
+    public partial class TopNavbar: ComponentBase, IDisposable {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
-          [Inject] private NavigationManager NavManager { get; set; } = default!;
+
+        [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private GameStateService GameStateService { get; set; } = default!;
-        
-        private string CurrentUrl => NavManager.Uri;
-        [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
-        
+
         private string? UserAvatarFileName;
+        private string CurrentUrl => NavManager.Uri;
         private int CurrentRacerRaceCount { get; set; } = 0;
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
-          protected override async Task OnInitializedAsync() {
+
+        protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
 
@@ -75,7 +74,7 @@ namespace DerbyDash.Components.Layout {
                         SelectedRacer = Racers.First();
                         await RaceTeamService.SetActiveRacer(SelectedRacer);
                     }
-                    
+
                     // Load race counts
                     CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
                     TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
@@ -93,7 +92,9 @@ namespace DerbyDash.Components.Layout {
                 CurrentRacerRaceCount = 0;
                 TeamRaceCount = 0;
             }
-        }        private async void HandleRacerChangedAsync() {
+        }
+
+        private async void HandleRacerChangedAsync() {
             try {
                 await LoadRacers();
                 StateHasChanged();
@@ -118,10 +119,10 @@ namespace DerbyDash.Components.Layout {
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
                     await RaceTeamService.SetActiveRacer(newRacer);
-                    
+
                     // Update the current racer race count
                     CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
-                    
+
                     StateHasChanged();
                 }
             }
@@ -192,16 +193,20 @@ namespace DerbyDash.Components.Layout {
         }
 
         private async Task LoadUserAvatar() {
+            // TODO replace
             var authState = await AuthStateTask;
             var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
-                var user = await UserManager.FindByIdAsync(userId);                if (user != null) {
-                    UserAvatarFileName = user.AvatarFileName;
+                // TODO Can we just get the current user instead of getting the ID first?
+                var user = await UserManager.FindByIdAsync(userId);
+                if (user != null) {
+                    // TODO This is still wrong
+                    //UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
-                }else { // Clear fields if user not found (e.g., after logout)                  
+                } else { // Clear fields if user not found (e.g., after logout)                  
                     UserAvatarFileName = null;
                     UserInitial = null;
                     UserEmail = null;
@@ -211,7 +216,9 @@ namespace DerbyDash.Components.Layout {
                 UserInitial = null;
                 UserEmail = null;
             }
-        }        private async void HandleGameStateChangedAsync(bool isGameRunning) {
+        }
+
+        private async void HandleGameStateChangedAsync(bool isGameRunning) {
             try {
                 await InvokeAsync(StateHasChanged);
             } catch (Exception ex) {
@@ -221,14 +228,16 @@ namespace DerbyDash.Components.Layout {
 
         private string GetNavbarClasses() {
             var classes = new List<string>();
-            
+
             // Check if we should hide the navbar on mobile when game is running
             if (GameStateService.ShouldHideNavbarOnMobile()) {
                 classes.Add("game-running");
             }
-            
+
             return string.Join(" ", classes);
-        }        void IDisposable.Dispose() {
+        }
+
+        void IDisposable.Dispose() {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
                 RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;

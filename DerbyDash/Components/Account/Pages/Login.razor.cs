@@ -132,7 +132,7 @@ namespace DerbyDash.Components.Account.Pages {
                 { "rememberMe", rememberMe },
                 { "returnUrl", returnUrl }
             };
-            RedirectManager.RedirectTo("/Account/ProcessLogin", queryParams);
+            RedirectManager.RedirectToWParams("/Account/ProcessLogin", queryParams);
         }
 
         private sealed class InputModel {

@@ -1,4 +1,4 @@
-﻿﻿﻿@using Microsoft.AspNetCore.Components.Authorization
+﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
 @using Microsoft.AspNetCore.Components.Web
 @rendermode InteractiveServer
@@ -6,7 +6,6 @@
 @inject IdentityRedirectManager RedirectManager
 @inject AuthenticationStateProvider AuthStateProvider
 @inject IJSRuntime JSRuntime
-@implements IDisposable
 
 <div class="sidebar-header">
     <a class="navbar-brand" href="">
@@ -79,10 +78,10 @@
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link logout-link" href="javascript:void(0)" @onclick="HandleLogout">
+                    <a class="nav-link logout-link" @onclick="HandleLogout">
                         <i class="nav-icon fas fa-sign-out-alt"></i>
                         <span class="nav-text">Logout</span>
-                    </NavLink>
+                    </a>
                 </div>
             </Authorized>
             <NotAuthorized>

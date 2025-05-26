@@ -7,7 +7,8 @@ using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
     [Authorize]
-    public partial class Preferences : ComponentBase {        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    public partial class Preferences: ComponentBase {
+        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = null!;
         [Inject] private NavigationManager NavManager { get; set; } = default!;
@@ -36,18 +37,19 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
             if (user == null) {
                 Logger.LogError("Failed to load user in OnInitializedAsync.");
-                SaveMessage = "Error: Could not load user data.";            } else {
+                SaveMessage = "Error: Could not load user data.";
+            } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
+                // TODO fix
+                //Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
 
-                // Set default avatar if user doesn't have one yet
-                if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
-                    Model.Avatar = Avatars[0]; // Default to first avatar
-                    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
-                } else {
-                    Model.Avatar = user.AvatarFileName;
-                    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
-                }
+                //if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
+                //    Model.Avatar = Avatars[0]; // Default to first avatar
+                //    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
+                //} else {
+                //    Model.Avatar = user.AvatarFileName;
+                //    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
+                //}
             }
         }
 
@@ -78,10 +80,12 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             Logger.LogInformation("Model.Avatar at submission time: {Avatar}", Model.Avatar ?? "null");
 
             // Check if an avatar is selected - use string.IsNullOrEmpty to properly check for null or empty strings
-            if (currentUser != null && !string.IsNullOrEmpty(Model.Avatar)) {                Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
+            if (currentUser != null && !string.IsNullOrEmpty(Model.Avatar)) {
+                Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
 
                 // Update the avatar filename
-                currentUser.AvatarFileName = Model.Avatar;
+                // TODO fix
+                // currentUser.AvatarFileName = Model.Avatar;
 
                 // Save changes to the database
                 var result = await UserManager.UpdateAsync(currentUser);
@@ -93,13 +97,17 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     // REMOVED: This causes 'Headers already sent' error in interactive server mode
                     // await SignInManager.RefreshSignInAsync(currentUser);
                     // Logger.LogInformation("SignInManager.RefreshSignInAsync called for user '{UserId}'", currentUser.Id);                    // *** Explicitly update the Model to reflect the saved state ***
-                    Model.Avatar = currentUser.AvatarFileName;
+                    // TODO
+                    // Model.Avatar = currentUser.AvatarFileName;
                     Logger.LogInformation("Model.Avatar explicitly updated after save to: {Avatar}", Model.Avatar ?? "null");
 
                     // Update the local user reference (optional, as navigation will likely reload)
-                    user = currentUser;                    // Force a refresh of the user from the database to verify changes (optional debug step)
+                    user = currentUser;
+
+                    // Force a refresh of the user from the database to verify changes (optional debug step)
                     var refreshedUser = await UserManager.FindByIdAsync(userId);
-                    Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
+                    // TODO update
+                    // Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
 
                     // Notify other components that the avatar has changed
                     AvatarService.NotifyAvatarChanged();

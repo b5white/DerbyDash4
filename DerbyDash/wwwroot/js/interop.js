@@ -4,12 +4,6 @@ window.toggleClass = (element, className) => {
     }
 };
 
-// Function to handle logout and force a refresh
-window.handleLogout = (redirectUrl) => {
-    // Force a complete page refresh to update all components
-    window.location.href = redirectUrl || '/';
-};
-
 // Initialize Bootstrap accordion
 window.initializeAccordion = () => {
     // Check if Bootstrap is available

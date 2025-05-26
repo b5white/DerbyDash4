@@ -6,7 +6,6 @@ using DerbyDash.Exceptions;
 using DerbyDash.Services;
 using DerbyDash.Utilities;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -32,11 +31,10 @@ namespace DerbyDash.Components.Pages {
         public required ILogger<Race> Logger { get; set; }
 
         [Inject]
-        public required IJSRuntime JSRuntime { get; set; }        [Inject]
-        public required IUserService UserService { get; set; }
+        public required IJSRuntime JSRuntime { get; set; }
 
         [Inject]
-        public required AuthenticationStateProvider AuthStateProvider { get; set; }
+        public required IUserService UserService { get; set; }
 
         [Inject]
         public required GameStateService GameStateService { get; set; }
@@ -85,7 +83,9 @@ namespace DerbyDash.Components.Pages {
         private bool _inactivityTimerDisposed = false;
         private bool _flashTimerDisposed = false;
 
-        TrackContainer? trackContainerInstance;        protected override void OnInitialized() {
+        TrackContainer? trackContainerInstance;
+
+        protected override void OnInitialized() {
             Logger.LogInformation("OnInitialized");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
@@ -99,7 +99,7 @@ namespace DerbyDash.Components.Pages {
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
         }
-        
+
         // OnAfterRenderAsync is defined later in the file
 
         private async Task Reset() {
@@ -109,12 +109,13 @@ namespace DerbyDash.Components.Pages {
                 CurrentRacerFinished = false;
                 Finished = false;
                 currentDistance = 0;
-                Answer = "";                Started = true;
+                Answer = "";
+                Started = true;
                 Running = true;
-                
+
                 // Notify GameStateService that the game is now running
                 GameStateService.SetGameRunning(true);
-                
+
                 await CreateProblems();
                 InitializeTrack(ProblemClassString);
                 ScaleRace(0);
@@ -167,16 +168,19 @@ namespace DerbyDash.Components.Pages {
                     }
                 });
             }
-        }        private async Task StartClick() {
+        }
+
+
+        private async Task StartClick() {
             // Check if the user is logged in
             bool isAuthenticated = await UserService.IsLoggedInAsync();
-            
+
             if (!isAuthenticated) {
                 // User is not logged in, redirect to login page with return URL
                 NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
                 return;
             }
-            
+
             // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
@@ -208,9 +212,11 @@ namespace DerbyDash.Components.Pages {
             }
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
-            }            try {
+            }
+
+            try {
                 // Save the last played race to the database
-                await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString);
+                //    await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error saving last played race to database");
             }
@@ -362,12 +368,13 @@ namespace DerbyDash.Components.Pages {
                 }
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();
-                }                await UpdateResultsAsync(FinishTime);
+                }
+                await UpdateResultsAsync(FinishTime);
                 Running = false;
-                
+
                 // Notify GameStateService that the game has stopped
                 GameStateService.SetGameRunning(false);
-                
+
                 problems = null;
                 StateHasChanged();
             }
@@ -412,13 +419,15 @@ namespace DerbyDash.Components.Pages {
                 } else if (track.Cars[i].TotalTime == 0) {
                     track.Cars[i].TotalTime = time;
                 }
-            }            if (allFinished && CurrentRacerFinished && !Finished) {
+            }
+
+            if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
-                
+
                 // Notify GameStateService that the game has stopped
                 GameStateService.SetGameRunning(false);
-                
+
                 StopPeriodicTimer();
             }
 
@@ -495,6 +504,7 @@ namespace DerbyDash.Components.Pages {
                 Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
+                    Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
                     NavManager.NavigateTo("/Account/Manage/RaceTeam");
                     return;
                 }
@@ -503,9 +513,11 @@ namespace DerbyDash.Components.Pages {
                 track = RaceService.CreateTrack(problemSetIdentifier);
             } catch (MissingTeamMemberException ex) {
                 LogMessage(ex);
+                Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
                 NavManager.NavigateTo("/Account/Manage/RaceTeam");
             } catch (MissingUserException ex) {
                 LogMessage(ex);
+                Logger.LogInformation($"Redirecting to /Account/login");
                 NavManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
@@ -519,7 +531,7 @@ namespace DerbyDash.Components.Pages {
             } catch (Exception) {
                 // Ignore focus errors
             }
-            
+
             // No need to check authentication status on first render
             // The UI already shows a login message for unauthenticated users
         }
@@ -629,11 +641,13 @@ namespace DerbyDash.Components.Pages {
 
         public void LogMessage(string message) {
             Logger.LogWarning(message);
-        }        public void Dispose() {
+        }
+
+        public void Dispose() {
             // Reset game state when component is disposed
             GameStateService.SetGameRunning(false);
             GameStateService.SetCurrentRacePage("");
-            
+
             periodicTimer.Dispose();
 
             if (InactivityTimer != null) {
