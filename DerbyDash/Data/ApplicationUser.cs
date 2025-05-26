@@ -9,5 +9,10 @@ namespace DerbyDash.Data {
         /// </summary>
         [MaxLength(255)]
         public string? AvatarFileName { get; set; }
+
+        /// <summary>
+        /// The identifier of the last played race (e.g., "addition-4stable")
+        /// </summary>
+        public string? LastPlayedRace { get; set; }
     }
 }
