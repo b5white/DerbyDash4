@@ -2,19 +2,19 @@ using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
-    public partial class TopNavbar {
+    public partial class TopNavbar: ComponentBase, IDisposable {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
+
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
-        [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
+        [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         private string? UserAvatarFileName;
         private string CurrentUrl => NavManager.Uri;
@@ -26,6 +26,9 @@ namespace DerbyDash.Components.Layout {
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
+
+            // Subscribe to avatar changes
+            AvatarService.OnAvatarChanged += HandleAvatarChangedAsync;
 
             // Subscribe to navigation changes and refresh user avatar when navigation occurs
             NavManager.LocationChanged += HandleLocationChangedAsync;
@@ -92,6 +95,15 @@ namespace DerbyDash.Components.Layout {
                 StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+            }
+        }
+
+        private async void HandleAvatarChangedAsync() {
+            try {
+                await LoadUserAvatar();
+                StateHasChanged();
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error in HandleAvatarChangedAsync");
             }
         }
 
@@ -176,16 +188,17 @@ namespace DerbyDash.Components.Layout {
         }
 
         private async Task LoadUserAvatar() {
+            // TODO replace
             var authState = await AuthStateTask;
             var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
+                // TODO Can we just get the current user instead of getting the ID first?
                 var user = await UserManager.FindByIdAsync(userId);
-
                 if (user != null) {
-                    // TODO reinstitute
-                    // UserAvatarFileName = user.AvatarFileName;
+                    // TODO This is still wrong
+                    //UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  
@@ -204,6 +217,10 @@ namespace DerbyDash.Components.Layout {
             // Unsubscribe from racer changes
             if (RaceTeamService != null)
                 RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;
+
+            // Unsubscribe from avatar changes
+            if (AvatarService != null)
+                AvatarService.OnAvatarChanged -= HandleAvatarChangedAsync;
 
             // Unsubscribe from navigation changes
             if (NavManager != null)

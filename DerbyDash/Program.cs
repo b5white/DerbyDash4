@@ -5,7 +5,6 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace DerbyDash {
     public class Program {
@@ -27,47 +26,41 @@ namespace DerbyDash {
             builder.Services.AddCascadingAuthenticationState();
             builder.Services.AddScoped<IdentityUserAccessor>();
             builder.Services.AddScoped<IdentityRedirectManager>();
+
+            // Register both auth state providers
             builder.Services.AddScoped<CustomAuthStateProvider>();
-            builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-                sp.GetRequiredService<CustomAuthStateProvider>());
+            builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+
+            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<FeedbackService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
+            builder.Services.AddScoped<IAvatarService, AvatarService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider =>
-                new FakeUserStore(provider.GetRequiredService<ILogger<FakeUserStore>>()));
-            //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
-            builder.Services.AddScoped<UserManager<IdentityUser>>(provider => {
-                var userManager = new UserManager<IdentityUser>(
-                    provider.GetRequiredService<IUserStore<IdentityUser>>(),
-                    provider.GetRequiredService<IOptions<IdentityOptions>>(),
-                    provider.GetRequiredService<IPasswordHasher<IdentityUser>>(),
-                    new List<IUserValidator<IdentityUser>>(),
-                    new List<IPasswordValidator<IdentityUser>>(), // No password validators
-                    provider.GetRequiredService<ILookupNormalizer>(),
-                    provider.GetRequiredService<IdentityErrorDescriber>(),
-                    provider.GetRequiredService<IServiceProvider>(),
-                    provider.GetRequiredService<ILogger<UserManager<IdentityUser>>>()
-                );
-                return userManager;
-            });
-
-            // Add Identity services
+            // Add Identity services with Entity Framework stores
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
-                options.SignIn.RequireConfirmedAccount = true;
-                options.SignIn.RequireConfirmedEmail = true;
+                // Sign-in requirements
+                options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
+                options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing
+
+                // Password requirements  
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 8;
+                options.Password.RequiredLength = 6; // Reduced for easier testing
+
+                // User requirements
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddRoles<IdentityRole>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
@@ -76,13 +69,14 @@ namespace DerbyDash {
                 options.DefaultScheme = IdentityConstants.ApplicationScheme;
                 options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
             })
-                //.AddIdentityCookies()
                 .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
                     cookieOptions.LoginPath = "/Account/Login";
+                    cookieOptions.LogoutPath = "/Account/Logout";
+                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
                     cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
                     cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
                     cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
+                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
                     cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
                     cookieOptions.Cookie.Name = "DerbyDash";
                     cookieOptions.Cookie.IsEssential = true;

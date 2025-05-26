@@ -6,9 +6,19 @@ namespace DerbyDash.Data {
     public class Feedback {
         [Key]
         public int Id { get; set; }
-        
-        // Removed UserId and User properties as they don't exist in the database
-        
+
+        [Required]
+        [StringLength(450)]
+        public string UserId { get; set; } = string.Empty;
+
+        [ForeignKey("UserId")]
+        public ApplicationUser User { get; set; } = null!;
+
+        public int RacerId { get; set; }
+
+        [ForeignKey("RacerId")]
+        public Racer Racer { get; set; } = null!;
+
         [Required]
         [StringLength(100)]
         public string Name { get; set; } = string.Empty;
@@ -46,6 +56,7 @@ namespace DerbyDash.Data {
 
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum FeedbackType {
+        None = 0,
         BugReport,
         FeatureRequest,
         GeneralFeedback,

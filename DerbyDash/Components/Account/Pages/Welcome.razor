@@ -1,0 +1,104 @@
+@page "/Welcome"
+@namespace DerbyDash.Components.Account.Pages
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.WebUtilities
+@inject NavigationManager Navigation
+@attribute [AllowAnonymous]
+
+<PageTitle>Welcome to Derby Dash - Math Racing Adventure</PageTitle>
+
+<div class="welcome-container">
+    <div class="racing-background">
+        <div class="racing-track"></div>
+        <div class="finish-line"></div>
+    </div>
+    
+    <div class="welcome-content">
+        <div class="hero-section">
+            <div class="logo-section">
+                <h1 class="brand-title">Derby<span class="dash">Dash</span></h1>
+                <div class="racing-flag">🏁</div>
+            </div>
+            
+            <h2 class="hero-title">Rev Up Your Math Skills!</h2>
+            <p class="hero-subtitle">
+                Join the ultimate mathematical racing experience where speed meets learning.
+                Create your racing team, solve problems, and dash to victory!
+            </p>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🏎️</div>
+                <h3>Create Your Racing Team</h3>
+                <p>Build a team of virtual racers with unique racing names and watch them compete as you solve math problems!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🧮</div>
+                <h3>Math Challenges</h3>
+                <p>Practice addition, subtraction, multiplication, and division through exciting racing scenarios.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3>Track Your Progress</h3>
+                <p>Monitor your team's performance, track races completed, and celebrate your mathematical victories!</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Speed Learning</h3>
+                <p>The faster you solve problems correctly, the faster your racers speed toward the finish line!</p>
+            </div>
+        </div>
+
+        <div class="cta-section">
+            <h3>Ready to Start Your Racing Journey?</h3>
+            <p>Join thousands of learners who are already racing their way to math mastery!</p>
+            
+            <div class="cta-buttons">
+                <a href="@GetLoginUrl()" class="btn-primary-cta">
+                    <span class="btn-text">Start Racing Now</span>
+                    <span class="btn-icon">🏁</span>
+                </a>
+                <a href="@GetRegisterUrl()" class="btn-secondary-cta">
+                    <span class="btn-text">Create Account</span>
+                    <span class="btn-icon">📝</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <div class="stat-item">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Math Problems</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">Racing Fun</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Learning</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string GetLoginUrl()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var returnUrl = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url) ? url.ToString() : "/";
+        return $"/Account/Login?returnUrl={Uri.EscapeDataString(returnUrl)}";
+    }
+
+    private string GetRegisterUrl()
+    {
+        var uri = new Uri(Navigation.Uri);
+        var returnUrl = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url) ? url.ToString() : "/";
+        return $"/Account/Register?returnUrl={Uri.EscapeDataString(returnUrl)}";
+    }
+}

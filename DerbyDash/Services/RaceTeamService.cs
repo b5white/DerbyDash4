@@ -1,13 +1,11 @@
 ﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
-using System.Security.Claims;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
-        private readonly AuthenticationStateProvider _authorizationState;
+        private readonly IUserService _userService;
         private readonly ILogger<RaceTeamService> Logger;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -28,13 +26,13 @@ namespace DerbyDash.Services {
         public event Action? OnRacerChanged;
 
         public RaceTeamService(
-            AuthenticationStateProvider authorizationState,
+            IUserService userService,
             ILogger<RaceTeamService> logger,
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
             IJSRuntime jsRuntime) {
-            _authorizationState = authorizationState;
+            _userService = userService;
             Logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -57,6 +55,12 @@ namespace DerbyDash.Services {
             ApplicationUser? user;
             string userId;
             try {
+                // Check if user is authenticated first
+                if (!await _userService.IsLoggedInAsync()) {
+                    Logger.LogWarning("User is not authenticated when trying to GetRacers");
+                    return new List<Racer>();
+                }
+
                 // Try to get the userId, but don't fail if we can't
                 try {
                     userId = await GetUserID("GetRacers");
@@ -124,14 +128,12 @@ namespace DerbyDash.Services {
 
         public async Task UpdateRacer(Racer racer) {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
-            // DONE Implementation would go here
             await Task.CompletedTask; // Just to use 'await'
             return;
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
-            // DONE Implementation would go here
             await Task.CompletedTask; // Just to use 'await'
             return;
         }
@@ -246,23 +248,15 @@ namespace DerbyDash.Services {
                 if (!string.IsNullOrEmpty(UserId)) {
                     return UserId;
                 }
-                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
-                if (authState == null) {
-                    Logger.LogError($"No authentication state found when trying to {purpose}.");
-                    throw new MissingUserException();
+
+                // Check if user is authenticated first
+                if (!await _userService.IsLoggedInAsync()) {
+                    Logger.LogWarning("User is not authenticated when trying to {Purpose}", purpose);
+                    throw new MissingUserException("User is not authenticated");
                 }
-                ClaimsPrincipal? user = authState?.User;
-                if (user == null) {
-                    Logger.LogError($"No user ID found when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                string? userId = _userManager.GetUserId(user!);
-                if (string.IsNullOrEmpty(userId)) {
-                    Logger.LogError($"Unable to determine the user userId when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                UserId = userId;
-                return userId;
+
+                UserId = await _userService.GetUserIdAsync(purpose);
+                return UserId;
             } catch (Exception ex) {
                 Logger.LogError(ex, $"Error getting userId for {purpose}");
                 throw new MissingUserException("Could not determine userId", ex);

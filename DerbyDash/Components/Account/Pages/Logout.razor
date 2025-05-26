@@ -7,6 +7,7 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 @inject CustomAuthStateProvider AuthStateProvider
+@inject DerbyDash.Services.IUserService UserService
 @inject ILogger<Logout> Logger
 
 <PageTitle>Logging out...</PageTitle>
@@ -18,31 +19,3 @@
     </div>
 </div>
 
-@code {
-
-    protected override async Task OnInitializedAsync() {
-        if (await IsLoggedIn()) {
-            Logger.LogInformation("OnInitializedAsync called.");
-            try {
-                // Sign out the user
-                await SignInManager.SignOutAsync();
-                
-                // Notify the auth state provider that the user has been logged out
-                AuthStateProvider.NotifyUserAuthentication();
-                RedirectManager.RedirectTo("/", forceLoad: true);
-            } catch (NavigationException) {
-                throw;
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error during logout.");
-            }
-        } else {
-            // If not logged in, just redirect to home
-            RedirectManager.RedirectTo("/");
-        }
-    }
-
-    private async Task<bool> IsLoggedIn() {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        return authState.User.Identity?.IsAuthenticated ?? false;
-    }
-}

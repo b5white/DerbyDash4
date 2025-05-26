@@ -45,7 +45,6 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             if (!result.Succeeded) {
                 throw new InvalidOperationException("Unexpected error occurred deleting user.");
             }
-
             await SignInManager.SignOutAsync();
             AuthStateProvider.NotifyUserAuthentication();
 

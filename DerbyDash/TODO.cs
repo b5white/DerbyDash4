@@ -17,10 +17,10 @@
         // DONE Add a link to the FAQ page from the Subscription page.
         // DONE Move avatar to Racer
         // TODO Add an explainer page before the login page 
-        // TODO Add "You need to log in to race." to all menus if they are not logged in.
+        // DONE Add "You need to log in to race." to all menus if they are not logged in.
         // TODO Handle the screen shift when using a phone so can still see top of page.
-        // TODO Move Get/Save LastRace from Race to Racer Service
-        // TODO Create a UserService to handle all user related actions
+        // DONE Move Get/Save LastRace from Race to Racer Service
+        // DONE Create a UserService to handle all user related actions
         //    GetUserId
         //    IsLoggedIn
         //    Anything else using GetAuthenticationStateAsync
@@ -41,7 +41,7 @@
         // TODO If race team has no races, then on the Race Team page, show a message that suggests they try the app with multiplying squares before handing it over to their kids so they can see how it works.
         //    See if after just 5 to 10 races they don't know their squares better.
         // TODO Redo the menu pages to use two columns of thinner buttons
-        // TODO On the RaceTeam page, at runtime, vary the width of your screen. The hint words run over each other.
+        // DONE On the RaceTeam page, at runtime, vary the width of your screen. The hint words run over each other.
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.

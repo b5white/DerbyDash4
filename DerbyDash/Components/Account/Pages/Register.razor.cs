@@ -1,4 +1,5 @@
 using DerbyDash.Data;
+using DerbyDash.Components.Account;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
@@ -8,10 +9,34 @@ using System.Text;
 using System.Text.Encodings.Web;
 
 namespace DerbyDash.Components.Account.Pages {
-    public partial class Register {
+    public partial class Register : ComponentBase {
         private IEnumerable<IdentityError>? identityErrors;
         private bool showPassword = false;
         private bool showConfirmPassword = false;
+
+        [Inject]
+        private UserManager<ApplicationUser> UserManager { get; set; } = null!;
+
+        [Inject]
+        private IUserStore<ApplicationUser> UserStore { get; set; } = null!;
+
+        [Inject]
+        private SignInManager<ApplicationUser> SignInManager { get; set; } = null!;
+
+        [Inject]
+        private IEmailSender<ApplicationUser> EmailSender { get; set; } = null!;
+
+        [Inject]
+        private ILogger<Register> Logger { get; set; } = null!;
+
+        [Inject]
+        private NavigationManager NavManager { get; set; } = null!;
+
+        [Inject]
+        private IdentityRedirectManager RedirectManager { get; set; } = null!;
+
+        [Inject]
+        private CustomAuthStateProvider AuthStateProvider { get; set; } = null!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -42,12 +67,21 @@ namespace DerbyDash.Components.Account.Pages {
             var callbackUrl = NavManager.GetUriWithQueryParameters(
                 NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-            if (UserManager.Options.SignIn.RequireConfirmedAccount) {
+              if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
-                ReturnUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
-                RedirectManager.RedirectTo($"/Account/ProcessLogin?email={Uri.EscapeDataString(email)}&rememberMe=false&returnUrl={Uri.EscapeDataString(ReturnUrl)}");
+                Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
+            } else {
+                Logger.LogInformation("Email confirmation not required - automatically signing in user");
+                
+                // Automatically sign in the user when email confirmation is disabled
+                await SignInManager.SignInAsync(user, isPersistent: false);
+                AuthStateProvider.NotifyUserAuthentication();
+                Logger.LogInformation("User automatically signed in: {Email}", email);
             }
-            RedirectManager.RedirectTo(ReturnUrl);
+            
+            // Always redirect to the RegisterConfirmation page after successful registration
+            var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
+            RedirectManager.RedirectTo(confirmationUrl);
         }
 
         private ApplicationUser CreateUser() {

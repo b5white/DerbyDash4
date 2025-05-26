@@ -6,7 +6,6 @@ using DerbyDash.Exceptions;
 using DerbyDash.Services;
 using DerbyDash.Utilities;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.JSInterop;
@@ -34,8 +33,8 @@ namespace DerbyDash.Components.Pages {
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
 
-        [Inject]
-        public required AuthenticationStateProvider AuthStateProvider { get; set; }
+          [Inject]
+        public required IUserService UserService { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
@@ -164,9 +163,8 @@ namespace DerbyDash.Components.Pages {
 
         private async Task StartClick() {
             // Check if the user is logged in
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
-
+            bool isAuthenticated = await UserService.IsLoggedInAsync();
+            
             if (!isAuthenticated) {
                 // User is not logged in, redirect to login page with return URL
                 NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
@@ -208,8 +206,7 @@ namespace DerbyDash.Components.Pages {
 
             try {
                 // Save the last played race to the database
-                // TODO this should be on the RTS, not RS.
-                await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
+                //    await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error saving last played race to database");
             }

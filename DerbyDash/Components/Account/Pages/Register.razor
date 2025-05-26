@@ -8,14 +8,6 @@
 
 @attribute [AllowAnonymous]
 
-@inject UserManager<ApplicationUser> UserManager
-@inject IUserStore<ApplicationUser> UserStore
-@inject SignInManager<ApplicationUser> SignInManager
-@inject IEmailSender<ApplicationUser> EmailSender
-@inject ILogger<Register> Logger
-@inject NavigationManager NavManager
-@inject IdentityRedirectManager RedirectManager
-
 <PageTitle>Register - Derby Dash</PageTitle>
 
 <div class="register-container">
@@ -53,7 +45,7 @@
                         <ul>
                             <li>Teach your kids to use best practices for passwords</li>
                             <li>Pick 3 or more words that are easy for you to remember</li>
-                            <li>Choose words that woud be hard for others to guess</li>
+                            <li>Choose words that would be hard for others to guess</li>
                             <li>At least 12 characters is best</li>
                             <li>Use different passwords for different websites</li>
                         </ul>
