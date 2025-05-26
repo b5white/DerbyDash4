@@ -16,7 +16,7 @@
         // DONE Subscription service with the fake data
         // DONE Add a link to the FAQ page from the Subscription page.
         // DONE Move avatar to Racer
-        // TODO Add an explainer page before the login page 
+        // DONE Add an explainer page before the login page 
         // DONE Add "You need to log in to race." to all menus if they are not logged in.
         // TODO Handle the screen shift when using a phone so can still see top of page.
         // DONE Move Get/Save LastRace from Race to Racer Service
