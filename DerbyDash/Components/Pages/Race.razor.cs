@@ -33,7 +33,9 @@ namespace DerbyDash.Components.Pages {
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
-        
+          [Inject]
+        public required IUserService UserService { get; set; }
+
         [Inject]
         public required AuthenticationStateProvider AuthStateProvider { get; set; }
 
@@ -159,13 +161,9 @@ namespace DerbyDash.Components.Pages {
                     }
                 });
             }
-        }
-
-
-        private async Task StartClick() {
+        }        private async Task StartClick() {
             // Check if the user is logged in
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var isAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+            bool isAuthenticated = await UserService.IsLoggedInAsync();
             
             if (!isAuthenticated) {
                 // User is not logged in, redirect to login page with return URL
@@ -204,11 +202,9 @@ namespace DerbyDash.Components.Pages {
             }
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
-            }
-
-            try {
+            }            try {
                 // Save the last played race to the database
-                await RaceService.SaveLastPlayedRaceAsync(ProblemClassString);
+                await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error saving last played race to database");
             }

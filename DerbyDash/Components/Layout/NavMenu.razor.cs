@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 namespace DerbyDash.Components.Layout {
     public partial class NavMenu : IDisposable {
         private string? currentUrl;
-        private AuthenticationState? authState;
-
-        protected override void OnInitialized() {
+        private AuthenticationState? authState;        protected override void OnInitialized() {
             currentUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
             NavManager.LocationChanged += OnLocationChanged;
             

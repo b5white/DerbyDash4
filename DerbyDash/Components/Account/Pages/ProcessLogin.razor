@@ -10,6 +10,7 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<ProcessLogin> Logger
 @inject IdentityRedirectManager RedirectManager
+@inject DerbyDash.Services.IUserService UserService
 
 <PageTitle>Processing Login - Derby Dash</PageTitle>
 
@@ -62,10 +63,7 @@
             }
             RedirectManager.RedirectTo(targetUrl);
         }
-    }
-
-    private async Task<bool> IsLoggedIn() {
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        return authState.User.Identity?.IsAuthenticated ?? false;
+    }    private async Task<bool> IsLoggedIn() {
+        return await UserService.IsLoggedInAsync();
     }
 }

@@ -29,7 +29,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IdentityRedirectManager>();
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
-                sp.GetRequiredService<CustomAuthStateProvider>());
+                sp.GetRequiredService<CustomAuthStateProvider>());            builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             builder.Services.AddScoped<RaceService>();
             builder.Services.AddScoped<IFAQService, FAQService>();
@@ -37,56 +37,40 @@ namespace DerbyDash {
             builder.Services.AddScoped<FeedbackService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>>(provider =>
-                new FakeUserStore(provider.GetRequiredService<ILogger<FakeUserStore>>()));
-            //           builder.Services.AddSingleton<UserManager<ApplicationUser>, UserManager<ApplicationUser>>();
-            builder.Services.AddScoped<UserManager<IdentityUser>>(provider => {
-                var userManager = new UserManager<IdentityUser>(
-                    provider.GetRequiredService<IUserStore<IdentityUser>>(),
-                    provider.GetRequiredService<IOptions<IdentityOptions>>(),
-                    provider.GetRequiredService<IPasswordHasher<IdentityUser>>(),
-                    new List<IUserValidator<IdentityUser>>(),
-                    new List<IPasswordValidator<IdentityUser>>(), // No password validators
-                    provider.GetRequiredService<ILookupNormalizer>(),
-                    provider.GetRequiredService<IdentityErrorDescriber>(),
-                    provider.GetRequiredService<IServiceProvider>(),
-                    provider.GetRequiredService<ILogger<UserManager<IdentityUser>>>()
-                );
-                return userManager;
-            });
-
-            // Add Identity services
-            builder.Services.AddIdentityCore<ApplicationUser>(options => {
-                options.SignIn.RequireConfirmedAccount = true;
-                options.SignIn.RequireConfirmedEmail = true;
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();            // Add Identity services with Entity Framework stores
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+                // Sign-in requirements
+                options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
+                options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing
+                
+                // Password requirements  
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 8;
+                options.Password.RequiredLength = 6; // Reduced for easier testing
+                
+                // User requirements
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            // Add authentication services
-            builder.Services.AddAuthentication(options => {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-            })
-                //.AddIdentityCookies()
-                .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
-                    cookieOptions.LoginPath = "/Account/Login";
-                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.Always;  // Enable for HTTPS
-                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                    cookieOptions.Cookie.Name = "DerbyDash";
-                    cookieOptions.Cookie.IsEssential = true;
-                });
+            // Configure cookie options for Identity (AddIdentity automatically registers the authentication scheme)
+            builder.Services.ConfigureApplicationCookie(cookieOptions => {
+                cookieOptions.LoginPath = "/Account/Login";
+                cookieOptions.LogoutPath = "/Account/Logout";
+                cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Adjust for development
+                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                cookieOptions.Cookie.Name = "DerbyDash";
+                cookieOptions.Cookie.IsEssential = true;
+            });
+
             // Add authorization services
             builder.Services.AddAuthorization();
 
@@ -114,7 +98,7 @@ namespace DerbyDash {
             app.UseAuthorization();
             app.UseAntiforgery();
             app.MapStaticAssets();
-            app.MapRazorComponents<App>()
+            app.MapRazorComponents<DerbyDash.Components.App>()
                 .AddInteractiveServerRenderMode();
             //    .AddInteractiveWebAssemblyRenderMode()
             //    .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);

@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
-        private readonly AuthenticationStateProvider _authorizationState;
+        private readonly IUserService _userService;
         private readonly ILogger<RaceTeamService> Logger;
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -25,16 +25,14 @@ namespace DerbyDash.Services {
         private string? UserId;
 
         // Event that components can subscribe to for updates
-        public event Action? OnRacerChanged;
-
-        public RaceTeamService(
-            AuthenticationStateProvider authorizationState,
+        public event Action? OnRacerChanged;        public RaceTeamService(
+            IUserService userService,
             ILogger<RaceTeamService> logger,
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
             IJSRuntime jsRuntime) {
-            _authorizationState = authorizationState;
+            _userService = userService;
             Logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
@@ -238,29 +236,14 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error loading active racer from cookie");
                 // Don't change Active here, keep whatever value it has
             }
-        }
-
-        public async Task<string> GetUserID(string purpose) {
+        }        public async Task<string> GetUserID(string purpose) {
             Logger.LogInformation("GetUserID for {purpose}", purpose);
             try {
                 if (!string.IsNullOrEmpty(UserId)) {
                     return UserId;
                 }
-                AuthenticationState authState = await _authorizationState.GetAuthenticationStateAsync();
-                if (authState == null) {
-                    Logger.LogError($"No authentication state found when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                ClaimsPrincipal? user = authState?.User;
-                if (user == null) {
-                    Logger.LogError($"No user ID found when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
-                string? userId = _userManager.GetUserId(user!);
-                if (string.IsNullOrEmpty(userId)) {
-                    Logger.LogError($"Unable to determine the user userId when trying to {purpose}.");
-                    throw new MissingUserException();
-                }
+                
+                string userId = await _userService.GetUserIdAsync(purpose);
                 UserId = userId;
                 return userId;
             } catch (Exception ex) {

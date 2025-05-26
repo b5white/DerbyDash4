@@ -34,18 +34,17 @@ namespace DerbyDash.Components.Pages {
             await DbKeepAlive.PingDatabaseAsync();
             await base.OnInitializedAsync();
             return;
-        }
-
-        [Inject]
+        }        [Inject]
         public required NavigationManager NavManager { get; set; }
+        
+        [Inject]
+        public required IRaceTeamService RaceTeamService { get; set; }
 
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
             try {
-                // TODO reimplement this
                 // Get the last played race from the database
-                //   lastPlayedRace = await RaceService.GetLastPlayedRaceAsync();
-                await Task.CompletedTask; // Just to use 'await'
+                lastPlayedRace = await RaceTeamService.GetLastPlayedRaceAsync();
 
                 // If there's a last played race, navigate to it
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {

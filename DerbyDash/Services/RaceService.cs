@@ -63,27 +63,8 @@ namespace DerbyDash.Services {
         public async Task SaveRaceAsync(RaceComponents track) {
             await Task.CompletedTask; // Just to use 'await'
             return;
-        }
-
-        public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
+        }        public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
             return new List<SpeedIncrement>();
-        }
-
-        /// <summary>
-        /// Saves the last played race for the current user in the database
-        /// </summary>
-        /// <param name="problemClassString">The identifier of the race (e.g., "addition-4stable")</param>
-        /// <returns>A task representing the asynchronous operation</returns>
-        public async Task SaveLastPlayedRaceAsync(string problemClassString) {
-            await _raceTeamService.SaveLastPlayedRaceAsync(problemClassString);
-        }
-
-        /// <summary>
-        /// Gets the last played race for the current user from database
-        /// </summary>
-        /// <returns>The identifier of the last played race, or null if not found</returns>
-        public async Task<string?> GetLastPlayedRaceAsync() {
-            return await _raceTeamService.GetLastPlayedRaceAsync();
         }
     }
 }
