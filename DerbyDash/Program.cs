@@ -39,6 +39,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<FeedbackService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
+            builder.Services.AddScoped<GameStateService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 

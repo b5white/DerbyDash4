@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Components;
 namespace DerbyDash.Components.Account.Pages {
     public partial class Logout {
         protected override async Task OnInitializedAsync() {
-            if (await IsLoggedIn()) {
+            if (await UserService.IsLoggedInAsync()) {
                 Logger.LogInformation("OnInitializedAsync called.");
                 try {
                     // Sign out the user
@@ -11,20 +11,15 @@ namespace DerbyDash.Components.Account.Pages {
 
                     // Notify the auth state provider that the user has been logged out
                     AuthStateProvider.NotifyUserAuthentication();
-                    RedirectManager.RedirectTo("/", forceLoad: true);
+                    Logger.LogInformation("User logged out successfully.");
                 } catch (NavigationException) {
                     throw;
                 } catch (Exception ex) {
                     Logger.LogError(ex, "Error during logout.");
                 }
-            } else {
-                // If not logged in, just redirect to home
-                RedirectManager.RedirectTo("/");
             }
-        }
-
-        private async Task<bool> IsLoggedIn() {
-	        return await UserService.IsLoggedInAsync();
+            // If not logged in, just redirect to home
+            RedirectManager.RedirectTo("/Welcome", forceLoad: true);
         }
     }
 }

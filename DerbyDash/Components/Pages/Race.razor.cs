@@ -33,8 +33,11 @@ namespace DerbyDash.Components.Pages {
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
 
-          [Inject]
+        [Inject]
         public required IUserService UserService { get; set; }
+
+        [Inject]
+        public required GameStateService GameStateService { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
@@ -92,6 +95,9 @@ namespace DerbyDash.Components.Pages {
             FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
             FlashTimer.Elapsed += HideAnswer;
             FlashTimer.AutoReset = false;
+
+            // Notify GameStateService that we're on a race page
+            GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
         }
 
         // OnAfterRenderAsync is defined later in the file
@@ -106,6 +112,10 @@ namespace DerbyDash.Components.Pages {
                 Answer = "";
                 Started = true;
                 Running = true;
+
+                // Notify GameStateService that the game is now running
+                GameStateService.SetGameRunning(true);
+
                 await CreateProblems();
                 InitializeTrack(ProblemClassString);
                 ScaleRace(0);
@@ -164,7 +174,7 @@ namespace DerbyDash.Components.Pages {
         private async Task StartClick() {
             // Check if the user is logged in
             bool isAuthenticated = await UserService.IsLoggedInAsync();
-            
+
             if (!isAuthenticated) {
                 // User is not logged in, redirect to login page with return URL
                 NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
@@ -360,7 +370,11 @@ namespace DerbyDash.Components.Pages {
                     FlashTimer.Stop();
                 }
                 await UpdateResultsAsync(FinishTime);
-                Running = true;
+                Running = false;
+
+                // Notify GameStateService that the game has stopped
+                GameStateService.SetGameRunning(false);
+
                 problems = null;
                 StateHasChanged();
             }
@@ -410,6 +424,10 @@ namespace DerbyDash.Components.Pages {
             if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
+
+                // Notify GameStateService that the game has stopped
+                GameStateService.SetGameRunning(false);
+
                 StopPeriodicTimer();
             }
 
@@ -626,6 +644,10 @@ namespace DerbyDash.Components.Pages {
         }
 
         public void Dispose() {
+            // Reset game state when component is disposed
+            GameStateService.SetGameRunning(false);
+            GameStateService.SetCurrentRacePage("");
+
             periodicTimer.Dispose();
 
             if (InactivityTimer != null) {

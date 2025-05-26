@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 
 namespace DerbyDash.Components.Account.Pages {
-    public partial class Register : ComponentBase {
+    public partial class Register: ComponentBase {
         private IEnumerable<IdentityError>? identityErrors;
         private bool showPassword = false;
         private bool showConfirmPassword = false;
@@ -67,18 +67,18 @@ namespace DerbyDash.Components.Account.Pages {
             var callbackUrl = NavManager.GetUriWithQueryParameters(
                 NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
                 new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
-              if (UserManager.Options.SignIn.RequireConfirmedAccount) {
+            if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
                 Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
             } else {
                 Logger.LogInformation("Email confirmation not required - automatically signing in user");
-                
+
                 // Automatically sign in the user when email confirmation is disabled
                 await SignInManager.SignInAsync(user, isPersistent: false);
                 AuthStateProvider.NotifyUserAuthentication();
                 Logger.LogInformation("User automatically signed in: {Email}", email);
             }
-            
+
             // Always redirect to the RegisterConfirmation page after successful registration
             var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
             RedirectManager.RedirectTo(confirmationUrl);

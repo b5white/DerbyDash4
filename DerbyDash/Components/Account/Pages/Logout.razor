@@ -1,21 +1,10 @@
 @page "/Account/Logout"
-@using Microsoft.AspNetCore.Identity
-@using DerbyDash.Data
-@using Microsoft.AspNetCore.Components.Server
-@using System.Security.Claims
 
 @inject SignInManager<ApplicationUser> SignInManager
-@inject IdentityRedirectManager RedirectManager
 @inject CustomAuthStateProvider AuthStateProvider
-@inject DerbyDash.Services.IUserService UserService
+@inject IUserService UserService
 @inject ILogger<Logout> Logger
+@inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Logging out...</PageTitle>
-
-<div class="logout-container">
-    <div class="logout-content">
-        <h1>Logging out...</h1>
-        <p>Please wait while we sign you out.</p>
-    </div>
-</div>
-
+<h1>Logging out...</h1>
+<p>Please wait while we sign you out.</p>
