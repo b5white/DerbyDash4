@@ -1,17 +1,13 @@
 @page "/Account/Logout"
 @using Microsoft.AspNetCore.Identity
 @using DerbyDash.Data
-@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Server
 @using System.Security.Claims
-@using Microsoft.JSInterop
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject IdentityRedirectManager RedirectManager
 @inject CustomAuthStateProvider AuthStateProvider
 @inject ILogger<Logout> Logger
-@inject IJSRuntime JSRuntime
-@inject NavigationManager NavigationManager
 
 <PageTitle>Logging out...</PageTitle>
 
@@ -23,8 +19,7 @@
 </div>
 
 @code {
-    private bool _isLoggedOut = false;
-    
+
     protected override async Task OnInitializedAsync() {
         if (await IsLoggedIn()) {
             Logger.LogInformation("OnInitializedAsync called.");
@@ -34,12 +29,7 @@
                 
                 // Notify the auth state provider that the user has been logged out
                 AuthStateProvider.NotifyUserAuthentication();
-                
-                // Set flag to indicate logout is complete
-                _isLoggedOut = true;
-                
-                // We'll handle the redirect in OnAfterRenderAsync
-
+                RedirectManager.RedirectTo("/", forceLoad: true);
             } catch (NavigationException) {
                 throw;
             } catch (Exception ex) {
@@ -48,17 +38,6 @@
         } else {
             // If not logged in, just redirect to home
             NavigationManager.NavigateTo("/");
-        }
-    }
-    
-    protected override async Task OnAfterRenderAsync(bool firstRender) {
-        if (_isLoggedOut) {
-            try {
-                // Now it's safe to use JavaScript interop
-                NavigationManager.NavigateTo("/", true); // Force reload
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error during navigation after logout.");
-            }
         }
     }
 

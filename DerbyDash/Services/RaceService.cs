@@ -56,7 +56,6 @@ namespace DerbyDash.Services {
                 Cars[i].InitializeFastEddyTimeIncrements(random, safeIndex);
                 Cars[i].ResetFlexBasis(Cars.Count, CAR_GAP);
             }
-
             return track;
         }
 

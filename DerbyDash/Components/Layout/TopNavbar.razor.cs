@@ -14,10 +14,10 @@ namespace DerbyDash.Components.Layout {
         [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
         [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
-        private string CurrentUrl => NavManager.Uri;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         private string? UserAvatarFileName;
+        private string CurrentUrl => NavManager.Uri;
         private int CurrentRacerRaceCount { get; set; } = 0;
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
@@ -66,7 +66,7 @@ namespace DerbyDash.Components.Layout {
                         SelectedRacer = Racers.First();
                         await RaceTeamService.SetActiveRacer(SelectedRacer);
                     }
-                    
+
                     // Load race counts
                     CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
                     TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
@@ -102,10 +102,10 @@ namespace DerbyDash.Components.Layout {
                 if (newRacer != null) {
                     SelectedRacer = newRacer;
                     await RaceTeamService.SetActiveRacer(newRacer);
-                    
+
                     // Update the current racer race count
                     CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
-                    
+
                     StateHasChanged();
                 }
             }
