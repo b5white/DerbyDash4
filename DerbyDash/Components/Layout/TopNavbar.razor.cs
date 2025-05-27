@@ -206,8 +206,7 @@ namespace DerbyDash.Components.Layout {
                 // TODO Can we just get the current user instead of getting the ID first?
                 var user = await UserManager.FindByIdAsync(userId);
                 if (user != null) {
-                    // TODO This is still wrong
-                    //UserAvatarFileName = user.AvatarFileName;
+                    UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  
