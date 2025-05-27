@@ -179,7 +179,9 @@ namespace DerbyDash.Components.Pages {
                 // User is not logged in, redirect to login page with return URL
                 NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
                 return;
-            }            // If we already have a ProblemClassString, save it to the database
+            }
+
+            // If we already have a ProblemClassString, save it to the database
             if (!string.IsNullOrEmpty(ProblemClassString)) {
                 try {
                     // Save the last played race to the database
@@ -209,7 +211,9 @@ namespace DerbyDash.Components.Pages {
             }
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
-            }            try {
+            }
+
+            try {
                 // Save the last played race to the database
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString);
             } catch (Exception ex) {

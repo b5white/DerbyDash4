@@ -278,7 +278,7 @@ namespace DerbyDash.Services {
                 }
                 return null;
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error retrieving last played race for user");
+                Logger.LogError(ex, "Error retrieving last played race for active racer");
                 return null;
             }
         }
@@ -290,17 +290,23 @@ namespace DerbyDash.Services {
         /// <returns>A task representing the asynchronous operation</returns>
         public async Task SaveLastPlayedRaceAsync(string problemClassString) {
             try {
-                // Get the current user
-                string userId = await GetUserID("SaveLastPlayedRaceAsync");
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user != null) {
-                    user.LastPlayedRace = problemClassString;
-                    await _userManager.UpdateAsync(user);
-                    Logger.LogInformation($"Saved last played race '{problemClassString}' for user {user.UserName}");
+                // Get the active racer
+                var activeRacer = await GetActiveRacer();
+
+                if (activeRacer != null) {
+                    // Update the LastPlayedRace property on the active racer
+                    activeRacer.LastPlayedRace = problemClassString;
+
+                    // Also update the LastRaced date to today
+                    activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
+
+                    Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
+
+                    // Notify subscribers that the racer has been updated
                     OnRacerChanged?.Invoke();
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race for user");
+                Logger.LogError(ex, "Error saving last played race for active racer");
             }
         }
 

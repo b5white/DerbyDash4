@@ -5,6 +5,7 @@
 @using DerbyDash.Data
 @attribute [AllowAnonymous]
 @inject ISubscriptionService SubscriptionService
+@inject ILogger<Subscription> Logger
 
 <PageTitle>Subscription - Derby Dash</PageTitle>
 
@@ -14,24 +15,19 @@
         <h1>Subscription Overview</h1>
         <div class="race-flag right"></div>
     </div>
-    
-    @if (isLoading)
-    {
+
+    @if (isLoading) {
         <div class="loading-container">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Loading...</span>
             </div>
             <p>Loading subscription data...</p>
         </div>
-    }
-    else if (userSubscription == null)
-    {
+    } else if (userSubscription == null) {
         <div class="alert alert-warning" role="alert">
             No subscription found. Please contact support.
         </div>
-    }
-    else
-    {
+    } else {
         <div class="subscription-content">
             <div class="subscription-card">
                 <div class="subscription-section current-plan">
@@ -40,16 +36,11 @@
                         <div class="progress-fill" style="width: @(userSubscription.ProgressPercentage)%"></div>
                     </div>
                     <p class="section-info">
-                        @if (userSubscription.IsPaused)
-                        {
+                        @if (userSubscription.IsPaused) {
                             <span class="paused-badge">PAUSED</span>
-                        }
-                        else if (userSubscription.Status == SubscriptionStatus.Cancelled)
-                        {
+                        } else if (userSubscription.Status == SubscriptionStatus.Cancelled) {
                             <span class="cancelled-badge">CANCELLED</span>
-                        }
-                        else
-                        {
+                        } else {
                             @userSubscription.DaysRemaining <text> days left</text> @(userSubscription.IsTrial ? " on trial" : "")
                         }
                     </p>
@@ -84,19 +75,18 @@
                     </button>
                 </div>
 
-                @if (showRenewOptions)
-                {
+                @if (showRenewOptions) {
                     <div class="subscription-section renew-options">
                         <div class="renew-option-buttons">
-                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Monthly ? "selected" : "")" 
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Monthly ? "selected" : "")"
                                     @onclick="() => SelectRenewalType(SubscriptionType.Monthly)">
                                 Monthly
                             </button>
-                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Annual ? "selected" : "")" 
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Annual ? "selected" : "")"
                                     @onclick="() => SelectRenewalType(SubscriptionType.Annual)">
                                 Annual
                             </button>
-                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Lifetime ? "selected" : "")" 
+                            <button class="renew-option-button @(selectedRenewalType == SubscriptionType.Lifetime ? "selected" : "")"
                                     @onclick="() => SelectRenewalType(SubscriptionType.Lifetime)">
                                 Lifetime
                             </button>
@@ -111,12 +101,9 @@
                     <div class="section-info-block">
                         <p class="section-title">@(userSubscription.IsPaused ? "Resume" : "Pause") Subscription</p>
                         <p class="section-description">
-                            @if (userSubscription.IsPaused)
-                            {
+                            @if (userSubscription.IsPaused) {
                                 <span>Your subscription is currently paused.<br>Resume to continue using premium features.</span>
-                            }
-                            else
-                            {
+                            } else {
                                 <span>Temporarily pause your subscription.<br>You can restart whenever convenient for you.</span>
                             }
                         </p>
@@ -142,7 +129,9 @@
                         <div class="offers-progress-fill" style="width: @(userSubscription.SpecialOffersProgress)%"></div>
                     </div>
                 </div>
-
+                @if (!string.IsNullOrEmpty(errorMessage)) {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
                 <div class="subscription-footer">
                     <a href="#" class="footer-link">Special Offers</a>
                     <a href="#" class="footer-link">Payment Details</a>
@@ -155,90 +144,83 @@
 </div>
 
 @code {
-    private Data.Subscription? userSubscription;
+    private Data.Subscription userSubscription = new Data.Subscription() { UserId = "none" };
     private bool isLoading = true;
     private bool showRenewOptions = false;
     private SubscriptionType selectedRenewalType = SubscriptionType.Monthly;
-    private string userId = "demo-user"; // For demo purposes
+    private string userId = "demo-user"; // TODO Get this from user service
+    private string? errorMessage;
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            // For demo, we'll use a fixed user ID
+    protected override async Task OnInitializedAsync() {
+        try {
             userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading subscription: {ex.Message}");
-        }
-        finally
-        {
+            if (userSubscription == null) {
+                errorMessage = "There was an error loading your subscription. Please try again later.";
+                Logger.LogError("Error loading subscription");
+            }
+        } finally {
             isLoading = false;
         }
     }
 
-    private void ToggleRenewOptions()
-    {
+    private void ToggleRenewOptions() {
         showRenewOptions = !showRenewOptions;
     }
 
-    private void SelectRenewalType(SubscriptionType type)
-    {
+    private void SelectRenewalType(SubscriptionType type) {
         selectedRenewalType = type;
     }
 
-    private async Task ToggleAutoRenewal()
-    {
-        if (userSubscription != null)
-        {
-            await SubscriptionService.ToggleAutoRenewalAsync(userId);
-            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
-        }
-    }
-
-    private async Task TogglePauseSubscription()
-    {
-        if (userSubscription != null)
-        {
-            if (userSubscription.IsPaused)
-            {
-                await SubscriptionService.ResumeSubscriptionAsync(userId);
+    private async Task ToggleAutoRenewal() {
+        if (userSubscription != null) {
+            if (await SubscriptionService.ToggleAutoRenewalAsync(userId)) {
+                errorMessage = null; // Clear any previous error
+            } else {
+                errorMessage = "Failed to toggle auto-renewal. Please try again.";
             }
-            else
-            {
-                await SubscriptionService.PauseSubscriptionAsync(userId);
+        }
+    }
+
+    private async Task TogglePauseSubscription() {
+        bool result = true;
+        if (userSubscription.IsPaused) {
+            result = await SubscriptionService.ResumeSubscriptionAsync(userId);
+        } else {
+            result = await SubscriptionService.PauseSubscriptionAsync(userId);
+        }
+        if (result) {
+            errorMessage = null; // Clear any previous error
+        } else {
+            errorMessage = "Failed to toggle pausing your subscription. Please try again.";
+        }
+    }
+
+    private async Task CancelSubscription() {
+        if (userSubscription.Status != SubscriptionStatus.Cancelled) {
+            if (await SubscriptionService.CancelSubscriptionAsync(userId) ) {
+                errorMessage = null; // Clear any previous error
+            } else {
+                errorMessage = "Failed to cancel your subscription. Please try again.";
             }
-            
-            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
         }
     }
 
-    private async Task CancelSubscription()
-    {
-        if (userSubscription != null && userSubscription.Status != SubscriptionStatus.Cancelled)
-        {
-            await SubscriptionService.CancelSubscriptionAsync(userId);
-            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
-        }
-    }
-
-    private async Task RenewSubscription()
-    {
-        if (userSubscription != null)
-        {
-            await SubscriptionService.RenewSubscriptionAsync(userId, selectedRenewalType);
-            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+    private async Task RenewSubscription() {
+        if (await SubscriptionService.RenewSubscriptionAsync(userId, selectedRenewalType)) {
             showRenewOptions = false;
+            errorMessage = null; // Clear any previous error
+        } else {
+            errorMessage = "Failed to Renew Subscription. Please try again.";
         }
     }
 
-    private async Task UseReferralCredit()
-    {
-        if (userSubscription != null && userSubscription.ReferralCredits > 0)
-        {
-            await SubscriptionService.UseReferralCreditAsync(userId);
-            userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+    private async Task UseReferralCredit() {
+        if (userSubscription.ReferralCredits > 0) {
+            if (await SubscriptionService.UseReferralCreditAsync(userId)) {
+                errorMessage = null; // Clear any previous error
+            } else {
+                errorMessage = "Failed to update renewal credits. Please try again.";
+            }
         }
     }
 }
