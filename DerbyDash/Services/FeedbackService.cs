@@ -32,9 +32,10 @@ namespace DerbyDash.Services {
             try {
                 feedback.SubmittedAt = DateTime.UtcNow;
                 feedback.IsResolved = false;
-                // TODO Populate racerId and UserId
-                feedback.RacerId = 0;
-                feedback.UserId = string.Empty;
+                // Set optional foreign keys to null if not provided
+                // These can be populated later if user authentication is available
+                feedback.RacerId = null;
+                feedback.UserId = null;
                 await context.Feedbacks.AddAsync(feedback);
                 await context.SaveChangesAsync();
                 return true;

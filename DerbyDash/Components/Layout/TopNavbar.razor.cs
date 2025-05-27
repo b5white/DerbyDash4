@@ -2,6 +2,7 @@ using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
@@ -17,6 +18,7 @@ namespace DerbyDash.Components.Layout {
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private GameStateService GameStateService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         private string? UserAvatarFileName;
         private string CurrentUrl => NavManager.Uri;
@@ -24,6 +26,8 @@ namespace DerbyDash.Components.Layout {
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
+        
+        private Task<AuthenticationState> AuthStateTask => AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes

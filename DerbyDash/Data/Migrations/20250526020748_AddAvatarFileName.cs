@@ -27,13 +27,35 @@ namespace DerbyDash.Migrations
                 name: "TeamRaceCount",
                 table: "AspNetUsers");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "FeedbackType",
+            // Add temporary column for FeedbackType conversion
+            migrationBuilder.AddColumn<int>(
+                name: "FeedbackType_New",
                 table: "Feedbacks",
                 type: "int",
                 nullable: false,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                defaultValue: 0);
+
+            // Convert existing string values to enum values
+            migrationBuilder.Sql(@"
+                UPDATE Feedbacks 
+                SET FeedbackType_New = CASE 
+                    WHEN FeedbackType = 'Bug Report' OR FeedbackType = 'BugReport' THEN 1
+                    WHEN FeedbackType = 'Feature Request' OR FeedbackType = 'FeatureRequest' THEN 2
+                    WHEN FeedbackType = 'General Feedback' OR FeedbackType = 'GeneralFeedback' THEN 3
+                    WHEN FeedbackType = 'Question' THEN 4
+                    ELSE 0
+                END");
+
+            // Drop the old FeedbackType column
+            migrationBuilder.DropColumn(
+                name: "FeedbackType",
+                table: "Feedbacks");
+
+            // Rename the new column to FeedbackType
+            migrationBuilder.RenameColumn(
+                name: "FeedbackType_New",
+                table: "Feedbacks",
+                newName: "FeedbackType");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",
@@ -77,13 +99,35 @@ namespace DerbyDash.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AlterColumn<string>(
-                name: "FeedbackType",
+            // Convert FeedbackType back to string
+            migrationBuilder.AddColumn<string>(
+                name: "FeedbackType_Old",
                 table: "Feedbacks",
                 type: "nvarchar(max)",
                 nullable: false,
-                oldClrType: typeof(int),
-                oldType: "int");
+                defaultValue: "");
+
+            // Convert enum values back to strings
+            migrationBuilder.Sql(@"
+                UPDATE Feedbacks 
+                SET FeedbackType_Old = CASE 
+                    WHEN FeedbackType = 1 THEN 'Bug Report'
+                    WHEN FeedbackType = 2 THEN 'Feature Request'
+                    WHEN FeedbackType = 3 THEN 'General Feedback'
+                    WHEN FeedbackType = 4 THEN 'Question'
+                    ELSE 'General Feedback'
+                END");
+
+            // Drop the enum column
+            migrationBuilder.DropColumn(
+                name: "FeedbackType",
+                table: "Feedbacks");
+
+            // Rename back to FeedbackType
+            migrationBuilder.RenameColumn(
+                name: "FeedbackType_Old",
+                table: "Feedbacks",
+                newName: "FeedbackType");
 
             migrationBuilder.AlterColumn<string>(
                 name: "Email",

@@ -7,17 +7,16 @@ namespace DerbyDash.Data {
         [Key]
         public int Id { get; set; }
 
-        [Required]
         [StringLength(450)]
-        public string UserId { get; set; } = string.Empty;
+        public string? UserId { get; set; }
 
         [ForeignKey("UserId")]
-        public ApplicationUser User { get; set; } = null!;
+        public ApplicationUser? User { get; set; }
 
-        public int RacerId { get; set; }
+        public int? RacerId { get; set; }
 
         [ForeignKey("RacerId")]
-        public Racer Racer { get; set; } = null!;
+        public Racer? Racer { get; set; }
 
         [Required]
         [StringLength(100)]

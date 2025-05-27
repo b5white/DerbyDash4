@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace DerbyDash.Data {
     // Add profile data for application users by adding properties to the ApplicationUser class

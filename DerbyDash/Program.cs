@@ -44,7 +44,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             // Add Identity services with Entity Framework stores
-            builder.Services.AddIdentityCore<ApplicationUser>(options => {
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
                 // Sign-in requirements
                 options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
                 options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing
@@ -61,27 +61,21 @@ namespace DerbyDash {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddRoles<IdentityRole>()
-                .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            // Add authentication services
-            builder.Services.AddAuthentication(options => {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
-            })
-                .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
-                    cookieOptions.LoginPath = "/Account/Login";
-                    cookieOptions.LogoutPath = "/Account/Logout";
-                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
-                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
-                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                    cookieOptions.Cookie.Name = "DerbyDash";
-                    cookieOptions.Cookie.IsEssential = true;
-                });
+            // Configure Identity cookie options
+            builder.Services.ConfigureApplicationCookie(cookieOptions => {
+                cookieOptions.LoginPath = "/Account/Login";
+                cookieOptions.LogoutPath = "/Account/Logout";
+                cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
+                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                cookieOptions.Cookie.Name = "DerbyDash";
+                cookieOptions.Cookie.IsEssential = true;
+            });
             // Add authorization services
             builder.Services.AddAuthorization();
 
