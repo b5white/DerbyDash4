@@ -87,6 +87,7 @@
         // Get avatars working and attached to racers
         // Put the avatar, in a larger form, on the Race page before they race for the
         //     first time that day. Not on the results page after a race.
+        // Update the DerbyDash logo.
         // Limit racers to 8 per subscription.
         //     Make this a User field so admin can increase it per user if needed.
         // Show user and racer counts in admin feedback page.
