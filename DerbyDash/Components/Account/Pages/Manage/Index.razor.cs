@@ -44,10 +44,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 if (!setPhoneResult.Succeeded) {
                     RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
                 }
-            }
-
-            await SignInManager.RefreshSignInAsync(user);
-            AuthStateProvider.NotifyUserLogin();
+            }            await SignInManager.RefreshSignInAsync(user);
             RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
         }
 
