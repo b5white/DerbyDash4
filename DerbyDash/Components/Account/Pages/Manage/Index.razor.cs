@@ -47,7 +47,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
-            AuthStateProvider.NotifyUserAuthentication();
+            AuthStateProvider.NotifyUserLogin();
             RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
         }
 

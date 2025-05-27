@@ -1,5 +1,4 @@
 using DerbyDash.Data;
-using DerbyDash.Components.Account;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
@@ -75,7 +74,7 @@ namespace DerbyDash.Components.Account.Pages {
 
                 // Automatically sign in the user when email confirmation is disabled
                 await SignInManager.SignInAsync(user, isPersistent: false);
-                AuthStateProvider.NotifyUserAuthentication();
+                AuthStateProvider.NotifyUserLogin();
                 Logger.LogInformation("User automatically signed in: {Email}", email);
             }
 

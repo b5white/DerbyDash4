@@ -47,7 +47,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
 
             await SignInManager.RefreshSignInAsync(user);
-            AuthStateProvider.NotifyUserAuthentication();
+            AuthStateProvider.NotifyUserLogin();
             Logger.LogInformation("User changed their password successfully.");
 
             RedirectManager.RedirectToCurrentPageWithStatus("Your password has been changed", HttpContext);

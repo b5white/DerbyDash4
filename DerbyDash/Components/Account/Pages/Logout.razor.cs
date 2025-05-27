@@ -10,7 +10,7 @@ namespace DerbyDash.Components.Account.Pages {
                     await SignInManager.SignOutAsync();
 
                     // Notify the auth state provider that the user has been logged out
-                    AuthStateProvider.NotifyUserAuthentication();
+                    AuthStateProvider.NotifyUserLogout();
                     Logger.LogInformation("User logged out successfully.");
                 }
             } catch (NavigationException) {
