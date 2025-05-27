@@ -4,22 +4,23 @@ using Microsoft.EntityFrameworkCore;
 namespace DerbyDash.Services {
     public class FeedbackService(ApplicationDbContext context) {
 
-        public async Task<List<Feedback>> GetAllFeedbackAsync() {
+        public async Task<List<Feedback>> GetFeedbackSinceDateAsync(DateTime startDate) {
             return await context.Feedbacks
+                .Where(f => f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type) {
+        public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type, DateTime startDate) {
             return await context.Feedbacks
-                .Where(f => f.FeedbackType == type)
+                .Where(f => f.FeedbackType == type && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
 
-        public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved) {
+        public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved, DateTime startDate) {
             return await context.Feedbacks
-                .Where(f => f.IsResolved == isResolved)
+                .Where(f => f.IsResolved == isResolved && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
