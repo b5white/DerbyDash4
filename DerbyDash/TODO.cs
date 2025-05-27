@@ -54,5 +54,9 @@
         // TODO Enable logging to the database
         // TODO Enable email
         // TODO Get Feedback and Subscription reading/writing to DB.
+
+        // DO LATER
+        // TODO Update the DerbyDash logo to the new one.
+        // TODO Update racers avatars feature for user
     }
 }
