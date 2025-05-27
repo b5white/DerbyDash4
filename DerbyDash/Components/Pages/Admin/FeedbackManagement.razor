@@ -20,8 +20,7 @@
             <div class="card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Filter Options</h5>
-                    @if (!string.IsNullOrEmpty(selectedType) || !string.IsNullOrEmpty(selectedStatus))
-                    {
+                    @if (selectedFeedbackType != null || !string.IsNullOrEmpty(selectedStatus)) {
                         <span class="badge bg-light text-dark">Filters Active</span>
                     }
                 </div>
@@ -42,11 +41,20 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Filter by Status:</label>
-                                <select class="form-select" value="@selectedStatus" @onchange="@(e => selectedStatus = e.Value?.ToString() ?? "")">
+                                <select class="form-select" @bind="selectedStatus">
                                     <option value="">All Status</option>
                                     <option value="Resolved">Resolved</option>
                                     <option value="Unresolved">Unresolved</option>
                                 </select>
+                            </div>
+                        </div>                        
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Start Date:</label>
+                                <input type="date"
+                                       class="form-control"
+                                       @bind="selectedStartDate"
+                                       @bind:format="yyyy-MM-dd" />
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -57,7 +65,7 @@
                                         <i class="bi bi-funnel"></i> Apply Filters
                                     </button>
                                     <button class="btn btn-outline-secondary" @onclick="@(async () => await ClearFilters())" 
-                                            disabled="@(string.IsNullOrEmpty(selectedType) && string.IsNullOrEmpty(selectedStatus))">
+                                            disabled="@(selectedFeedbackType == null && string.IsNullOrEmpty(selectedStatus))">
                                         <i class="bi bi-x-circle"></i>
                                     </button>
                                 </div>
@@ -85,15 +93,13 @@
     }
     else
     {
-        @if (!string.IsNullOrEmpty(selectedType) || !string.IsNullOrEmpty(selectedStatus))
-        {
+        @if (selectedFeedbackType != null || !string.IsNullOrEmpty(selectedStatus)) {
             <div class="alert alert-info mb-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <strong>Active Filters:</strong>
-                        @if (!string.IsNullOrEmpty(selectedType))
-                        {
-                            <span class="badge bg-primary ms-2">Type: @selectedType</span>
+                        @if (selectedFeedbackType != null) {
+                            <span class="badge bg-primary ms-2">Type: @selectedFeedbackType</span>
                         }
                         @if (!string.IsNullOrEmpty(selectedStatus))
                         {
@@ -180,8 +186,9 @@
                 <div class="modal-body" style="padding: 1rem;">
                     <div class="mb-3">
                         <label class="form-label" style="font-weight: 500; margin-bottom: 0.5rem; display: block;">Admin Notes:</label>
-                        <textarea class="form-control" rows="4" value="@adminNotes" @oninput="@(e => adminNotes = e.Value?.ToString() ?? "")"
-                                  style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;"></textarea>
+                        <textarea class="form-control" rows="4" @bind="adminNotes"
+                            style="width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 0.25rem;">
+                        </textarea>
                     </div>
                 </div>
                 <div class="modal-footer" style="background-color: #f8f9fa; border-top: 1px solid #dee2e6; padding: 1rem; display: flex; justify-content: flex-end; gap: 0.5rem;">
@@ -234,12 +241,12 @@
 @code {
     private List<Feedback> feedbackList = new();
     private bool loading = true;
-    private string selectedType = "";
     private FeedbackType? selectedFeedbackType = null;
     private string selectedStatus = "";
     private bool showResolveDialog = false;
     private bool showDeleteDialog = false;
     private string adminNotes = "";
+    private DateTime selectedStartDate = DateTime.UtcNow.AddMonths(-1);
     private int selectedFeedbackId;
 
     protected override async Task OnInitializedAsync()
@@ -250,7 +257,7 @@
     private async Task LoadFeedback()
     {
         loading = true;
-        feedbackList = await FeedbackService.GetAllFeedbackAsync();
+        feedbackList = await FeedbackService.GetFeedbackSinceDateAsync(selectedStartDate);
         loading = false;
     }
 
@@ -262,7 +269,7 @@
             loading = true;
             
             // First get all feedback
-            var allFeedback = await FeedbackService.GetAllFeedbackAsync();
+            var allFeedback = await FeedbackService.GetFeedbackSinceDateAsync(selectedStartDate);
             Console.WriteLine($"Total feedback items: {allFeedback.Count}");
             
             // Apply type filter if selected
@@ -297,10 +304,10 @@
     }
     
     private async Task ClearFilters()
-    {
-        selectedType = "";
+    {        
         selectedFeedbackType = null;
         selectedStatus = "";
+        selectedStartDate = DateTime.UtcNow.AddMonths(-1);
         await LoadFeedback();
     }
 

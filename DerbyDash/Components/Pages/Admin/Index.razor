@@ -18,7 +18,7 @@
                         <i class="bi bi-chat-dots"></i>
                     </div>
                     <div class="dashboard-card-content">
-                        <h5 class="card-title">Feedback</h5>
+                        <h5 class="card-title">Recent Feedback</h5>
                         <h2 class="card-value">@feedbackCount</h2>
                         <p class="card-text">@unresolvedCount unresolved</p>
                     </div>
@@ -91,7 +91,7 @@
                     <h5 class="mb-0">Recent Feedback</h5>
                 </div>
                 <div class="card-body">
-                    @if (recentFeedback == null || !recentFeedback.Any())
+                    @if (currentFeedback == null || !currentFeedback.Any())
                     {
                         <p class="text-muted">No feedback submissions yet.</p>
                     }
@@ -108,7 +108,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var feedback in recentFeedback)
+                                    @foreach (var feedback in currentFeedback)
                                     {
                                         <tr>
                                             <td>@feedback.SubmittedAt.ToString("MM/dd/yyyy")</td>
@@ -176,8 +176,8 @@
 </div>
 
 @code {
-    private List<Feedback> allFeedback = new();
     private List<Feedback> recentFeedback = new();
+    private List<Feedback> currentFeedback = new();
     private int feedbackCount = 0;
     private int unresolvedCount = 0;
     private int bugReportCount = 0;
@@ -192,21 +192,22 @@
 
     private async Task LoadFeedbackData()
     {
-        allFeedback = await FeedbackService.GetAllFeedbackAsync();
-        
-        if (allFeedback != null)
+        var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+        recentFeedback = await FeedbackService.GetFeedbackSinceDateAsync(oneMonthAgo);
+
+        if (recentFeedback != null)
         {
-            feedbackCount = allFeedback.Count;
-            unresolvedCount = allFeedback.Count(f => !f.IsResolved);
+            feedbackCount = recentFeedback.Count;
+            unresolvedCount = recentFeedback.Count(f => !f.IsResolved);
             
             // Get counts by type
-            bugReportCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.BugReport);
-            featureRequestCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.FeatureRequest);
-            generalFeedbackCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.GeneralFeedback);
-            otherFeedbackCount = allFeedback.Count(f => f.FeedbackType == FeedbackType.Question);
+            bugReportCount = recentFeedback.Count(f => f.FeedbackType == FeedbackType.BugReport);
+            featureRequestCount = recentFeedback.Count(f => f.FeedbackType == FeedbackType.FeatureRequest);
+            generalFeedbackCount = recentFeedback.Count(f => f.FeedbackType == FeedbackType.GeneralFeedback);
+            otherFeedbackCount = recentFeedback.Count(f => f.FeedbackType == FeedbackType.Question);
             
             // Get recent feedback (last 5)
-            recentFeedback = allFeedback
+            currentFeedback = recentFeedback
                 .OrderByDescending(f => f.SubmittedAt)
                 .Take(5)
                 .ToList();
