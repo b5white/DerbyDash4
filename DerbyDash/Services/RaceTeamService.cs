@@ -2,6 +2,7 @@
 using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
+using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -11,14 +12,11 @@ namespace DerbyDash.Services {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJSRuntime _jsRuntime;
+        private readonly IServiceProvider _serviceProvider;
         private bool _triedLoadingFromCookie = false;
 
 
-        private List<Racer> raceTeam = new() {
-                new Racer { Id = 1, Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
-                new Racer { Id = 2, Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
-                new Racer { Id = 3, Name = "Charlie" }
-            };
+        private List<Racer> raceTeam = new();
         private Racer? Active;
         private string? UserId;
 
@@ -31,13 +29,15 @@ namespace DerbyDash.Services {
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
-            IJSRuntime jsRuntime) {
+            IJSRuntime jsRuntime,
+            IServiceProvider serviceProvider) {
             _userService = userService;
             Logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _jsRuntime = jsRuntime;
+            _serviceProvider = serviceProvider;
 
             // Set a default active racer instead of trying to load from cookie during initialization
             // This avoids JS interop during prerendering
@@ -52,8 +52,6 @@ namespace DerbyDash.Services {
 
         public async Task<List<Racer>> GetRacersInternal() {
             Logger.LogInformation("GetRacersInternal");
-            ApplicationUser? user;
-            string userId;
             try {
                 // Check if user is authenticated first
                 if (!await _userService.IsLoggedInAsync()) {
@@ -61,39 +59,77 @@ namespace DerbyDash.Services {
                     return new List<Racer>();
                 }
 
-                // Try to get the userId, but don't fail if we can't
+                // Try to get the userId
+                string userId;
                 try {
                     userId = await GetUserID("GetRacers");
                     Logger.LogInformation($"Getting racers for user: {userId}");
                 } catch (Exception ex) {
                     Logger.LogWarning(ex, "Could not get userId, but continuing");
-                    // Continue even if we can't get the userId
                     return new List<Racer>();
                 }
 
-                user = await GetUserByIdAsync(userId);
-                if (user == null) {
-                    Logger.LogWarning("Could not get user, but continuing");
-                    return new List<Racer>();
-                }
+                // Load racers from database with race counts using a single query
+                var racers = await _context.Racers
+                    .Where(r => r.UserId == userId)
+                    .Select(r => new Racer {
+                        Id = r.Id,
+                        Name = r.Name,
+                        UserId = r.UserId,
+                        LastRaced = r.LastRaced,
+                        LastPlayedRace = r.LastPlayedRace,
+                        AvatarFileName = r.AvatarFileName,
+                        RaceCount = _context.Races.Count(race => race.RacerId == r.Id)
+                    })
+                    .ToListAsync();
+
+                Logger.LogInformation($"Loaded {racers.Count} racers from database");
+                return racers;
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error in GetRacers()");
+                Logger.LogError(ex, "Error in GetRacersInternal()");
                 return new List<Racer>();
             }
-            return await GetRacers(user);
         }
 
         public async Task<List<Racer>> GetRacers(ApplicationUser user) {
             Logger.LogInformation("GetRacers for ID: {ID}", user.Id);
-            // Return the same data as GetRacers() for consistency
-            await Task.CompletedTask; // Just to use 'await'
-            return raceTeam;
+            
+            // Load racers from database with race counts
+            var racers = await _context.Racers
+                .Where(r => r.UserId == user.Id)
+                .ToListAsync();
+
+            // Calculate race count for each racer
+            foreach (var racer in racers) {
+                racer.RaceCount = await _context.Races
+                    .CountAsync(r => r.RacerId == racer.Id);
+            }
+
+            return racers;
         }
 
         public async Task<Racer?> GetRacerByIdAsync(int racerId) {
             Logger.LogInformation("GetRacerByIdAsync for ID: {ID}", racerId);
-            await Task.CompletedTask; // Just to use 'await'
-            return raceTeam.FirstOrDefault(r => r.Id == racerId);
+            
+            try {
+                var racer = await _context.Racers
+                    .Where(r => r.Id == racerId)
+                    .Select(r => new Racer {
+                        Id = r.Id,
+                        Name = r.Name,
+                        UserId = r.UserId,
+                        LastRaced = r.LastRaced,
+                        LastPlayedRace = r.LastPlayedRace,
+                        AvatarFileName = r.AvatarFileName,
+                        RaceCount = _context.Races.Count(race => race.RacerId == r.Id)
+                    })
+                    .FirstOrDefaultAsync();
+                
+                return racer;
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error getting racer by ID {RacerId}", racerId);
+                return null;
+            }
         }
 
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
@@ -103,43 +139,111 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer> AddRacer(Racer racer) {
-            Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
-            racer.UserId = await GetUserID("AddRacer");
+            Logger.LogInformation("AddRacer for Name: {Name}", racer.Name);
+            
+            try {
+                racer.UserId = await GetUserID("AddRacer");
 
-            // Generate a unique ID if not provided
-            if (racer.Id <= 0) {
-                // Find the maximum ID and increment by 1
-                int maxId = raceTeam.Count > 0 ? raceTeam.Max(r => r.Id) : 0;
-                racer.Id = maxId + 1;
+                // Check for duplicate names for this user
+                var existingRacer = await _context.Racers
+                    .FirstOrDefaultAsync(r => r.UserId == racer.UserId && r.Name == racer.Name);
+                
+                if (existingRacer != null) {
+                    throw new DuplicateRacerException($"Racer with name '{racer.Name}' already exists");
+                }
+
+                // Add to database
+                _context.Racers.Add(racer);
+                await _context.SaveChangesAsync();
+
+                // Initialize RaceCount to 0 for new racer
+                racer.RaceCount = 0;
+
+                // Refresh the cached team list
+                raceTeam = await GetRacersInternal();
+
+                // Set as active racer if none is selected
+                if (Active == null || !raceTeam.Any(r => r.Id == Active.Id)) {
+                    Active = racer;
+                }
+
+                // Notify subscribers that the racer list has changed
+                OnRacerChanged?.Invoke();
+                
+                Logger.LogInformation($"Added racer {racer.Name} with ID {racer.Id}");
+                return racer;
+            } catch (DuplicateRacerException) {
+                throw; // Re-throw duplicate exceptions
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error adding racer {Name}", racer.Name);
+                throw;
             }
-
-            raceTeam.Add(racer);
-
-            // Set as active racer if none is selected
-            if (Active is null) {
-                Active = racer;
-            }
-
-            // Notify subscribers that the racer list has changed
-            OnRacerChanged?.Invoke();
-            await Task.CompletedTask; // Just to use 'await'
-            return racer;
         }
 
         public async Task UpdateRacer(Racer racer) {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
-            await Task.CompletedTask; // Just to use 'await'
-            return;
+            
+            try {
+                var existingRacer = await _context.Racers.FindAsync(racer.Id);
+                if (existingRacer != null) {
+                    existingRacer.Name = racer.Name;
+                    existingRacer.AvatarFileName = racer.AvatarFileName;
+                    existingRacer.LastRaced = racer.LastRaced;
+                    existingRacer.LastPlayedRace = racer.LastPlayedRace;
+                    
+                    await _context.SaveChangesAsync();
+                    
+                    // Refresh the cached team list
+                    raceTeam = await GetRacersInternal();
+                    
+                    // Notify subscribers that the racer has been updated
+                    OnRacerChanged?.Invoke();
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error updating racer {ID}", racer.Id);
+                throw;
+            }
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
-            await Task.CompletedTask; // Just to use 'await'
-            return;
+            
+            try {
+                var racer = await _context.Racers.FindAsync(racerId);
+                if (racer != null) {
+                    // Remove all races associated with this racer first
+                    var races = await _context.Races.Where(r => r.RacerId == racerId).ToListAsync();
+                    _context.Races.RemoveRange(races);
+                    
+                    // Remove the racer
+                    _context.Racers.Remove(racer);
+                    await _context.SaveChangesAsync();
+                    
+                    // Refresh the cached team list
+                    raceTeam = await GetRacersInternal();
+                    
+                    // If this was the active racer, set a new one
+                    if (Active?.Id == racerId) {
+                        Active = raceTeam.FirstOrDefault();
+                    }
+                    
+                    // Notify subscribers that the racer has been removed
+                    OnRacerChanged?.Invoke();
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error removing racer {ID}", racerId);
+                throw;
+            }
         }
 
         public async Task<Racer> GetActiveRacer() {
             Logger.LogInformation("GetActiveRacer");
+            
+            // Ensure we have loaded the racers from database
+            if (raceTeam.Count == 0) {
+                raceTeam = await GetRacersInternal();
+            }
+            
             // Try to load from cookie if we haven't already attempted to do so
             if (!_triedLoadingFromCookie) {
                 try {
@@ -159,6 +263,17 @@ namespace DerbyDash.Services {
                 Active = raceTeam.FirstOrDefault();
             }
 
+            // If Active racer is not null, ensure it has the latest race count
+            if (Active != null) {
+                try {
+                    // Update the race count using a separate query to avoid concurrency issues
+                    var raceCount = await _context.Races.CountAsync(r => r.RacerId == Active.Id);
+                    Active.RaceCount = raceCount;
+                } catch (Exception ex) {
+                    Logger.LogError(ex, "Error updating race count for active racer");
+                }
+            }
+
             return Active!;
         }
 
@@ -174,7 +289,7 @@ namespace DerbyDash.Services {
                     var userId = await GetUserID("SetActiveRacer");
                     userIdentifier = userId.ToString();
                 } catch (Exception) {
-                    // If we can't get the userId, use "guest" as the identifier
+                    // If we can't get userId, use "guest" as the identifier
                     Logger.LogWarning("Could not get userId for cookie, using guest instead");
                 }
 
@@ -269,14 +384,19 @@ namespace DerbyDash.Services {
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
             try {
-                // Get the current user
-                string userId = await GetUserID("GetLastPlayedRaceAsync");
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user != null && !string.IsNullOrEmpty(user.LastPlayedRace)) {
-                    Logger.LogInformation($"Retrieved last played race '{user.LastPlayedRace}' for user {user.UserName}");
-                    return user.LastPlayedRace;
+                // Use a separate scope for UserManager operations to avoid DbContext concurrency
+                using (var scope = _serviceProvider.CreateScope()) {
+                    var scopedUserManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    
+                    // Get the current user
+                    string userId = await GetUserID("GetLastPlayedRaceAsync");
+                    var user = await scopedUserManager.FindByIdAsync(userId);
+                    if (user != null && !string.IsNullOrEmpty(user.LastPlayedRace)) {
+                        Logger.LogInformation($"Retrieved last played race '{user.LastPlayedRace}' for user {user.UserName}");
+                        return user.LastPlayedRace;
+                    }
+                    return null;
                 }
-                return null;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error retrieving last played race for user");
                 return null;
@@ -290,17 +410,40 @@ namespace DerbyDash.Services {
         /// <returns>A task representing the asynchronous operation</returns>
         public async Task SaveLastPlayedRaceAsync(string problemClassString) {
             try {
-                // Get the current user
-                string userId = await GetUserID("SaveLastPlayedRaceAsync");
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user != null) {
-                    user.LastPlayedRace = problemClassString;
-                    await _userManager.UpdateAsync(user);
-                    Logger.LogInformation($"Saved last played race '{problemClassString}' for user {user.UserName}");
-                    OnRacerChanged?.Invoke();
+                var activeRacer = await GetActiveRacer();
+                if (activeRacer != null) {
+                    // Update the racer's last played race and last raced date
+                    var racer = await _context.Racers.FindAsync(activeRacer.Id);
+                    if (racer != null) {
+                        racer.LastPlayedRace = problemClassString;
+                        racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                        await _context.SaveChangesAsync();
+                        
+                        // Update the active racer object as well
+                        activeRacer.LastPlayedRace = problemClassString;
+                        activeRacer.LastRaced = racer.LastRaced;
+                        
+                        Logger.LogInformation($"Saved last played race {problemClassString} for racer {racer.Name}");
+                    }
+                }
+
+                // Use a separate scope for UserManager operations to avoid DbContext concurrency
+                using (var scope = _serviceProvider.CreateScope()) {
+                    var scopedUserManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+                    
+                    // Also save to the user's profile
+                    string userId = await GetUserID("SaveLastPlayedRace");
+                    var user = await scopedUserManager.FindByIdAsync(userId);
+                    if (user != null) {
+                        user.LastPlayedRace = problemClassString;
+                        await scopedUserManager.UpdateAsync(user);
+                        Logger.LogInformation($"Saved last played race '{problemClassString}' for user {user.UserName}");
+                        // Don't trigger OnRacerChanged for just saving last played race
+                    }
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race for user");
+                Logger.LogError(ex, "Error saving last played race {ProblemClass}", problemClassString);
+                throw;
             }
         }
 
@@ -312,12 +455,17 @@ namespace DerbyDash.Services {
             try {
                 string userId = await GetUserID("GetTeamRaceCountAsync");
                 if (!string.IsNullOrEmpty(userId)) {
-                    // Get the count for the current user
-                    int count = 15; //await _context.Races
-                                    //  .Where(r => _context.RaceTeam
-                                    //      .Any(rt => rt.Id == r.RacerId && rt.UserId == userId))
-                                    //  .CountAsync();
-                    Logger.LogInformation("Count is {count}", count);
+                    // Get all racers for this user
+                    var userRacerIds = await _context.Racers
+                        .Where(r => r.UserId == userId)
+                        .Select(r => r.Id)
+                        .ToListAsync();
+                    
+                    // Count all races for all racers belonging to this user
+                    int count = await _context.Races
+                        .CountAsync(r => userRacerIds.Contains(r.RacerId));
+                    
+                    Logger.LogInformation("Team race count for user {UserId}: {Count}", userId, count);
                     return count;
                 }
                 return 0;
@@ -345,9 +493,101 @@ namespace DerbyDash.Services {
         public async Task<Racer?> GetRacerWithRaceCountAsync() {
             var racer = await GetActiveRacer();
             if (racer != null) {
-                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
+                // Get race count using a separate query to avoid concurrency issues
+                var raceCount = await _context.Races.CountAsync(r => r.RacerId == racer.Id);
+                racer.RaceCount = raceCount;
             }
             return racer;
+        }
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null) {
+            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements);
+        }
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null) {
+            try {
+                var activeRacer = await GetActiveRacer();
+                if (activeRacer == null) {
+                    throw new InvalidOperationException("No active racer found");
+                }
+
+                // Create the race record
+                var race = new Race {
+                    RacerId = activeRacer.Id,
+                    RaceDateTime = DateTime.Now,
+                    TotalTime = totalTime,
+                    ProblemSetId = problemSetId,
+                    ImageId = activeRacer.Id % 6 + 1 // Cycle through available car images
+                };
+
+                // Add to database
+                _context.Races.Add(race);
+                await _context.SaveChangesAsync();
+
+                // Add speed increments if provided
+                if (speedIncrements != null && speedIncrements.Count > 0) {
+                    foreach (var increment in speedIncrements) {
+                        increment.RaceId = race.Id;
+                    }
+                    _context.SpeedIncrements.AddRange(speedIncrements);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Update the racer's last raced date
+                var racer = await _context.Racers.FindAsync(activeRacer.Id);
+                if (racer != null) {
+                    racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                    await _context.SaveChangesAsync();
+                    
+                    // Update the active racer object as well
+                    activeRacer.LastRaced = racer.LastRaced;
+                }
+
+                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}");
+                
+                // Notify that race counts may have changed
+                OnRacerChanged?.Invoke();
+                
+                return race;
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error saving race completion");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Maps problem class strings to integer IDs for database storage
+        /// </summary>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <returns>Integer ID for the problem set</returns>
+        private int GetProblemSetId(string problemClassString) {
+            return problemClassString.ToLowerInvariant() switch {
+                "addition-4stable" => 1,
+                "subtraction-4stable" => 2,
+                "multiplication-4stable" => 3,
+                "division-4stable" => 4,
+                "addition-unstable" => 5,
+                "subtraction-unstable" => 6,
+                "multiplication-unstable" => 7,
+                "division-unstable" => 8,
+                "mixed-4stable" => 9,
+                "mixed-unstable" => 10,
+                _ => 999 // Unknown problem type
+            };
         }
     }
 }

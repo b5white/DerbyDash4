@@ -34,7 +34,7 @@
         // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
         //    I want Reset to be higher level and it has too many details.
         // TODO Why do we have both @racer.RaceCount and @CurrentRacerRaceCount?
-        // TODO Move the css in topnavbar.razor over the the css file
+        // DONE Move the css in topnavbar.razor over the the css file
         // TODO Use ActiveRacer if its set instead of getting it from the cookie all the time.
         // TODO Use ActiveRacer in GetUserID if it is set
         // DONE Populate UserId in AddRacer
