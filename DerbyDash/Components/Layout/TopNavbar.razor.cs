@@ -2,6 +2,7 @@ using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
@@ -17,6 +18,7 @@ namespace DerbyDash.Components.Layout {
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private GameStateService GameStateService { get; set; } = default!;
+        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
         private string? UserAvatarFileName;
         private string CurrentUrl => NavManager.Uri;
@@ -24,6 +26,8 @@ namespace DerbyDash.Components.Layout {
         private int TeamRaceCount { get; set; } = 0;
         private string? UserInitial;
         private string? UserEmail; // Add property for email
+        
+        private Task<AuthenticationState> AuthStateTask => AuthenticationStateProvider.GetAuthenticationStateAsync();
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
@@ -202,8 +206,7 @@ namespace DerbyDash.Components.Layout {
                 // TODO Can we just get the current user instead of getting the ID first?
                 var user = await UserManager.FindByIdAsync(userId);
                 if (user != null) {
-                    // TODO This is still wrong
-                    //UserAvatarFileName = user.AvatarFileName;
+                    UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email
                 } else { // Clear fields if user not found (e.g., after logout)                  

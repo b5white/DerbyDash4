@@ -269,17 +269,16 @@ namespace DerbyDash.Services {
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
             try {
-                // Get the active racer
-                var activeRacer = await GetActiveRacer();
-
-                if (activeRacer != null && !string.IsNullOrEmpty(activeRacer.LastPlayedRace)) {
-                    Logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
-                    return activeRacer.LastPlayedRace;
+                // Get the current user
+                string userId = await GetUserID("GetLastPlayedRaceAsync");
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null && !string.IsNullOrEmpty(user.LastPlayedRace)) {
+                    Logger.LogInformation($"Retrieved last played race '{user.LastPlayedRace}' for user {user.UserName}");
+                    return user.LastPlayedRace;
                 }
-
                 return null;
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error retrieving last played race for active racer");
+                Logger.LogError(ex, "Error retrieving last played race for user");
                 return null;
             }
         }
@@ -291,23 +290,17 @@ namespace DerbyDash.Services {
         /// <returns>A task representing the asynchronous operation</returns>
         public async Task SaveLastPlayedRaceAsync(string problemClassString) {
             try {
-                // Get the active racer
-                var activeRacer = await GetActiveRacer();
-
-                if (activeRacer != null) {
-                    // Update the LastPlayedRace property on the active racer
-                    activeRacer.LastPlayedRace = problemClassString;
-
-                    // Also update the LastRaced date to today
-                    activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
-
-                    Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
-
-                    // Notify subscribers that the racer has been updated
+                // Get the current user
+                string userId = await GetUserID("SaveLastPlayedRaceAsync");
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user != null) {
+                    user.LastPlayedRace = problemClassString;
+                    await _userManager.UpdateAsync(user);
+                    Logger.LogInformation($"Saved last played race '{problemClassString}' for user {user.UserName}");
                     OnRacerChanged?.Invoke();
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race for active racer");
+                Logger.LogError(ex, "Error saving last played race for user");
             }
         }
 

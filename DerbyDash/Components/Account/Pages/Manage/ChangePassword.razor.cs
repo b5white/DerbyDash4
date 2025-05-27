@@ -44,10 +44,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             if (!changePasswordResult.Succeeded) {
                 message = $"Error: {string.Join(",", changePasswordResult.Errors.Select(error => error.Description))}";
                 return;
-            }
-
-            await SignInManager.RefreshSignInAsync(user);
-            AuthStateProvider.NotifyUserLogin();
+            }            await SignInManager.RefreshSignInAsync(user);
             Logger.LogInformation("User changed their password successfully.");
 
             RedirectManager.RedirectToCurrentPageWithStatus("Your password has been changed", HttpContext);

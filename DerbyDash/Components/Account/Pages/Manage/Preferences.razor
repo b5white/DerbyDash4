@@ -2,8 +2,6 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Components.Authorization
-@using Microsoft.AspNetCore.Identity
-@using DerbyDash.Data
 @inherits ComponentBase
 @* Inject statements are now in the code-behind *@
 @attribute [Authorize]
@@ -32,6 +30,6 @@
     <!-- Debug info (can be removed in production) -->
     <div class="mt-3 small text-muted">
         <div>Current Model.Avatar: @(Model.Avatar ?? "None")</div>
-        @*         <div>Current user.AvatarFileName: @(user?.AvatarFileName ?? "None")</div> *@
+        <div>Current user.AvatarFileName: @(user?.AvatarFileName ?? "None")</div>
     </div>
 </div>

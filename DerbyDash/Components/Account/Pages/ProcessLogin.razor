@@ -1,6 +1,4 @@
 @page "/Account/ProcessLogin"
-@using Microsoft.AspNetCore.Identity
-@using DerbyDash.Data
 @using Microsoft.Extensions.Logging
 @using System.Web
 
@@ -43,11 +41,9 @@
                 var user = await UserManager.FindByEmailAsync(Email);
 
                 if (user != null) {
-                    targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
-                    // Sign in the user directly without password verification
+                    targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;                    // Sign in the user directly without password verification
                     // (password was already verified in the Login page)
                     await SignInManager.SignInAsync(user, RememberMe);
-                    AuthStateProvider.NotifyUserLogin();
                     Logger.LogInformation("User logged in: {Email}", Email);
                 } else {
                     // User not found, redirect back to login
