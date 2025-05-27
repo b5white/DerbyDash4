@@ -3,10 +3,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace DerbyDash.Components.Account.Pages {
-    public partial class Login {
+namespace DerbyDash.Components.Account.Pages {    public partial class Login {
         private string? errorMessage;
-        private bool showPassword = false;
 
         [Inject]
         private UserManager<ApplicationUser> UserManager { get; set; } = null!;
@@ -21,15 +19,8 @@ namespace DerbyDash.Components.Account.Pages {
         private IdentityRedirectManager RedirectManager { get; set; } = null!;
 
         [SupplyParameterFromForm]
-        private InputModel Input { get; set; } = new();
-
-        [SupplyParameterFromQuery]
+        private InputModel Input { get; set; } = new();        [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
-
-        private void TogglePasswordVisibility() {
-            showPassword = !showPassword;
-            // No need for StateHasChanged() here as Blazor handles UI updates for bound values on events
-        }
 
         protected override async Task OnInitializedAsync() {
             // No HttpContext usage in interactive mode

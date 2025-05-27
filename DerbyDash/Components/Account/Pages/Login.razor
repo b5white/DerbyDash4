@@ -2,7 +2,6 @@
 
 @using System.ComponentModel.DataAnnotations
 @using DerbyDash.Data
-@rendermode InteractiveServer
 
 @attribute [AllowAnonymous]
 
@@ -37,18 +36,16 @@
                         <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
                             autocomplete="username" aria-required="true" placeholder="Enter your email" />
                         <ValidationMessage For="() => Input.Email" class="validation-message" />
-                    </div>
-
-                    <div class="form-group">
+                    </div>                    <div class="form-group">
                         <label for="Input.Password">Password</label>
                         <div class="password-input-container">
-                            <InputText type="@(showPassword ? "text" : "password")" @bind-Value="Input.Password"
+                            <InputText type="password" @bind-Value="Input.Password"
                                 id="Input.Password" class="form-control" autocomplete="current-password"
                                 aria-required="true" placeholder="Enter your password" />
-                            <button type="button" class="password-toggle-btn" @onclick="TogglePasswordVisibility"
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('Input.Password')"
                                 tabindex="-1">
-                                <i class="@(showPassword ? "fas fa-eye-slash" : "fas fa-eye")" aria-hidden="true"></i>
-                                <span class="sr-only">@(showPassword ? "Hide" : "Show") password</span>
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                <span class="sr-only">Show password</span>
                             </button>
                         </div>
                         <ValidationMessage For="() => Input.Password" class="validation-message" />

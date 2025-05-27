@@ -119,3 +119,24 @@ window.getBrowserInfo = () => {
     
     return `${browserInfo.browser} ${browserInfo.version} on ${browserInfo.os} (${browserInfo.device})`;
 };
+
+// Toggle password visibility
+window.togglePasswordVisibility = (inputId) => {
+    const input = document.getElementById(inputId);
+    const button = document.querySelector(`button[onclick="togglePasswordVisibility('${inputId}')"]`);
+    
+    if (input && button) {
+        const icon = button.querySelector('i');
+        const srText = button.querySelector('.sr-only');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.className = 'fas fa-eye-slash';
+            srText.textContent = 'Hide password';
+        } else {
+            input.type = 'password';
+            icon.className = 'fas fa-eye';
+            srText.textContent = 'Show password';
+        }
+    }
+};

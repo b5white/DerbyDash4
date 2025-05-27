@@ -7,11 +7,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 
-namespace DerbyDash.Components.Account.Pages {
-    public partial class Register: ComponentBase {
+namespace DerbyDash.Components.Account.Pages {    public partial class Register: ComponentBase {
         private IEnumerable<IdentityError>? identityErrors;
-        private bool showPassword = false;
-        private bool showConfirmPassword = false;
 
         [Inject]
         private UserManager<ApplicationUser> UserManager { get; set; } = null!;
@@ -93,18 +90,7 @@ namespace DerbyDash.Components.Account.Pages {
         private IUserEmailStore<ApplicationUser> GetEmailStore() {
             if (!UserManager.SupportsUserEmail) {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
-            }
-            return (IUserEmailStore<ApplicationUser>)UserStore;
-        }
-
-        private void TogglePasswordVisibility() {
-            showPassword = !showPassword;
-            StateHasChanged();
-        }
-
-        private void ToggleConfirmPasswordVisibility() {
-            showConfirmPassword = !showConfirmPassword;
-            StateHasChanged();
+            }            return (IUserEmailStore<ApplicationUser>)UserStore;
         }
 
         private sealed class InputModel {
