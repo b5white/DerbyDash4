@@ -166,7 +166,10 @@
                 if (UserManager.Options.SignIn.RequireConfirmedAccount)
                 {
                     RedirectManager.RedirectToWParams("Account/RegisterConfirmation", new() { ["email"] = Input.Email });
-                }                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                }
+
+                await SignInManager.SignInAsync(user, isPersistent: false, externalLoginInfo.LoginProvider);
+                AuthStateProvider.NotifyUserLogin();
                 RedirectManager.RedirectTo(ReturnUrl);
             }
         }
