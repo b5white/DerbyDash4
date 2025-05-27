@@ -12,6 +12,7 @@ namespace DerbyDash.Data {
         public string Name { get; set; } = string.Empty;
         public DateOnly? LastRaced { get; set; } = null;
         // Last played race identifier (e.g., "addition-4stable")
+        [MaxLength(100)]
         public string? LastPlayedRace { get; set; }
         // Avatar image file name (e.g., "1.png", "2.png", "3.png")
         [MaxLength(255)]
