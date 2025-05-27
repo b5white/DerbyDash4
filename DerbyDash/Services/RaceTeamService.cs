@@ -455,24 +455,19 @@ namespace DerbyDash.Services {
             try {
                 string userId = await GetUserID("GetTeamRaceCountAsync");
                 if (!string.IsNullOrEmpty(userId)) {
-                    // Get all racers for this user
-                    var userRacerIds = await _context.Racers
-                        .Where(r => r.UserId == userId)
-                        .Select(r => r.Id)
-                        .ToListAsync();
-                    
-                    // Count all races for all racers belonging to this user
+                    // Use a single query with JOIN to avoid multiple database calls
                     int count = await _context.Races
-                        .CountAsync(r => userRacerIds.Contains(r.RacerId));
+                        .Where(r => _context.Racers.Any(racer => racer.UserId == userId && racer.Id == r.RacerId))
+                        .CountAsync();
                     
                     Logger.LogInformation("Team race count for user {UserId}: {Count}", userId, count);
                     return count;
                 }
+                Logger.LogWarning("GetTeamRaceCountAsync: UserId is null or empty");
                 return 0;
-
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting team race count");
-                return 0;
+                return 0; // Return 0 instead of throwing to make UI more resilient
             }
         }
 
