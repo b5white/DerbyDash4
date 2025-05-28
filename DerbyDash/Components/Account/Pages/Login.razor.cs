@@ -3,7 +3,8 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
-namespace DerbyDash.Components.Account.Pages {    public partial class Login {
+namespace DerbyDash.Components.Account.Pages {
+    public partial class Login {
         private string? errorMessage;
 
         [Inject]
@@ -19,7 +20,9 @@ namespace DerbyDash.Components.Account.Pages {    public partial class Login {
         private IdentityRedirectManager RedirectManager { get; set; } = null!;
 
         [SupplyParameterFromForm]
-        private InputModel Input { get; set; } = new();        [SupplyParameterFromQuery]
+        private InputModel Input { get; set; } = new();
+
+        [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
         protected override async Task OnInitializedAsync() {

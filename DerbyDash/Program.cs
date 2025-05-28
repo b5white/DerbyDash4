@@ -44,7 +44,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
             // Add Identity services with Entity Framework stores
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+            builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 // Sign-in requirements
                 options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
                 options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing

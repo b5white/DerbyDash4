@@ -63,8 +63,10 @@ else
             if (result.Succeeded) {
                 emailConfirmed = true;
                 statusMessage = "Thank you for confirming your email.";
-                  // Automatically sign in the user after email confirmation
+                
+                // Automatically sign in the user after email confirmation
                 await SignInManager.SignInAsync(user, true);
+                AuthStateProvider.NotifyUserLogin();
 
                 // We don't automatically redirect to give the user a chance to see the confirmation message
                 // They can click the link to go to the Race Team page

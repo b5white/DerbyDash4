@@ -1,4 +1,5 @@
-﻿<CascadingAuthenticationState>
+﻿@using DerbyDash.Components.Account
+<CascadingAuthenticationState>
     <Router AppAssembly="typeof(Program).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@GetLayoutType(routeData)">

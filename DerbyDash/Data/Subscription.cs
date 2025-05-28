@@ -9,7 +9,6 @@ namespace DerbyDash.Data {
 
         [ForeignKey("User")]
         public required string UserId { get; set; }  // Foreign key to AspNetUsers
-        [Required]
         public ApplicationUser? User { get; set; }  // Navigation property
 
         public SubscriptionType Type { get; set; }
@@ -21,12 +20,15 @@ namespace DerbyDash.Data {
         public DateTime? PausedDate { get; set; }
         public SubscriptionStatus Status { get; set; }
         public int SpecialOffersProgress { get; set; } // Percentage value (0-100)
-        
+
         // Calculated properties
         [NotMapped]
         public int DaysRemaining => (EndDate - DateTime.Now).Days > 0 ? (EndDate - DateTime.Now).Days : 0;
         [NotMapped]
-        public int ProgressPercentage => 100 - (int)((double)DaysRemaining / (EndDate - StartDate).TotalDays * 100);
+        public int ProgressPercentage =>
+            (EndDate - StartDate).TotalDays == 0
+                ? 100
+                : 100 - (int)((double)DaysRemaining / (EndDate - StartDate).TotalDays * 100);
         [NotMapped]
         public bool IsActive => Status == SubscriptionStatus.Active && !IsPaused && DateTime.Now <= EndDate;
         [NotMapped]

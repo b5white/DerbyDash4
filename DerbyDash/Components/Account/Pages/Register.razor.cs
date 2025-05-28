@@ -7,7 +7,8 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 
-namespace DerbyDash.Components.Account.Pages {    public partial class Register: ComponentBase {
+namespace DerbyDash.Components.Account.Pages {
+    public partial class Register: ComponentBase {
         private IEnumerable<IdentityError>? identityErrors;
 
         [Inject]
@@ -66,10 +67,12 @@ namespace DerbyDash.Components.Account.Pages {    public partial class Register:
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
                 Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
-            } else {                Logger.LogInformation("Email confirmation not required - automatically signing in user");
+            } else {
+                Logger.LogInformation("Email confirmation not required - automatically signing in user");
 
                 // Automatically sign in the user when email confirmation is disabled
                 await SignInManager.SignInAsync(user, isPersistent: false);
+                AuthStateProvider.NotifyUserLogin();
                 Logger.LogInformation("User automatically signed in: {Email}", email);
             }
 
@@ -90,7 +93,8 @@ namespace DerbyDash.Components.Account.Pages {    public partial class Register:
         private IUserEmailStore<ApplicationUser> GetEmailStore() {
             if (!UserManager.SupportsUserEmail) {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
-            }            return (IUserEmailStore<ApplicationUser>)UserStore;
+            }
+            return (IUserEmailStore<ApplicationUser>)UserStore;
         }
 
         private sealed class InputModel {

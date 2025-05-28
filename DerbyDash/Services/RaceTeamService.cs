@@ -398,7 +398,7 @@ namespace DerbyDash.Services {
                     return null;
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error retrieving last played race for user");
+                Logger.LogError(ex, "Error retrieving last played race for active racer");
                 return null;
             }
         }
