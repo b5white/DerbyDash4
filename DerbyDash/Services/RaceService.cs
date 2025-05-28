@@ -62,22 +62,24 @@ namespace DerbyDash.Services {
         public async Task SaveRaceAsync(RaceComponents track) {
             await Task.CompletedTask; // Just to use 'await'
             return;
-        }        public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
+        }
+
+        public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
             var speedIncrements = new List<SpeedIncrement>();
-            
+
             for (int i = 0; i < Times.Length && Times[i] > 0; i++) {
                 // Calculate speed and distance based on the elapsed time
                 double elapsedTime = Times[i];
-                double speed = i > 0 ? (elapsedTime - Times[i-1]) : elapsedTime;
+                double speed = i > 0 ? (elapsedTime - Times[i - 1]) : elapsedTime;
                 double distance = (i + 1) * (TotalDistance / Times.Where(t => t > 0).Count());
-                
+
                 speedIncrements.Add(new SpeedIncrement {
                     Time = elapsedTime,
                     Speed = speed,
                     Distance = distance
                 });
             }
-            
+
             return speedIncrements;
         }
     }

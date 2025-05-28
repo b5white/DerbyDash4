@@ -1,5 +1,4 @@
 ﻿using DerbyDash.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class DatabaseKeepAliveService {

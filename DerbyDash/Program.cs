@@ -2,9 +2,9 @@ using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
+using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash {
     public class Program {
@@ -18,8 +18,8 @@ namespace DerbyDash {
             //    .AddAuthenticationStateSerialization();
 
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            //builder.Services.AddDbContext<ApplicationDbContext>(options =>
+            //    options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             // Add Scoped services
@@ -41,8 +41,12 @@ namespace DerbyDash {
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();            // Add Identity services with Entity Framework stores
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            // Logging
+            builder.Services.AddScoped<CurrentRequestDTO>();
+
+            // Add Identity services with Entity Framework stores
+            builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 // Sign-in requirements
                 options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
                 options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing

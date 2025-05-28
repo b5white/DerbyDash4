@@ -40,16 +40,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 SaveMessage = "Error: Could not load user data.";
             } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
-                
+                //   Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
+
                 // Set the Model.Avatar from the user's current avatar
-                if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
-                    Model.Avatar = Avatars[0]; // Default to first avatar
-                    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
-                } else {
-                    Model.Avatar = user.AvatarFileName;
-                    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
-                }
+                //if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
+                //    Model.Avatar = Avatars[0]; // Default to first avatar
+                //    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
+                //} else {
+                //    Model.Avatar = user.AvatarFileName;
+                //    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
+                //}
             }
         }
 
@@ -84,7 +84,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
 
                 // Update the avatar filename
-                currentUser.AvatarFileName = Model.Avatar;
+                //currentUser.AvatarFileName = Model.Avatar;
 
                 // Save changes to the database with retry logic for concurrency conflicts
                 var result = await UserManager.UpdateAsync(currentUser);
@@ -122,9 +122,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     // REMOVED: This causes 'Headers already sent' error in interactive server mode
                     // await SignInManager.RefreshSignInAsync(currentUser);
                     // Logger.LogInformation("SignInManager.RefreshSignInAsync called for user '{UserId}'", currentUser.Id);                    
-                    
+
                     // *** Explicitly update the Model to reflect the saved state ***
-                    Model.Avatar = currentUser.AvatarFileName;
+                    //Model.Avatar = currentUser.AvatarFileName;
                     Logger.LogInformation("Model.Avatar explicitly updated after save to: {Avatar}", Model.Avatar ?? "null");
 
                     // Update the local user reference (optional, as navigation will likely reload)
@@ -132,7 +132,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                     // Force a refresh of the user from the database to verify changes (optional debug step)
                     var refreshedUser = await UserManager.FindByIdAsync(userId);
-                    Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
+                    //Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
 
                     // Notify other components that the avatar has changed
                     AvatarService.NotifyAvatarChanged();
