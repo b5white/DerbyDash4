@@ -18,16 +18,15 @@
 </div>
 
 <div @ref="navScrollableElement" class="nav-scrollable">
-    <nav class="nav flex-column">
-        <div class="nav-item">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+    <nav class="nav flex-column">        <div class="nav-item">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                 <i class="nav-icon fas fa-home"></i>
                 <span class="nav-text">Home</span>
             </NavLink>
         </div>
 
         <div class="nav-item featured-item">
-            <NavLink class="nav-link featured-link" href="RaceSetsMenu" Match="NavLinkMatch.All">
+            <NavLink class="nav-link featured-link" href="RaceSetsMenu" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                 <i class="nav-icon fas fa-flag-checkered" style="color: #ffcc00;"></i>
                 <span class="nav-text" style="font-weight: bold; font-size: 1.1em; color: #ffcc00;">Races</span>
                 <span class="featured-indicator">🏆</span>
@@ -38,38 +37,36 @@
             <Authorized>
                 <div class="nav-divider">
                     <span>Resources</span>
-                </div>
-
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All">
+                </div>                <div class="nav-item">
+                    <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-question-circle"></i>
                         <span class="nav-text">FAQ</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="feedback" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link" href="feedback" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-comment-alt"></i>
                         <span class="nav-text">Feedback</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item profile-item">
-                    <NavLink class="nav-link profile-link" href="Account/Manage" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link profile-link" href="Account/Manage" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-user-circle"></i>
                         <span class="nav-text">Profile</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link pay-it-forward-link" href="PayItForward" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link pay-it-forward-link" href="PayItForward" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-gift"></i>
                         <span class="nav-text">Pay it Forward</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-info-circle"></i>
                         <span class="nav-text">About DerbyDash</span>
                     </NavLink>
@@ -85,24 +82,22 @@
             <NotAuthorized>
                 <div class="nav-divider">
                     <span>Resources</span>
-                </div>
-
-                <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Register" Match="NavLinkMatch.All">
+                </div>                <div class="nav-item">
+                    <NavLink class="nav-link" href="Account/Register" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-user-plus"></i>
                         <span class="nav-text">Register</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link" href="Account/Login" Match="NavLinkMatch.All">
+                    <NavLink class="nav-link" href="Account/Login" Match="NavLinkMatch.All" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-sign-in-alt"></i>
                         <span class="nav-text">Login</span>
                     </NavLink>
                 </div>
 
                 <div class="nav-item">
-                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix">
+                    <NavLink class="nav-link about-link" href="about" Match="NavLinkMatch.Prefix" @onclick="HandleNavClick">
                         <i class="nav-icon fas fa-info-circle"></i>
                         <span class="nav-text">About DerbyDash</span>
                     </NavLink>
@@ -122,6 +117,11 @@
     // Method to toggle the CSS class via JavaScript
     private async Task ToggleNavMenu() {
         await JSRuntime.InvokeVoidAsync("toggleClass", navScrollableElement, "show-menu");
+    }
+
+    // Method to handle navigation link clicks - close menu if on mobile
+    private async Task HandleNavClick() {
+        await CloseMenu();
     }
 
     // Assuming AppInfo is defined elsewhere or remove if not needed

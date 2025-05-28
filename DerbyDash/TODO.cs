@@ -28,7 +28,7 @@
         //      b.Property<string>("LastPlayedRace").HasColumnType("nvarchar(100)");
         // DONE Show password isn't working on registration or login.
         // TODO Handle the screen shift when using a phone so can still see top of page.        
-        // TODO On mobile, the menu stays up too long. At least close when they make a selection.
+        // DONE On mobile, the menu stays up too long. At least close when they make a selection.
         // TODO On mobile, when on profile page, hide top menu bar.
         //      Once they pop up the keyboard, there isn't much space left.
         // TODO If race team has no races, then on the Race Team page, add a button Next ->

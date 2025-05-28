@@ -4,6 +4,12 @@ window.toggleClass = (element, className) => {
     }
 };
 
+window.removeClass = (element, className) => {
+    if (element) {
+        element.classList.remove(className);
+    }
+};
+
 // Initialize Bootstrap accordion
 window.initializeAccordion = () => {
     // Check if Bootstrap is available
