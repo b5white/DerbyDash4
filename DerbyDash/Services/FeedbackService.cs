@@ -1,32 +1,41 @@
+using Bogus;
 using DerbyDash.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
-    public class FeedbackService(ApplicationDbContext context) {
+    public class FeedbackService {
+
+        private List<Feedback> Feedbacks;
+        public FeedbackService() {
+            Feedbacks = GenerateFakeFeedbacks(10);
+        }
 
         public async Task<List<Feedback>> GetFeedbackSinceDateAsync(DateTime startDate) {
-            return await context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type, DateTime startDate) {
-            return await context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.FeedbackType == type && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved, DateTime startDate) {
-            return await context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.IsResolved == isResolved && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<Feedback?> GetFeedbackByIdAsync(int id) {
-            return await context.Feedbacks.FindAsync(id);
+            var result = Feedbacks.Find(f => f.Id == id);
+            return await Task.FromResult(result);
         }
 
         public async Task<bool> AddFeedbackAsync(Feedback feedback) {
@@ -35,25 +44,20 @@ namespace DerbyDash.Services {
                 feedback.IsResolved = false;
                 // Set optional foreign keys to null if not provided
                 // These can be populated later if user authentication is available
-                feedback.RacerId = null;
-                feedback.UserId = null;
-                await context.Feedbacks.AddAsync(feedback);
-                await context.SaveChangesAsync();
-                return true;
+                feedback.RacerId = 0;
+                feedback.UserId = "";
+                Feedbacks.Add(feedback);
+                return await Task.FromResult(true);
             } catch (Exception ex) {
-            	// TODO Use Logger instead of console
+                // TODO Use Logger instead of console
                 Console.WriteLine($"Error adding feedback: {ex.Message}");
-                if (ex.InnerException != null) {
-                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
-                }
-                return false;
+                return await Task.FromResult(false);
             }
         }
 
         public async Task<bool> UpdateFeedbackAsync(Feedback feedback) {
             try {
-                context.Feedbacks.Update(feedback);
-                await context.SaveChangesAsync();
+                //   Feedbacks.Update(feedback);
                 return true;
             } catch {
                 return false;
@@ -62,16 +66,15 @@ namespace DerbyDash.Services {
 
         public async Task<bool> ResolveFeedbackAsync(int id, string adminNotes) {
             try {
-                var feedback = await context.Feedbacks.FindAsync(id);
+                var feedback = await GetFeedbackByIdAsync(id);
                 if (feedback == null)
                     return false;
 
                 feedback.IsResolved = true;
                 feedback.AdminNotes = adminNotes;
                 feedback.ResolvedAt = DateTime.UtcNow;
+                //   Feedbacks.Update(feedback);
 
-                context.Feedbacks.Update(feedback);
-                await context.SaveChangesAsync();
                 return true;
             } catch {
                 return false;
@@ -80,16 +83,35 @@ namespace DerbyDash.Services {
 
         public async Task<bool> DeleteFeedbackAsync(int id) {
             try {
-                var feedback = await context.Feedbacks.FindAsync(id);
+                var feedback = await GetFeedbackByIdAsync(id);
                 if (feedback == null)
                     return false;
 
-                context.Feedbacks.Remove(feedback);
-                await context.SaveChangesAsync();
+                Feedbacks.Remove(feedback);
                 return true;
             } catch {
                 return false;
             }
+        }
+
+        public List<Feedback> GenerateFakeFeedbacks(int count = 3) {
+            var faker = new Faker<Feedback>()
+                .RuleFor(f => f.Id, f => 0)
+                .RuleFor(f => f.UserId, f => f.Random.Guid().ToString())
+                .RuleFor(f => f.RacerId, f => f.Random.Bool() ? f.Random.Int(1, 100) : (int?)null)
+                .RuleFor(f => f.Name, f => f.Name.FullName())
+                .RuleFor(f => f.Email, f => f.Internet.Email())
+                .RuleFor(f => f.FeedbackType, f => f.PickRandom<FeedbackType>())
+                .RuleFor(f => f.Subject, f => f.Lorem.Sentence(5))
+                .RuleFor(f => f.Message, f => f.Lorem.Paragraphs(1))
+                .RuleFor(f => f.BrowserInfo, f => f.Random.String2(20))
+                .RuleFor(f => f.ContactConsent, f => f.Random.Bool())
+                .RuleFor(f => f.SubmittedAt, f => f.Date.Recent())
+                .RuleFor(f => f.IsResolved, f => f.Random.Bool())
+                .RuleFor(f => f.AdminNotes, f => f.Lorem.Sentence(6))
+                .RuleFor(f => f.ResolvedAt, (f, feedback) => feedback.IsResolved ? f.Date.Recent() : null);
+
+            return faker.Generate(count);
         }
     }
 }

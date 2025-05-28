@@ -3,7 +3,6 @@ using DerbyDash.Exceptions;
 using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -360,75 +359,6 @@ namespace DerbyDash.Services {
                 racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
             }
             return racer;
-        }
-
-        /// <summary>
-        /// Saves a completed race to the database for the current active racer
-        /// </summary>
-        /// <param name="totalTime">The total time taken to complete the race</param>
-        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
-        /// <param name="speedIncrements">The speed increments during the race</param>
-        /// <returns>The saved race record</returns>
-        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null) {
-            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements);
-        }
-
-        /// <summary>
-        /// Saves a completed race to the database for the current active racer
-        /// </summary>
-        /// <param name="totalTime">The total time taken to complete the race</param>
-        /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
-        /// <param name="speedIncrements">The speed increments during the race</param>
-        /// <returns>The saved race record</returns>
-        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null) {
-            try {
-                var activeRacer = await GetActiveRacer();
-                if (activeRacer == null) {
-                    throw new InvalidOperationException("No active racer found");
-                }
-
-                // Create the race record
-                var race = new Race {
-                    RacerId = activeRacer.Id,
-                    RaceDateTime = DateTime.Now,
-                    TotalTime = totalTime,
-                    ProblemSetId = problemSetId,
-                    ImageId = activeRacer.Id % 6 + 1 // Cycle through available car images
-                };
-
-                // Add to database
-                _context.Races.Add(race);
-                await _context.SaveChangesAsync();
-
-                // Add speed increments if provided
-                if (speedIncrements != null && speedIncrements.Count > 0) {
-                    foreach (var increment in speedIncrements) {
-                        increment.RaceId = race.Id;
-                    }
-                    _context.SpeedIncrements.AddRange(speedIncrements);
-                    await _context.SaveChangesAsync();
-                }
-
-                // Update the racer's last raced date
-                var racer = await _context.Racers.FindAsync(activeRacer.Id);
-                if (racer != null) {
-                    racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
-                    await _context.SaveChangesAsync();
-                    
-                    // Update the active racer object as well
-                    activeRacer.LastRaced = racer.LastRaced;
-                }
-
-                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}");
-                
-                // Notify that race counts may have changed
-                OnRacerChanged?.Invoke();
-                
-                return race;
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving race completion");
-                throw;
-            }
         }
 
         /// <summary>

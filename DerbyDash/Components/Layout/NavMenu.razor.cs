@@ -3,7 +3,9 @@ using Microsoft.JSInterop;
 
 namespace DerbyDash.Components.Layout {
     public partial class NavMenu: IDisposable {
-        private string? currentUrl;        protected override void OnInitialized() {
+        private string? currentUrl;
+
+        protected override void OnInitialized() {
             currentUrl = NavManager.ToBaseRelativePath(NavManager.Uri);
             NavManager.LocationChanged += OnLocationChanged;
         }
@@ -20,10 +22,13 @@ namespace DerbyDash.Components.Layout {
 
         // Handle logout directly from the NavMenu
         private async void HandleLogout() {
-            // Close the mobile menu first
-            await CloseMenu();
-            // Navigate to the logout page with forceLoad=true to ensure a full page refresh
-            NavManager.NavigateTo("/Account/Logout", true);
+            try {
+                // Close the mobile menu first
+                await CloseMenu();
+                // Navigate to the logout page with forceLoad=true to ensure a full page refresh
+                NavManager.NavigateTo("/Account/Logout", true);
+            } catch (Exception ex) {
+            }
         }
 
         public void Dispose() {

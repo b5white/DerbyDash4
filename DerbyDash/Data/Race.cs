@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DerbyDash.Data {
-    [Index(nameof(Id), nameof(RacerId), nameof(ProblemSetId))]
+    // [Index(nameof(Id), nameof(RacerId), nameof(ProblemSetId))]
     public class Race {
         [Key]
         public int Id { get; set; }
