@@ -88,13 +88,19 @@ namespace DerbyDash.Components.Layout {
                     CurrentRacerRaceCount = 0;
                     TeamRaceCount = 0;
                 }
+            } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
+                // DbContext concurrency issue - this is temporary, don't clear the racers
+                Logger.LogWarning(ex, "Temporary DbContext concurrency issue while loading racers - keeping existing data");
+                // Don't clear the existing racers, just log the issue
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error loading racers");
-                // User isn't logged in or other error occurred. Initialize with empty lists.
-                Racers = new List<Racer>();
-                SelectedRacer = new Racer { Id = 0, Name = "" };
-                CurrentRacerRaceCount = 0;
-                TeamRaceCount = 0;
+                // Only clear racers for non-concurrency errors (like authentication issues)
+                if (!ex.Message.Contains("second operation was started")) {
+                    Racers = new List<Racer>();
+                    SelectedRacer = new Racer { Id = 0, Name = "" };
+                    CurrentRacerRaceCount = 0;
+                    TeamRaceCount = 0;
+                }
             }
         }
 
@@ -102,6 +108,22 @@ namespace DerbyDash.Components.Layout {
             try {
                 await LoadRacers();
                 StateHasChanged();
+            } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
+                // DbContext concurrency issue - this is temporary, retry after a short delay
+                Logger.LogWarning(ex, "Temporary DbContext concurrency issue in HandleRacerChangedAsync - will retry");
+                
+                // Retry after a short delay
+                _ = Task.Run(async () => {
+                    await Task.Delay(100); // Short delay
+                    try {
+                        await InvokeAsync(async () => {
+                            await LoadRacers();
+                            StateHasChanged();
+                        });
+                    } catch (Exception retryEx) {
+                        Logger.LogWarning(retryEx, "Retry failed in HandleRacerChangedAsync");
+                    }
+                });
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
             }

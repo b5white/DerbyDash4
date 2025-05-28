@@ -74,55 +74,6 @@
     </div>
 </div>
 
-<style>
-.user-avatar-navbar {
-    display: flex;
-    align-items: center;
-    margin-right: 1.5rem;
-}
-.navbar-avatar-img {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 2px solid #ff9800;
-    box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-    object-fit: cover;
-    margin-right: 0.5rem;
-}
-.navbar-avatar-default {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
-    color: #fff;
-    font-size: 1.6rem;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 0.5rem;
-    box-shadow: 0 2px 8px rgba(255,152,0,0.10);
-}
-
-.race-stats {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.8rem;
-    color: #666;
-    margin-top: 4px;
-}
-
-.current-racer-races {
-    color: #ff9800;
-    font-weight: bold;
-}
-
-.team-races {
-    color: #2980b9;
-    font-weight: bold;
-}
-</style>
-
 @code {
     // Expose avatar properties for use in markup
     private string? GetUserAvatarFileName() => UserAvatarFileName;

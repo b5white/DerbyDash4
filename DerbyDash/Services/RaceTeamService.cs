@@ -3,6 +3,7 @@ using DerbyDash.Exceptions;
 using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
+using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
@@ -71,7 +72,6 @@ namespace DerbyDash.Services {
                     Logger.LogInformation($"Getting racers for user: {userId}");
                 } catch (Exception ex) {
                     Logger.LogWarning(ex, "Could not get userId, but continuing");
-                    // Continue even if we can't get the userId
                     return new List<Racer>();
                 }
 
@@ -81,7 +81,7 @@ namespace DerbyDash.Services {
                     return new List<Racer>();
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error in GetRacers()");
+                Logger.LogError(ex, "Error in GetRacersInternal()");
                 return new List<Racer>();
             }
             return await GetRacers(user);
@@ -179,7 +179,7 @@ namespace DerbyDash.Services {
                     var userId = await GetUserID("SetActiveRacer");
                     userIdentifier = userId.ToString();
                 } catch (Exception) {
-                    // If we can't get the userId, use "guest" as the identifier
+                    // If we can't get userId, use "guest" as the identifier
                     Logger.LogWarning("Could not get userId for cookie, using guest instead");
                 }
 
@@ -311,7 +311,8 @@ namespace DerbyDash.Services {
                     OnRacerChanged?.Invoke();
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race for active racer");
+                Logger.LogError(ex, "Error saving last played race {ProblemClass}", problemClassString);
+                throw;
             }
         }
 
@@ -331,11 +332,11 @@ namespace DerbyDash.Services {
                     Logger.LogInformation("Count is {count}", count);
                     return count;
                 }
+                Logger.LogWarning("GetTeamRaceCountAsync: UserId is null or empty");
                 return 0;
-
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting team race count");
-                return 0;
+                return 0; // Return 0 instead of throwing to make UI more resilient
             }
         }
 
@@ -359,6 +360,96 @@ namespace DerbyDash.Services {
                 racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
             }
             return racer;
+        }
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null) {
+            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements);
+        }
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null) {
+            try {
+                var activeRacer = await GetActiveRacer();
+                if (activeRacer == null) {
+                    throw new InvalidOperationException("No active racer found");
+                }
+
+                // Create the race record
+                var race = new Race {
+                    RacerId = activeRacer.Id,
+                    RaceDateTime = DateTime.Now,
+                    TotalTime = totalTime,
+                    ProblemSetId = problemSetId,
+                    ImageId = activeRacer.Id % 6 + 1 // Cycle through available car images
+                };
+
+                // Add to database
+                _context.Races.Add(race);
+                await _context.SaveChangesAsync();
+
+                // Add speed increments if provided
+                if (speedIncrements != null && speedIncrements.Count > 0) {
+                    foreach (var increment in speedIncrements) {
+                        increment.RaceId = race.Id;
+                    }
+                    _context.SpeedIncrements.AddRange(speedIncrements);
+                    await _context.SaveChangesAsync();
+                }
+
+                // Update the racer's last raced date
+                var racer = await _context.Racers.FindAsync(activeRacer.Id);
+                if (racer != null) {
+                    racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                    await _context.SaveChangesAsync();
+                    
+                    // Update the active racer object as well
+                    activeRacer.LastRaced = racer.LastRaced;
+                }
+
+                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}");
+                
+                // Notify that race counts may have changed
+                OnRacerChanged?.Invoke();
+                
+                return race;
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error saving race completion");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Maps problem class strings to integer IDs for database storage
+        /// </summary>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <returns>Integer ID for the problem set</returns>
+        private int GetProblemSetId(string problemClassString) {
+            return problemClassString.ToLowerInvariant() switch {
+                "addition-4stable" => 1,
+                "subtraction-4stable" => 2,
+                "multiplication-4stable" => 3,
+                "division-4stable" => 4,
+                "addition-unstable" => 5,
+                "subtraction-unstable" => 6,
+                "multiplication-unstable" => 7,
+                "division-unstable" => 8,
+                "mixed-4stable" => 9,
+                "mixed-unstable" => 10,
+                _ => 999 // Unknown problem type
+            };
         }
     }
 }

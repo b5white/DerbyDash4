@@ -41,29 +41,44 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         private async void HandleRacerChangedAsync() {
             try {
+                Logger.LogInformation("HandleRacerChangedAsync started");
                 await ReloadUsers();
-                StateHasChanged();
+                await InvokeAsync(StateHasChanged);
+                Logger.LogInformation("HandleRacerChangedAsync completed");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
+                // Don't rethrow to prevent UI breaking
             }
         }
 
         private async Task OnValidSubmitAsync() {
             try {
+                Logger.LogInformation("Adding new racer: {RacerName}", Input.MemberName);
+                
                 Racer newTeamMember = new() {
                     Name = Input.MemberName,
                 };
 
                 await RaceTeamService.AddRacer(newTeamMember);
+                
+                Logger.LogInformation("Racer added successfully: {RacerName}", Input.MemberName);
+                
                 // The list will be refreshed via the OnRacerChanged event
+                // Add a small delay to ensure the database operation is complete
+                await Task.Delay(100);
 
                 message = "The team member has been added";
                 Input = new(); // Clear the form
+                
+                // Force an immediate reload to ensure UI is updated
+                await ReloadUsers();
+                StateHasChanged();
             } catch (DuplicateRacerException) {
                 // Preserve the entered name and show error
                 message = $"Error: '{Input.MemberName}' already exists on the team";
+                Logger.LogWarning("Duplicate racer name attempted: {RacerName}", Input.MemberName);
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error adding racer");
+                Logger.LogError(ex, "Error adding racer: {RacerName}", Input.MemberName);
                 message = "Error adding racer: " + ex.Message;
             }
         }
@@ -80,15 +95,26 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         private async Task ReloadUsers() {
             try {
+                Logger.LogInformation("ReloadUsers started");
+                
                 // Get the racers directly from the service
                 // The service handles its own user authentication
                 raceTeam.Clear();
-                raceTeam.AddRange(await RaceTeamService.GetRacers());
+                var racers = await RaceTeamService.GetRacers();
+                raceTeam.AddRange(racers);
 
-                // Get team race count
-                TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
+                Logger.LogInformation($"Loaded {raceTeam.Count} racers");
 
-                Logger.LogInformation($"Loaded {raceTeam.Count} racers with {TeamRaceCount} total races");
+                // Get team race count in a separate operation to avoid concurrency issues
+                try {
+                    TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
+                    Logger.LogInformation($"Team race count: {TeamRaceCount}");
+                } catch (Exception ex) {
+                    Logger.LogError(ex, "Error getting team race count, setting to 0");
+                    TeamRaceCount = 0;
+                }
+
+                Logger.LogInformation($"ReloadUsers completed: {raceTeam.Count} racers with {TeamRaceCount} total races");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in ReloadUsers");
                 // Initialize with empty list to avoid null reference exceptions
