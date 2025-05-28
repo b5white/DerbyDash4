@@ -41,10 +41,8 @@ namespace DerbyDash {
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
-            // Add Identity services with Entity Framework stores
-            builder.Services.AddIdentityCore<ApplicationUser>(options => {
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();            // Add Identity services with Entity Framework stores
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
                 // Sign-in requirements
                 options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
                 options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing
@@ -60,10 +58,7 @@ namespace DerbyDash {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddSignInManager()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ApplicationDbContext>();
 
             // Configure Identity cookie options
             builder.Services.ConfigureApplicationCookie(cookieOptions => {
