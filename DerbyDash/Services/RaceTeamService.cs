@@ -1,5 +1,6 @@
 ﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
+using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 
@@ -10,6 +11,7 @@ namespace DerbyDash.Services {
         private readonly ApplicationDbContext _context;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CurrentRequestDTO CurrentRequest;
         private readonly IJSRuntime _jsRuntime;
         private bool _triedLoadingFromCookie = false;
 
@@ -31,12 +33,14 @@ namespace DerbyDash.Services {
             ApplicationDbContext context,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
+            CurrentRequestDTO currentRequest,
             IJSRuntime jsRuntime) {
             _userService = userService;
             Logger = logger;
             _context = context;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
+            CurrentRequest = currentRequest;
             _jsRuntime = jsRuntime;
 
             // Set a default active racer instead of trying to load from cookie during initialization
@@ -158,13 +162,14 @@ namespace DerbyDash.Services {
             if (Active == null) {
                 Active = raceTeam.FirstOrDefault();
             }
-
+            CurrentRequest.RacerId = Active?.Id ?? 0;
             return Active!;
         }
 
         public async Task SetActiveRacer(Racer racer) {
             Logger.LogInformation("SetActiveRacer ID: {ID}", racer.Id);
             Active = racer;
+            CurrentRequest.RacerId = Active.Id;
 
             try {
                 // Try to use JS interop, but catch the exception if we're prerendering
@@ -269,12 +274,12 @@ namespace DerbyDash.Services {
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
             try {
-                // Get the current user
-                string userId = await GetUserID("GetLastPlayedRaceAsync");
-                var user = await _userManager.FindByIdAsync(userId);
-                if (user != null && !string.IsNullOrEmpty(user.LastPlayedRace)) {
-                    Logger.LogInformation($"Retrieved last played race '{user.LastPlayedRace}' for user {user.UserName}");
-                    return user.LastPlayedRace;
+                // Get the active racer
+                var activeRacer = await GetActiveRacer();
+
+                if (activeRacer != null && !string.IsNullOrEmpty(activeRacer.LastPlayedRace)) {
+                    Logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
+                    return activeRacer.LastPlayedRace;
                 }
                 return null;
             } catch (Exception ex) {

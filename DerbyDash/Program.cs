@@ -2,6 +2,7 @@ using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
+using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +43,8 @@ namespace DerbyDash {
             builder.Services.AddScoped<GameStateService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            // Logging
+            builder.Services.AddScoped<CurrentRequestDTO>();
 
             // Add Identity services with Entity Framework stores
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
