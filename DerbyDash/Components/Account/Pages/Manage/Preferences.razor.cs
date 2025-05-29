@@ -86,8 +86,34 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 // Update the avatar filename
                 //currentUser.AvatarFileName = Model.Avatar;
 
-                // Save changes to the database
+                // Save changes to the database with retry logic for concurrency conflicts
                 var result = await UserManager.UpdateAsync(currentUser);
+                
+                // If we get a concurrency conflict, retry with a fresh user entity
+                if (!result.Succeeded && result.Errors.Any(e => e.Description.Contains("Optimistic concurrency failure"))) {
+                    Logger.LogWarning("Concurrency conflict detected for user '{UserId}', retrying with fresh entity", currentUser.Id);
+                    
+                    // Fetch a fresh copy of the user from the database
+                    var freshUser = await UserManager.FindByIdAsync(userId);
+                    if (freshUser != null) {
+                        // Apply the avatar change to the fresh entity
+                        freshUser.AvatarFileName = Model.Avatar;
+                        
+                        // Retry the update
+                        result = await UserManager.UpdateAsync(freshUser);
+                        currentUser = freshUser; // Update our reference
+                        
+                        if (result.Succeeded) {
+                            Logger.LogInformation("UserManager.UpdateAsync succeeded on retry for user '{UserId}'", currentUser.Id);
+                        } else {
+                            Logger.LogError("UserManager.UpdateAsync failed on retry for user '{UserId}'. Errors: {Errors}",
+                                currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
+                        }
+                    } else {
+                        Logger.LogError("Could not fetch fresh user entity for retry, user '{UserId}' not found", userId);
+                        result = IdentityResult.Failed(new IdentityError { Description = "Could not reload user data for retry" });
+                    }
+                }
 
                 if (result.Succeeded) {
                     Logger.LogInformation("UserManager.UpdateAsync succeeded for user '{UserId}'", currentUser.Id);

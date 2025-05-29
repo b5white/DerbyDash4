@@ -1,0 +1,302 @@
+/* Subscription Page Styling for Manage Layout */
+.subscription-container-manage {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+}
+
+.subscription-content {
+    padding: 1.5rem;
+}
+
+.subscription-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Loading and error states */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    text-align: center;
+}
+
+.loading-container p {
+    margin-top: 1rem;
+    color: #6c757d;
+}
+
+/* Section styling */
+.subscription-section {
+    border: 1px solid #e6e6e6;
+    border-radius: 8px;
+    padding: 1rem;
+    background-color: #fafafa;
+}
+
+.section-title {
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.section-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.section-info {
+    color: #666;
+    margin: 0;
+}
+
+/* Progress bar */
+.progress-bar {
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    height: 8px;
+    width: 100%;
+    overflow: hidden;
+    margin: 0.5rem 0;
+}
+
+.progress-fill {
+    background-color: #4CAF50;
+    height: 8px;
+    transition: width 1s ease-in-out;
+}
+
+/* Credits display */
+.referral-credits {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.credits-display {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.credits-count {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4CAF50;
+    line-height: 1;
+}
+
+.credits-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.credits-action {
+    display: flex;
+    justify-content: end;
+    align-items: center;
+}
+
+/* Upgrade section */
+.upgrade, .pause, .cancel {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.section-info-block {
+    flex: 1;
+}
+
+/* Auto renewal */
+.auto-renewal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Action buttons */
+.action-button {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #333;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.action-button:hover {
+    background-color: #f8f9fa;
+    border-color: #6c757d;
+}
+
+.action-button:disabled {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+/* Renew options */
+.renew-options {
+    background-color: #f8f9fa;
+    border-color: #4CAF50;
+}
+
+.renew-option-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.renew-option-button {
+    flex: 1;
+    min-width: 80px;
+    padding: 0.6rem;
+    border: 2px solid #ddd;
+    background-color: white;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.renew-option-button:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-1px);
+}
+
+.renew-option-button.selected {
+    border-color: #4CAF50;
+    background-color: #E8F5E9;
+    color: #2E7D32;
+}
+
+.confirm-button {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+
+.confirm-button:hover {
+    background-color: #388E3C;
+}
+
+/* Special offers */
+.offers-progress-bar {
+    background-color: #e0e0e0;
+    border-radius: 5px;
+    height: 6px;
+    width: 100%;
+    overflow: hidden;
+    margin-top: 0.8rem;
+}
+
+.offers-progress-fill {
+    background-color: #b0b0b0;
+    height: 6px;
+    width: 30%;
+    transition: width 1s ease-in-out;
+}
+
+/* Status badges */
+.paused-badge, .cancelled-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: bold;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+.paused-badge {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.cancelled-badge {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Footer */
+.subscription-footer {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    border-top: 1px solid #dee2e6;
+    margin: 1.5rem -1.5rem -1.5rem -1.5rem;
+}
+
+.footer-link {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .subscription-content {
+        padding: 1rem;
+    }
+    
+    .upgrade, .pause, .cancel {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .action-button {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .renew-option-buttons {
+        flex-direction: column;
+    }
+    
+    .renew-option-button {
+        width: 100%;
+    }
+    
+    .referral-credits {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .credits-action {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}

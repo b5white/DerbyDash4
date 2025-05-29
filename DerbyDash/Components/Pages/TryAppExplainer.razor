@@ -1,0 +1,310 @@
+@page "/TryAppExplainer"
+@attribute [AllowAnonymous]
+@rendermode InteractiveServer
+
+<PageTitle>Try Derby Dash First</PageTitle>
+
+<div class="explainer-container">
+    <div class="explainer-header">
+        <h1 class="explainer-title">
+            <i class="fas fa-lightbulb"></i>
+            Try DerbyDash Yourself First!
+        </h1>
+        <p class="explainer-subtitle">
+            We suggest parents try the app before handing it over to their kids
+        </p>
+    </div>
+
+    <div class="explainer-content">
+        <div class="suggestion-card">
+            <div class="suggestion-icon">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+            <div class="suggestion-text">
+                <h3>Learn by Example</h3>
+                <p>
+                    The best way to understand how DerbyDash works is to experience it yourself. 
+                    We recommend starting with multiplication squares to see how the app helps with math learning.
+                </p>
+            </div>
+        </div>
+
+        <div class="suggestion-card">
+            <div class="suggestion-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="suggestion-text">
+                <h3>Just 5-10 Races</h3>
+                <p>
+                    After just 5 to 10 races with small multiplication squares, you'll likely notice 
+                    you know your squares better. This quick experience will help you understand 
+                    what your kids will gain from using the app.
+                </p>
+            </div>
+        </div>
+
+        <div class="suggestion-card">
+            <div class="suggestion-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="suggestion-text">
+                <h3>Share the Experience</h3>
+                <p>
+                    Once you've tried it yourself, you'll be able to better guide and encourage 
+                    your children as they use Derby Dash to improve their math skills.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-section">
+        <div class="race-preview">
+            <h3>Ready to Race?</h3>
+            <p>Click below to try multiplication squares and see how Derby Dash works!</p>
+        </div>
+        
+        <div class="action-buttons">
+            <a href="/race/multiplication-squaressmall" class="btn-lets-race">
+                <i class="fas fa-flag-checkered"></i>
+                Let's Race!
+            </a>
+            
+            <a href="/Account/Manage/RaceTeam" class="btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Back to Race Team
+            </a>
+        </div>
+    </div>
+
+    <div class="educational-note">
+        <div class="note-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="note-text">
+            <p>
+                <strong>Educational Tip:</strong> Multiplication squares (like 2×2, 3×3, 4×4) are foundational 
+                for mental math. Mastering these small squares first makes larger multiplication problems much easier!
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+.explainer-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.explainer-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.explainer-title {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.explainer-title i {
+    color: #f39c12;
+    margin-right: 0.5rem;
+}
+
+.explainer-subtitle {
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.explainer-content {
+    margin-bottom: 3rem;
+}
+
+.suggestion-card {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border-left: 4px solid #3498db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+}
+
+.suggestion-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-icon {
+    font-size: 2rem;
+    color: #3498db;
+    margin-right: 1.5rem;
+    margin-top: 0.5rem;
+    min-width: 2rem;
+}
+
+.suggestion-text h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.suggestion-text p {
+    color: #5a6c7d;
+    margin: 0;
+    line-height: 1.6;
+}
+
+.action-section {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.race-preview h3 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.race-preview p {
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-lets-race {
+    background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-lets-race:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-back {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.educational-note {
+    display: flex;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-radius: 12px;
+    border-left: 4px solid #f39c12;
+}
+
+.note-icon {
+    font-size: 1.5rem;
+    color: #f39c12;
+    margin-right: 1rem;
+    margin-top: 0.2rem;
+}
+
+.note-text p {
+    margin: 0;
+    color: #856404;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@@media (max-width: 768px) {
+    .explainer-container {
+        padding: 1rem;
+    }
+    
+    .explainer-title {
+        font-size: 2rem;
+    }
+    
+    .suggestion-card {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .suggestion-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-lets-race,
+    .btn-back {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
+
+@@media (max-width: 480px) {
+    .explainer-title {
+        font-size: 1.8rem;
+    }
+    
+    .action-section {
+        padding: 1.5rem;
+    }
+    
+    .educational-note {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .note-icon {
+        margin-right: 0;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
