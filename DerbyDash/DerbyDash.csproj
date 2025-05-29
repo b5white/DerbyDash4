@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <!--<ProjectReference Include="..\DerbyDash.Client\DerbyDash.Client.csproj" />-->
+    <PackageReference Include="Bogus" Version="35.6.3" />
     <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
       <PrivateAssets>all</PrivateAssets>  
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -21,8 +22,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
   </ItemGroup>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell.exe -ExecutionPolicy Bypass -File &quot;$(ProjectDir)update-build-number.ps1&quot; $(ProjectDir)&#xD;&#xA;&#xD;&#xA;" />
-  </Target>
 </Project>

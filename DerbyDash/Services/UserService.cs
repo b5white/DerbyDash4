@@ -1,13 +1,15 @@
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
+using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace DerbyDash.Services {
-    public class UserService : IUserService {
+    public class UserService: IUserService {
         private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly CurrentRequestDTO CurrentRequest;
         private readonly ILogger<UserService> _logger;
 
         // Cache the user ID to avoid repeated lookups during a single request
@@ -17,12 +19,16 @@ namespace DerbyDash.Services {
         public UserService(
             AuthenticationStateProvider authenticationStateProvider,
             UserManager<ApplicationUser> userManager,
+            CurrentRequestDTO currentRequest,
             ILogger<UserService> logger
         ) {
             _authenticationStateProvider = authenticationStateProvider;
             _userManager = userManager;
+            CurrentRequest = currentRequest;
             _logger = logger;
-        }        public async Task<string> GetUserIdAsync(string purpose = "") {
+        }
+
+        public async Task<string> GetUserIdAsync(string purpose = "") {
             var logContext = string.IsNullOrEmpty(purpose) ? "GetUserIdAsync" : $"GetUserIdAsync for {purpose}";
             _logger.LogInformation("{LogContext}", logContext);
 
@@ -52,6 +58,7 @@ namespace DerbyDash.Services {
 
                 // Cache the user ID
                 _cachedUserId = userId;
+                CurrentRequest.UserId = userId; // Update the current request context
                 _userIdCacheInitialized = true;
 
                 _logger.LogInformation("Successfully retrieved user ID for {Purpose}", purpose);

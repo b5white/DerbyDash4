@@ -1,9 +1,7 @@
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DerbyDash.Data {
-    [Index(nameof(UserId), nameof(Status))]
+    //   [Index(nameof(UserId), nameof(Status))]
     public class Subscription {
         public int Id { get; set; }
 

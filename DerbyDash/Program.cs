@@ -2,6 +2,7 @@ using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
+using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,21 @@ namespace DerbyDash {
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+            // Add authentication services and cookie options
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
+                    cookieOptions.LoginPath = "/Account/Login";
+                    cookieOptions.LogoutPath = "/Account/Logout";
+                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
+                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                    cookieOptions.Cookie.Name = "DerbyDash";
+                    cookieOptions.Cookie.IsEssential = true;
+                });
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
             builder.Services.AddScoped<RaceService>();
@@ -44,8 +60,12 @@ namespace DerbyDash {
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
-            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();            // Add Identity services with Entity Framework stores
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+            builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+            // Logging
+            builder.Services.AddScoped<CurrentRequestDTO>();
+
+            // Add Identity services with Entity Framework stores
+            builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 // Sign-in requirements
                 options.SignIn.RequireConfirmedAccount = false; // Set to false for easier testing
                 options.SignIn.RequireConfirmedEmail = false;   // Set to false for easier testing
@@ -61,22 +81,13 @@ namespace DerbyDash {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+            //    .AddRoles<IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddSignInManager()
                 .AddDefaultTokenProviders();
 
-            // Configure Identity cookie options
-            builder.Services.ConfigureApplicationCookie(cookieOptions => {
-                cookieOptions.LoginPath = "/Account/Login";
-                cookieOptions.LogoutPath = "/Account/Logout";
-                cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
-                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
-                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                cookieOptions.Cookie.Name = "DerbyDash";
-                cookieOptions.Cookie.IsEssential = true;
-            });
+            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
+
             // Add authorization services
             builder.Services.AddAuthorization();
 
@@ -100,6 +111,7 @@ namespace DerbyDash {
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseMiddleware<CurrentRequestMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();
