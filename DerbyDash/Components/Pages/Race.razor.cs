@@ -407,7 +407,8 @@ namespace DerbyDash.Components.Pages {
             if (!wasCarAtTop && isCarAtTop) {
                 SynchronizeAnimationStart();
             }
-        }        private Task<bool> CalculateOldDistance(double time) {
+        }
+        private Task<bool> CalculateOldDistance(double time) {
             Boolean allFinished = true;
             for (int i = 1; i < track.Cars.Count; i++) {
                 double dist = track.Cars[i].CalculateCurrentDistance(time);
@@ -429,7 +430,8 @@ namespace DerbyDash.Components.Pages {
             }
 
             return Task.FromResult(allFinished);
-        }private async Task UpdateResultsAsync(float timeSpan) {
+        }
+        private async Task UpdateResultsAsync(float timeSpan) {
             try {
                 await Task.Run(() => {
                     ResetResults(timeSpan);
@@ -441,17 +443,17 @@ namespace DerbyDash.Components.Pages {
                     try {
                         // Create speed increments from the elapsed answer times
                         var speedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
-                        
+
                         // Convert ProblemClassString to problem set ID
                         int problemSetId = GetProblemSetId(ProblemClassString);
-                        
+
                         // Save the race completion
-                        await RaceTeamService.SaveRaceCompletionAsync(
-                            totalTime: timeSpan, 
-                            problemSetId: problemSetId, 
-                            speedIncrements: speedIncrements
-                        );
-                        
+                        //await RaceTeamService.SaveRaceCompletionAsync(
+                        //    totalTime: timeSpan, 
+                        //    problemSetId: problemSetId, 
+                        //    speedIncrements: speedIncrements
+                        //);
+
                         Logger.LogInformation($"Race completion saved: {timeSpan}s for problem set {problemSetId}");
                     } catch (Exception ex) {
                         Logger.LogError(ex, "Error saving race completion to database");
@@ -644,7 +646,8 @@ namespace DerbyDash.Components.Pages {
                     await CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
-                }            } catch (OperationCanceledException) {
+                }
+            } catch (OperationCanceledException) {
                 Logger.LogInformation("Timer cancelled");
             }
         }

@@ -5,6 +5,7 @@ using DerbyDash.Services;
 using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash {
     public class Program {
@@ -18,8 +19,8 @@ namespace DerbyDash {
             //    .AddAuthenticationStateSerialization();
 
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            //builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            //    options.UseSqlServer(connectionString));
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             // Add Scoped services
@@ -30,6 +31,7 @@ namespace DerbyDash {
             // Register both auth state providers
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+            builder.Services.AddAuthentication();
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
@@ -62,24 +64,27 @@ namespace DerbyDash {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
-                .AddRoles<IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+            //    .AddRoles<IdentityRole>()
+            //    .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
 
+            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
+
             // Configure Identity cookie options
-            builder.Services.ConfigureApplicationCookie(cookieOptions => {
-                cookieOptions.LoginPath = "/Account/Login";
-                cookieOptions.LogoutPath = "/Account/Logout";
-                cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
-                cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
-                cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                cookieOptions.Cookie.Name = "DerbyDash";
-                cookieOptions.Cookie.IsEssential = true;
-            });
+            builder.Services.AddAuthentication("Identity.Application")
+                .AddCookie("Identity.Application", cookieOptions => {
+                    cookieOptions.LoginPath = "/Account/Login";
+                    cookieOptions.LogoutPath = "/Account/Logout";
+                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
+                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                    cookieOptions.Cookie.Name = "DerbyDash";
+                    cookieOptions.Cookie.IsEssential = true;
+                });
             // Add authorization services
             builder.Services.AddAuthorization();
 

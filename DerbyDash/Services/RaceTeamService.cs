@@ -8,8 +8,8 @@ namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
         private readonly IUserService _userService;
         private readonly ILogger<RaceTeamService> Logger;
-        private readonly ApplicationDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
+        //        private readonly ApplicationDbContext _context;
+        //        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CurrentRequestDTO CurrentRequest;
         private readonly IJSRuntime _jsRuntime;
@@ -30,15 +30,15 @@ namespace DerbyDash.Services {
         public RaceTeamService(
             IUserService userService,
             ILogger<RaceTeamService> logger,
-            ApplicationDbContext context,
-            IHttpContextAccessor httpContextAccessor,
+            //       ApplicationDbContext context,
+            //       IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
             CurrentRequestDTO currentRequest,
             IJSRuntime jsRuntime) {
             _userService = userService;
             Logger = logger;
-            _context = context;
-            _httpContextAccessor = httpContextAccessor;
+            //       _context = context;
+            //       _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             CurrentRequest = currentRequest;
             _jsRuntime = jsRuntime;
