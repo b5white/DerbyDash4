@@ -88,21 +88,21 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                 // Save changes to the database with retry logic for concurrency conflicts
                 var result = await UserManager.UpdateAsync(currentUser);
-                
+
                 // If we get a concurrency conflict, retry with a fresh user entity
                 if (!result.Succeeded && result.Errors.Any(e => e.Description.Contains("Optimistic concurrency failure"))) {
                     Logger.LogWarning("Concurrency conflict detected for user '{UserId}', retrying with fresh entity", currentUser.Id);
-                    
+
                     // Fetch a fresh copy of the user from the database
                     var freshUser = await UserManager.FindByIdAsync(userId);
                     if (freshUser != null) {
                         // Apply the avatar change to the fresh entity
-                        freshUser.AvatarFileName = Model.Avatar;
-                        
+                        // freshUser.AvatarFileName = Model.Avatar;
+
                         // Retry the update
                         result = await UserManager.UpdateAsync(freshUser);
                         currentUser = freshUser; // Update our reference
-                        
+
                         if (result.Succeeded) {
                             Logger.LogInformation("UserManager.UpdateAsync succeeded on retry for user '{UserId}'", currentUser.Id);
                         } else {

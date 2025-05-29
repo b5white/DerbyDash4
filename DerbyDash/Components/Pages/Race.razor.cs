@@ -116,7 +116,7 @@ namespace DerbyDash.Components.Pages {
                 // Notify GameStateService that the game is now running
                 GameStateService.SetGameRunning(true);
 
-                await CreateProblems();
+                CreateProblems();
                 await InitializeTrack(ProblemClassString);
                 ScaleRace(0);
                 encouragingWord = encouragingWords[Random.Shared.Next(0, encouragingWords.Length)];
@@ -194,7 +194,7 @@ namespace DerbyDash.Components.Pages {
             await Reset();
         }
 
-        private async Task CreateProblems() {
+        private void CreateProblems() {
             Logger.LogInformation("CreateProblems");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
