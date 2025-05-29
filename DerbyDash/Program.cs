@@ -108,6 +108,7 @@ namespace DerbyDash {
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+            app.UseMiddleware<CurrentRequestMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();

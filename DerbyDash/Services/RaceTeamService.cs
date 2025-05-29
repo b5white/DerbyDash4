@@ -56,11 +56,11 @@ namespace DerbyDash.Services {
 
         public async Task<List<Racer>> GetRacersInternal() {
             Logger.LogInformation("GetRacersInternal");
-            ApplicationUser? user;
             string userId;
             try {
                 // Check if user is authenticated first
                 if (!await _userService.IsLoggedInAsync()) {
+                    // TODO throw an exception so we can redirect
                     Logger.LogWarning("User is not authenticated when trying to GetRacers");
                     return new List<Racer>();
                 }
@@ -71,34 +71,39 @@ namespace DerbyDash.Services {
                     Logger.LogInformation($"Getting racers for user: {userId}");
                 } catch (Exception ex) {
                     Logger.LogWarning(ex, "Could not get userId, but continuing");
+                    // TODO throw an exception so we can redirect them to log in
                     return new List<Racer>();
                 }
 
-                user = await GetUserByIdAsync(userId);
-                if (user == null) {
-                    Logger.LogWarning("Could not get user, but continuing");
-                    return new List<Racer>();
-                }
+
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in GetRacersInternal()");
                 return new List<Racer>();
             }
-            return await GetRacers(user);
+            return await GetRacersByUserId(userId);
         }
 
-        public async Task<List<Racer>> GetRacers(ApplicationUser user) {
-            Logger.LogInformation("GetRacers for ID: {ID}", user.Id);
+        public async Task<List<Racer>> GetRacersByUserId(string userId) {
+            Logger.LogInformation("GetRacersByUserId for ID: {ID}", userId);
             // Return the same data as GetRacers() for consistency
             await Task.CompletedTask; // Just to use 'await'
+            if (raceTeam.Count == 0) {
+                Logger.LogWarning("No Racers found for ID: {ID}", userId);
+            }
             return raceTeam;
         }
 
         public async Task<Racer?> GetRacerByIdAsync(int racerId) {
             Logger.LogInformation("GetRacerByIdAsync for ID: {ID}", racerId);
+            Racer? racer = raceTeam.FirstOrDefault(r => r.Id == racerId);
+            if (racer == null) {
+                Logger.LogWarning("No Racer found for ID: {ID}", racerId);
+            }
             await Task.CompletedTask; // Just to use 'await'
-            return raceTeam.FirstOrDefault(r => r.Id == racerId);
+            return racer;
         }
 
+        [Obsolete]
         public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
             Logger.LogInformation("GetUserByIdAsync for userId: {userId}", userId);
             await Task.CompletedTask; // Just to use 'await'
@@ -115,7 +120,8 @@ namespace DerbyDash.Services {
                 int maxId = raceTeam.Count > 0 ? raceTeam.Max(r => r.Id) : 0;
                 racer.Id = maxId + 1;
             }
-
+            // await _context.RaceTeam.AddAsync(racer);
+            // await _context.SaveChangesAsync();
             raceTeam.Add(racer);
 
             // Set as active racer if none is selected
@@ -131,14 +137,16 @@ namespace DerbyDash.Services {
 
         public async Task UpdateRacer(Racer racer) {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
+            // _context.RaceTeam.Update(racer);
+            // await _context.SaveChangesAsync();
             await Task.CompletedTask; // Just to use 'await'
-            return;
+            OnRacerChanged?.Invoke();
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
             await Task.CompletedTask; // Just to use 'await'
-            return;
+            OnRacerChanged?.Invoke();
         }
 
         public async Task<Racer> GetActiveRacer() {
@@ -178,7 +186,7 @@ namespace DerbyDash.Services {
                     var userId = await GetUserID("SetActiveRacer");
                     userIdentifier = userId.ToString();
                 } catch (Exception) {
-                    // If we can't get userId, use "guest" as the identifier
+                    // If we can't get the userId, use "guest" as the identifier
                     Logger.LogWarning("Could not get userId for cookie, using guest instead");
                 }
 
@@ -356,7 +364,7 @@ namespace DerbyDash.Services {
         public async Task<Racer?> GetRacerWithRaceCountAsync() {
             var racer = await GetActiveRacer();
             if (racer != null) {
-                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.FamilyMemberId == racerId);
+                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.RacerId == racerId);
             }
             return racer;
         }

@@ -220,14 +220,15 @@ namespace DerbyDash.Components.Layout {
 
         private async Task LoadUserAvatar() {
             // TODO replace
-            var authState = await AuthStateTask;
-            var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // var authState = await AuthStateTask;
+            var userId = ""; // authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
                 // TODO Can we just get the current user instead of getting the ID first?
                 var user = await UserManager.FindByIdAsync(userId);
                 if (user != null) {
+                    // TODO This is still wrong
                     //UserAvatarFileName = user.AvatarFileName;
                     UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
                     UserEmail = user.Email; // Store the user's email

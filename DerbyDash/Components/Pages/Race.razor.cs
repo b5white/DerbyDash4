@@ -117,7 +117,7 @@ namespace DerbyDash.Components.Pages {
                 GameStateService.SetGameRunning(true);
 
                 await CreateProblems();
-                InitializeTrack(ProblemClassString);
+                await InitializeTrack(ProblemClassString);
                 ScaleRace(0);
                 encouragingWord = encouragingWords[Random.Shared.Next(0, encouragingWords.Length)];
                 ReceivedError = false;
@@ -181,16 +181,6 @@ namespace DerbyDash.Components.Pages {
                 return;
             }
 
-            // If we already have a ProblemClassString, save it to the database
-            if (!string.IsNullOrEmpty(ProblemClassString)) {
-                try {
-                    // Save the last played race to the database
-                    await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString);
-                } catch (Exception ex) {
-                    Logger.LogError(ex, "Error saving last played race to database");
-                }
-            }
-
             // Refresh the active racer cookie if there is an active racer
             try {
                 Racer? activeRacer = await RaceTeamService.GetActiveRacer();
@@ -212,13 +202,6 @@ namespace DerbyDash.Components.Pages {
             if (problems == null) {
                 problems = ProblemFactory.CreateProblemManager(ProblemClassString);
             }
-
-            try {
-                // Save the last played race to the database
-                await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString);
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error saving last played race to database");
-            }
         }
 
         public async Task OnAfter() {
@@ -235,7 +218,7 @@ namespace DerbyDash.Components.Pages {
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    await CalculateNewDistance(GetTimespan(starttime));
+                    CalculateNewDistance(GetTimespan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
@@ -379,7 +362,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private async Task CalculateNewDistance(double time) {
+        private void CalculateNewDistance(double time) {
             currentDistance = 0;
             int i;
 
@@ -398,7 +381,7 @@ namespace DerbyDash.Components.Pages {
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
-                await EndRace();
+                EndRace();
             }
 
             bool wasCarAtTop = track.IsAnyCarAtTop;
@@ -408,7 +391,8 @@ namespace DerbyDash.Components.Pages {
                 SynchronizeAnimationStart();
             }
         }
-        private Task<bool> CalculateOldDistance(double time) {
+
+        private bool CalculateOldDistance(double time) {
             Boolean allFinished = true;
             for (int i = 1; i < track.Cars.Count; i++) {
                 double dist = track.Cars[i].CalculateCurrentDistance(time);
@@ -429,36 +413,14 @@ namespace DerbyDash.Components.Pages {
                 StopPeriodicTimer();
             }
 
-            return Task.FromResult(allFinished);
+            return allFinished;
         }
         private async Task UpdateResultsAsync(float timeSpan) {
             try {
-                await Task.Run(() => {
-                    ResetResults(timeSpan);
-                    CalculateAverage();
-                });
-
-                // Save the race completion to the database
-                if (!string.IsNullOrEmpty(ProblemClassString)) {
-                    try {
-                        // Create speed increments from the elapsed answer times
-                        var speedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
-
-                        // Convert ProblemClassString to problem set ID
-                        int problemSetId = GetProblemSetId(ProblemClassString);
-
-                        // Save the race completion
-                        //await RaceTeamService.SaveRaceCompletionAsync(
-                        //    totalTime: timeSpan, 
-                        //    problemSetId: problemSetId, 
-                        //    speedIncrements: speedIncrements
-                        //);
-
-                        Logger.LogInformation($"Race completion saved: {timeSpan}s for problem set {problemSetId}");
-                    } catch (Exception ex) {
-                        Logger.LogError(ex, "Error saving race completion to database");
-                    }
-                }
+                ResetResults(timeSpan);
+                CalculateAverage();
+                await RaceService.SaveRaceAsync(track.Cars[0], track.RacerId, track.ProblemId);
+                await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);
             }
@@ -529,14 +491,14 @@ namespace DerbyDash.Components.Pages {
         //    }
         //}
 
-        public void InitializeTrack(string? problemSetIdentifier) {
+        public async Task InitializeTrack(string? problemSetIdentifier) {
             Logger.LogInformation("InitializeTrack");
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
                 // Get the current racer from the _raceTeamService
-                Racer? currentRacer = RaceTeamService.GetActiveRacer().GetAwaiter().GetResult();
+                Racer? currentRacer = await RaceTeamService.GetActiveRacer();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
                     Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
@@ -545,8 +507,8 @@ namespace DerbyDash.Components.Pages {
                 }
 
                 // Create the track with the current racer
-                track = RaceService.CreateTrack(problemSetIdentifier);
-            } catch (MissingTeamMemberException ex) {
+                track = await RaceService.CreateTrack(problemSetIdentifier);
+            } catch (MissingRacerException ex) {
                 LogMessage(ex);
                 Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
                 NavManager.NavigateTo("/Account/Manage/RaceTeam");
@@ -642,13 +604,12 @@ namespace DerbyDash.Components.Pages {
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     RaceTime = GetSpan(starttime);
-                    await CalculateNewDistance(RaceTime);
-                    await CalculateOldDistance(RaceTime);
+                    CalculateNewDistance(RaceTime);
+                    CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
                 }
             } catch (OperationCanceledException) {
-                Logger.LogInformation("Timer cancelled");
             }
         }
 

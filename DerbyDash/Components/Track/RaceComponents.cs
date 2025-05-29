@@ -12,7 +12,7 @@
         public int SpeedClass { get; set; } = 1;
         public float RaceTime = 0;
         public int ProblemId { get; set; }
-        public string TeamMemberId { get; set; } = "";
+        public int RacerId { get; set; }
         const int MIN_SPEED_CLASS = 1;
         const int MAX_SPEED_CLASS = 15;
 
