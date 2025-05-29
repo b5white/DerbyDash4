@@ -1,5 +1,5 @@
 namespace DerbyDash.Services {
-    public class AvatarService : IAvatarService {
+    public class AvatarService: IAvatarService {
         private readonly ILogger<AvatarService> _logger;
 
         public AvatarService(ILogger<AvatarService> logger) {
@@ -9,14 +9,23 @@ namespace DerbyDash.Services {
         /// <summary>
         /// Event that fires when a user's avatar is updated
         /// </summary>
-        public event Action? OnAvatarChanged;
+        public event Func<Task>? OnAvatarChanged;
 
         /// <summary>
         /// Notifies subscribers that the current user's avatar has been updated
         /// </summary>
-        public void NotifyAvatarChanged() {
+        public async Task NotifyAvatarChanged() {
             _logger.LogInformation("Avatar changed, notifying subscribers");
-            OnAvatarChanged?.Invoke();
+            await InvokeOnAvatarChanged();
+        }
+
+        private async Task InvokeOnAvatarChanged() {
+            if (OnAvatarChanged != null) {
+                var handlers = OnAvatarChanged.GetInvocationList().Cast<Func<Task>>();
+                foreach (var handler in handlers) {
+                    await handler(); // Await each handler
+                }
+            }
         }
     }
 }

@@ -25,7 +25,7 @@ namespace DerbyDash.Services {
         private string? UserId;
 
         // Event that components can subscribe to for updates
-        public event Action? OnRacerChanged;
+        public event Func<Task>? OnRacerChanged;
 
         public RaceTeamService(
             IUserService userService,
@@ -130,7 +130,7 @@ namespace DerbyDash.Services {
             }
 
             // Notify subscribers that the racer list has changed
-            OnRacerChanged?.Invoke();
+            await InvokeOnRacerChanged();
             await Task.CompletedTask; // Just to use 'await'
             return racer;
         }
@@ -140,13 +140,13 @@ namespace DerbyDash.Services {
             // _context.RaceTeam.Update(racer);
             // await _context.SaveChangesAsync();
             await Task.CompletedTask; // Just to use 'await'
-            OnRacerChanged?.Invoke();
+            await InvokeOnRacerChanged();
         }
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
             await Task.CompletedTask; // Just to use 'await'
-            OnRacerChanged?.Invoke();
+            await InvokeOnRacerChanged();
         }
 
         public async Task<Racer> GetActiveRacer() {
@@ -202,7 +202,7 @@ namespace DerbyDash.Services {
             }
 
             // Notify subscribers that the active racer has changed
-            OnRacerChanged?.Invoke();
+            await InvokeOnRacerChanged();
         }
 
         // Load the active racer from cookie
@@ -315,7 +315,7 @@ namespace DerbyDash.Services {
                     Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
 
                     // Notify subscribers that the racer has been updated
-                    OnRacerChanged?.Invoke();
+                    await InvokeOnRacerChanged();
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error saving last played race {ProblemClass}", problemClassString);
@@ -367,6 +367,15 @@ namespace DerbyDash.Services {
                 racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.RacerId == racerId);
             }
             return racer;
+        }
+        
+        private async Task InvokeOnRacerChanged() {
+            if (OnRacerChanged != null) {
+                var handlers = OnRacerChanged.GetInvocationList().Cast<Func<Task>>();
+                foreach (var handler in handlers) {
+                    await handler(); // Await each handler
+                }
+            }
         }
 
         /// <summary>

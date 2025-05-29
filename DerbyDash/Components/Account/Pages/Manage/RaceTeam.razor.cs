@@ -39,7 +39,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             await ReloadUsers();
         }
 
-        private async void HandleRacerChangedAsync() {
+        private async Task HandleRacerChangedAsync() {
             try {
                 Logger.LogInformation("HandleRacerChangedAsync started");
                 await ReloadUsers();

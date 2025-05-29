@@ -2,7 +2,7 @@
 
 namespace DerbyDash.Services {
     public interface IRaceTeamService {
-        public event Action? OnRacerChanged;
+        public event Func<Task>? OnRacerChanged;
         public Task<List<Racer>> GetRacersByUserId(string userId);
         public Task<List<Racer>> GetRacers();
         public Task<Racer?> GetRacerByIdAsync(int racerId);
@@ -31,7 +31,7 @@ namespace DerbyDash.Services {
         /// </summary>
         /// <returns>The total number of races</returns>
         public Task<int> GetTeamRaceCountAsync();
-        
+
         /// <summary>
         /// Gets the number of races completed by the current active racer
         /// </summary>

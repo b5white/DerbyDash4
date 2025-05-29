@@ -533,7 +533,7 @@ namespace DerbyDash.Components.Pages {
             // The UI already shows a login message for unauthenticated users
         }
 
-        public async void OnAfterIgnore() {
+        public async Task OnAfterIgnore() {
             try {
                 await textInput.FocusAsync();
             } catch (Exception) {

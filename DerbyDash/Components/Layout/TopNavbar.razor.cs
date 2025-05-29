@@ -3,7 +3,6 @@ using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
@@ -36,11 +35,8 @@ namespace DerbyDash.Components.Layout {
             // Subscribe to avatar changes
             AvatarService.OnAvatarChanged += HandleAvatarChangedAsync;
 
-            // Subscribe to navigation changes and refresh user avatar when navigation occurs
-            NavManager.LocationChanged += HandleLocationChangedAsync;
-
             // Subscribe to game state changes
-            GameStateService.OnGameStateChanged += HandleGameStateChangedAsync;
+            GameStateService.OnGameStateChanged += HandleGameStateChanged;
 
             await LoadUserAvatar();
         }
@@ -49,16 +45,6 @@ namespace DerbyDash.Components.Layout {
             if (firstRender) {
                 await LoadRacers();
                 StateHasChanged();
-            }
-        }
-
-        private async void HandleLocationChangedAsync(object? sender, LocationChangedEventArgs e) {
-            // Refresh user avatar when navigation occurs
-            try {
-                await LoadUserAvatar();
-                StateHasChanged();
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error in HandleLocationChangedAsync");
             }
         }
 
@@ -104,14 +90,14 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleRacerChangedAsync() {
+        private async Task HandleRacerChangedAsync() {
             try {
                 await LoadRacers();
                 StateHasChanged();
             } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
                 // DbContext concurrency issue - this is temporary, retry after a short delay
                 Logger.LogWarning(ex, "Temporary DbContext concurrency issue in HandleRacerChangedAsync - will retry");
-                
+
                 // Retry after a short delay
                 _ = Task.Run(async () => {
                     await Task.Delay(100); // Short delay
@@ -129,7 +115,7 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleAvatarChangedAsync() {
+        private async Task HandleAvatarChangedAsync() {
             try {
                 await LoadUserAvatar();
                 StateHasChanged();
@@ -244,9 +230,9 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleGameStateChangedAsync(bool isGameRunning) {
+        private void HandleGameStateChanged(bool isGameRunning) {
             try {
-                await InvokeAsync(StateHasChanged);
+                StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleGameStateChangedAsync");
             }
@@ -272,13 +258,9 @@ namespace DerbyDash.Components.Layout {
             if (AvatarService != null)
                 AvatarService.OnAvatarChanged -= HandleAvatarChangedAsync;
 
-            // Unsubscribe from navigation changes
-            if (NavManager != null)
-                NavManager.LocationChanged -= HandleLocationChangedAsync;
-
             // Unsubscribe from game state changes
             if (GameStateService != null)
-                GameStateService.OnGameStateChanged -= HandleGameStateChangedAsync;
+                GameStateService.OnGameStateChanged -= HandleGameStateChanged;
         }
     }
 }

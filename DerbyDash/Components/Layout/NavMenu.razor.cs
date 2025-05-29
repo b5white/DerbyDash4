@@ -21,7 +21,7 @@ namespace DerbyDash.Components.Layout {
         }
 
         // Handle logout directly from the NavMenu
-        private async void HandleLogout() {
+        private async Task HandleLogout() {
             try {
                 // Close the mobile menu first
                 await CloseMenu();
