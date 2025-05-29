@@ -22,8 +22,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
   </ItemGroup>
-
-  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="powershell.exe -ExecutionPolicy Bypass -File &quot;$(ProjectDir)update-build-number.ps1&quot; $(ProjectDir)&#xD;&#xA;&#xD;&#xA;" />
-  </Target>
 </Project>

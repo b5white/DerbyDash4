@@ -31,7 +31,21 @@ namespace DerbyDash {
             // Register both auth state providers
             builder.Services.AddScoped<CustomAuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
-            builder.Services.AddAuthentication();
+
+            // Add authentication services and cookie options
+            builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
+                .AddCookie(IdentityConstants.ApplicationScheme, cookieOptions => {
+                    cookieOptions.LoginPath = "/Account/Login";
+                    cookieOptions.LogoutPath = "/Account/Logout";
+                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
+                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
+                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
+                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
+                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
+                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
+                    cookieOptions.Cookie.Name = "DerbyDash";
+                    cookieOptions.Cookie.IsEssential = true;
+                });
 
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
@@ -71,20 +85,6 @@ namespace DerbyDash {
 
             builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
 
-            // Configure Identity cookie options
-            builder.Services.AddAuthentication("Identity.Application")
-                .AddCookie("Identity.Application", cookieOptions => {
-                    cookieOptions.LoginPath = "/Account/Login";
-                    cookieOptions.LogoutPath = "/Account/Logout";
-                    cookieOptions.AccessDeniedPath = "/Account/AccessDenied";
-                    cookieOptions.ExpireTimeSpan = TimeSpan.FromDays(90); // Set cookie expiration
-                    cookieOptions.SlidingExpiration = true;              // Optional: Reset expiration if active
-                    cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
-                    cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
-                    cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                    cookieOptions.Cookie.Name = "DerbyDash";
-                    cookieOptions.Cookie.IsEssential = true;
-                });
             // Add authorization services
             builder.Services.AddAuthorization();
 

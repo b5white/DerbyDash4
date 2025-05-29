@@ -59,6 +59,8 @@
         // TODO Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // TODO Admin page for viewing logs
         // TODO Enable email
+        // TODO Add Exception to the feedback report
+        // TODO Add SessionId to log
 
         // ** Either Filipe or Brad **
         // TODO Save the Race position in the list at time it was first run, in Race
@@ -69,6 +71,7 @@
         // TODO Add current userId and racerId to feedback in service.
         // TODO Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
+        // TODO Add version number to Feedback report
 
         // ** Later **
         // Show userId and racerId in admin feedback page.
