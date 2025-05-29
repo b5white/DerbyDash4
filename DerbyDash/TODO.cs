@@ -31,7 +31,7 @@
         // DONE On mobile, the menu stays up too long. At least close when they make a selection.
         // DONE On mobile, when on profile page, hide top menu bar.
         //      Once they pop up the keyboard, there isn't much space left.
-        // TODO If race team has no races, then on the Race Team page, add a button Next ->
+        // DONE If race team has no races, then on the Race Team page, add a button Next ->
         //      that takes them to an explainer page.
         //      It suggests they try the app with multiplying squares before handing it over
         //      to their kids so they can see how it works.
@@ -41,8 +41,8 @@
         // TODO Add progress panel with list of steps to each of the reg pages.
         //      Change RaceTeam page to show progress panel if coming from reg,
         //      and profile menu if not.
-        // TODO Top menu needs to refresh the race count after each race.
-        // TODO Subscription should look like it's part of the profile submenu, like the others do.
+        // DONE Top menu needs to refresh the race count after each race.
+        // DONE Subscription should look like it's part of the profile submenu, like the others do.
         // TODO Don't default the active racer, except for when first adding the race team and when reading from a cookie.
         // TODO Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
         // TODO Redo the menu pages to use two columns of thinner buttons

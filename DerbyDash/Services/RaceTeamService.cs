@@ -3,12 +3,13 @@ using DerbyDash.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.JSInterop;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
         private readonly IUserService _userService;
         private readonly ILogger<RaceTeamService> Logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IJSRuntime _jsRuntime;
@@ -26,14 +27,14 @@ namespace DerbyDash.Services {
         public RaceTeamService(
             IUserService userService,
             ILogger<RaceTeamService> logger,
-            ApplicationDbContext context,
+            IDbContextFactory<ApplicationDbContext> contextFactory,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager,
             IJSRuntime jsRuntime,
             IServiceProvider serviceProvider) {
             _userService = userService;
             Logger = logger;
-            _context = context;
+            _contextFactory = contextFactory;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _jsRuntime = jsRuntime;
@@ -70,7 +71,8 @@ namespace DerbyDash.Services {
                 }
 
                 // Load racers from database with race counts using a single query
-                var racers = await _context.Racers
+                using var context = _contextFactory.CreateDbContext();
+                var racers = await context.Racers
                     .Where(r => r.UserId == userId)
                     .Select(r => new Racer {
                         Id = r.Id,
@@ -79,7 +81,7 @@ namespace DerbyDash.Services {
                         LastRaced = r.LastRaced,
                         LastPlayedRace = r.LastPlayedRace,
                         AvatarFileName = r.AvatarFileName,
-                        RaceCount = _context.Races.Count(race => race.RacerId == r.Id)
+                        RaceCount = context.Races.Count(race => race.RacerId == r.Id)
                     })
                     .ToListAsync();
 
@@ -95,13 +97,14 @@ namespace DerbyDash.Services {
             Logger.LogInformation("GetRacers for ID: {ID}", user.Id);
             
             // Load racers from database with race counts
-            var racers = await _context.Racers
+            using var context = _contextFactory.CreateDbContext();
+            var racers = await context.Racers
                 .Where(r => r.UserId == user.Id)
                 .ToListAsync();
 
             // Calculate race count for each racer
             foreach (var racer in racers) {
-                racer.RaceCount = await _context.Races
+                racer.RaceCount = await context.Races
                     .CountAsync(r => r.RacerId == racer.Id);
             }
 
@@ -112,7 +115,8 @@ namespace DerbyDash.Services {
             Logger.LogInformation("GetRacerByIdAsync for ID: {ID}", racerId);
             
             try {
-                var racer = await _context.Racers
+                using var context = _contextFactory.CreateDbContext();
+                var racer = await context.Racers
                     .Where(r => r.Id == racerId)
                     .Select(r => new Racer {
                         Id = r.Id,
@@ -121,7 +125,7 @@ namespace DerbyDash.Services {
                         LastRaced = r.LastRaced,
                         LastPlayedRace = r.LastPlayedRace,
                         AvatarFileName = r.AvatarFileName,
-                        RaceCount = _context.Races.Count(race => race.RacerId == r.Id)
+                        RaceCount = context.Races.Count(race => race.RacerId == r.Id)
                     })
                     .FirstOrDefaultAsync();
                 
@@ -145,7 +149,8 @@ namespace DerbyDash.Services {
                 racer.UserId = await GetUserID("AddRacer");
 
                 // Check for duplicate names for this user
-                var existingRacer = await _context.Racers
+                using var context = _contextFactory.CreateDbContext();
+                var existingRacer = await context.Racers
                     .FirstOrDefaultAsync(r => r.UserId == racer.UserId && r.Name == racer.Name);
                 
                 if (existingRacer != null) {
@@ -153,8 +158,8 @@ namespace DerbyDash.Services {
                 }
 
                 // Add to database
-                _context.Racers.Add(racer);
-                await _context.SaveChangesAsync();
+                context.Racers.Add(racer);
+                await context.SaveChangesAsync();
 
                 // Initialize RaceCount to 0 for new racer
                 racer.RaceCount = 0;
@@ -184,14 +189,15 @@ namespace DerbyDash.Services {
             Logger.LogInformation("UpdateRacer for ID: {ID}", racer.Id);
             
             try {
-                var existingRacer = await _context.Racers.FindAsync(racer.Id);
+                using var context = _contextFactory.CreateDbContext();
+                var existingRacer = await context.Racers.FindAsync(racer.Id);
                 if (existingRacer != null) {
                     existingRacer.Name = racer.Name;
                     existingRacer.AvatarFileName = racer.AvatarFileName;
                     existingRacer.LastRaced = racer.LastRaced;
                     existingRacer.LastPlayedRace = racer.LastPlayedRace;
                     
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                     
                     // Refresh the cached team list
                     raceTeam = await GetRacersInternal();
@@ -209,15 +215,16 @@ namespace DerbyDash.Services {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
             
             try {
-                var racer = await _context.Racers.FindAsync(racerId);
+                using var context = _contextFactory.CreateDbContext();
+                var racer = await context.Racers.FindAsync(racerId);
                 if (racer != null) {
                     // Remove all races associated with this racer first
-                    var races = await _context.Races.Where(r => r.RacerId == racerId).ToListAsync();
-                    _context.Races.RemoveRange(races);
+                    var races = await context.Races.Where(r => r.RacerId == racerId).ToListAsync();
+                    context.Races.RemoveRange(races);
                     
                     // Remove the racer
-                    _context.Racers.Remove(racer);
-                    await _context.SaveChangesAsync();
+                    context.Racers.Remove(racer);
+                    await context.SaveChangesAsync();
                     
                     // Refresh the cached team list
                     raceTeam = await GetRacersInternal();
@@ -267,7 +274,8 @@ namespace DerbyDash.Services {
             if (Active != null) {
                 try {
                     // Update the race count using a separate query to avoid concurrency issues
-                    var raceCount = await _context.Races.CountAsync(r => r.RacerId == Active.Id);
+                    using var context = _contextFactory.CreateDbContext();
+                    var raceCount = await context.Races.CountAsync(r => r.RacerId == Active.Id);
                     Active.RaceCount = raceCount;
                 } catch (Exception ex) {
                     Logger.LogError(ex, "Error updating race count for active racer");
@@ -413,11 +421,12 @@ namespace DerbyDash.Services {
                 var activeRacer = await GetActiveRacer();
                 if (activeRacer != null) {
                     // Update the racer's last played race and last raced date
-                    var racer = await _context.Racers.FindAsync(activeRacer.Id);
+                    using var context = _contextFactory.CreateDbContext();
+                    var racer = await context.Racers.FindAsync(activeRacer.Id);
                     if (racer != null) {
                         racer.LastPlayedRace = problemClassString;
                         racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
-                        await _context.SaveChangesAsync();
+                        await context.SaveChangesAsync();
                         
                         // Update the active racer object as well
                         activeRacer.LastPlayedRace = problemClassString;
@@ -456,8 +465,9 @@ namespace DerbyDash.Services {
                 string userId = await GetUserID("GetTeamRaceCountAsync");
                 if (!string.IsNullOrEmpty(userId)) {
                     // Use a single query with JOIN to avoid multiple database calls
-                    int count = await _context.Races
-                        .Where(r => _context.Racers.Any(racer => racer.UserId == userId && racer.Id == r.RacerId))
+                    using var context = _contextFactory.CreateDbContext();
+                    int count = await context.Races
+                        .Where(r => context.Racers.Any(racer => racer.UserId == userId && racer.Id == r.RacerId))
                         .CountAsync();
                     
                     Logger.LogInformation("Team race count for user {UserId}: {Count}", userId, count);
@@ -489,7 +499,8 @@ namespace DerbyDash.Services {
             var racer = await GetActiveRacer();
             if (racer != null) {
                 // Get race count using a separate query to avoid concurrency issues
-                var raceCount = await _context.Races.CountAsync(r => r.RacerId == racer.Id);
+                using var context = _contextFactory.CreateDbContext();
+                var raceCount = await context.Races.CountAsync(r => r.RacerId == racer.Id);
                 racer.RaceCount = raceCount;
             }
             return racer;
@@ -521,6 +532,7 @@ namespace DerbyDash.Services {
                 }
 
                 // Create the race record
+                using var context = _contextFactory.CreateDbContext();
                 var race = new Race {
                     RacerId = activeRacer.Id,
                     RaceDateTime = DateTime.Now,
@@ -530,23 +542,23 @@ namespace DerbyDash.Services {
                 };
 
                 // Add to database
-                _context.Races.Add(race);
-                await _context.SaveChangesAsync();
+                context.Races.Add(race);
+                await context.SaveChangesAsync();
 
                 // Add speed increments if provided
                 if (speedIncrements != null && speedIncrements.Count > 0) {
                     foreach (var increment in speedIncrements) {
                         increment.RaceId = race.Id;
                     }
-                    _context.SpeedIncrements.AddRange(speedIncrements);
-                    await _context.SaveChangesAsync();
+                    context.SpeedIncrements.AddRange(speedIncrements);
+                    await context.SaveChangesAsync();
                 }
 
                 // Update the racer's last raced date
-                var racer = await _context.Racers.FindAsync(activeRacer.Id);
+                var racer = await context.Racers.FindAsync(activeRacer.Id);
                 if (racer != null) {
                     racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
-                    await _context.SaveChangesAsync();
+                    await context.SaveChangesAsync();
                     
                     // Update the active racer object as well
                     activeRacer.LastRaced = racer.LastRaced;
