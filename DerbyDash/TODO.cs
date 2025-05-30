@@ -38,7 +38,7 @@
         //      See if after just 5 to 10 races they don't know their squares better.        
         //      I'll have someone write the instructions for this page.
         //      Just need a link at the bottom, Let's Race, that takes them to the SmallSquares race page.
-        // TODO Add progress panel with list of steps to each of the reg pages.
+        // DONE Add progress panel with list of steps to each of the reg pages.
         //      Change RaceTeam page to show progress panel if coming from reg,
         //      and profile menu if not.
         // DONE Top menu needs to refresh the race count after each race.
@@ -46,7 +46,7 @@
         // DONE align cars from leftside to right side of the screen.
         // DONE Don't default the active racer, except for when first adding the race team and when reading from a cookie.
         // DONE Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
-        // TODO Redo the menu pages to use two columns of thinner buttons
+        // DONE Redo the menu pages to use two columns of thinner buttons
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
