@@ -85,8 +85,8 @@ namespace DerbyDash.Components.Pages {
 
         TrackContainer? trackContainerInstance;
 
-        protected override void OnInitialized() {
-            Logger.LogInformation("OnInitialized");
+        protected override async Task OnInitializedAsync() {
+            Logger.LogInformation("OnInitializedAsync");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
@@ -98,6 +98,14 @@ namespace DerbyDash.Components.Pages {
 
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+
+            // ENFORCE: Must have a chosen racer to race
+            var activeRacer = await RaceTeamService.GetActiveRacer();
+            if (activeRacer == null) {
+                Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
+                NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
+                return;
+            }
         }
 
         // OnAfterRenderAsync is defined later in the file
