@@ -27,13 +27,13 @@
                     } else {
                         <div class="racer-selector">
                             <div class="racer-icon">
-                                @if (UserAvatarFileName != null)
+                                @if (RacerAvatarFileName != null)
                                 {
-                                    <img src="/images/avatars/@UserAvatarFileName" class="racer-avatar-img" alt="User Avatar" />
+                                    <img src="/images/avatars/@RacerAvatarFileName" class="racer-avatar-img" alt="Racer Avatar" />
                                 }
-                                else if (!string.IsNullOrEmpty(UserInitial))
+                                else if (!string.IsNullOrEmpty(RacerInitial))
                                 {
-                                    <div class="racer-avatar-default">@UserInitial</div>
+                                    <div class="racer-avatar-default">@RacerInitial</div>
                                 }
                                 else
                                 {
@@ -76,7 +76,7 @@
 
 @code {
     // Expose avatar properties for use in markup
-    private string? GetUserAvatarFileName() => UserAvatarFileName;
-    private string? GetUserInitial() => UserInitial;
+    private string? GetRacerAvatarFileName() => RacerAvatarFileName;
+    private string? GetRacerInitial() => RacerInitial;
 }
 

@@ -60,7 +60,6 @@ namespace DerbyDash.Services {
             try {
                 // Check if user is authenticated first
                 if (!await _userService.IsLoggedInAsync()) {
-                    // TODO throw an exception so we can redirect
                     Logger.LogWarning("User is not authenticated when trying to GetRacers");
                     return new List<Racer>();
                 }
@@ -71,7 +70,6 @@ namespace DerbyDash.Services {
                     Logger.LogInformation($"Getting racers for user: {userId}");
                 } catch (Exception ex) {
                     Logger.LogWarning(ex, "Could not get userId, but continuing");
-                    // TODO throw an exception so we can redirect them to log in
                     return new List<Racer>();
                 }
 
@@ -368,7 +366,7 @@ namespace DerbyDash.Services {
             }
             return racer;
         }
-        
+
         private async Task InvokeOnRacerChanged() {
             if (OnRacerChanged != null) {
                 var handlers = OnRacerChanged.GetInvocationList().Cast<Func<Task>>();

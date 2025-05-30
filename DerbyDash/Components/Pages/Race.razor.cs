@@ -630,9 +630,6 @@ namespace DerbyDash.Components.Pages {
 
         public void LogMessage(Exception E, string message = "") {
             Logger.LogError(E, message);
-            if (E.InnerException != null) {
-                LogMessage(E.InnerException);
-            }
         }
 
         public void LogMessage(string message) {

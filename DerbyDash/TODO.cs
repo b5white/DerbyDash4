@@ -53,8 +53,10 @@
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
         // DONE Subscription service with real data
-        // TODO Stop deleting old races
-        // TODO Enable logging to the database
+        // DONE Stop deleting old races
+        // DONE Enable logging to the database
+        // DONE Handle exceptions
+        // DONE Automatically log inner exceptions
         // TODO Sometimes getting No Racers on the TopMenu bar.
         // TODO Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // TODO Admin page for viewing logs

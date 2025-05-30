@@ -2,7 +2,6 @@ using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace DerbyDash.Components.Layout {
@@ -17,16 +16,13 @@ namespace DerbyDash.Components.Layout {
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
         [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject] private GameStateService GameStateService { get; set; } = default!;
-        [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
 
-        private string? UserAvatarFileName;
+        private string? RacerAvatarFileName;
         private string CurrentUrl => NavManager.Uri;
         private int CurrentRacerRaceCount { get; set; } = 0;
         private int TeamRaceCount { get; set; } = 0;
-        private string? UserInitial;
-        private string? UserEmail; // Add property for email
-
-        private Task<AuthenticationState> AuthStateTask => AuthenticationStateProvider.GetAuthenticationStateAsync();
+        private string? RacerInitial;
+        private string? RacerName; // Add property for email
 
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
@@ -38,7 +34,7 @@ namespace DerbyDash.Components.Layout {
             // Subscribe to game state changes
             GameStateService.OnGameStateChanged += HandleGameStateChanged;
 
-            await LoadUserAvatar();
+            await LoadRacerAvatar();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -74,19 +70,13 @@ namespace DerbyDash.Components.Layout {
                     CurrentRacerRaceCount = 0;
                     TeamRaceCount = 0;
                 }
-            } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
-                // DbContext concurrency issue - this is temporary, don't clear the racers
-                Logger.LogWarning(ex, "Temporary DbContext concurrency issue while loading racers - keeping existing data");
-                // Don't clear the existing racers, just log the issue
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error loading racers");
-                // Only clear racers for non-concurrency errors (like authentication issues)
-                if (!ex.Message.Contains("second operation was started")) {
-                    Racers = new List<Racer>();
-                    SelectedRacer = new Racer { Id = 0, Name = "" };
-                    CurrentRacerRaceCount = 0;
-                    TeamRaceCount = 0;
-                }
+                // User isn't logged in or other error occurred. Initialize with empty lists.
+                Racers = new List<Racer>();
+                SelectedRacer = new Racer { Id = 0, Name = "" };
+                CurrentRacerRaceCount = 0;
+                TeamRaceCount = 0;
             }
         }
 
@@ -94,22 +84,6 @@ namespace DerbyDash.Components.Layout {
             try {
                 await LoadRacers();
                 StateHasChanged();
-            } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
-                // DbContext concurrency issue - this is temporary, retry after a short delay
-                Logger.LogWarning(ex, "Temporary DbContext concurrency issue in HandleRacerChangedAsync - will retry");
-
-                // Retry after a short delay
-                _ = Task.Run(async () => {
-                    await Task.Delay(100); // Short delay
-                    try {
-                        await InvokeAsync(async () => {
-                            await LoadRacers();
-                            StateHasChanged();
-                        });
-                    } catch (Exception retryEx) {
-                        Logger.LogWarning(retryEx, "Retry failed in HandleRacerChangedAsync");
-                    }
-                });
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
             }
@@ -117,7 +91,7 @@ namespace DerbyDash.Components.Layout {
 
         private async Task HandleAvatarChangedAsync() {
             try {
-                await LoadUserAvatar();
+                await LoadRacerAvatar();
                 StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleAvatarChangedAsync");
@@ -204,29 +178,17 @@ namespace DerbyDash.Components.Layout {
                 return "Race through math challenges and become a champion!";
         }
 
-        private async Task LoadUserAvatar() {
-            // TODO replace
-            // var authState = await AuthStateTask;
-            var userId = ""; // authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        private async Task LoadRacerAvatar() {
+            Racer? racer = await RaceTeamService.GetActiveRacer();
+            if (racer != null) {
 
-            if (!string.IsNullOrEmpty(userId)) {
-                // Use FindByIdAsync to ensure we get a fresh copy from the database
-                // TODO Can we just get the current user instead of getting the ID first?
-                var user = await UserManager.FindByIdAsync(userId);
-                if (user != null) {
-                    // TODO This is still wrong
-                    //UserAvatarFileName = user.AvatarFileName;
-                    UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
-                    UserEmail = user.Email; // Store the user's email
-                } else { // Clear fields if user not found (e.g., after logout)                  
-                    UserAvatarFileName = null;
-                    UserInitial = null;
-                    UserEmail = null;
-                }
-            } else { // Clear fields if not authenticated              
-                UserAvatarFileName = null;
-                UserInitial = null;
-                UserEmail = null;
+                RacerAvatarFileName = racer.AvatarFileName;
+                RacerName = racer.Name;
+                RacerInitial = !string.IsNullOrEmpty(RacerName) ? RacerName.Substring(0, 1).ToUpper() : null;
+            } else { // Clear fields if Racer not found (e.g., after logout)                  
+                RacerAvatarFileName = null;
+                RacerInitial = null;
+                RacerName = null;
             }
         }
 

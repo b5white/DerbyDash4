@@ -92,7 +92,8 @@ namespace DerbyDash {
 
             app.MapGet("/throwerror", async () => {
                 await Task.CompletedTask; // Just to use 'await'
-                throw new Exception("Simulated exception");
+                var inner = new Exception("Inner exception message");
+                throw new Exception("Simulated exception", inner);
             });
 
             // Configure the HTTP request pipeline.

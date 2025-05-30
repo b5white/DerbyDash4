@@ -49,7 +49,6 @@ namespace DerbyDash.Services {
                 Feedbacks.Add(feedback);
                 return await Task.FromResult(true);
             } catch (Exception ex) {
-                // TODO Use Logger instead of console
                 Console.WriteLine($"Error adding feedback: {ex.Message}");
                 return await Task.FromResult(false);
             }
