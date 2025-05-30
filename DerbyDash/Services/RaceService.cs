@@ -1,5 +1,6 @@
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
+using DerbyDash.Exceptions;
 using DerbyDash.Utilities;
 
 namespace DerbyDash.Services {
@@ -33,11 +34,12 @@ namespace DerbyDash.Services {
             //}
             await Task.CompletedTask; // Just to use 'await'
             return races;
-        }
-
-        public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
+        }        public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
             Logger.LogInformation("CreateTrack");
             activeRacer = await _raceTeamService.GetActiveRacer();
+            if (activeRacer == null) {
+                throw new MissingRacerException("No active racer selected. Please select a racer from your race team.");
+            }
             return await CreateTrack(activeRacer.Id, problemSetIdentifier);
         }
 

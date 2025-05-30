@@ -46,11 +46,9 @@ namespace DerbyDash.Services {
             _userManager = userManager;
             CurrentRequest = currentRequest;
             _jsRuntime = jsRuntime;
-            _serviceProvider = serviceProvider;
-
-            // Set a default active racer instead of trying to load from cookie during initialization
-            // This avoids JS interop during prerendering
-            Active = raceTeam.FirstOrDefault();
+            _serviceProvider = serviceProvider;        // Don't default the active racer during initialization
+            // Active racer should only be set when first adding to race team or reading from cookie
+            Active = null;
         }
 
         public async Task<List<Racer>> GetRacers() {
@@ -169,14 +167,13 @@ namespace DerbyDash.Services {
                 await context.SaveChangesAsync();
 
                 // Initialize RaceCount to 0 for new racer
-                racer.RaceCount = 0;
+                racer.RaceCount = 0;            // Refresh the cached team list
+            raceTeam = await GetRacersInternal();
 
-                // Refresh the cached team list
-                raceTeam = await GetRacersInternal();
-
-            // Set as active racer if none is selected
-            if (Active is null) {
+            // Set as active racer only if this is the first racer for the user (when race team is being created)
+            if (Active is null && raceTeam.Count == 1) {
                 Active = racer;
+                Logger.LogInformation($"Set {racer.Name} as active racer (first racer for user)");
             }
 
             // Notify subscribers that the racer list has changed
@@ -225,13 +222,12 @@ namespace DerbyDash.Services {
                     // Remove the racer
                     context.Racers.Remove(racer);
                     await context.SaveChangesAsync();
-                    
-                    // Refresh the cached team list
+                      // Refresh the cached team list
                     raceTeam = await GetRacersInternal();
                     
-                    // If this was the active racer, set a new one
+                    // If this was the active racer, clear the active racer (don't auto-select new one)
                     if (Active?.Id == racerId) {
-                        Active = raceTeam.FirstOrDefault();
+                        Active = null;
                     }
                     
                     // Notify subscribers that the racer has been removed
@@ -241,9 +237,7 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error removing racer {ID}", racerId);
                 throw;
             }
-        }
-
-        public async Task<Racer> GetActiveRacer() {
+        }        public async Task<Racer?> GetActiveRacer() {
             Logger.LogInformation("GetActiveRacer");
             // Try to load from cookie if we haven't already attempted to do so
             if (!_triedLoadingFromCookie) {
@@ -252,16 +246,8 @@ namespace DerbyDash.Services {
                     _triedLoadingFromCookie = true;
                 } catch (Exception ex) {
                     Logger.LogError(ex, "Error loading active racer, using default");
-                    // If loading fails, keep the current Active value or set a default
-                    if (Active == null) {
-                        Active = raceTeam.FirstOrDefault();
-                    }
+                    // Don't default the active racer here - let it remain null
                 }
-            }
-
-            // If still null (which shouldn't happen), return the first racer
-            if (Active == null) {
-                Active = raceTeam.FirstOrDefault();
             }
 
             // If Active racer is not null, ensure it has the latest race count
@@ -276,7 +262,9 @@ namespace DerbyDash.Services {
                 }
             }
 
-            return Active!;
+            // Don't default to first racer - return null if no active racer is set
+            // Active racer should only be set when first adding to race team or reading from cookie
+            return Active;
         }
 
         public async Task SetActiveRacer(Racer racer) {
@@ -342,13 +330,10 @@ namespace DerbyDash.Services {
 
                         // Refresh the cookie with a new 90-day expiration
                         await _jsRuntime.InvokeVoidAsync("setCookie", cookieName, racerId, 90);
-                    }
-                } else {
+                    }                } else {
                     // If no cookie found or racer not found, keep the current Active value
-                    // or set the first racer as active if Active is null
-                    if (Active == null) {
-                        Active = raceTeam.FirstOrDefault();
-                    }
+                    // Don't default to first racer - only set active racer when explicitly loaded from cookie
+                    Logger.LogDebug("No active racer cookie found or racer no longer exists");
                 }
             } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
                 // This is expected during prerendering, so just log at debug level

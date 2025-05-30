@@ -2,6 +2,8 @@
 
 @using System.Text
 @using Microsoft.AspNetCore.WebUtilities
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
 
 @attribute [AllowAnonymous]
 
@@ -18,6 +20,8 @@
             <h1>Registration Successful!</h1>
             <StatusMessage Message="@statusMessage" />
         </div>
+
+        <RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
 
         <div class="confirmation-content">
             <div class="checkered-flag-icon">
@@ -71,6 +75,7 @@
 @code {
     private string? emailConfirmationLink;
     private string? statusMessage;
+    private List<RegistrationStep> registrationSteps = new();
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -80,6 +85,13 @@
 
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
 
     protected override async Task OnInitializedAsync() {
         if (Email is null) {
