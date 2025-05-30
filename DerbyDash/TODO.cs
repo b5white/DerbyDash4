@@ -43,6 +43,7 @@
         //      and profile menu if not.
         // DONE Top menu needs to refresh the race count after each race.
         // DONE Subscription should look like it's part of the profile submenu, like the others do.
+        // TODO align cars from leftside to right side of the screen.
         // TODO Don't default the active racer, except for when first adding the race team and when reading from a cookie.
         // TODO Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
         // TODO Redo the menu pages to use two columns of thinner buttons

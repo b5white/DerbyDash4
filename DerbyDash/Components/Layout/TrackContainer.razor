@@ -19,11 +19,11 @@
     <div class="track-container">
         <div class="finish-line" style="top: @Track.FinishLine.TopStr;">
             <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="Finish Line" />
-        </div>
-
-        <div class="cars-container">
-            @foreach (var car in Track.Cars) {
-                <div class="car-dynamic" style="flex-basis: @car.FlexBasis; top: @car.TopStr;">
+        </div>        <div class="cars-container">
+            @for (int i = 0; i < Track.Cars.Count; i++)
+            {
+                var car = Track.Cars[i];
+                <div class="car-dynamic" style="@GetCarLeftPosition(i, Track.Cars.Count) top: @car.TopStr;">
                     <img src="/images/RaceTrack/@car.ImageUrl" alt="Race car" />
                 </div>
             }
@@ -52,3 +52,21 @@
         }
     </div>
 </div>
+
+@code {
+    private string GetCarLeftPosition(int carIndex, int totalCars = 3)
+    {
+        // Lane sections (between yellow lines): 0%-15%, 15%-32%, 32%-49%, 49%-66%, 66%-83%, 83%-100%
+        // Car positions are centered in each lane section
+        string[] laneCenters = { "7.5%", "23.5%", "40.5%", "57.5%", "74.5%", "91.5%" };
+        
+        if (carIndex >= 0 && carIndex < laneCenters.Length)
+        {
+            return $"left: calc({laneCenters[carIndex]} - 8%);";
+        }
+        
+        // fallback: evenly distribute
+        double percent = 100.0 * (carIndex + 0.5) / 6; // 6 available lane sections
+        return $"left: calc({percent}% - 8%);";
+    }
+}

@@ -67,9 +67,10 @@ namespace DerbyDash.Services {
                 new Car { index = 1, ImageId = 2, Top = 9999  },
                 new Car { index = 2, ImageId = 3, Top = 9999  },
                 new Car { index = 3, ImageId = 4, Top = 9999  },
-            //    new Car { index = 4, ImageId = 5, Top = 9999  },
-            //    new Car { index = 5, ImageId = 6, Top = 9999  }
-            };
+                // new Car { index = 4, ImageId = 5, Top = 9999  },
+                // new Car { index = 5, ImageId = 6, Top = 9999  } // Add more cars as needed
+                // Only 3 cars for the race
+                };
 
                 // Assign the previous races to cars 1 to 5
                 for (int i = 1; i <= previousRaces.Count; i++) {

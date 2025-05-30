@@ -164,12 +164,14 @@
 }
 
 .car-dynamic {
-    position: relative;
+    position: absolute;
     width: 16%;
-    margin: 5px;
+    margin: 0;
     transform-style: preserve-3d;
     will-change: transform;
-    transition: top 0.5s ease-out;
+    transition: top 0.5s ease-out, left 0.5s ease-out;
+    pointer-events: none;
+    z-index: 4;
 }
 
 .car-dynamic img {
