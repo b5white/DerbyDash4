@@ -151,13 +151,25 @@ namespace DerbyDash.Services {
 
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
+            // Ensure user is authenticated
+            if (!await _userService.IsLoggedInAsync()) {
+                Logger.LogError("Attempt to add racer when user is not authenticated");
+                throw new MissingUserException("User must be logged in to add a racer.");
+            }
             racer.UserId = await GetUserID("AddRacer");
+            Logger.LogInformation($"Using UserId: {racer.UserId} for new racer");
+
+            // Ensure the userId exists in AspNetUsers
+            using var context = _contextFactory.CreateDbContext();
+            var userExists = await context.Users.AnyAsync(u => u.Id == racer.UserId);
+            if (!userExists) {
+                Logger.LogError($"UserId {racer.UserId} does not exist in AspNetUsers. Cannot add racer.");
+                throw new MissingUserException($"UserId {racer.UserId} does not exist in AspNetUsers. Cannot add racer.");
+            }
 
                 // Check for duplicate names for this user
-                using var context = _contextFactory.CreateDbContext();
                 var existingRacer = await context.Racers
                     .FirstOrDefaultAsync(r => r.UserId == racer.UserId && r.Name == racer.Name);
-                
                 if (existingRacer != null) {
                     throw new DuplicateRacerException($"Racer with name '{racer.Name}' already exists");
                 }
@@ -167,7 +179,8 @@ namespace DerbyDash.Services {
                 await context.SaveChangesAsync();
 
                 // Initialize RaceCount to 0 for new racer
-                racer.RaceCount = 0;            // Refresh the cached team list
+            racer.RaceCount = 0;
+            // Refresh the cached team list
             raceTeam = await GetRacersInternal();
 
             // Set as active racer only if this is the first racer for the user (when race team is being created)

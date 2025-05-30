@@ -82,11 +82,9 @@ namespace DerbyDash {
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
             //    .AddRoles<IdentityRole>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
-
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
 
             // Add authorization services
             builder.Services.AddAuthorization();
