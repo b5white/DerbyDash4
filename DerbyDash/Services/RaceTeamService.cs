@@ -275,8 +275,17 @@ namespace DerbyDash.Services {
                 }
             }
 
-            // Don't default to first racer - return null if no active racer is set
-            // Active racer should only be set when first adding to race team or reading from cookie
+            // If no active racer but racers exist, set the first as active
+            if (Active == null) {
+                var racers = await GetRacersInternal();
+                if (racers.Count > 0) {
+                    Active = racers[0];
+                    Logger.LogInformation($"No active racer was set, defaulting to first racer: {Active.Name} (ID: {Active.Id})");
+                    // Optionally, persist this selection in the cookie
+                    await SetActiveRacer(Active);
+                }
+            }
+
             return Active;
         }
 
