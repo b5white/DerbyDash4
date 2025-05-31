@@ -17,7 +17,10 @@ namespace DerbyDash.Components.Layout {
 
         // Method to close the mobile menu
         private async Task CloseMenu() {
-            await JSRuntime.InvokeVoidAsync("removeClass", navScrollableElement, "show-menu");
+            try {
+                await JSRuntime.InvokeVoidAsync("removeClass", navScrollableElement, "show-menu");
+            } catch (Exception) {
+            }
         }
 
         // Handle logout directly from the NavMenu
@@ -27,7 +30,7 @@ namespace DerbyDash.Components.Layout {
                 await CloseMenu();
                 // Navigate to the logout page with forceLoad=true to ensure a full page refresh
                 NavManager.NavigateTo("/Account/Logout", true);
-            } catch (Exception ex) {
+            } catch (Exception) {
             }
         }
 

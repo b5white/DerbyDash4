@@ -109,7 +109,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     //Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
 
                     // Notify other components that the avatar has changed
-                    AvatarService.NotifyAvatarChanged();
+                    await AvatarService.NotifyAvatarChanged();
                     Logger.LogInformation("Avatar change notification sent for user '{UserId}'", currentUser.Id);
 
                     SaveMessage = "Preferences saved!";
