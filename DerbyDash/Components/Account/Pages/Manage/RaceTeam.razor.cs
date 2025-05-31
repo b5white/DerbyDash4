@@ -4,13 +4,17 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using DerbyDash.Components.Shared;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class RaceTeam: IDisposable {
         private string? message;
-
         private List<Racer> raceTeam = new();
         protected int TeamRaceCount { get; set; } = 0;
+        private List<RegistrationProgress.RegistrationStep> registrationSteps = new();
+        
+        [SupplyParameterFromQuery]
+        private bool IsFromRegistration { get; set; }
 
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
@@ -34,6 +38,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
+            // Initialize registration steps if coming from registration flow
+            if (IsFromRegistration)
+            {
+                var stepsHelper = new RegistrationSteps { CurrentStep = "race-team" };
+                registrationSteps = stepsHelper.GetRegistrationSteps();
+            }
+            
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
             await ReloadUsers();

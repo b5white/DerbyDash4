@@ -4,10 +4,17 @@
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.WebUtilities
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
 
 @attribute [Authorize]
 
 <PageTitle>Manage team members</PageTitle>
+
+@if (IsFromRegistration)
+{
+    <RegistrationProgress Steps="@registrationSteps" CurrentStep="race-team" />
+}
 
 <h3>Current race team</h3>
 @if (raceTeam.Any()) {
@@ -86,4 +93,12 @@
     </div>
 </div>
 
+@if (IsFromRegistration && raceTeam.Any())
+{
+    <div class="mt-4">
+        <a href="/TryAppExplainer?IsFromRegistration=true" class="btn btn-success btn-lg">
+            <i class="fas fa-arrow-right"></i> Next: Start Racing
+        </a>
+    </div>
+}
 

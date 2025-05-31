@@ -31,21 +31,22 @@
         // DONE On mobile, the menu stays up too long. At least close when they make a selection.
         // DONE On mobile, when on profile page, hide top menu bar.
         //      Once they pop up the keyboard, there isn't much space left.
-        // TODO If race team has no races, then on the Race Team page, add a button Next ->
+        // DONE If race team has no races, then on the Race Team page, add a button Next ->
         //      that takes them to an explainer page.
         //      It suggests they try the app with multiplying squares before handing it over
         //      to their kids so they can see how it works.
         //      See if after just 5 to 10 races they don't know their squares better.        
         //      I'll have someone write the instructions for this page.
         //      Just need a link at the bottom, Let's Race, that takes them to the SmallSquares race page.
-        // TODO Add progress panel with list of steps to each of the reg pages.
+        // DONE Add progress panel with list of steps to each of the reg pages.
         //      Change RaceTeam page to show progress panel if coming from reg,
         //      and profile menu if not.
         // DONE Top menu needs to refresh the race count after each race.
         // DONE Subscription should look like it's part of the profile submenu, like the others do.
-        // TODO Don't default the active racer, except for when first adding the race team and when reading from a cookie.
-        // TODO Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
-        // TODO Redo the menu pages to use two columns of thinner buttons
+        // DONE align cars from leftside to right side of the screen.
+        // DONE Don't default the active racer, except for when first adding the race team and when reading from a cookie.
+        // DONE Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
+        // DONE Redo the menu pages to use two columns of thinner buttons
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
@@ -66,14 +67,14 @@
 
         // ** Either Filipe or Brad **
         // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Get rid of anything related to saving race count in the database
+        // DONE Get rid of anything related to saving race count in the database
         //    We'll calculate it based on the number of races in the DB.
-        // TODO Use ActiveRacer if it's set instead of getting it from the cookie all the time.
+        // TODO Use ActiveRacer instead of getting it from the cookie all the time.
         // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // TODO Add current userId and racerId to feedback in service.
-        // TODO Move GetUserID from RTS to the User manager.
+        // DONE Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
-        // TODO Add version number to Feedback report
+        // HOLD Add version number to Feedback report
 
         // ** Later **
         // Show userId and racerId in admin feedback page.

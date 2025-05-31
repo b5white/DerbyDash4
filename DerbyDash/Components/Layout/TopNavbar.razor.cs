@@ -48,22 +48,21 @@ namespace DerbyDash.Components.Layout {
             try {
                 // Get racers from the service
                 Racers = await RaceTeamService.GetRacers();
-
                 if (Racers.Count > 0) {
                     // Set the selected racer to the current racer
                     Racer? currentRacer = await RaceTeamService.GetActiveRacer();
 
                     if (currentRacer != null) {
                         SelectedRacer = currentRacer;
+                        // Load race counts only when we have an active racer
+                        CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
+                        TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
                     } else {
-                        // If no active racer, set the first one as active
-                        SelectedRacer = Racers.First();
-                        await RaceTeamService.SetActiveRacer(SelectedRacer);
+                        // No active racer selected - don't default to first racer
+                        SelectedRacer = new Racer { Id = 0, Name = "" };
+                        CurrentRacerRaceCount = 0;
+                        TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
                     }
-
-                    // Load race counts
-                    CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
-                    TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
                 } else {
                     // Initialize with an empty racer to avoid null reference exceptions
                     SelectedRacer = new Racer { Id = 0, Name = "" };

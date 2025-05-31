@@ -8,17 +8,17 @@ namespace DerbyDash.Services {
     public class RaceTeamService: IRaceTeamService {
         private readonly IUserService _userService;
         private readonly ILogger<RaceTeamService> Logger;
-        //        private readonly ApplicationDbContext _context;
-        //        private readonly IHttpContextAccessor _httpContextAccessor;
+
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly CurrentRequestDTO CurrentRequest;
         private readonly IJSRuntime _jsRuntime;
+
         private bool _triedLoadingFromCookie = false;
 
 
         private List<Racer> raceTeam = new() {
-                new Racer { Id = 1, Name = "Alice", LastRaced = new DateOnly(2025, 2, 1) },
-                new Racer { Id = 2, Name = "Bob", LastRaced = new DateOnly(2025, 3, 15) },
+                new Racer { Id = 1, Name = "Alice", RaceCount = 5, LastRaced = new DateOnly(2025, 2, 1) },
+                new Racer { Id = 2, Name = "Bob", RaceCount = 3, LastRaced = new DateOnly(2025, 3, 15) },
                 new Racer { Id = 3, Name = "Charlie" }
             };
         private Racer? Active;
@@ -30,32 +30,24 @@ namespace DerbyDash.Services {
         public RaceTeamService(
             IUserService userService,
             ILogger<RaceTeamService> logger,
-            //       ApplicationDbContext context,
-            //       IHttpContextAccessor httpContextAccessor,
+
             UserManager<ApplicationUser> userManager,
             CurrentRequestDTO currentRequest,
             IJSRuntime jsRuntime) {
             _userService = userService;
             Logger = logger;
-            //       _context = context;
-            //       _httpContextAccessor = httpContextAccessor;
+
             _userManager = userManager;
             CurrentRequest = currentRequest;
             _jsRuntime = jsRuntime;
 
-            // Set a default active racer instead of trying to load from cookie during initialization
-            // This avoids JS interop during prerendering
-            Active = raceTeam.FirstOrDefault();
+            // Don't default the active racer during initialization
+            // Active racer should only be set when first adding to race team or reading from cookie
+            Active = null;
         }
 
         public async Task<List<Racer>> GetRacers() {
             Logger.LogInformation("GetRacers");
-            raceTeam = await GetRacersInternal();
-            return raceTeam;
-        }
-
-        public async Task<List<Racer>> GetRacersInternal() {
-            Logger.LogInformation("GetRacersInternal");
             string userId;
             try {
                 // Check if user is authenticated first
@@ -75,7 +67,7 @@ namespace DerbyDash.Services {
 
 
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error in GetRacersInternal()");
+                Logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
             return await GetRacersByUserId(userId);
@@ -83,11 +75,13 @@ namespace DerbyDash.Services {
 
         public async Task<List<Racer>> GetRacersByUserId(string userId) {
             Logger.LogInformation("GetRacersByUserId for ID: {ID}", userId);
-            // Return the same data as GetRacers() for consistency
+            //List<Racer> racers = await _context.RaceTeam.Where(rt => rt.UserId == userId)
+            //    .OrderBy(fm => fm.Name)
+            //    .ToListAsync();
+            //if (racers.Count == 0) {
+            //    Logger.LogWarning("No Racers found for ID: {ID}", userId);
+            //}
             await Task.CompletedTask; // Just to use 'await'
-            if (raceTeam.Count == 0) {
-                Logger.LogWarning("No Racers found for ID: {ID}", userId);
-            }
             return raceTeam;
         }
 
@@ -101,16 +95,10 @@ namespace DerbyDash.Services {
             return racer;
         }
 
-        [Obsolete]
-        public async Task<ApplicationUser?> GetUserByIdAsync(string userId) {
-            Logger.LogInformation("GetUserByIdAsync for userId: {userId}", userId);
-            await Task.CompletedTask; // Just to use 'await'
-            return new ApplicationUser() { UserName = "User_" + userId };
-        }
-
         public async Task<Racer> AddRacer(Racer racer) {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
             racer.UserId = await GetUserID("AddRacer");
+            Logger.LogInformation($"Using UserId: {racer.UserId} for new racer");
 
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {
@@ -118,13 +106,16 @@ namespace DerbyDash.Services {
                 int maxId = raceTeam.Count > 0 ? raceTeam.Max(r => r.Id) : 0;
                 racer.Id = maxId + 1;
             }
+            racer.RaceCount = 3;
             // await _context.RaceTeam.AddAsync(racer);
             // await _context.SaveChangesAsync();
             raceTeam.Add(racer);
 
-            // Set as active racer if none is selected
-            if (Active is null) {
+            // Set as active racer only if this is the first racer for the user (when race team is being created)
+            if (Active is null && raceTeam.Count == 1) {
+                // Set as active racer if none is selected
                 Active = racer;
+                Logger.LogInformation($"Set {racer.Name} as active racer (first racer for user)");
             }
 
             // Notify subscribers that the racer list has changed
@@ -147,28 +138,34 @@ namespace DerbyDash.Services {
             await InvokeOnRacerChanged();
         }
 
-        public async Task<Racer> GetActiveRacer() {
+        public async Task<Racer?> GetActiveRacer() {
             Logger.LogInformation("GetActiveRacer");
-            // Try to load from cookie if we haven't already attempted to do so
-            if (!_triedLoadingFromCookie) {
-                try {
-                    await LoadActiveRacerFromCookieAsync();
-                    _triedLoadingFromCookie = true;
-                } catch (Exception ex) {
-                    Logger.LogError(ex, "Error loading active racer, using default");
-                    // If loading fails, keep the current Active value or set a default
-                    if (Active == null) {
-                        Active = raceTeam.FirstOrDefault();
+            // Return the active racer if we already have one
+            if (Active == null) {
+                // Try to load from cookie if we haven't already attempted to do so
+                if (!_triedLoadingFromCookie) {
+                    try {
+                        await LoadActiveRacerFromCookieAsync();
+                        _triedLoadingFromCookie = true;
+                    } catch (Exception) {
+                        Logger.LogWarning("Didn't load active racer from cookie");
+                        // Don't default the active racer here - let it remain null
+                    }
+                }
+
+                // Set as active racer only if this is the first racer for the user (when race team is being created)
+                if (Active is null && raceTeam.Count == 1) {
+                    var racers = await GetRacers();
+                    if (racers.Count > 0) {
+                        Active = racers[0];
+                        Logger.LogInformation($"No active racer was set, defaulting to first racer: {Active.Name} (ID: {Active.Id})");
+                        // Optionally, persist this selection in the cookie
+                        await SetActiveRacer(Active);
                     }
                 }
             }
-
-            // If still null (which shouldn't happen), return the first racer
-            if (Active == null) {
-                Active = raceTeam.FirstOrDefault();
-            }
             CurrentRequest.RacerId = Active?.Id ?? 0;
-            return Active!;
+            return Active;
         }
 
         public async Task SetActiveRacer(Racer racer) {
@@ -237,10 +234,8 @@ namespace DerbyDash.Services {
                     }
                 } else {
                     // If no cookie found or racer not found, keep the current Active value
-                    // or set the first racer as active if Active is null
-                    if (Active == null) {
-                        Active = raceTeam.FirstOrDefault();
-                    }
+                    // Don't default to first racer - only set active racer when explicitly loaded from cookie
+                    Logger.LogDebug("No active racer cookie found or racer no longer exists");
                 }
             } catch (InvalidOperationException ex) when (ex.Message.Contains("JavaScript interop calls cannot be issued at this time")) {
                 // This is expected during prerendering, so just log at debug level
@@ -304,13 +299,12 @@ namespace DerbyDash.Services {
                 var activeRacer = await GetActiveRacer();
 
                 if (activeRacer != null) {
-                    // Update the LastPlayedRace property on the active racer
+                    // Update the racer's last played race and last raced date
+
                     activeRacer.LastPlayedRace = problemClassString;
-
-                    // Also update the LastRaced date to today
                     activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
-
                     Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
+                    // await context.SaveChangesAsync();
 
                     // Notify subscribers that the racer has been updated
                     await InvokeOnRacerChanged();
@@ -327,18 +321,18 @@ namespace DerbyDash.Services {
         /// <returns>The total number of races</returns>
         public async Task<int> GetTeamRaceCountAsync() {
             try {
-                string userId = await GetUserID("GetTeamRaceCountAsync");
-                if (!string.IsNullOrEmpty(userId)) {
-                    // Get the count for the current user
-                    int count = 15; //await _context.Races
-                                    //  .Where(r => _context.RaceTeam
-                                    //      .Any(rt => rt.Id == r.RacerId && rt.UserId == userId))
-                                    //  .CountAsync();
-                    Logger.LogInformation("Count is {count}", count);
-                    return count;
-                }
-                Logger.LogWarning("GetTeamRaceCountAsync: UserId is null or empty");
-                return 0;
+                //string userId = await GetUserID("GetTeamRaceCountAsync");
+                //if (!string.IsNullOrEmpty(userId)) {
+                int count = 15; //await context.Races
+                                //        .Where(r => context.Racers.Any(racer => racer.UserId == userId && racer.Id == r.RacerId))
+                                //        .CountAsync();
+
+                //    Logger.LogInformation("Team race count for user {UserId}: {Count}", userId, count);
+                await Task.CompletedTask; // Just to use 'await'
+                return count;
+                // }
+                //Logger.LogWarning("GetTeamRaceCountAsync: UserId is null or empty");
+                //return 0;
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error getting team race count");
                 return 0; // Return 0 instead of throwing to make UI more resilient
@@ -362,7 +356,11 @@ namespace DerbyDash.Services {
         public async Task<Racer?> GetRacerWithRaceCountAsync() {
             var racer = await GetActiveRacer();
             if (racer != null) {
-                racer.RaceCount = 5;  //await _context.Races.CountAsync(r => r.RacerId == racerId);
+                //??
+                // Get race count using a separate query to avoid concurrency issues
+                //using var context = _contextFactory.CreateDbContext();
+                //var raceCount = await context.Races.CountAsync(r => r.RacerId == racer.Id);
+                //racer.RaceCount = raceCount;
             }
             return racer;
         }

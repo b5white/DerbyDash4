@@ -3,33 +3,34 @@
 
 @inject SignInManager<ApplicationUser> SignInManager
 
-<ul class="nav nav-pills flex-column">
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage" Match="NavLinkMatch.All">Profile</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Email">Email</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/ChangePassword">Password</NavLink>
-    </li>
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/RaceTeam">Race Team</NavLink>
-    </li>    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/Subscription">Subscription</NavLink>
-    </li>
+<div class="profile-menu-grid">
+    <NavLink class="profile-menu-btn" href="Account/Manage" Match="NavLinkMatch.All">
+        <i class="fas fa-user"></i> Profile
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/Email">
+        <i class="fas fa-envelope"></i> Email
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/ChangePassword">
+        <i class="fas fa-key"></i> Password
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/RaceTeam">
+        <i class="fas fa-users"></i> Race Team
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/Subscription">
+        <i class="fas fa-credit-card"></i> Subscription
+    </NavLink>
     @if (hasExternalLogins)
     {
-        <li class="nav-item">
-            <NavLink class="nav-link" href="Account/Manage/ExternalLogins">External logins</NavLink>
-        </li>
+        <NavLink class="profile-menu-btn" href="Account/Manage/ExternalLogins">
+            <i class="fas fa-link"></i> External logins
+        </NavLink>
     }
-    @* <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/TwoFactorAuthentication">Two-factor authentication</NavLink>
-    </li> *@
-    <li class="nav-item">
-        <NavLink class="nav-link" href="Account/Manage/PersonalData">Personal data</NavLink>
-    </li>
-</ul>
+    @* <NavLink class="profile-menu-btn" href="Account/Manage/TwoFactorAuthentication">
+        <i class="fas fa-shield-alt"></i> Two-factor authentication
+    </NavLink> *@
+    <NavLink class="profile-menu-btn" href="Account/Manage/PersonalData">
+        <i class="fas fa-user-shield"></i> Personal data
+    </NavLink>
+</div>
 
 

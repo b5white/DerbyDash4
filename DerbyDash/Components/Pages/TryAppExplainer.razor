@@ -1,10 +1,17 @@
 @page "/TryAppExplainer"
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
 
 <PageTitle>Try Derby Dash First</PageTitle>
 
 <div class="explainer-container">
+    @if (IsFromRegistration)
+    {
+        <RegistrationProgress Steps="@registrationSteps" CurrentStep="start-racing" />
+    }
+    
     <div class="explainer-header">
         <h1 class="explainer-title">
             <i class="fas fa-lightbulb"></i>
@@ -308,3 +315,20 @@
     }
 }
 </style>
+
+@code {
+    [SupplyParameterFromQuery]
+    private bool IsFromRegistration { get; set; }
+    
+    private List<RegistrationStep> registrationSteps = new();
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (IsFromRegistration)
+        {
+            var stepsHelper = new RegistrationSteps { CurrentStep = "start-racing" };
+            registrationSteps = stepsHelper.GetRegistrationSteps();
+        }
+    }
+}

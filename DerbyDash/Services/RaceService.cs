@@ -1,11 +1,11 @@
 using DerbyDash.Components.Track;
 using DerbyDash.Data;
+using DerbyDash.Exceptions;
 using DerbyDash.Utilities;
 
 namespace DerbyDash.Services {
     public class RaceService {
         private readonly IRaceTeamService _raceTeamService;
-        private readonly ApplicationDbContext _context;
         private RaceComponents track = new();
         private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
@@ -14,30 +14,17 @@ namespace DerbyDash.Services {
 
         public RaceService(
             ILogger<RaceService> logger,
-            IRaceTeamService raceTeamService,
-            ApplicationDbContext context) {
+            IRaceTeamService raceTeamService) {
             Logger = logger;
             _raceTeamService = raceTeamService;
-            _context = context;
-        }
-
-        [Obsolete]
-        public async Task<List<Race>> GetRacesByRacerIdAsync(int racerId) {
-            Logger.LogInformation("GetRacesByRacerIdAsync");
-            List<Race> races = new();
-            // await _context.Races
-            //    .Where(r => r.RacerId == racerId)
-            //    .ToListAsync();
-            //if (races.Count == 0) {
-            //    Logger.LogWarning("No races found for ID: {ID}", racerId);
-            //}
-            await Task.CompletedTask; // Just to use 'await'
-            return races;
         }
 
         public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
             Logger.LogInformation("CreateTrack");
             activeRacer = await _raceTeamService.GetActiveRacer();
+            if (activeRacer == null) {
+                throw new MissingRacerException("No active racer selected. Please select a racer from your race team.");
+            }
             return await CreateTrack(activeRacer.Id, problemSetIdentifier);
         }
 
@@ -67,9 +54,10 @@ namespace DerbyDash.Services {
                 new Car { index = 1, ImageId = 2, Top = 9999  },
                 new Car { index = 2, ImageId = 3, Top = 9999  },
                 new Car { index = 3, ImageId = 4, Top = 9999  },
-            //    new Car { index = 4, ImageId = 5, Top = 9999  },
-            //    new Car { index = 5, ImageId = 6, Top = 9999  }
-            };
+                // new Car { index = 4, ImageId = 5, Top = 9999  },
+                // new Car { index = 5, ImageId = 6, Top = 9999  } // Add more cars as needed
+                // Only 3 cars for the race
+                };
 
                 // Assign the previous races to cars 1 to 5
                 for (int i = 1; i <= previousRaces.Count; i++) {

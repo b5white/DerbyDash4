@@ -1,15 +1,11 @@
-﻿using DerbyDash.Data;
-
-namespace DerbyDash.Services {
+﻿namespace DerbyDash.Services {
     public class DatabaseKeepAliveService {
         private ILogger<DatabaseKeepAliveService> Logger;
-        private readonly ApplicationDbContext Context;
         private static DateTime _lastCleanup = DateTime.MinValue;
         private static readonly object _lock = new object();
 
-        public DatabaseKeepAliveService(ILogger<DatabaseKeepAliveService> logger, ApplicationDbContext context) {
+        public DatabaseKeepAliveService(ILogger<DatabaseKeepAliveService> logger) {
             Logger = logger;
-            Context = context;
         }
 
         public async Task PingDatabaseAsync() {

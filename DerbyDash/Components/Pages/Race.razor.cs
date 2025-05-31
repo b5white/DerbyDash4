@@ -85,8 +85,8 @@ namespace DerbyDash.Components.Pages {
 
         TrackContainer? trackContainerInstance;
 
-        protected override void OnInitialized() {
-            Logger.LogInformation("OnInitialized");
+        protected override async Task OnInitializedAsync() {
+            Logger.LogInformation("OnInitializedAsync");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
@@ -98,6 +98,14 @@ namespace DerbyDash.Components.Pages {
 
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+            
+            // ENFORCE: Must have a chosen racer to race
+            var activeRacer = await RaceTeamService.GetActiveRacer();
+            if (activeRacer == null) {
+                Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
+                NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
+                return;
+            }
         }
 
         // OnAfterRenderAsync is defined later in the file
@@ -218,7 +226,7 @@ namespace DerbyDash.Components.Pages {
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
-                    CalculateNewDistance(GetTimespan(starttime));
+                    await CalculateNewDistance(GetTimespan(starttime));
                     //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
@@ -362,7 +370,7 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private void CalculateNewDistance(double time) {
+        private async Task CalculateNewDistance(double time) {
             currentDistance = 0;
             int i;
 
@@ -381,7 +389,7 @@ namespace DerbyDash.Components.Pages {
 
             if (currentDistance >= RaceService.TotalDistance && !CurrentRacerFinished) {
                 CurrentRacerFinished = true;
-                EndRace();
+                await EndRace();
             }
 
             bool wasCarAtTop = track.IsAnyCarAtTop;
@@ -604,7 +612,7 @@ namespace DerbyDash.Components.Pages {
             try {
                 while (await periodicTimer.WaitForNextTickAsync(PeriodicTimerToken.Token)) {
                     RaceTime = GetSpan(starttime);
-                    CalculateNewDistance(RaceTime);
+                    await CalculateNewDistance(RaceTime);
                     CalculateOldDistance(RaceTime);
                     ScaleRace(currentTimeIndex);
                     await InvokeAsync(StateHasChanged);
