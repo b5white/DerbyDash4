@@ -18,8 +18,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
         public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
@@ -29,9 +29,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         protected override async Task OnInitializedAsync() {
             Input ??= new();
-            //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            //requirePassword = await UserManager.HasPasswordAsync(user);
-            await Task.CompletedTask; // Just to use 'await'
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            requirePassword = await UserManager.HasPasswordAsync(user);
             return;
         }
 
@@ -45,6 +44,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             if (!result.Succeeded) {
                 throw new InvalidOperationException("Unexpected error occurred deleting user.");
             }
+
             await SignInManager.SignOutAsync();
             AuthStateProvider.NotifyUserLogout();
 

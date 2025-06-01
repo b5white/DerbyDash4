@@ -81,7 +81,7 @@ namespace DerbyDash.Components.Layout {
 
         private async Task HandleRacerChangedAsync() {
             try {
-                await LoadRacers();
+                //await LoadRacers();
                 StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
@@ -97,7 +97,7 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async Task OnRacerChanged(ChangeEventArgs e) {
+        private async Task OnRacerChangedAsync(ChangeEventArgs e) {
             string newRacerIdStr = e.Value?.ToString() ?? string.Empty;
             if (!string.IsNullOrEmpty(newRacerIdStr) && int.TryParse(newRacerIdStr, out int newRacerId)) {
                 Racer? newRacer = await RaceTeamService.GetRacerByIdAsync(newRacerId);

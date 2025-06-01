@@ -20,8 +20,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
         internal IEmailSender<ApplicationUser> EmailSender { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal NavigationManager NavManager { get; set; } = default!;
         [Inject]
@@ -31,12 +31,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            //email = await UserManager.GetEmailAsync(user);
-            //isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            email = await UserManager.GetEmailAsync(user);
+            isEmailConfirmed = await UserManager.IsEmailConfirmedAsync(user);
 
-            //Input.NewEmail ??= email;
-            await Task.CompletedTask; // Just to use 'await'
+            Input.NewEmail ??= email;
             return;
         }
 

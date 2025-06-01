@@ -11,7 +11,6 @@ namespace DerbyDash.Services {
         public Task RemoveRacer(int racerId);
         public Task<Racer?> GetActiveRacer();
         public Task SetActiveRacer(Racer racer);
-        public Task<string> GetUserID(string purpose);
 
         /// <summary>
         /// Gets the last played race for the current user from database

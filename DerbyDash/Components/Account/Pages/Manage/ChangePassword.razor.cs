@@ -7,8 +7,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class ChangePassword {
         private string? message;
         private ApplicationUser user = default!;
-        // Remove unused field
-        // private bool hasPassword;
+        private bool hasPassword;
 
         [Inject]
         public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
@@ -20,8 +19,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
         public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
@@ -30,12 +29,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            //hasPassword = await UserManager.HasPasswordAsync(user);
-            //if (!hasPassword) {
-            //    RedirectManager.RedirectTo("Account/Manage/SetPassword");
-            //}
-            await Task.CompletedTask; // Just to use 'await'
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            hasPassword = await UserManager.HasPasswordAsync(user);
+            if (!hasPassword) {
+                RedirectManager.RedirectTo("Account/Manage/SetPassword");
+            }
             return;
         }
 
@@ -44,7 +42,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             if (!changePasswordResult.Succeeded) {
                 message = $"Error: {string.Join(",", changePasswordResult.Errors.Select(error => error.Description))}";
                 return;
-            }            await SignInManager.RefreshSignInAsync(user);
+            }
+
+            await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserLogin();
             Logger.LogInformation("User changed their password successfully.");
 
             RedirectManager.RedirectToCurrentPageWithStatus("Your password has been changed", HttpContext);

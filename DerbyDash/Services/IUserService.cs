@@ -1,3 +1,4 @@
+using DerbyDash.Data;
 using System.Security.Claims;
 
 namespace DerbyDash.Services {
@@ -17,10 +18,16 @@ namespace DerbyDash.Services {
         Task<bool> IsLoggedInAsync();
 
         /// <summary>
+        /// Gets the current user's ApplicationUser
+        /// </summary>
+        /// <returns>The current user, or null if not authenticated</returns>
+        Task<ApplicationUser?> GetCurrentUserAsync();
+
+        /// <summary>
         /// Gets the current user's ClaimsPrincipal
         /// </summary>
         /// <returns>The current user's claims principal, or null if not authenticated</returns>
-        Task<ClaimsPrincipal?> GetCurrentUserAsync();
+        Task<ClaimsPrincipal?> GetCurrentPrincipalUserAsync();
 
         /// <summary>
         /// Gets the current user's username/email

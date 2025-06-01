@@ -1,6 +1,5 @@
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
-using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
@@ -9,7 +8,7 @@ namespace DerbyDash.Services {
     public class UserService: IUserService {
         private readonly AuthenticationStateProvider _authenticationStateProvider;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly CurrentRequestDTO CurrentRequest;
+        private readonly SessionData CurrentSession;
         private readonly ILogger<UserService> _logger;
 
         // Cache the user ID to avoid repeated lookups during a single request
@@ -19,12 +18,12 @@ namespace DerbyDash.Services {
         public UserService(
             AuthenticationStateProvider authenticationStateProvider,
             UserManager<ApplicationUser> userManager,
-            CurrentRequestDTO currentRequest,
+            SessionData currentRequest,
             ILogger<UserService> logger
         ) {
             _authenticationStateProvider = authenticationStateProvider;
             _userManager = userManager;
-            CurrentRequest = currentRequest;
+            CurrentSession = currentRequest;
             _logger = logger;
         }
 
@@ -40,13 +39,13 @@ namespace DerbyDash.Services {
 
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 if (authState?.User == null) {
-                    _logger.LogWarning("No authentication state found when trying to {Purpose}", purpose);
+                    _logger.LogInformation("No authentication state found when trying to {Purpose}", purpose);
                     throw new MissingUserException("No authentication state available");
                 }
 
                 var user = authState.User;
                 if (user?.Identity == null || !user.Identity.IsAuthenticated) {
-                    _logger.LogWarning("No authenticated user found when trying to {Purpose}", purpose);
+                    _logger.LogInformation("No authenticated user found when trying to {Purpose}", purpose);
                     throw new MissingUserException("User is not authenticated");
                 }
 
@@ -58,7 +57,7 @@ namespace DerbyDash.Services {
 
                 // Cache the user ID
                 _cachedUserId = userId;
-                CurrentRequest.UserId = userId; // Update the current request context
+                CurrentSession.UserId = userId; // Update the current request context
                 _userIdCacheInitialized = true;
 
                 _logger.LogInformation("Successfully retrieved user ID for {Purpose}", purpose);
@@ -79,7 +78,17 @@ namespace DerbyDash.Services {
             }
         }
 
-        public async Task<ClaimsPrincipal?> GetCurrentUserAsync() {
+        public async Task<ApplicationUser?> GetCurrentUserAsync() {
+            ClaimsPrincipal? userPrincipal = await GetCurrentPrincipalUserAsync();
+            ApplicationUser? user = null;
+            if (userPrincipal != null) {
+                user = await _userManager.GetUserAsync(userPrincipal);
+            }
+            CurrentSession.UserId = user?.Id ?? ""; // Update the current request context with user ID
+            return user;
+        }
+
+        public async Task<ClaimsPrincipal?> GetCurrentPrincipalUserAsync() {
             try {
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 return authState?.User?.Identity?.IsAuthenticated == true ? authState.User : null;
@@ -91,7 +100,7 @@ namespace DerbyDash.Services {
 
         public async Task<string?> GetUserNameAsync() {
             try {
-                var user = await GetCurrentUserAsync();
+                var user = await GetCurrentPrincipalUserAsync();
                 return user?.Identity?.Name;
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error getting user name");
@@ -101,7 +110,7 @@ namespace DerbyDash.Services {
 
         public async Task<string?> GetUserClaimAsync(string claimType) {
             try {
-                var user = await GetCurrentUserAsync();
+                var user = await GetCurrentPrincipalUserAsync();
                 return user?.FindFirst(claimType)?.Value;
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error getting user claim {ClaimType}", claimType);
@@ -111,7 +120,7 @@ namespace DerbyDash.Services {
 
         public async Task<bool> IsInRoleAsync(string role) {
             try {
-                var user = await GetCurrentUserAsync();
+                var user = await GetCurrentPrincipalUserAsync();
                 return user?.IsInRole(role) ?? false;
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error checking if user is in role {Role}", role);

@@ -2,7 +2,6 @@ using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
 using DerbyDash.Services;
-using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -59,10 +58,21 @@ namespace DerbyDash {
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
+
+            // Email
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
             builder.Services.AddScoped<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-            // Logging
-            builder.Services.AddScoped<CurrentRequestDTO>();
+
+            // SessionData and Logging
+            builder.Services.AddScoped<SessionData>();
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options => {
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+                options.Cookie.IsEssential = true;
+            });
 
             // Add Identity services with Entity Framework stores
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
@@ -111,7 +121,8 @@ namespace DerbyDash {
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseMiddleware<CurrentRequestMiddleware>();
+            app.UseSession();
+            app.UseMiddleware<CurrentSessionMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseAntiforgery();

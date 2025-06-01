@@ -16,8 +16,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         public UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
         public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
         [Inject]
@@ -29,12 +29,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
-            //user = await UserAccessor.GetRequiredUserAsync(HttpContext);
-            //username = await UserManager.GetUserNameAsync(user);
-            //phoneNumber = await UserManager.GetPhoneNumberAsync(user);
+            user = await UserAccessor.GetRequiredUserAsync(HttpContext);
+            username = await UserManager.GetUserNameAsync(user);
+            phoneNumber = await UserManager.GetPhoneNumberAsync(user);
 
-            //Input.PhoneNumber ??= phoneNumber;
-            await Task.CompletedTask; // Just to use 'await'
+            Input.PhoneNumber ??= phoneNumber;
             return;
         }
 
@@ -44,7 +43,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 if (!setPhoneResult.Succeeded) {
                     RedirectManager.RedirectToCurrentPageWithStatus("Error: Failed to set phone number.", HttpContext);
                 }
-            }            await SignInManager.RefreshSignInAsync(user);
+            }
+
+            await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserLogin();
             RedirectManager.RedirectToCurrentPageWithStatus("Your profile has been updated", HttpContext);
         }
 

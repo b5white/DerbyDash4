@@ -58,23 +58,25 @@
         // DONE Enable logging to the database
         // DONE Handle exceptions
         // DONE Automatically log inner exceptions
-        // TODO Sometimes getting No Racers on the TopMenu bar.
+        // TODO Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
         // TODO Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // TODO Admin page for viewing logs
         // TODO Enable email
         // TODO Add Exception to the feedback report
         // TODO Add SessionId to log
+        // TODO Review Cookie.SameSite across all three cookie settings.
 
         // ** Either Filipe or Brad **
         // TODO Save the Race position in the list at time it was first run, in Race
         // DONE Get rid of anything related to saving race count in the database
         //    We'll calculate it based on the number of races in the DB.
-        // TODO Use ActiveRacer instead of getting it from the cookie all the time.
+        // DONE Use ActiveRacer instead of getting it from the cookie all the time.
         // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // TODO Add current userId and racerId to feedback in service.
         // DONE Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
         // HOLD Add version number to Feedback report
+        // TODO Rewrite UserService so it doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
 
         // ** Later **
         // Show userId and racerId in admin feedback page.

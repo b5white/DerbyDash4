@@ -45,7 +45,8 @@
                                     <i class="fas fa-exchange-alt"></i> Select Your Racer
                                 </label>
                                 <div class="select-wrapper">
-                                    <select id="currentRacer" class="racer-dropdown" value="@SelectedRacer.Id" @onchange="OnRacerChanged" @onchange:preventDefault title="Click to change your active racer">
+                                    <select id="currentRacer" class="racer-dropdown" value="@SelectedRacer.Id"
+                                            @onchange="OnRacerChangedAsync" title="Click to change your active racer">
                                         @foreach (var racer in Racers) {
                                             <option value="@racer.Id">@racer.Name (@racer.RaceCount races)</option>
                                         }
