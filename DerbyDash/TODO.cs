@@ -67,15 +67,13 @@
         // TODO Save the Race position in the list at time it was first run, in Race
         // TODO Get rid of anything related to saving race count in the database
         //    We'll calculate it based on the number of races in the DB.
-        // TODO Use ActiveRacer if it's set instead of getting it from the cookie all the time.
-        // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
+        // DONE Use ActiveRacer if it's set instead of getting it from the cookie all the time.
+        // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // TODO Add current userId and racerId to feedback in service.
         // TODO Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
         // TODO Add version number to Feedback report
-        // TODO Use ActiveRacer instead of getting it from the cookie all the time.
-        // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
-        // TODO Add current userId and racerId to feedback in service.
+
 
         // ** Later **
         // Show userId and racerId in admin feedback page.

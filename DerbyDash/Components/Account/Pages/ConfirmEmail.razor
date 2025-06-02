@@ -64,6 +64,9 @@ else
     [SupplyParameterFromQuery]
     private string? ReturnUrl { get; set; }
 
+    [SupplyParameterFromQuery]
+    private bool RememberMe { get; set; } = true;
+
     protected override async Task OnInitializedAsync() {
         if (UserId is null || Code is null) {
             RedirectManager.RedirectTo("");
@@ -82,8 +85,8 @@ else
                 emailConfirmed = true;
                 statusMessage = "Thank you for confirming your email.";
                 
-                // Automatically sign in the user after email confirmation
-                await SignInManager.SignInAsync(user, true);
+                // Automatically sign in the user after email confirmation using RememberMe preference
+                await SignInManager.SignInAsync(user, isPersistent: RememberMe);
                 AuthStateProvider.NotifyUserLogin();
 
                 // We don't automatically redirect to give the user a chance to see the confirmation message
