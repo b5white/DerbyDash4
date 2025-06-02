@@ -34,12 +34,12 @@ namespace DerbyDash.Components.Layout {
             AvatarService.OnAvatarChanged += HandleAvatarChangedAsync;
 
             // Subscribe to game state changes
-            GameStateService.OnGameStateChanged += HandleGameStateChanged;
+            GameStateService.OnGameStateChanged += HandleGameStateChangedAsync;
 
             // Listen for game running state
             isGameRunning = GameStateService.IsGameRunning;
 
-            await LoadUserAvatar();
+            await LoadRacerAvatar();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -229,7 +229,7 @@ namespace DerbyDash.Components.Layout {
 
             // Unsubscribe from game state changes
             if (GameStateService != null)
-                GameStateService.OnGameStateChanged -= HandleGameStateChanged;
+                GameStateService.OnGameStateChanged -= HandleGameStateChangedAsync;
         }
     }
 }
