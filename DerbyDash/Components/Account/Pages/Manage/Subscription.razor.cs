@@ -6,7 +6,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Subscription {
 
         [Inject]
-        UserService UserService { get; set; } = default!;
+        IUserService UserService { get; set; } = default!;
 
         [Inject]
         ILogger<Subscription> Logger { get; set; } = default!;
