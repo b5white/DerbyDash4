@@ -70,9 +70,16 @@ namespace DerbyDash.Components.Layout {
         private async Task LoadRacers() {
             try {
                 // Get racers from the service
-                Racers = await RaceTeamService.GetRacers();                if (Racers.Count > 0) {
-                    // Set the selected racer to the current racer
-                    Racer? currentRacer = await RaceTeamService.GetActiveRacer();
+                Racers = await RaceTeamService.GetRacers();
+                
+                if (Racers.Count > 0) {
+                    // Set the selected racer to the current racer using cached property
+                    var currentRacer = RaceTeamService.ActiveRacer;
+                    
+                    // If no cached racer, ensure initialization and get the active racer
+                    if (currentRacer == null) {
+                        currentRacer = await RaceTeamService.EnsureActiveRacerInitializedAsync();
+                    }
 
                     if (currentRacer != null) {
                         SelectedRacer = currentRacer;
