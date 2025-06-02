@@ -76,7 +76,10 @@
         // DONE Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
         // HOLD Add version number to Feedback report
-        // TODO Rewrite UserService so it doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // DONE Use ActiveRacer instead of getting it from the cookie all the time.
+        // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
+        // TODO Add current userId and racerId to feedback in service.
 
         // ** Later **
         // Show userId and racerId in admin feedback page.

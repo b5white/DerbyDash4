@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using DerbyDash.Data
 @inject NavigationManager NavManager
+@inject GameStateService GameStateService
 
 <div class="page">
     <div class="sidebar">
@@ -10,7 +11,7 @@
     </div>
 
     <div class="main">
-        @if (!IsAuthPage)
+        @if (!IsAuthPage && !GameStateService.IsGameRunning)
         {
             <TopNavbar />
             <Breadcrumb />

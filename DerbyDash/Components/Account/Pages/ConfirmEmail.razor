@@ -12,7 +12,9 @@
 <h1>Confirm email</h1>
 <StatusMessage Message="@statusMessage" />
 
-<RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
+<div class="registration-progress-container">
+    <RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
+</div>
 
 @if (emailConfirmed)
 {

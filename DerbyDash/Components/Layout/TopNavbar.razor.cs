@@ -24,6 +24,8 @@ namespace DerbyDash.Components.Layout {
         private string? RacerInitial;
         private string? RacerName; // Add property for email
 
+        private bool isGameRunning = false;
+
         protected override async Task OnInitializedAsync() {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
@@ -34,7 +36,10 @@ namespace DerbyDash.Components.Layout {
             // Subscribe to game state changes
             GameStateService.OnGameStateChanged += HandleGameStateChanged;
 
-            await LoadRacerAvatar();
+            // Listen for game running state
+            isGameRunning = GameStateService.IsGameRunning;
+
+            await LoadUserAvatar();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
@@ -191,13 +196,16 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private void HandleGameStateChanged(bool isGameRunning) {
+        private async void HandleGameStateChangedAsync(bool running) {
             try {
-                StateHasChanged();
+                isGameRunning = running;
+                await InvokeAsync(StateHasChanged);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleGameStateChangedAsync");
             }
         }
+
+        public bool ShouldShowNavbar => !isGameRunning;
 
         private string GetNavbarClasses() {
             var classes = new List<string>();

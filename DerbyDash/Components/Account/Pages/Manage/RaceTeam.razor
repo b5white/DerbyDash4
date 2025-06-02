@@ -11,12 +11,14 @@
 
 <PageTitle>Manage team members</PageTitle>
 
+<h3>Current race team</h3>
+
 @if (IsFromRegistration)
 {
-    <RegistrationProgress Steps="@registrationSteps" CurrentStep="race-team" />
+    <div class="registration-progress-container">
+        <RegistrationProgress Steps="@registrationSteps" CurrentStep="race-team" />
+    </div>
 }
-
-<h3>Current race team</h3>
 @if (raceTeam.Any()) {
     <div class="table-responsive">
         <table class="table table-striped">

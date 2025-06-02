@@ -20,8 +20,10 @@
             <h1>Registration Successful!</h1>
             <StatusMessage Message="@statusMessage" />
         </div>
-
-        <RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
+        
+        <div class="registration-progress-container">
+            <RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
+        </div>
 
         <div class="confirmation-content">
             <div class="checkered-flag-icon">

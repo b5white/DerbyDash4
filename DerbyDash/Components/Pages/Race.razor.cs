@@ -112,6 +112,8 @@ namespace DerbyDash.Components.Pages {
 
         private async Task Reset() {
             Logger.LogInformation("Reset");
+            // Set GameStateService.SetGameRunning(false) before starting a new race (if not already false)
+            GameStateService.SetGameRunning(false);
             if (!Running) {
                 RaceTime = 0;
                 CurrentRacerFinished = false;
@@ -361,10 +363,6 @@ namespace DerbyDash.Components.Pages {
                 }
                 await UpdateResultsAsync(FinishTime);
                 Running = false;
-
-                // Notify GameStateService that the game has stopped
-                GameStateService.SetGameRunning(false);
-
                 problems = null;
                 StateHasChanged();
             }
@@ -414,10 +412,6 @@ namespace DerbyDash.Components.Pages {
             if (allFinished && CurrentRacerFinished && !Finished) {
                 Finished = true;
                 Running = false;
-
-                // Notify GameStateService that the game has stopped
-                GameStateService.SetGameRunning(false);
-
                 StopPeriodicTimer();
             }
 
