@@ -434,21 +434,6 @@ namespace DerbyDash.Services {
                         Logger.LogInformation($"Saved last played race {problemClassString} for racer {racer.Name}");
                     }
                 }
-
-                // Use a separate scope for UserManager operations to avoid DbContext concurrency
-                using (var scope = _serviceProvider.CreateScope()) {
-                    var scopedUserManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                    
-                    // Also save to the user's profile
-                    string userId = await GetUserID("SaveLastPlayedRace");
-                    var user = await scopedUserManager.FindByIdAsync(userId);
-                    if (user != null) {
-                        user.LastPlayedRace = problemClassString;
-                        await scopedUserManager.UpdateAsync(user);
-                        Logger.LogInformation($"Saved last played race '{problemClassString}' for user {user.UserName}");
-                        // Don't trigger OnRacerChanged for just saving last played race
-                    }
-                }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error saving last played race {ProblemClass}", problemClassString);
                 throw;

@@ -11,13 +11,13 @@ using static DerbyDash.Components.Shared.RegistrationProgress;
 
 namespace DerbyDash.Components.Account.Pages {
     public partial class Register: ComponentBase {
-        private RegistrationSteps? registrationSteps;
         private List<RegistrationStep> registrationStepsList = new();
 
         protected override void OnInitialized()
         {
             base.OnInitialized();
-            registrationStepsList = registrationSteps?.GetRegistrationSteps() ?? new List<RegistrationStep>();
+            var stepsHelper = new RegistrationSteps { CurrentStep = "register" };
+            registrationStepsList = stepsHelper.GetRegistrationSteps();
         }
         private IEnumerable<IdentityError>? identityErrors;
 

@@ -73,6 +73,9 @@
         // TODO Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
         // TODO Add version number to Feedback report
+        // TODO Use ActiveRacer instead of getting it from the cookie all the time.
+        // TODO Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
+        // TODO Add current userId and racerId to feedback in service.
 
         // ** Later **
         // Show userId and racerId in admin feedback page.

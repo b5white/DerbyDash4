@@ -3,6 +3,6 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Data {
     // Add profile data for application users by adding properties to the ApplicationUser class
     public class ApplicationUser: IdentityUser {
-        public string? LastPlayedRace { get; set; }
+        // LastPlayedRace moved to Racer model - each racer tracks their own last played race
     }
 }

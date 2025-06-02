@@ -1,0 +1,15 @@
+.registration-progress-container {
+    padding: 1rem 2rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 0 0 15px 15px;
+    margin: 1.5rem 0;
+    max-width: 800px;
+}
+
+@media screen and (max-width: 768px) {
+    .registration-progress-container {
+        max-width: 90%;
+    }
+    
+}
