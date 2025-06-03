@@ -27,7 +27,6 @@
         //         should be
         //      b.Property<string>("LastPlayedRace").HasColumnType("nvarchar(100)");
         // DONE Show password isn't working on registration or login.
-        // TODO Handle the screen shift when using a phone so can still see top of page.        
         // DONE On mobile, the menu stays up too long. At least close when they make a selection.
         // DONE On mobile, when on profile page, hide top menu bar.
         //      Once they pop up the keyboard, there isn't much space left.
@@ -47,33 +46,50 @@
         // DONE Don't default the active racer, except for when first adding the race team and when reading from a cookie.
         // DONE Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
         // DONE Redo the menu pages to use two columns of thinner buttons
+        // TODO Handle the screen shift when using a phone so can still see top of page.        
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
+        // TODO Add a partially transparent results panel that pops up in the middle of the screen
+        //     at the end of the race, and shows their new time and how many of
+        //     the previous top 5 they beat.
+        //     It stays up until 1 second after all racers finish.
+        //     It says and says "Great race! You won." if they came in first.
+        //     Or "Good race." if not.
+        //     Would pop up right away, even while other racers
+        //     are finishing.
+        // DONE Add a Resend Email link to the RegisterConfirmation page?
+        //    It should just resend the email, but stay on the Confirmation page.
+        // TODO Dress up the confirmation email. Currently "Please confirm your account by clicking here."
+        // TODO Use GetUserID everywhere we need a UserId.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
         // DONE Subscription service with real data
-        // TODO Stop deleting old races
-        // TODO Enable logging to the database
-        // TODO Sometimes getting No Racers on the TopMenu bar.
+        // DONE Stop deleting old races
+        // DONE Enable logging to the database
+        // DONE Handle exceptions
+        // DONE Automatically log inner exceptions
+        // TODO Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
         // TODO Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // TODO Admin page for viewing logs
         // TODO Enable email
-        // TODO Add Exception to the feedback report
         // TODO Add SessionId to log
+        // TODO Add a link to the most recent log messages for SessionId to the feedback report
+        // TODO Review Cookie.SameSite across all three cookie settings.
 
         // ** Either Filipe or Brad **
-        // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Get rid of anything related to saving race count in the database
+        // DONE Get rid of anything related to saving race count in the database
         //    We'll calculate it based on the number of races in the DB.
-        // DONE Use ActiveRacer if it's set instead of getting it from the cookie all the time.
+        // DONE Move GetUserID from RTS to the User manager.
+        // DONE Use ActiveRacer instead of getting it from the cookie all the time.
         // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
-        // DONE Add current userId and racerId to feedback in service.
-        // TODO Move GetUserID from RTS to the User manager.
-        // TODO Use GetUserID everywhere we need a UserId.
-        // TODO Add version number to Feedback report
-
+        // TODO Save the Race position in the list at time it was first run, in Race
+        // TODO Add current userId and racerId to feedback in service.
+        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // TODO Add a way to change/delete the racer name on the RaceTeam page.
+        // TODO Add current userId and racerId to feedback in service.
+        // HOLD Add version number to Feedback report
 
         // ** Later **
         // Show userId and racerId in admin feedback page.
@@ -98,11 +114,6 @@
         // Show user and racer counts in admin feedback page.
         // Parents review progress page
         // Race counts for user and racer on the parents review
-        // Add a partially transparent results panel that pops up in the middle of the screen
-        //     for a second at the end of the race, and shows their new time and how many of
-        //     the previous top 5 they beat. Would pop up right away, even while other racers
-        //     are finishing.
-        // Add a way to change/delete the racer name on the RaceTeam page.
         // Move the css in *.razor over the the css files
         // Video page
         // Accessory page

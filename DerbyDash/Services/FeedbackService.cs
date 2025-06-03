@@ -54,7 +54,7 @@ namespace DerbyDash.Services {
                         _logger.LogInformation("Set feedback UserId to: {UserId}", feedback.UserId);
                         
                         // Get current racerId if there's an active racer
-                        var activeRacer = _raceTeamService.ActiveRacer;
+                        var activeRacer = await _raceTeamService.GetActiveRacer();
                         if (activeRacer != null) {
                             feedback.RacerId = activeRacer.Id;
                             _logger.LogInformation("Set feedback RacerId to: {RacerId} for racer: {RacerName}", 

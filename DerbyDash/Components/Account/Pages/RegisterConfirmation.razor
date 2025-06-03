@@ -2,6 +2,7 @@
 
 @using System.Text
 @using Microsoft.AspNetCore.WebUtilities
+@using System.Text.Encodings.Web
 @using DerbyDash.Components.Shared
 @using static DerbyDash.Components.Shared.RegistrationProgress
 
@@ -63,6 +64,18 @@
             </p>
             
             <div class="confirmation-actions">
+                <button @onclick="ResendConfirmationEmail" class="btn btn-warning" disabled="@isResending">
+                    @if (isResending)
+                    {
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <span>Sending...</span>
+                    }
+                    else
+                    {
+                        <i class="fas fa-envelope"></i>
+                        <span>Resend Email</span>
+                    }
+                </button>
                 <a href="Account/Login" class="btn btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Go to Login
                 </a>
@@ -78,6 +91,7 @@
     private string? emailConfirmationLink;
     private string? statusMessage;
     private List<RegistrationStep> registrationSteps = new();
+    private bool isResending = false;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -120,6 +134,59 @@
                     ["returnUrl"] = ReturnUrl,
                     ["rememberMe"] = RememberMe 
                 });
+        }
+    }
+
+    private async Task ResendConfirmationEmail()
+    {
+        if (Email is null)
+        {
+            statusMessage = "Email is not provided";
+            return;
+        }
+
+        isResending = true;
+        try
+        {
+            var user = await UserManager.FindByEmailAsync(Email);
+            if (user is null)
+            {
+                statusMessage = "User not found";
+                return;
+            }
+
+            var userId = await UserManager.GetUserIdAsync(user);
+            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+            var callbackUrl = NavManager.GetUriWithQueryParameters(
+                NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                new Dictionary<string, object?> { 
+                    ["userId"] = userId, 
+                    ["code"] = code, 
+                    ["returnUrl"] = ReturnUrl,
+                    ["rememberMe"] = RememberMe 
+                });
+
+            // Send the email if we have a real email sender
+            if (!(EmailSender is IdentityNoOpEmailSender))
+            {
+                await EmailSender.SendConfirmationLinkAsync(user, Email, HtmlEncoder.Default.Encode(callbackUrl));
+                statusMessage = "Confirmation email sent successfully. Please check your email.";
+            }
+            else
+            {
+                // For development, update the confirmation link
+                emailConfirmationLink = callbackUrl;
+                statusMessage = "Confirmation link updated. For development purposes, you can click the link above.";
+            }
+        }
+        catch (Exception ex)
+        {
+            statusMessage = $"Error sending confirmation email: {ex.Message}";
+        }
+        finally
+        {
+            isResending = false;
         }
     }
 }
