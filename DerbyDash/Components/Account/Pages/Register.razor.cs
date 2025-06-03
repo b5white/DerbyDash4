@@ -73,7 +73,12 @@ namespace DerbyDash.Components.Account.Pages {
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             var callbackUrl = NavManager.GetUriWithQueryParameters(
                 NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+                new Dictionary<string, object?> { 
+                    ["userId"] = userId, 
+                    ["code"] = code, 
+                    ["returnUrl"] = ReturnUrl,
+                    ["rememberMe"] = Input.RememberMe 
+                });
             if (UserManager.Options.SignIn.RequireConfirmedAccount) {
                 await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
                 Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
@@ -81,13 +86,13 @@ namespace DerbyDash.Components.Account.Pages {
                 Logger.LogInformation("Email confirmation not required - automatically signing in user");
 
                 // Automatically sign in the user when email confirmation is disabled
-                await SignInManager.SignInAsync(user, isPersistent: false);
+                await SignInManager.SignInAsync(user, isPersistent: Input.RememberMe);
                 AuthStateProvider.NotifyUserLogin();
                 Logger.LogInformation("User automatically signed in: {Email}", email);
             }
 
             // Always redirect to the RegisterConfirmation page after successful registration
-            var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}";
+            var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
             RedirectManager.RedirectTo(confirmationUrl);
         }
 
@@ -123,6 +128,9 @@ namespace DerbyDash.Components.Account.Pages {
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; } = "";
+
+            [Display(Name = "Keep me logged in with cookies")]
+            public bool RememberMe { get; set; } = true;
         }
     }
 }
