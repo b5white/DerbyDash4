@@ -9,31 +9,7 @@ namespace DerbyDash.Services {
         public Task<Racer> AddRacer(Racer racer);
         public Task UpdateRacer(Racer racer);
         public Task RemoveRacer(int racerId);
-        
-        /// <summary>
-        /// Gets the currently active racer (cached) without any database queries.
-        /// Call EnsureActiveRacerInitializedAsync() first to ensure it's loaded.
-        /// </summary>
-        public Racer? ActiveRacer { get; }
-        
-        /// <summary>
-        /// Gets the active racer, initializing from cookie/database if needed (legacy method)
-        /// Use ActiveRacer property for better performance when you know it's already initialized
-        /// </summary>
         public Task<Racer?> GetActiveRacer();
-        
-        /// <summary>
-        /// Ensures the active racer is initialized from cookie/database if needed.
-        /// This should be called once at application startup or when needed.
-        /// </summary>
-        public Task<Racer?> EnsureActiveRacerInitializedAsync();
-        
-        /// <summary>
-        /// Updates the race count for the active racer from database.
-        /// Call this only when you need the most up-to-date race count.
-        /// </summary>
-        public Task UpdateActiveRacerRaceCountAsync();
-        
         public Task SetActiveRacer(Racer racer);
         public Task<string> GetUserID(string purpose);
 

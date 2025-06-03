@@ -250,30 +250,8 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error removing racer {ID}", racerId);
                 throw;
             }
-        }
-
-        /// <summary>
-        /// Gets the currently active racer (cached) without any database queries.
-        /// Call EnsureActiveRacerInitializedAsync() first to ensure it's loaded.
-        /// </summary>
-        public Racer? ActiveRacer => Active;
-
-        /// <summary>
-        /// Gets the active racer, initializing from cookie/database if needed (legacy method)
-        /// Use ActiveRacer property for better performance when you know it's already initialized
-        /// </summary>
-        public async Task<Racer?> GetActiveRacer() {
-            await EnsureActiveRacerInitializedAsync();
-            return Active;
-        }
-
-        /// <summary>
-        /// Ensures the active racer is initialized from cookie/database if needed.
-        /// This should be called once at application startup or when needed.
-        /// </summary>
-        public async Task<Racer?> EnsureActiveRacerInitializedAsync() {
-            Logger.LogInformation("EnsureActiveRacerInitializedAsync");
-            
+        }        public async Task<Racer?> GetActiveRacer() {
+            Logger.LogInformation("GetActiveRacer");
             // Try to load from cookie if we haven't already attempted to do so
             if (!_triedLoadingFromCookie) {
                 try {
@@ -282,6 +260,18 @@ namespace DerbyDash.Services {
                 } catch (Exception ex) {
                     Logger.LogError(ex, "Error loading active racer, using default");
                     // Don't default the active racer here - let it remain null
+                }
+            }
+
+            // If Active racer is not null, ensure it has the latest race count
+            if (Active != null) {
+                try {
+                    // Update the race count using a separate query to avoid concurrency issues
+                    using var context = _contextFactory.CreateDbContext();
+                    var raceCount = await context.Races.CountAsync(r => r.RacerId == Active.Id);
+                    Active.RaceCount = raceCount;
+                } catch (Exception ex) {
+                    Logger.LogError(ex, "Error updating race count for active racer");
                 }
             }
 
@@ -297,23 +287,6 @@ namespace DerbyDash.Services {
             }
 
             return Active;
-        }
-
-        /// <summary>
-        /// Updates the race count for the active racer from database.
-        /// Call this only when you need the most up-to-date race count.
-        /// </summary>
-        public async Task UpdateActiveRacerRaceCountAsync() {
-            if (Active != null) {
-                try {
-                    // Update the race count using a separate query to avoid concurrency issues
-                    using var context = _contextFactory.CreateDbContext();
-                    var raceCount = await context.Races.CountAsync(r => r.RacerId == Active.Id);
-                    Active.RaceCount = raceCount;
-                } catch (Exception ex) {
-                    Logger.LogError(ex, "Error updating race count for active racer");
-                }
-            }
         }
 
         public async Task SetActiveRacer(Racer racer) {
@@ -421,8 +394,8 @@ namespace DerbyDash.Services {
         /// <returns>The identifier of the last played race, or null if not found</returns>
         public async Task<string?> GetLastPlayedRaceAsync() {
             try {
-                // Get the active racer - use cached version if available
-                var activeRacer = ActiveRacer ?? await GetActiveRacer();
+                // Get the active racer
+                var activeRacer = await GetActiveRacer();
 
                 if (activeRacer != null && !string.IsNullOrEmpty(activeRacer.LastPlayedRace)) {
                     Logger.LogInformation($"Retrieved last played race '{activeRacer.LastPlayedRace}' for racer {activeRacer.Name}");
@@ -442,8 +415,8 @@ namespace DerbyDash.Services {
         /// <returns>A task representing the asynchronous operation</returns>
         public async Task SaveLastPlayedRaceAsync(string problemClassString) {
             try {
-                // Get the active racer - use cached version if available
-                var activeRacer = ActiveRacer ?? await GetActiveRacer();
+                // Get the active racer
+                var activeRacer = await GetActiveRacer();
 
                 if (activeRacer != null) {
                     // Update the racer's last played race and last raced date
@@ -507,8 +480,7 @@ namespace DerbyDash.Services {
         }
 
         public async Task<Racer?> GetRacerWithRaceCountAsync() {
-            // Use cached active racer if available
-            var racer = ActiveRacer ?? await GetActiveRacer();
+            var racer = await GetActiveRacer();
             if (racer != null) {
                 // Get race count using a separate query to avoid concurrency issues
                 using var context = _contextFactory.CreateDbContext();
@@ -538,8 +510,7 @@ namespace DerbyDash.Services {
         /// <returns>The saved race record</returns>
         public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null) {
             try {
-                // Use cached active racer if available
-                var activeRacer = ActiveRacer ?? await GetActiveRacer();
+                var activeRacer = await GetActiveRacer();
                 if (activeRacer == null) {
                     throw new InvalidOperationException("No active racer found");
                 }
