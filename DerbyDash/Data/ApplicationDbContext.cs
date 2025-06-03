@@ -8,5 +8,6 @@ namespace DerbyDash.Data {
     public DbSet<Racer> Racers { get; set; }
     public DbSet<Race> Races { get; set; }
     public DbSet<SpeedIncrement> SpeedIncrements { get; set; }
+    public DbSet<Feedback> Feedbacks { get; set; }
     }
 }

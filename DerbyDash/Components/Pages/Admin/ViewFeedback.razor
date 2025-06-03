@@ -3,6 +3,8 @@
 @using System.Globalization
 @using DerbyDash.Components.Layout
 @inject FeedbackService FeedbackService
+@inject IRaceTeamService RaceTeamService
+@inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 @rendermode InteractiveServer
@@ -137,6 +139,40 @@
                                 <span><strong>Feedback Type:</strong></span>
                                 <span>@feedback.FeedbackType</span>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <span><strong>User Account:</strong></span>
+                                <div class="text-end">
+                                    @if (!string.IsNullOrEmpty(feedback.UserId)) {
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(userDisplayName)) {
+                                                <div>@userDisplayName</div>
+                                                <small class="text-muted">ID: @feedback.UserId</small>
+                                            } else {
+                                                <div>@feedback.UserId</div>
+                                            }
+                                        </div>
+                                    } else {
+                                        <span class="badge bg-warning">Anonymous</span>
+                                    }
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <span><strong>Racer:</strong></span>
+                                <div class="text-end">
+                                    @if (feedback.RacerId.HasValue) {
+                                        <div>
+                                            @if (!string.IsNullOrEmpty(racerDisplayName)) {
+                                                <div>@racerDisplayName</div>
+                                                <small class="text-muted">ID: @feedback.RacerId</small>
+                                            } else {
+                                                <div>Racer ID: @feedback.RacerId</div>
+                                            }
+                                        </div>
+                                    } else {
+                                        <span class="badge bg-secondary">No Racer</span>
+                                    }
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -246,6 +282,10 @@
     private string adminNotes = "";
     private string? errorMessage = "";
     private bool isResolving = false;
+    
+    // Additional properties for user and racer information
+    private string? userDisplayName;
+    private string? racerDisplayName;
 
     // enable handling the escape key to close
     private DotNetObjectReference<ViewFeedback>? _objectRef;
@@ -283,7 +323,44 @@
     private async Task LoadFeedback() {
         loading = true;
         feedback = await FeedbackService.GetFeedbackByIdAsync(Id);
+        
+        // Load additional user and racer information
+        await LoadAdditionalUserInfo();
+        
         loading = false;
+    }
+    
+    private async Task LoadAdditionalUserInfo() {
+        userDisplayName = null;
+        racerDisplayName = null;
+        
+        if (feedback != null) {
+            // Load user information if UserId is available
+            if (!string.IsNullOrEmpty(feedback.UserId)) {
+                try {
+                    var user = await UserManager.FindByIdAsync(feedback.UserId);
+                    if (user != null) {
+                        userDisplayName = !string.IsNullOrEmpty(user.UserName) ? user.UserName : user.Email;
+                    }
+                } catch (Exception ex) {
+                    // If we can't load user info, just log and continue
+                    Console.WriteLine($"Could not load user info for ID {feedback.UserId}: {ex.Message}");
+                }
+            }
+            
+            // Load racer information if RacerId is available
+            if (feedback.RacerId.HasValue) {
+                try {
+                    var racer = await RaceTeamService.GetRacerByIdAsync(feedback.RacerId.Value);
+                    if (racer != null) {
+                        racerDisplayName = racer.Name;
+                    }
+                } catch (Exception ex) {
+                    // If we can't load racer info, just log and continue
+                    Console.WriteLine($"Could not load racer info for ID {feedback.RacerId}: {ex.Message}");
+                }
+            }
+        }
     }
 
     private void OpenResolveDialog() {

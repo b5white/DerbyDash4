@@ -69,7 +69,7 @@
         //    We'll calculate it based on the number of races in the DB.
         // DONE Use ActiveRacer if it's set instead of getting it from the cookie all the time.
         // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
-        // TODO Add current userId and racerId to feedback in service.
+        // DONE Add current userId and racerId to feedback in service.
         // TODO Move GetUserID from RTS to the User manager.
         // TODO Use GetUserID everywhere we need a UserId.
         // TODO Add version number to Feedback report
