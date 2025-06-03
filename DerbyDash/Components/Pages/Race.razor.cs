@@ -16,34 +16,31 @@ namespace DerbyDash.Components.Pages {
 
     public partial class Race: ComponentBase, IDisposable {
         [Inject]
-        public ILogger<Race> Logger { get; set; } = default!;
+        public required RaceService RaceService { get; set; }
 
         [Inject]
-        public IRaceTeamService RaceTeamService { get; set; } = default!;
+        public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
-        public RaceService RaceService { get; set; } = default!;
-
-        [Inject]
-        public NavigationManager NavManager { get; set; } = default!;
-
-        [Inject]
-        public IUserService UserService { get; set; } = default!;
-
-        [Inject]
-        public GameStateService GameStateService { get; set; } = default!;
+        public required NavigationManager NavManager { get; set; }
 
         [Inject]
         public required IConfiguration configuration { get; set; }
 
         [Inject]
+        public required ILogger<Race> Logger { get; set; }
+
+        [Inject]
         public required IJSRuntime JSRuntime { get; set; }
+
+        [Inject]
+        public required IUserService UserService { get; set; }
+
+        [Inject]
+        public required GameStateService GameStateService { get; set; }
 
         [Parameter]
         public string? ProblemClassString { get; set; }
-
-        // Cache the active racer to avoid repeated database calls
-        private Racer? _cachedActiveRacer;
 
         private bool Started = false;
         private bool Running = false;
@@ -88,20 +85,8 @@ namespace DerbyDash.Components.Pages {
 
         TrackContainer? trackContainerInstance;
 
-        /// <summary>
-        /// Gets the cached active racer, ensuring it's loaded once during component initialization
-        /// </summary>
-        private async Task<Racer?> GetCachedActiveRacerAsync() {
-            if (_cachedActiveRacer == null) {
-                _cachedActiveRacer = await RaceTeamService.GetActiveRacer();
-            }
-            return _cachedActiveRacer;
-        }
-
         protected override async Task OnInitializedAsync() {
-            Logger.LogInformation("Race.OnInitializedAsync()");
-            
-            // Initialize configuration and timers
+            Logger.LogInformation("OnInitializedAsync");
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
@@ -114,11 +99,9 @@ namespace DerbyDash.Components.Pages {
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
 
-            // Cache the active racer once during initialization
-            _cachedActiveRacer = await RaceTeamService.EnsureActiveRacerInitializedAsync();
-            
             // ENFORCE: Must have a chosen racer to race
-            if (_cachedActiveRacer == null) {
+            var activeRacer = await RaceTeamService.GetActiveRacer();
+            if (activeRacer == null) {
                 Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
                 NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
                 return;
@@ -210,7 +193,7 @@ namespace DerbyDash.Components.Pages {
 
             // Refresh the active racer cookie if there is an active racer
             try {
-                var activeRacer = _cachedActiveRacer ?? RaceTeamService.ActiveRacer;
+                Racer? activeRacer = await RaceTeamService.GetActiveRacer();
                 if (activeRacer != null) {
                     await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
                 }
@@ -516,8 +499,8 @@ namespace DerbyDash.Components.Pages {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
-                // Get the current racer from cache or service
-                var currentRacer = _cachedActiveRacer ?? RaceTeamService.ActiveRacer;
+                // Get the current racer from the _raceTeamService
+                Racer? currentRacer = await RaceTeamService.GetActiveRacer();
                 if (currentRacer == null) {
                     // If no racer is selected, redirect to the RaceTeam page
                     Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
