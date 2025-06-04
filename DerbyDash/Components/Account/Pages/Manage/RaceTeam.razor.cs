@@ -1,10 +1,10 @@
+using DerbyDash.Components.Shared;
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using DerbyDash.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using DerbyDash.Components.Shared;
 
 namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class RaceTeam: IDisposable {
@@ -12,7 +12,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private List<Racer> raceTeam = new();
         protected int TeamRaceCount { get; set; } = 0;
         private List<RegistrationProgress.RegistrationStep> registrationSteps = new();
-        
+
         [SupplyParameterFromQuery]
         private bool IsFromRegistration { get; set; }
 
@@ -20,7 +20,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private HttpContext HttpContext { get; set; } = default!;
 
         [Inject]
-        public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        public required UserManager<ApplicationUser> UserManager { get; set; }
 
         [Inject]
         internal IdentityUserAccessor UserAccessor { get; set; } = default!;
@@ -29,22 +29,21 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
 
         [Inject]
-        internal IRaceTeamService RaceTeamService { get; set; } = default!;
+        public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
-        public ILogger<RaceTeam> Logger { get; set; } = default!;
+        public required ILogger<RaceTeam> Logger { get; set; }
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
         protected override async Task OnInitializedAsync() {
             // Initialize registration steps if coming from registration flow
-            if (IsFromRegistration)
-            {
+            if (IsFromRegistration) {
                 var stepsHelper = new RegistrationSteps { CurrentStep = "race-team" };
                 registrationSteps = stepsHelper.GetRegistrationSteps();
             }
-            
+
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
             await ReloadUsers();

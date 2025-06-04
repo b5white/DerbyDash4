@@ -8,16 +8,16 @@ namespace DerbyDash.Components.Account.Pages {
         private string? errorMessage;
 
         [Inject]
-        private UserManager<ApplicationUser> UserManager { get; set; } = null!;
+        public required UserManager<ApplicationUser> UserManager { get; set; }
 
         [Inject]
-        private ILogger<Login> Logger { get; set; } = null!;
+        public required ILogger<Login> Logger { get; set; }
 
         [Inject]
-        private NavigationManager NavManager { get; set; } = default!;
+        public required NavigationManager NavManager { get; set; }
 
         [Inject]
-        private IdentityRedirectManager RedirectManager { get; set; } = null!;
+        internal IdentityRedirectManager RedirectManager { get; set; } = default!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -126,7 +126,7 @@ namespace DerbyDash.Components.Account.Pages {
                 { "rememberMe", rememberMe },
                 { "returnUrl", returnUrl }
             };
-            RedirectManager.RedirectToWParams("/Account/ProcessLogin", queryParams);
+            RedirectManager!.RedirectToWParams("/Account/ProcessLogin", queryParams);
         }
 
         private sealed class InputModel {

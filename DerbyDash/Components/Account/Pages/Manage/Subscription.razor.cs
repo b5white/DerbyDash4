@@ -6,13 +6,13 @@ namespace DerbyDash.Components.Account.Pages.Manage {
     public partial class Subscription {
 
         [Inject]
-        IUserService UserService { get; set; } = default!;
+        public required IUserService UserService { get; set; }
 
         [Inject]
-        ILogger<Subscription> Logger { get; set; } = default!;
+        public required ILogger<Subscription> Logger { get; set; }
 
         [Inject]
-        ISubscriptionService SubscriptionService { get; set; } = default!;
+        public required ISubscriptionService SubscriptionService { get; set; }
 
         private Data.Subscription userSubscription = new Data.Subscription() { UserId = "none" };
         private bool isLoading = true;

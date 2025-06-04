@@ -8,12 +8,12 @@ using Microsoft.AspNetCore.Identity;
 namespace DerbyDash.Components.Account.Pages.Manage {
     [Authorize]
     public partial class Preferences: ComponentBase {
-        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-        [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = null!;
-        [Inject] private NavigationManager NavManager { get; set; } = default!;
-        [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
-        [Inject] private IAvatarService AvatarService { get; set; } = default!;
+        [Inject] public required UserManager<ApplicationUser> UserManager { get; set; }
+        [Inject] public required SignInManager<ApplicationUser> SignInManager { get; set; }
+        [Inject] internal IdentityRedirectManager RedirectManager { get; set; } = null!;
+        [Inject] public required NavigationManager NavManager { get; set; }
+        [Inject] public required ILogger<Preferences> Logger { get; set; }
+        [Inject] public required IAvatarService AvatarService { get; set; }
 
         public class PreferencesModel {
             public string? Avatar { get; set; }
@@ -61,6 +61,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         }
 
         private async Task OnSubmitAsync() {
+            // TODO racer has options, not the user.
             // Get the user ID from claims to ensure we're working with the correct user
             //var authState = await AuthStateTask;
             //var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;

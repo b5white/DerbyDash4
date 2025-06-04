@@ -35,22 +35,14 @@ else
     private List<RegistrationStep> registrationSteps = new();
     
     [Inject]
-    UserManager<ApplicationUser> UserManager { get; set; } = default!;
+    public required UserManager<ApplicationUser> UserManager { get; set; }
     [Inject]
-    SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+    public required SignInManager<ApplicationUser> SignInManager { get; set; }
     [Inject]
-    IdentityRedirectManager RedirectManager { get; set; } = default!;
-    
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
-        registrationSteps = stepsHelper.GetRegistrationSteps();
-    }
-
+    internal IdentityRedirectManager RedirectManager { get; set; } = default!;
 
     [Inject]
-    public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+    public required CustomAuthStateProvider AuthStateProvider { get; set; }
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -66,6 +58,12 @@ else
 
     [SupplyParameterFromQuery]
     private bool RememberMe { get; set; } = true;
+
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
 
     protected override async Task OnInitializedAsync() {
         if (UserId is null || Code is null) {

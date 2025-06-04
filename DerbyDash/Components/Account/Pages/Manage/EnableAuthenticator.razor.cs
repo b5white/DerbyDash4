@@ -20,14 +20,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private HttpContext HttpContext { get; set; } = default!;
 
         [Inject]
-        public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        public required UserManager<ApplicationUser> UserManager { get; set; }
         [Inject]
-        public UrlEncoder UrlEncoder { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        public required UrlEncoder UrlEncoder { get; set; }
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+        [Inject] public required ILogger<ChangePassword> Logger { get; set; }
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 

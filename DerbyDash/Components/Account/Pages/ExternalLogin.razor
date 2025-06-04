@@ -65,7 +65,7 @@
     private string? Action { get; set; }
 
     [Inject]
-    public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+    public required CustomAuthStateProvider AuthStateProvider { get; set; }
     
     private string? ProviderDisplayName => externalLoginInfo?.ProviderDisplayName;
 

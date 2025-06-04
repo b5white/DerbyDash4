@@ -9,13 +9,13 @@ namespace DerbyDash.Components.Layout {
         private List<Racer> Racers { get; set; } = new List<Racer>();
         private Racer SelectedRacer { get; set; } = new Racer { Id = 0, Name = "" };
 
-        [Inject] private NavigationManager NavManager { get; set; } = default!;
-        [Inject] private IdentityRedirectManager RedirectManager { get; set; } = default!;
-        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
-        [Inject] private ILogger<TopNavbar> Logger { get; set; } = default!;
-        [Inject] private IAvatarService AvatarService { get; set; } = default!;
-        [Inject] private UserManager<ApplicationUser> UserManager { get; set; } = default!;
-        [Inject] private GameStateService GameStateService { get; set; } = default!;
+        [Inject] public required NavigationManager NavManager { get; set; }
+        [Inject] internal IdentityRedirectManager RedirectManager { get; set; } = default!;
+        [Inject] public required IRaceTeamService RaceTeamService { get; set; }
+        [Inject] public required ILogger<TopNavbar> Logger { get; set; }
+        [Inject] public required IAvatarService AvatarService { get; set; }
+        [Inject] public required UserManager<ApplicationUser> UserManager { get; set; }
+        [Inject] public required GameStateService GameStateService { get; set; }
 
         private string? RacerAvatarFileName;
         private string CurrentUrl => NavManager.Uri;
@@ -196,7 +196,7 @@ namespace DerbyDash.Components.Layout {
             }
         }
 
-        private async void HandleGameStateChangedAsync(bool running) {
+        private async Task HandleGameStateChangedAsync(bool running) {
             try {
                 isGameRunning = running;
                 await InvokeAsync(StateHasChanged);

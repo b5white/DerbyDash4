@@ -22,7 +22,7 @@ namespace DerbyDash.Services {
         public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
             Logger.LogInformation("CreateTrack");
             // Use cached active racer or ensure it's initialized
-            activeRacer = _raceTeamService.ActiveRacer ?? await _raceTeamService.EnsureActiveRacerInitializedAsync();
+            activeRacer = await _raceTeamService.GetActiveRacer();
             if (activeRacer == null) {
                 throw new MissingRacerException("No active racer selected. Please select a racer from your race team.");
             }

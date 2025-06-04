@@ -7,14 +7,14 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [CascadingParameter]
         private HttpContext HttpContext { get; set; } = default!;
         [Inject]
-        public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        public required UserManager<ApplicationUser> UserManager { get; set; } = default!;
         [Inject]
-        public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        //       [Inject]
-        //       internal IdentityUserAccessor UserAccessor { get; set; } = default!;
-        //       [Inject]
-        //       internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+        public required SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        [Inject]
+        internal IdentityRedirectManager RedirectManager { get; set; } = default!;
+        [Inject] public required ILogger<ChangePassword> Logger { get; set; } = default!;
 
         private async Task OnSubmitAsync() {
             //var user = await UserAccessor.GetRequiredUserAsync(HttpContext);

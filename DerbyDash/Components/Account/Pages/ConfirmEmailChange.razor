@@ -17,7 +17,7 @@
     private string? message;
 
     [Inject]
-    public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+    public required CustomAuthStateProvider AuthStateProvider { get; set; }
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;

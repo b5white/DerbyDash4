@@ -8,7 +8,7 @@ namespace DerbyDash.Services {
         private readonly ILogger<FeedbackService> _logger;
 
         private List<Feedback> Feedbacks;
-        
+
         public FeedbackService(IUserService userService, IRaceTeamService raceTeamService, ILogger<FeedbackService> logger) {
             _userService = userService;
             _raceTeamService = raceTeamService;
@@ -49,18 +49,18 @@ namespace DerbyDash.Services {
             try {
                 feedback.SubmittedAt = DateTime.UtcNow;
                 feedback.IsResolved = false;
-                
+
                 // Get current userId if user is authenticated
                 try {
                     if (await _userService.IsLoggedInAsync()) {
                         feedback.UserId = await _userService.GetUserIdAsync("AddFeedback");
                         _logger.LogInformation("Set feedback UserId to: {UserId}", feedback.UserId);
-                        
+
                         // Get current racerId if there's an active racer
-                        var activeRacer = _raceTeamService.ActiveRacer;
+                        var activeRacer = await _raceTeamService.GetActiveRacer();
                         if (activeRacer != null) {
                             feedback.RacerId = activeRacer.Id;
-                            _logger.LogInformation("Set feedback RacerId to: {RacerId} for racer: {RacerName}", 
+                            _logger.LogInformation("Set feedback RacerId to: {RacerId} for racer: {RacerName}",
                                 feedback.RacerId, activeRacer.Name);
                         } else {
                             feedback.RacerId = null;
@@ -78,7 +78,7 @@ namespace DerbyDash.Services {
                     feedback.UserId = null;
                     feedback.RacerId = null;
                 }
-                
+
                 Feedbacks.Add(feedback);
                 return await Task.FromResult(true);
             } catch (Exception ex) {

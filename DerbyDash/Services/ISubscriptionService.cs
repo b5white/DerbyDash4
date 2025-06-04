@@ -2,7 +2,7 @@ using DerbyDash.Data;
 
 namespace DerbyDash.Services {
     public interface ISubscriptionService {
-        Task<Subscription?> GetCurrentSubscriptionAsync(string userId);
+        Task<Subscription> GetCurrentSubscriptionAsync(string userId);
         Task<bool> ToggleAutoRenewalAsync(string userId);
         Task<bool> PauseSubscriptionAsync(string userId);
         Task<bool> ResumeSubscriptionAsync(string userId);

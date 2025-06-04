@@ -8,7 +8,7 @@ namespace DerbyDash.Components.Pages {
         [Inject] public required IJSRuntime JSRuntime { get; set; }
         [Inject] public required ILogger<Home> Logger { get; set; }
         [Inject] public required NavigationManager NavManager { get; set; }
-        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
+        [Inject] public required IRaceTeamService RaceTeamService { get; set; }
 
         [Inject] public required DatabaseKeepAliveService DbKeepAlive { get; set; }
 

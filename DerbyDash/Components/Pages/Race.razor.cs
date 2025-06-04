@@ -14,7 +14,7 @@ using Timer = System.Timers.Timer;
 
 namespace DerbyDash.Components.Pages {
 
-    public partial class Race: ComponentBase, IDisposable {
+    public partial class Race: ComponentBase, IAsyncDisposable {
         [Inject]
         public required RaceService RaceService { get; set; }
 
@@ -99,8 +99,8 @@ namespace DerbyDash.Components.Pages {
             FlashTimer.AutoReset = false;
 
             // Notify GameStateService that we're on a race page
-            GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
-            
+            await GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+
             // ENFORCE: Must have a chosen racer to race
             var activeRacer = await RaceTeamService.GetActiveRacer();
             if (activeRacer == null) {
@@ -115,7 +115,7 @@ namespace DerbyDash.Components.Pages {
         private async Task Reset() {
             Logger.LogInformation("Reset");
             // Set GameStateService.SetGameRunning(false) before starting a new race (if not already false)
-            GameStateService.SetGameRunning(false);
+            await GameStateService.SetGameRunning(false);
             if (!Running) {
                 RaceTime = 0;
                 CurrentRacerFinished = false;
@@ -126,7 +126,7 @@ namespace DerbyDash.Components.Pages {
                 Running = true;
 
                 // Notify GameStateService that the game is now running
-                GameStateService.SetGameRunning(true);
+                await GameStateService.SetGameRunning(true);
 
                 CreateProblems();
                 await InitializeTrack(ProblemClassString);
@@ -640,10 +640,10 @@ namespace DerbyDash.Components.Pages {
             Logger.LogWarning(message);
         }
 
-        public void Dispose() {
+        public async ValueTask DisposeAsync() {
             // Reset game state when component is disposed
-            GameStateService.SetGameRunning(false);
-            GameStateService.SetCurrentRacePage("");
+            await GameStateService.SetGameRunning(false);
+            await GameStateService.SetCurrentRacePage("");
 
             periodicTimer.Dispose();
 

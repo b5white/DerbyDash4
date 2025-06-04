@@ -16,18 +16,18 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private HttpContext HttpContext { get; set; } = default!;
 
         [Inject]
-        public UserManager<ApplicationUser> UserManager { get; set; } = default!;
+        public required UserManager<ApplicationUser> UserManager { get; set; }
         [Inject]
-        public SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-        //[Inject]
-        //internal IdentityUserAccessor UserAccessor { get; set; } = default!;
+        public required SignInManager<ApplicationUser> SignInManager { get; set; }
+        [Inject]
+        internal IdentityUserAccessor UserAccessor { get; set; } = default!;
         [Inject]
         internal IUserStore<ApplicationUser> UserStore { get; set; } = default!;
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-        [Inject] public ILogger<ChangePassword> Logger { get; set; } = default!;
+        [Inject] public required ILogger<ChangePassword> Logger { get; set; }
 
-        [Inject] public CustomAuthStateProvider AuthStateProvider { get; set; } = default!;
+        [Inject] public required CustomAuthStateProvider AuthStateProvider { get; set; }
 
         [SupplyParameterFromForm]
         private string? LoginProvider { get; set; }
@@ -63,7 +63,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             var result = await UserManager.RemoveLoginAsync(user, LoginProvider!, ProviderKey!);
             if (!result.Succeeded) {
                 RedirectManager.RedirectToCurrentPageWithStatus("Error: The external login was not removed.", HttpContext);
-            }            await SignInManager.RefreshSignInAsync(user);
+            }
+
+            await SignInManager.RefreshSignInAsync(user);
+            AuthStateProvider.NotifyUserLogin();
             RedirectManager.RedirectToCurrentPageWithStatus("The external login was removed.", HttpContext);
         }
 
