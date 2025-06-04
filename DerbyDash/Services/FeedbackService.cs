@@ -1,45 +1,48 @@
 using Bogus;
 using DerbyDash.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class FeedbackService {
-        private readonly ApplicationDbContext _context;
         private readonly IUserService _userService;
         private readonly IRaceTeamService _raceTeamService;
         private readonly ILogger<FeedbackService> _logger;
 
-        public FeedbackService(ApplicationDbContext context, IUserService userService, IRaceTeamService raceTeamService, ILogger<FeedbackService> logger) {
-            _context = context;
+        private List<Feedback> Feedbacks;
+        
+        public FeedbackService(IUserService userService, IRaceTeamService raceTeamService, ILogger<FeedbackService> logger) {
             _userService = userService;
             _raceTeamService = raceTeamService;
             _logger = logger;
+            Feedbacks = GenerateFakeFeedbacks(10);
         }
 
         public async Task<List<Feedback>> GetFeedbackSinceDateAsync(DateTime startDate) {
-            return await _context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<List<Feedback>> GetFeedbackByTypeAsync(FeedbackType type, DateTime startDate) {
-            return await _context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.FeedbackType == type && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<List<Feedback>> GetFeedbackByStatusAsync(bool isResolved, DateTime startDate) {
-            return await _context.Feedbacks
+            var result = Feedbacks
                 .Where(f => f.IsResolved == isResolved && f.SubmittedAt >= startDate)
                 .OrderByDescending(f => f.SubmittedAt)
-                .ToListAsync();
+                .ToList();
+            return await Task.FromResult(result);
         }
 
         public async Task<Feedback?> GetFeedbackByIdAsync(int id) {
-            return await _context.Feedbacks
-                .FirstOrDefaultAsync(f => f.Id == id);
+            var result = Feedbacks.Find(f => f.Id == id);
+            return await Task.FromResult(result);
         }
 
         public async Task<bool> AddFeedbackAsync(Feedback feedback) {
@@ -54,7 +57,7 @@ namespace DerbyDash.Services {
                         _logger.LogInformation("Set feedback UserId to: {UserId}", feedback.UserId);
                         
                         // Get current racerId if there's an active racer
-                        var activeRacer = await _raceTeamService.GetActiveRacer();
+                        var activeRacer = _raceTeamService.ActiveRacer;
                         if (activeRacer != null) {
                             feedback.RacerId = activeRacer.Id;
                             _logger.LogInformation("Set feedback RacerId to: {RacerId} for racer: {RacerName}", 
@@ -76,22 +79,19 @@ namespace DerbyDash.Services {
                     feedback.RacerId = null;
                 }
                 
-                _context.Feedbacks.Add(feedback);
-                await _context.SaveChangesAsync();
-                return true;
+                Feedbacks.Add(feedback);
+                return await Task.FromResult(true);
             } catch (Exception ex) {
                 _logger.LogError(ex, "Error adding feedback");
-                return false;
+                return await Task.FromResult(false);
             }
         }
 
         public async Task<bool> UpdateFeedbackAsync(Feedback feedback) {
             try {
-                _context.Feedbacks.Update(feedback);
-                await _context.SaveChangesAsync();
+                //   Feedbacks.Update(feedback);
                 return true;
-            } catch (Exception ex) {
-                _logger.LogError(ex, "Error updating feedback");
+            } catch {
                 return false;
             }
         }
@@ -105,12 +105,10 @@ namespace DerbyDash.Services {
                 feedback.IsResolved = true;
                 feedback.AdminNotes = adminNotes;
                 feedback.ResolvedAt = DateTime.UtcNow;
-                
-                _context.Feedbacks.Update(feedback);
-                await _context.SaveChangesAsync();
+                //   Feedbacks.Update(feedback);
+
                 return true;
-            } catch (Exception ex) {
-                _logger.LogError(ex, "Error resolving feedback");
+            } catch {
                 return false;
             }
         }
@@ -121,11 +119,9 @@ namespace DerbyDash.Services {
                 if (feedback == null)
                     return false;
 
-                _context.Feedbacks.Remove(feedback);
-                await _context.SaveChangesAsync();
+                Feedbacks.Remove(feedback);
                 return true;
-            } catch (Exception ex) {
-                _logger.LogError(ex, "Error deleting feedback");
+            } catch {
                 return false;
             }
         }

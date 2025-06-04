@@ -5,6 +5,10 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     margin-bottom: 0.5rem;
     transition: all 0.3s ease;
+    /* Prevent horizontal overflow */
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 
 .container-fluid {
@@ -365,6 +369,13 @@
         padding: 0.75rem 1rem;
         position: relative;
         z-index: 1000; /* Below the sidebar z-index */
+        /* Safe area handling for devices with notches */
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+        /* Prevent horizontal overflow */
+        width: 100%;
+        box-sizing: border-box;
+        overflow-x: hidden;
     }
     
     .container-fluid {
