@@ -124,6 +124,8 @@
                         <th>ID</th>
                         <th>Date</th>
                         <th>Name</th>
+                        <th>User ID</th>
+                        <th>Racer ID</th>
                         <th>Type</th>
                         <th>Subject</th>
                         <th>Status</th>
@@ -137,6 +139,22 @@
                             <td>@feedback.Id</td>
                             <td>@feedback.SubmittedAt.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</td>
                             <td>@feedback.Name</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(feedback.UserId)) {
+                                    <span class="badge bg-info text-truncate" style="max-width: 80px;" title="@feedback.UserId">
+                                        @(feedback.UserId.Length > 8 ? feedback.UserId.Substring(0, 8) + "..." : feedback.UserId)
+                                    </span>
+                                } else {
+                                    <span class="badge bg-secondary">Anonymous</span>
+                                }
+                            </td>
+                            <td>
+                                @if (feedback.RacerId.HasValue) {
+                                    <span class="badge bg-success"># @feedback.RacerId</span>
+                                } else {
+                                    <span class="badge bg-light text-dark">--</span>
+                                }
+                            </td>
                             <td>@feedback.FeedbackType</td>
                             <td>@feedback.Subject</td>
                             <td>

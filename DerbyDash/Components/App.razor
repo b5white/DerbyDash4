@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <base href="/" />
     <link rel="stylesheet" href="@Assets["lib/bootstrap/dist/css/bootstrap.min.css"]" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -105,9 +105,21 @@
             } else {
                 browserInfo.os = "Unknown";
             }
-            
-            return `${browserInfo.browser} ${browserInfo.version} on ${browserInfo.os} (${browserInfo.device})`;
+              return `${browserInfo.browser} ${browserInfo.version} on ${browserInfo.os} (${browserInfo.device})`;
         };
+        
+        // Initialize mobile optimizations when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (window.initializeMobileOptimizations) {
+                    window.initializeMobileOptimizations();
+                }
+            });
+        } else {
+            if (window.initializeMobileOptimizations) {
+                window.initializeMobileOptimizations();
+            }
+        }
     </script>
 </body>
 

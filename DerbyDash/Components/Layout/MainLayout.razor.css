@@ -3,6 +3,9 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    min-height: -webkit-fill-available; /* Fallback for iOS Safari */
+    width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .main {
@@ -68,11 +71,32 @@ main {
         right: 0;
         height: auto;
         z-index: 1001;
+        /* Safe area handling for devices with notches */
+        padding-top: max(0px, env(safe-area-inset-top));
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
     }
     
     /* Add margin-top to the main div to prevent content from being hidden under the sidebar */
     .main {
-        margin-top: 3.5rem; /* Height of the sidebar header */
+        margin-top: calc(3.5rem + env(safe-area-inset-top, 0px)); /* Height of the sidebar header + safe area */
+        /* Handle safe areas for main content */
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+        padding-bottom: max(0px, env(safe-area-inset-bottom));
+        
+        /* Prevent content shifting */
+        width: 100%;
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    /* Ensure page takes full height on mobile */
+    .page {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        width: 100%;
+        overflow-x: hidden;
     }
 }
 

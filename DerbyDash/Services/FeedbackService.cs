@@ -3,9 +3,16 @@ using DerbyDash.Data;
 
 namespace DerbyDash.Services {
     public class FeedbackService {
+        private readonly IUserService _userService;
+        private readonly IRaceTeamService _raceTeamService;
+        private readonly ILogger<FeedbackService> _logger;
 
         private List<Feedback> Feedbacks;
-        public FeedbackService() {
+        
+        public FeedbackService(IUserService userService, IRaceTeamService raceTeamService, ILogger<FeedbackService> logger) {
+            _userService = userService;
+            _raceTeamService = raceTeamService;
+            _logger = logger;
             Feedbacks = GenerateFakeFeedbacks(10);
         }
 
@@ -42,14 +49,40 @@ namespace DerbyDash.Services {
             try {
                 feedback.SubmittedAt = DateTime.UtcNow;
                 feedback.IsResolved = false;
-                // Set optional foreign keys to null if not provided
-                // These can be populated later if user authentication is available
-                feedback.RacerId = 0;
-                feedback.UserId = "";
+                
+                // Get current userId if user is authenticated
+                try {
+                    if (await _userService.IsLoggedInAsync()) {
+                        feedback.UserId = await _userService.GetUserIdAsync("AddFeedback");
+                        _logger.LogInformation("Set feedback UserId to: {UserId}", feedback.UserId);
+                        
+                        // Get current racerId if there's an active racer
+                        var activeRacer = _raceTeamService.ActiveRacer;
+                        if (activeRacer != null) {
+                            feedback.RacerId = activeRacer.Id;
+                            _logger.LogInformation("Set feedback RacerId to: {RacerId} for racer: {RacerName}", 
+                                feedback.RacerId, activeRacer.Name);
+                        } else {
+                            feedback.RacerId = null;
+                            _logger.LogInformation("No active racer found, RacerId set to null");
+                        }
+                    } else {
+                        // User is not authenticated, leave UserId and RacerId as null/empty
+                        feedback.UserId = null;
+                        feedback.RacerId = null;
+                        _logger.LogInformation("User not authenticated, UserId and RacerId set to null");
+                    }
+                } catch (Exception ex) {
+                    // If we can't get user context, log the error but don't fail the feedback submission
+                    _logger.LogWarning(ex, "Could not get user context for feedback, proceeding with anonymous feedback");
+                    feedback.UserId = null;
+                    feedback.RacerId = null;
+                }
+                
                 Feedbacks.Add(feedback);
                 return await Task.FromResult(true);
             } catch (Exception ex) {
-                Console.WriteLine($"Error adding feedback: {ex.Message}");
+                _logger.LogError(ex, "Error adding feedback");
                 return await Task.FromResult(false);
             }
         }

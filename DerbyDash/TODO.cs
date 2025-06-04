@@ -58,7 +58,7 @@
         //     Or "Good race." if not.
         //     Would pop up right away, even while other racers
         //     are finishing.
-        // TODO Add a Resend Email link to the RegisterConfirmation page?
+        // DONE Add a Resend Email link to the RegisterConfirmation page?
         //    It should just resend the email, but stay on the Confirmation page.
         // TODO Dress up the confirmation email. Currently "Please confirm your account by clicking here."
         // TODO Use GetUserID everywhere we need a UserId.

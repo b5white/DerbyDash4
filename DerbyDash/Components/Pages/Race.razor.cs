@@ -86,7 +86,9 @@ namespace DerbyDash.Components.Pages {
         TrackContainer? trackContainerInstance;
 
         protected override async Task OnInitializedAsync() {
-            Logger.LogInformation("OnInitializedAsync");
+            Logger.LogInformation("Race.OnInitializedAsync()");
+            
+            // Initialize configuration and timers
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
