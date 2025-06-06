@@ -22,12 +22,8 @@
     color: white;
     padding: 1.5rem 2rem;
     text-align: center;
-}
-
-.registration-progress-container {
-    padding: 1rem 2rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid #e0e0e0;
+    margin: -2.5rem -2.5rem 2rem -2.5rem;
+    border-radius: 0;
 }
 
 .confirmation-header h1 {
@@ -37,7 +33,7 @@
 }
 
 .confirmation-content {
-    padding: 2rem;
+    padding: 0;
     text-align: center;
 }
 
@@ -157,6 +153,11 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .confirmation-header {
+        margin: -1.8rem -1.8rem 1.5rem -1.8rem;
+        padding: 1rem 1.5rem;
+    }
+    
     .confirmation-header h1 {
         font-size: 1.8rem;
     }

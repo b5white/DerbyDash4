@@ -131,6 +131,11 @@ namespace DerbyDash.Components.Account.Pages {
 
             [Display(Name = "Keep me logged in with cookies")]
             public bool RememberMe { get; set; } = true;
+
+            [Required(ErrorMessage = "Please verify that you are not a robot.")]
+            [Range(typeof(bool), "true", "true", ErrorMessage = "Please verify that you are not a robot.")]
+            [Display(Name = "I'm not a robot")]
+            public bool CaptchaVerified { get; set; } = false;
         }
     }
 }

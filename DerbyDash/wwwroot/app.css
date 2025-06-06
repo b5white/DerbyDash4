@@ -85,7 +85,7 @@ input, select, textarea {
         /* Prevent zoom on iOS by ensuring minimum font size */
         font-size: max(16px, 1em);
         /* Improve touch targets */
-        min-height: 44px;
+        /* min-height: 44px; */
         /* Prevent layout shifts */
         box-sizing: border-box;
     }

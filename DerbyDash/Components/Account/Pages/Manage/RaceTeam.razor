@@ -11,96 +11,116 @@
 
 <PageTitle>Manage team members</PageTitle>
 
-<h3>Current race team</h3>
-
 @if (IsFromRegistration)
 {
-    <div class="registration-progress-container">
-        <RegistrationProgress Steps="@registrationSteps" CurrentStep="race-team" />
-    </div>
+    <RegistrationLayout Steps="@registrationSteps" 
+                       CurrentStep="race-team"
+                       SidebarTitle="Create Your Race Team"
+                       SidebarDescription="Add racers to your team and start your math racing adventure!"
+                       SidebarExtraContent="<div class='team-hint'><i class='fas fa-users'></i> You can add multiple racers for your family</div>">
+        @RenderContent()
+    </RegistrationLayout>
 }
-@if (raceTeam.Any()) {
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Racer Name</th>
-                    <th>Races Completed</th>
-                    <th>Last Raced</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (Racer racer in raceTeam) {
-                    <tr>
-                        <td>@racer.Name</td>
-                        <td>@racer.RaceCount</td>
-                        <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
-                                <i class="fas fa-check-circle"></i> Set Active
-                            </button>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-            <tfoot>
-                <tr class="table-info">
-                    <td><strong>Team Total</strong></td>
-                    <td><strong>@TeamRaceCount</strong></td>
-                    <td colspan="2"></td>
-                </tr>
-            </tfoot>
-        </table>
-    </div>
-} else {
-    <div class="alert alert-info">
-        Your race team is empty. Add racers to get started!
-    </div>
+else
+{
+    @RenderContent()
 }
 
-@if (TeamRaceCount == 0 && raceTeam.Any()) {
-    <div class="mt-3 mb-4">
-        <div class="card border-primary">
-            <div class="card-body text-center">
-                <h5 class="card-title text-primary">
-                    <i class="fas fa-lightbulb"></i> New to Derby Dash?
-                </h5>
-                <p class="card-text">
-                    Get the most out of this app! See our quick guide for parents before you start racing.
-                </p>
-                <a href="/TryAppExplainer" class="btn btn-primary">
-                    Next <i class="fas fa-arrow-right"></i>
-                </a>
+@code {
+    private RenderFragment RenderContent() => @<text>
+        <h3>Current race team</h3>
+
+        @if (raceTeam.Any()) {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Racer Name</th>
+                            <th>Races Completed</th>
+                            <th>Last Raced</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Racer racer in raceTeam) {
+                            <tr>
+                                <td>@racer.Name</td>
+                                <td>@racer.RaceCount</td>
+                                <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
+                                        <i class="fas fa-check-circle"></i> Set Active
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-info">
+                            <td><strong>Team Total</strong></td>
+                            <td><strong>@TeamRaceCount</strong></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        } else {
+            <div class="alert alert-info">
+                Your race team is empty. Add racers to get started!
+            </div>
+        }
+
+        @if (TeamRaceCount == 0 && raceTeam.Any()) {
+            <div class="mt-3 mb-4">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">
+                            <i class="fas fa-lightbulb"></i> New to Derby Dash?
+                        </h5>
+                        <p class="card-text">
+                            Get the most out of this app! See our quick guide for parents before you start racing.
+                        </p>
+                        <a href="/TryAppExplainer" class="btn btn-primary">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <StatusMessage Message="@message" />
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Add New Racer
+                </h4>
+            </div>
+            <div class="card-body">
+                <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="add-racer">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="Input.RacerName" class="form-control" placeholder="Enter racer name" />
+                        <label for="Input.RacerName">Racer Name</label>
+                        <ValidationMessage For="() => Input.RacerName" class="text-danger" />
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Racer
+                    </button>
+                </EditForm>
             </div>
         </div>
-    </div>
-}
 
-<h3 class="mt-3">Add a racer</h3>
-
-<StatusMessage Message="@message"/>
-<div class="row">
-    <div class="col-xl-6">
-        <EditForm Model="Input" FormName="add-racer" OnValidSubmit="OnValidSubmitAsync" method="post">
-            <DataAnnotationsValidator />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText type="text" @bind-Value="Input.MemberName" id="Input.MemberName" class="form-control" autocomplete="off" aria-required="true" />
-                <label for="Input.MemberName" class="form-label">Enter a racing name for your student</label>
-                <ValidationMessage For="() => Input.MemberName" class="text-danger" />
+        @if (IsFromRegistration && raceTeam.Any())
+        {
+            <div class="registration-next-step">
+                <a href="/TryAppExplainer?IsFromRegistration=true" class="btn btn-lg btn-primary">
+                    <i class="fas fa-rocket"></i> Continue to Start Racing
+                </a>
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Add racer</button>
-        </EditForm>
-    </div>
-</div>
-
-@if (IsFromRegistration && raceTeam.Any())
-{
-    <div class="mt-4">
-        <a href="/TryAppExplainer?IsFromRegistration=true" class="btn btn-success btn-lg">
-            <i class="fas fa-arrow-right"></i> Next: Start Racing
-        </a>
-    </div>
+        }
+    </text>;
 }
 

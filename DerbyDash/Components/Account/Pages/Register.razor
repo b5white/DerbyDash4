@@ -9,107 +9,92 @@
 
 <PageTitle>Register - Derby Dash</PageTitle>
 
-<div class="register-container">
-    <div class="register-background"></div>
-    <div class="register-content">
-        <div class="register-logo">
-            <h1>Derby<span>Dash</span></h1>
+<RegistrationLayout Steps="@registrationStepsList" CurrentStep="register" SidebarTitle="Join the Race!"
+    SidebarDescription="Create an account to track your progress in exciting math races!"
+    SidebarExtraContent="<div class='scroll-down-hint'><i class='fas fa-arrow-down'></i> Scroll Down to Register</div>">
+
+    <h2 class="register-title">Create Your Account</h2>
+    <StatusMessage Message="@Message" />
+    <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
+        FormName="register">
+        <DataAnnotationsValidator />
+        <ValidationSummary class="text-danger" role="alert" />
+
+        <div class="form-group">
+            <label for="Input.Email">Email Address</label>
+            <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username"
+                aria-required="true" placeholder="Enter your email" />
+            <ValidationMessage For="() => Input.Email" class="validation-message" />
         </div>
 
-        <div class="register-card">
-            <div class="register-image">
-                <div class="checkered-pattern top"></div>
-                <div class="racing-stripe"></div>
-                <div class="register-image-content">
-                    <h2>Join the Race!</h2>
-                    <p>Create an account to track your progress in exciting math races!</p>
-                    <div class="scroll-down-hint">
-                        <i class="fas fa-arrow-down"></i> Scroll Down to Register
-                    </div>
-                </div>
-                <div class="checkered-pattern"></div>
-                <div class="registration-progress-container">
-                    <RegistrationProgress Steps="@registrationStepsList" CurrentStep="register" />
-                </div>
+        <div class="password-tips">
+            <h3><i class="fas fa-shield-alt"></i> Password Tips</h3>
+            <ul>
+                <li>Teach your kids to use best practices for passwords</li>
+                <li>Pick 3 or more words that are easy for you to remember</li>
+                <li>Choose words that would be hard for others to guess</li>
+                <li>At least 12 characters is best</li>
+                <li>Use different passwords for different websites</li>
+            </ul>
+            <div class="example">Example: JulieLikesMath</div>
+        </div>
+
+        <div class="form-group">
+            <label for="Input.Password">Password</label>
+            <div class="password-input-container">
+                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
+                    autocomplete="new-password" aria-required="true" placeholder="Create a password" />
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('Input.Password')"
+                    tabindex="-1">
+                    <i class="fas fa-eye" aria-hidden="true"></i>
+                    <span class="sr-only">Show password</span>
+                </button>
             </div>
+            <ValidationMessage For="() => Input.Password" class="validation-message" />
+        </div>
 
+        <div class="form-group">
+            <label for="Input.ConfirmPassword">Confirm Password</label>
+            <div class="password-input-container">
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
+                    class="form-control" autocomplete="new-password" aria-required="true"
+                    placeholder="Confirm your password" />
+                <button type="button" class="password-toggle-btn"
+                    onclick="togglePasswordVisibility('Input.ConfirmPassword')" tabindex="-1">
+                    <i class="fas fa-eye" aria-hidden="true"></i>
+                    <span class="sr-only">Show password</span>
+                </button>
+            </div>
+            <ValidationMessage For="() => Input.ConfirmPassword" class="validation-message" />
+        </div>
 
+        <div class="form-group">
+            <label class="form-check-label">
+                <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+                Keep me logged in with cookies
+            </label>
+        </div>
 
-            <div class="register-form">
-                <h2 class="register-title">Create Your Account</h2>
-                <StatusMessage Message="@Message" />
-                <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
-                    FormName="register">
-                    <DataAnnotationsValidator />
-                    <ValidationSummary class="text-danger" role="alert" />
-
-                    <div class="form-group">
-                        <label for="Input.Email">Email Address</label>
-                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
-                            autocomplete="username" aria-required="true" placeholder="Enter your email" />
-                        <ValidationMessage For="() => Input.Email" class="validation-message" />
-                    </div>
-
-                    <div class="password-tips">
-                        <h3><i class="fas fa-shield-alt"></i> Password Tips</h3>
-                        <ul>
-                            <li>Teach your kids to use best practices for passwords</li>
-                            <li>Pick 3 or more words that are easy for you to remember</li>
-                            <li>Choose words that would be hard for others to guess</li>
-                            <li>At least 12 characters is best</li>
-                            <li>Use different passwords for different websites</li>
-                        </ul>
-                        <div class="example">Example: JulieLikesMath</div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="Input.Password">Password</label>
-                        <div class="password-input-container">
-                            <InputText type="password" @bind-Value="Input.Password" id="Input.Password"
-                                class="form-control" autocomplete="new-password" aria-required="true"
-                                placeholder="Create a password" />
-                            <button type="button" class="password-toggle-btn"
-                                onclick="togglePasswordVisibility('Input.Password')" tabindex="-1">
-                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                <span class="sr-only">Show password</span>
-                            </button>
-                        </div>
-                        <ValidationMessage For="() => Input.Password" class="validation-message" />
-                    </div>
-
-                    <div class="form-group">
-                        <label for="Input.ConfirmPassword">Confirm Password</label>
-                        <div class="password-input-container">
-                            <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
-                                class="form-control" autocomplete="new-password" aria-required="true"
-                                placeholder="Confirm your password" />
-                            <button type="button" class="password-toggle-btn"
-                                onclick="togglePasswordVisibility('Input.ConfirmPassword')" tabindex="-1">
-                                <i class="fas fa-eye" aria-hidden="true"></i>
-                                <span class="sr-only">Show password</span>
-                            </button>
-                        </div>
-                        <ValidationMessage For="() => Input.ConfirmPassword" class="validation-message" />
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-check-label">
-                            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                            Keep me logged in with cookies
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-register">
-                        <i class="fas fa-user-plus"></i> Create Account
-                    </button>
-
-                    <div class="register-links">
-                        <p>
-                            Already have an account? <a href="Account/Login">Sign in</a>
-                        </p>
-                    </div>
-                </EditForm>
+        <div class="form-group captcha-group">
+            <div class="captcha-container">
+                <label class="form-check-label captcha-label">
+                    <InputCheckbox @bind-Value="Input.CaptchaVerified" class="form-check-input captcha-checkbox" />
+                    <span class="captcha-text">I'm not a robot</span>
+                    <i class="fas fa-shield-alt captcha-icon"></i>
+                </label>
+                <ValidationMessage For="() => Input.CaptchaVerified" class="validation-message" />
             </div>
         </div>
-    </div>
-</div>
+
+        <button type="submit" class="btn btn-register">
+            <i class="fas fa-user-plus"></i> Create Account
+        </button>
+
+        <div class="register-links">
+            <p>
+                Already have an account? <a href="Account/Login">Sign in</a>
+            </p>
+        </div>
+    </EditForm>
+
+</RegistrationLayout>

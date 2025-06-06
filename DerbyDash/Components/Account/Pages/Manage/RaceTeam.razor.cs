@@ -64,15 +64,15 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         private async Task OnValidSubmitAsync() {
             try {
-                Logger.LogInformation("Adding new racer: {RacerName}", Input.MemberName);
+                Logger.LogInformation("Adding new racer: {RacerName}", Input.RacerName);
 
                 Racer newRacer = new() {
-                    Name = Input.MemberName,
+                    Name = Input.RacerName,
                 };
 
                 await RaceTeamService.AddRacer(newRacer);
 
-                Logger.LogInformation("Racer added successfully: {RacerName}", Input.MemberName);
+                Logger.LogInformation("Racer added successfully: {RacerName}", Input.RacerName);
 
                 // The list will be refreshed via the OnRacerChanged event
                 // Add a small delay to ensure the database operation is complete
@@ -86,10 +86,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 StateHasChanged();
             } catch (DuplicateRacerException) {
                 // Preserve the entered name and show error
-                message = $"Error: '{Input.MemberName}' already exists on the team";
-                Logger.LogWarning("Duplicate racer name attempted: {RacerName}", Input.MemberName);
+                message = $"Error: '{Input.RacerName}' already exists on the team";
+                Logger.LogWarning("Duplicate racer name attempted: {RacerName}", Input.RacerName);
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error adding racer: {RacerName}", Input.MemberName);
+                Logger.LogError(ex, "Error adding racer: {RacerName}", Input.RacerName);
                 message = "Error adding racer: " + ex.Message;
             }
         }
@@ -128,8 +128,8 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private sealed class InputModel {
             [Required]
             [DataType(DataType.Text)]
-            [Display(Name = "Racing name")]
-            public string MemberName { get; set; } = "";
+            [Display(Name = "Racer name")]
+            public string RacerName { get; set; } = "";
         }
 
         public void Dispose() {
