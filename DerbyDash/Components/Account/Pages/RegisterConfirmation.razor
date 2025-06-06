@@ -14,65 +14,64 @@
 
 <PageTitle>Registration Successful - Derby Dash</PageTitle>
 
-<div class="confirmation-container">
-    <div class="confirmation-card">
-        <div class="confirmation-header">
-            <h1>Registration Successful!</h1>
-            <StatusMessage Message="@statusMessage" />
-        </div>
+<RegistrationLayout Steps="@registrationSteps" 
+                   CurrentStep="confirm-email"
+                   SidebarTitle="Registration Successful!"
+                   SidebarDescription="Thank you for joining Derby Dash! Your racing adventure is about to begin.">
+    
+    <div class="confirmation-header">
+        <h1>Registration Successful!</h1>
+        <StatusMessage Message="@statusMessage" />
+    </div>
 
-        <div class="registration-progress-container">
-            <RegistrationProgress Steps="@registrationSteps" CurrentStep="confirm-email" />
+    <div class="confirmation-content">
+        <div class="checkered-flag-icon">
+            <i class="fas fa-flag-checkered"></i>
         </div>
-
-        <div class="confirmation-content">
-            <div class="checkered-flag-icon">
-                <i class="fas fa-flag-checkered"></i>
+        
+        <h2>Thank you for joining Derby Dash!</h2>
+        
+        @if (emailConfirmationLink is not null) {
+            <div class="alert alert-info">
+                <p>
+                    <strong>Important:</strong> In a production environment, a confirmation link would be sent to your email.
+                </p>
+                <p>
+                    For development purposes, you can <a href="@emailConfirmationLink" class="alert-link">click here to confirm your account</a>.
+                </p>
             </div>
-            
-            <h2>Thank you for joining Derby Dash!</h2>
-            
-            @if (emailConfirmationLink is not null) {
-                <div class="alert alert-info">
-                    <p>
-                        <strong>Important:</strong> In a production environment, a confirmation link would be sent to your email.
-                    </p>
-                    <p>
-                        For development purposes, you can <a href="@emailConfirmationLink" class="alert-link">click here to confirm your account</a>.
-                    </p>
-                </div>
-            } else {
-                <div class="confirmation-message">
-                    <p>
-                        A confirmation link has been sent to your email address. Click the link in the email to activate your account.
-                    </p>
-                    <p>
-                        <strong>Please check your email to confirm your account.</strong>
-                    </p>
-                    <p>
-                        Then you can create your race team and get started.
-                    </p>
-                    <p>
-                        If you don't see the email, please check your spam folder.
-                    </p>
-                </div>
-            }
-            
-            <p class="next-steps">
-                After confirming your email, you'll be able to log in and start using Derby Dash!
-            </p>
-            
-            <div class="confirmation-actions">
-                <a href="Account/Login" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt"></i> Go to Login
-                </a>
-                <a href="/" class="btn btn-secondary">
-                    <i class="fas fa-home"></i> Return to Home
-                </a>
+        } else {
+            <div class="confirmation-message">
+                <p>
+                    A confirmation link has been sent to your email address. Click the link in the email to activate your account.
+                </p>
+                <p>
+                    <strong>Please check your email to confirm your account.</strong>
+                </p>
+                <p>
+                    Then you can create your race team and get started.
+                </p>
+                <p>
+                    If you don't see the email, please check your spam folder.
+                </p>
             </div>
+        }
+        
+        <p class="next-steps">
+            After confirming your email, you'll be able to log in and start using Derby Dash!
+        </p>
+        
+        <div class="confirmation-actions">
+            <a href="Account/Login" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Go to Login
+            </a>
+            <a href="/" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Return to Home
+            </a>
         </div>
     </div>
-</div>
+
+</RegistrationLayout>
 
 @code {
     private string? emailConfirmationLink;

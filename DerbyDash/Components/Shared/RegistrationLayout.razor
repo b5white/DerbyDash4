@@ -1,0 +1,48 @@
+@namespace DerbyDash.Components.Shared
+
+<div class="registration-layout-container">
+    <div class="registration-background"></div>
+    <div class="registration-content">
+        @if (!HideHeader)
+        {
+            <div class="registration-logo">
+                <h1>Derby<span>Dash</span></h1>
+            </div>
+        }
+
+        <div class="registration-card">
+            <div class="registration-sidebar">
+                <div class="checkered-pattern top"></div>
+                <div class="racing-stripe"></div>
+                <div class="registration-sidebar-content">
+                    <h2>@SidebarTitle</h2>
+                    <p>@SidebarDescription</p>
+                    @if (!string.IsNullOrEmpty(SidebarExtraContent))
+                    {
+                        <div class="sidebar-extra">
+                            @((MarkupString)SidebarExtraContent)
+                        </div>
+                    }
+                </div>
+                <div class="checkered-pattern"></div>
+                <div class="registration-progress-container">
+                    <RegistrationProgress Steps="@Steps" CurrentStep="@CurrentStep" />
+                </div>
+            </div>
+
+            <div class="registration-main-content">
+                @ChildContent
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; } = default!;
+    [Parameter] public List<RegistrationProgress.RegistrationStep> Steps { get; set; } = new();
+    [Parameter] public string CurrentStep { get; set; } = "";
+    [Parameter] public string SidebarTitle { get; set; } = "Derby Dash";
+    [Parameter] public string SidebarDescription { get; set; } = "Complete your registration to start racing!";
+    [Parameter] public string SidebarExtraContent { get; set; } = "";
+    [Parameter] public bool HideHeader { get; set; } = false;
+} 

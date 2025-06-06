@@ -20,6 +20,7 @@ namespace DerbyDash.Components.Layout {
             try {
                 await JSRuntime.InvokeVoidAsync("removeClass", navScrollableElement, "show-menu");
             } catch (Exception) {
+                // Ignore JS interop errors - menu might already be closed
             }
         }
 
@@ -28,9 +29,17 @@ namespace DerbyDash.Components.Layout {
             try {
                 // Close the mobile menu first
                 await CloseMenu();
+                
+                // Add a small delay to ensure menu close animation completes
+                await Task.Delay(100);
+                
                 // Navigate to the logout page with forceLoad=true to ensure a full page refresh
                 NavManager.NavigateTo("/Account/Logout", true);
-            } catch (Exception) {
+            } catch (Exception ex) {
+                // Log the error or handle it appropriately
+                Console.WriteLine($"Error during logout: {ex.Message}");
+                // Still try to navigate to logout even if menu close fails
+                NavManager.NavigateTo("/Account/Logout", true);
             }
         }
 
