@@ -438,8 +438,6 @@
     }
 }
 
-
-
 /* Desktop enhancements */
 @media (min-width: 1024px) {
     .racer-selector {
@@ -481,4 +479,10 @@
     color: #495057; /* Adjust color as needed */
     font-weight: 500;
     white-space: nowrap; /* Prevent email from wrapping */
+}
+
+@media (min-width: 769px) {
+    .top-navbar.game-running {
+        display: none;
+    }
 }
