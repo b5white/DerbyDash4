@@ -34,7 +34,7 @@ namespace DerbyDash.Services {
             _jsRuntime = jsRuntime;
         }
 
-        public async Task<List<Racer>> GetRacers() {
+        public async Task<List<Racer>> GetRacers(bool includeCount = true) {
             Logger.LogInformation("GetRacers");
             string userId;
             try {
@@ -58,14 +58,29 @@ namespace DerbyDash.Services {
                 Logger.LogError(ex, "Error in GetRacers()");
                 return new List<Racer>();
             }
-            return await GetRacersByUserId(userId);
+            return await GetRacersByUserId(userId, includeCount);
         }
 
-        public async Task<List<Racer>> GetRacersByUserId(string userId) {
+        public async Task<List<Racer>> GetRacersByUserId(string userId, bool includeCount) {
             Logger.LogInformation("GetRacersByUserId for ID: {ID}", userId);
-            //List<Racer> racers = await _context.RaceTeam.Where(rt => rt.UserId == userId)
-            //    .OrderBy(fm => fm.Name)
-            //    .ToListAsync();
+            List<Racer> racers;
+            using var context = _contextFactory.CreateDbContext();
+            var query = context.RaceTeam
+                .Where(rt => rt.UserId == userId)
+                .OrderBy(fm => fm.Name);
+
+            if (includeCount) {
+                racers = await query
+                    .Select(racer => new Racer {
+                        Id = racer.Id,
+                        UserId = racer.UserId,
+                        Name = racer.Name, // Add other properties as needed
+                        RaceCount = context.Races.Count(r => r.RacerId == racer.Id)
+                    })
+                    .ToListAsync();
+            } else {
+                racers = await query.ToListAsync();
+            }
             //if (racers.Count == 0) {
             //    Logger.LogWarning("No Racers found for ID: {ID}", userId);
             //}

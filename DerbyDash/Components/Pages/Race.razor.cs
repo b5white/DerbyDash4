@@ -87,7 +87,7 @@ namespace DerbyDash.Components.Pages {
 
         protected override async Task OnInitializedAsync() {
             Logger.LogInformation("Race.OnInitializedAsync()");
-            
+
             // Initialize configuration and timers
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
@@ -101,13 +101,6 @@ namespace DerbyDash.Components.Pages {
             // Notify GameStateService that we're on a race page
             await GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
 
-            // ENFORCE: Must have a chosen racer to race
-            var activeRacer = await RaceTeamService.GetActiveRacer();
-            if (activeRacer == null) {
-                Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
-                NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
-                return;
-            }
         }
 
         // OnAfterRenderAsync is defined later in the file
@@ -247,7 +240,7 @@ namespace DerbyDash.Components.Pages {
                     ScaleRace(currentTimeIndex);
                     StateHasChanged();
                 } else {
-                    if (Answer.Length > (problem?.Length ?? 999)) {
+                    if (Answer.Length == (problem?.Length ?? 999)) {
                         Answer = "";
                     }
                 }
@@ -423,8 +416,7 @@ namespace DerbyDash.Components.Pages {
             try {
                 ResetResults(timeSpan);
                 CalculateAverage();
-                // Save the race using RaceTeamService which properly saves to database and updates counts
-                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements);
+                await RaceService.SaveRaceAsync(track.Cars[0], track.RacerId, track.ProblemId);
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);
@@ -468,6 +460,15 @@ namespace DerbyDash.Components.Pages {
         private void GoBack() {
             StopPeriodicTimer();
             NavManager.NavigateTo("javascript:history.back()");
+        }
+
+        private async Task ClearRaces() {
+            await RaceService.DeleteRaces(ProblemClassString ?? "");
+            FinishTime = 0;
+            prevAverage = 0;
+            improvedTime = 0;
+            previousResults = [0, 0, 0, 0, 0];
+            StateHasChanged();
         }
 
         private void CalculateAverage() {
@@ -528,6 +529,14 @@ namespace DerbyDash.Components.Pages {
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             try {
+                // ENFORCE: Must have a chosen racer to race
+                var activeRacer = await RaceTeamService.GetActiveRacer();
+                if (activeRacer == null) {
+                    Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
+                    NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
+                    return;
+                }
+
                 // Try to focus the text input if it exists
                 await textInput.FocusAsync();
             } catch (Exception) {

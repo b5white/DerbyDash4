@@ -128,6 +128,22 @@ namespace DerbyDash.Services {
             return race;
         }
 
+        public async Task DeleteRaces(string problemSet) {
+            Logger.LogInformation($"DeleteRaces for current racer, {problemSet}");
+            try {
+                int problemSetId = UtilityMethods.GetUniqueIntFromString(problemSet);
+                int racerId = (await _raceTeamService.GetActiveRacer())?.Id ?? 0;
+                if (racerId != 0) {
+                    int deletedCount = await _context.Races
+                        .Where(r => r.RacerId == racerId && r.ProblemSetId == problemSetId)
+                        .ExecuteDeleteAsync();
+                    Logger.LogInformation("Deleted {deletedCount");
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "DeleteRaces");
+            }
+        }
+
         public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
             Logger.LogInformation("CreateSpeedIncrements");
             float currentTime = 0;
