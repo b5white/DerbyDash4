@@ -438,7 +438,8 @@ namespace DerbyDash.Components.Pages {
             try {
                 ResetResults(timeSpan);
                 CalculateAverage();
-                await RaceService.SaveRaceAsync(track.Cars[0], track.RacerId, track.ProblemId);
+                // Save the race using RaceTeamService which properly saves to database and updates counts
+                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements);
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);
