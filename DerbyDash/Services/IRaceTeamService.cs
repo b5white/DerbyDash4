@@ -6,6 +6,7 @@ namespace DerbyDash.Services {
         public Task<List<Racer>> GetRacersByUserId(string userId);
         public Task<List<Racer>> GetRacers();
         public Task<Racer?> GetRacerByIdAsync(int racerId);
+        public Task<Racer?> GetRacerWithRaceCountAsync();
         public Task<Racer> AddRacer(Racer racer);
         public Task UpdateRacer(Racer racer);
         public Task RemoveRacer(int racerId);

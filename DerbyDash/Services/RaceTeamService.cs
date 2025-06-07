@@ -150,7 +150,9 @@ namespace DerbyDash.Services {
                         await SetActiveRacer(active);
                     }
                 }
-                CurrentSession.RacerId = active?.Id ?? 0;
+                if (active is not null) {
+                    CurrentSession.RacerId = active.Id;
+                }
                 return active;
             } else {
                 return await GetRacerByIdAsync(CurrentSession.RacerId);

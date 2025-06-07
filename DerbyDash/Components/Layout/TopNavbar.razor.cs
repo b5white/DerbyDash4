@@ -39,12 +39,12 @@ namespace DerbyDash.Components.Layout {
             // Listen for game running state
             isGameRunning = GameStateService.IsGameRunning;
 
-            await LoadRacerAvatar();
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             if (firstRender) {
                 await LoadRacers();
+                await LoadRacerAvatar();
                 StateHasChanged();
             }
         }
@@ -55,7 +55,7 @@ namespace DerbyDash.Components.Layout {
                 Racers = await RaceTeamService.GetRacers();
                 if (Racers.Count > 0) {
                     // Set the selected racer to the current racer
-                    Racer? currentRacer = await RaceTeamService.GetActiveRacer();
+                    Racer? currentRacer = await RaceTeamService.GetRacerWithRaceCountAsync();
 
                     if (currentRacer != null) {
                         SelectedRacer = currentRacer;
