@@ -1,0 +1,21 @@
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<div class="beta-banner" @onclick="NavigateToWelcome" role="button" tabindex="0" @onkeypress="HandleKeyPress">
+    <span class="beta-text">BETA * BETA * BETA * BETA</span>
+</div>
+
+@code {
+    private void NavigateToWelcome()
+    {
+        Navigation.NavigateTo("/beta-welcome");
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" || e.Key == " ")
+        {
+            NavigateToWelcome();
+        }
+    }
+} 
