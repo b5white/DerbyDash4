@@ -12,7 +12,7 @@ namespace DerbyDash.Components.Pages {
 
         [Inject] public required DatabaseKeepAliveService DbKeepAlive { get; set; }
 
-        private string appName = "Derby Dash";
+        private string appName = "TurboFlash";
         private string selectedGif = "";
         private string? lastPlayedRace;
 
