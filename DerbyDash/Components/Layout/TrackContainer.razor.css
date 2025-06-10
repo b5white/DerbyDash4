@@ -222,15 +222,6 @@
     animation: arrowBounce 1s ease-in-out infinite;
 }
 
-/* AI car styling */
-.car-dynamic.ai-car {
-    opacity: 0.85;
-}
-
-.car-dynamic.ai-car img {
-    filter: brightness(0.9) contrast(0.95);
-}
-
 /* Animations */
 @keyframes playerCarPulse {
     0% {
