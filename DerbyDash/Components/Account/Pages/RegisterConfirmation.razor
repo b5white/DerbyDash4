@@ -12,12 +12,12 @@
 @inject NavigationManager NavManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Registration Successful - Derby Dash</PageTitle>
+<PageTitle>Registration Successful - TurboFlash</PageTitle>
 
 <RegistrationLayout Steps="@registrationSteps" 
                    CurrentStep="confirm-email"
                    SidebarTitle="Registration Successful!"
-                   SidebarDescription="Thank you for joining Derby Dash! Your racing adventure is about to begin.">
+                   SidebarDescription="Thank you for joining TurboFlash! Your racing adventure is about to begin.">
     
     <div class="confirmation-header">
         <h1>Registration Successful!</h1>
@@ -29,7 +29,7 @@
             <i class="fas fa-flag-checkered"></i>
         </div>
         
-        <h2>Thank you for joining Derby Dash!</h2>
+        <h2>Thank you for joining TurboFlash!</h2>
         
         @if (emailConfirmationLink is not null) {
             <div class="alert alert-info">
@@ -58,7 +58,7 @@
         }
         
         <p class="next-steps">
-            After confirming your email, you'll be able to log in and start using Derby Dash!
+            After confirming your email, you'll be able to log in and start using TurboFlash!
         </p>
         
         <div class="confirmation-actions">

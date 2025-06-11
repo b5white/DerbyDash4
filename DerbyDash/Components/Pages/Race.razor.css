@@ -341,11 +341,51 @@ html, body {
     z-index: 100;
 }
 
+/* Enhanced player speed indicator */
+.speed-indicator.player-speed {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.9), rgba(255, 140, 0, 0.8));
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
+                0 0 20px rgba(255, 215, 0, 0.3);
+    animation: speedIndicatorPulse 2s ease-in-out infinite alternate;
+}
+
+.speed-label {
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    margin-bottom: 2px;
+    display: block;
+}
+
 .speed-value {
     color: #fff;
     font-size: 24px;
     font-weight: bold;
     font-family: 'Digital-7', monospace;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    display: block;
+}
+
+.speed-indicator.player-speed .speed-value {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+@keyframes speedIndicatorPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 
+                    0 0 20px rgba(255, 215, 0, 0.3);
+    }
+    100% {
+        transform: scale(1.02);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 
+                    0 0 30px rgba(255, 215, 0, 0.5);
+    }
 }
 
 /* Car and start line animations */

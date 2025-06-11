@@ -9,23 +9,20 @@
 
 <PageTitle>Confirm email</PageTitle>
 
-<RegistrationLayout Steps="@registrationSteps" 
-                   CurrentStep="confirm-email"
-                   SidebarTitle="Email Confirmation"
-                   SidebarDescription="Almost there! Just one more step to complete your registration.">
-    
+<RegistrationLayout Steps="@registrationSteps"
+                    CurrentStep="confirm-email"
+                    SidebarTitle="Email Confirmation"
+                    SidebarDescription="Almost there! Just one more step to complete your registration.">
+
     <h1>Confirm email</h1>
     <StatusMessage Message="@statusMessage" />
 
-    @if (emailConfirmed)
-    {
+    @if (emailConfirmed) {
         <div class="alert alert-success">
             <p>Your email has been confirmed successfully!</p>
             <p>Next step: <a href="Account/Manage/RaceTeam?IsFromRegistration=true">Set up your Race Team</a> to start racing!</p>
         </div>
-    }
-    else
-    {
+    } else {
         <p>There was a problem confirming your email. Please try again or contact support.</p>
     }
 
@@ -35,13 +32,21 @@
     private string? statusMessage;
     private bool emailConfirmed = false;
     private List<RegistrationStep> registrationSteps = new();
-    
+
     [Inject]
     public required UserManager<ApplicationUser> UserManager { get; set; }
     [Inject]
     public required SignInManager<ApplicationUser> SignInManager { get; set; }
     [Inject]
     internal IdentityRedirectManager RedirectManager { get; set; } = default!;
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
+
 
     [Inject]
     public required CustomAuthStateProvider AuthStateProvider { get; set; }
@@ -61,37 +66,25 @@
     [SupplyParameterFromQuery]
     private bool RememberMe { get; set; } = true;
 
-    protected override void OnInitialized() {
-        base.OnInitialized();
-        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
-        registrationSteps = stepsHelper.GetRegistrationSteps();
-    }
-
     protected override async Task OnInitializedAsync() {
         if (UserId is null || Code is null) {
             RedirectManager.RedirectTo("");
         }
 
         var user = await UserManager.FindByIdAsync(UserId);
-        if (user is null)
-        {
+        if (user is null) {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             statusMessage = $"Error loading user with ID {UserId}";
-        }
-        else
-        {
+        } else {
             var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
             var result = await UserManager.ConfirmEmailAsync(user, code);
-            if (result.Succeeded)
-            {
+            if (result.Succeeded) {
                 emailConfirmed = true;
                 statusMessage = "Thank you for confirming your email.";
                 AuthStateProvider.NotifyUserLogin();
-                if(RememberMe)
+                if (RememberMe)
                     await SignInManager.SignInAsync(user, true);
-            }
-            else
-            {
+            } else {
                 statusMessage = "Error confirming your email.";
             }
         }
