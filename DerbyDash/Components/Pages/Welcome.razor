@@ -1,8 +1,9 @@
 @page "/beta-welcome"
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager Navigation
+@rendermode InteractiveServer
 
-<PageTitle>Welcome to Derby Dash - Math Racing Adventure!</PageTitle>
+<PageTitle>Welcome to TurboFlash - Math Racing Adventure!</PageTitle>
 
 <div class="welcome-container">
     <!-- Animated Background -->
@@ -29,8 +30,8 @@
             <div class="logo-container">
                 <div class="logo-animation">
                     <h1 class="main-title">
-                        <span class="derby">Derby</span>
-                        <span class="dash">Dash</span>
+                        <span class="derby">Turbo</span>
+                        <span class="dash">Flash</span>
                     </h1>
                     <div class="beta-badge">BETA</div>
                 </div>
@@ -41,7 +42,7 @@
                 <h2>🏁 Welcome to the Ultimate Math Racing Experience!</h2>
                 <p>
                     Rev up your brain and race through exciting math challenges! 
-                    Derby Dash combines the thrill of racing with the power of mathematics, 
+                    TurboFlash combines the thrill of racing with the power of mathematics, 
                     creating an engaging learning experience for all skill levels.
                 </p>
             </div>
@@ -87,7 +88,7 @@
                     <NotAuthorized>
                         <button class="cta-button primary" @onclick="NavigateToLogin">
                             <i class="fas fa-sign-in-alt"></i>
-                            Join Derby Dash
+                            Join TurboFlash
                         </button>
                         <button class="cta-button secondary" @onclick="NavigateToRegister">
                             <i class="fas fa-user-plus"></i>
@@ -101,7 +102,7 @@
                 <div class="beta-notice">
                     <h3>🚧 Beta Version</h3>
                     <p>
-                        You're experiencing Derby Dash in its beta phase! We're actively working on new features 
+                        You're experiencing TurboFlash in its beta phase! We're actively working on new features 
                         and improvements. Your feedback helps us create the best math racing experience possible.
                     </p>
                     <div class="beta-features">

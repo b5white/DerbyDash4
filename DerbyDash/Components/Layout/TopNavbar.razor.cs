@@ -172,13 +172,13 @@ namespace DerbyDash.Components.Layout {
             else if (CurrentUrl.Contains("/Account/Manage"))
                 return "Account Settings";
             else if (CurrentUrl.Contains("/Account/Register"))
-                return "Join Derby Dash";
+                return "Join TurboFlash";
             else if (CurrentUrl.Contains("/Account/Login"))
                 return "Welcome Back";
             else if (CurrentUrl.Contains("/Race/"))
                 return "Race Time!";
             else
-                return "Derby Dash";
+                return "TurboFlash";
         }
 
         private string GetPageIcon() {
