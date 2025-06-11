@@ -46,6 +46,15 @@
         // DONE Don't default the active racer, except for when first adding the race team and when reading from a cookie.
         // DONE Racing should require them to have a chosen racer, and if not, redirect them to the RaceTeam page to choose one.
         // DONE Redo the menu pages to use two columns of thinner buttons
+        // DONE Add a Resend Email link to the RegisterConfirmation page?
+        //    It should just resend the email, but stay on the Confirmation page.
+        // DONE Use GetUserID everywhere we need a UserId.
+        // DONE Get rid of anything related to saving race count in the database
+        //    We'll calculate it based on the number of races in the DB.
+        // DONE Move GetUserID from RTS to the User manager.
+        // DONE Use ActiveRacer instead of getting it from the cookie all the time.
+        // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
+        // DONE Change name from DerbyDash to TurboFlash
         // TODO Handle the screen shift when using a phone so can still see top of page.        
         // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
@@ -58,10 +67,15 @@
         //     Or "Good race." if not.
         //     Would pop up right away, even while other racers
         //     are finishing.
-        // DONE Add a Resend Email link to the RegisterConfirmation page?
-        //    It should just resend the email, but stay on the Confirmation page.
+        // TODO Current car Top never goes below 50% of screen height.
         // TODO Dress up the confirmation email. Currently "Please confirm your account by clicking here."
-        // TODO Use GetUserID everywhere we need a UserId.
+        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // TODO Add a way to change/delete the racer name on the RaceTeam page.
+        // TODO Save the Race position in the list at time it was first run, in Race
+        // TODO Add current userId and racerId to feedback in service.
+        // TODO Get avatars working and attached to racers
+        // TODO Put the avatar, in a larger form, on the Start Race pages.
+        // TODO In a smaller form on the results page after a race.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
@@ -70,25 +84,15 @@
         // DONE Enable logging to the database
         // DONE Handle exceptions
         // DONE Automatically log inner exceptions
-        // TODO Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
-        // TODO Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
+        // DONE Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
+        // DONE Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
+        // DONE Enable email
         // TODO Admin page for viewing logs
-        // TODO Enable email
         // TODO Add SessionId to log
         // TODO Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 
         // ** Either Filipe or Brad **
-        // DONE Get rid of anything related to saving race count in the database
-        //    We'll calculate it based on the number of races in the DB.
-        // DONE Move GetUserID from RTS to the User manager.
-        // DONE Use ActiveRacer instead of getting it from the cookie all the time.
-        // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
-        // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Add current userId and racerId to feedback in service.
-        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
-        // TODO Add a way to change/delete the racer name on the RaceTeam page.
-        // TODO Add current userId and racerId to feedback in service.
         // HOLD Add version number to Feedback report
 
         // ** Later **
@@ -105,9 +109,6 @@
         //     Note: We don't need a way to reply or ask for more details.
         //     They've already noted whether we can reply, in which case we handle it via email.
         //     And then record the final resolution here.
-        // Get avatars working and attached to racers
-        // Put the avatar, in a larger form, on the Race page before they race for the
-        //     first time that day. Not on the results page after a race.
         // Update the DerbyDash logo.
         // Limit racers to 8 per subscription.
         //     Make this a User field so admin can increase it per user if needed.
