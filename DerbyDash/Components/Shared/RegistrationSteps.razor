@@ -5,36 +5,30 @@
     [Parameter]
     public string CurrentStep { get; set; } = "";
 
-    public List<RegistrationStep> GetRegistrationSteps()
-    {
-        return new List<RegistrationStep>
-        {
-            new RegistrationStep
-            {
+    public List<RegistrationStep> GetRegistrationSteps() {
+        return new List<RegistrationStep> {
+            new RegistrationStep {
                 Id = "register",
                 StepNumber = 1,
                 Name = "Create Account",
                 Description = "Set up your Turbo Flash account",
                 Url = "/Account/Register"
             },
-            new RegistrationStep
-            {
+            new RegistrationStep {
                 Id = "confirm-email",
                 StepNumber = 2,
                 Name = "Confirm Email",
                 Description = "Verify your email address",
                 Url = ""
             },
-            new RegistrationStep
-            {
+            new RegistrationStep {
                 Id = "race-team",
                 StepNumber = 3,
                 Name = "Create Race Team",
                 Description = "Add racers to your team",
                 Url = "/Account/Manage/RaceTeam"
             },
-            new RegistrationStep
-            {
+            new RegistrationStep {
                 Id = "start-racing",
                 StepNumber = 4,
                 Name = "Start Racing",

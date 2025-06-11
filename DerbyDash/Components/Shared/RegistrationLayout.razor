@@ -3,8 +3,7 @@
 <div class="registration-layout-container">
     <div class="registration-background"></div>
     <div class="registration-content">
-        @if (!HideHeader)
-        {
+        @if (!HideHeader) {
             <div class="registration-logo">
                 <h1>Turbo<span>Flash</span></h1>
             </div>
@@ -17,8 +16,7 @@
                 <div class="registration-sidebar-content">
                     <h2>@SidebarTitle</h2>
                     <p>@SidebarDescription</p>
-                    @if (!string.IsNullOrEmpty(SidebarExtraContent))
-                    {
+                    @if (!string.IsNullOrEmpty(SidebarExtraContent)) {
                         <div class="sidebar-extra">
                             @((MarkupString)SidebarExtraContent)
                         </div>

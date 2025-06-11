@@ -6,15 +6,12 @@
 </div>
 
 @code {
-    private void NavigateToWelcome()
-    {
+    private void NavigateToWelcome() {
         Navigation.NavigateTo("/beta-welcome");
     }
 
-    private void HandleKeyPress(KeyboardEventArgs e)
-    {
-        if (e.Key == "Enter" || e.Key == " ")
-        {
+    private void HandleKeyPress(KeyboardEventArgs e) {
+        if (e.Key == "Enter" || e.Key == " ") {
             NavigateToWelcome();
         }
     }
