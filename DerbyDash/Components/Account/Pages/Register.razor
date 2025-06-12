@@ -75,13 +75,39 @@
             </label>
         </div>
 
+        <div style="display:none;">
+            <InputCheckbox @bind-Value="Input.FakeCaptchaChecked" id="fakeCaptchaCheckbox" />
+            <label for="fakeCaptchaCheckbox">Fake CAPTCHA</label>
+        </div>
+
         <div class="form-group captcha-group">
-            <div class="captcha-container">
-                <label class="form-check-label captcha-label">
-                    <InputCheckbox @bind-Value="Input.CaptchaVerified" class="form-check-input captcha-checkbox" />
-                    <span class="captcha-text">I'm not a robot</span>
-                    <i class="fas fa-shield-alt captcha-icon"></i>
-                </label>
+            <div class="captcha-widget">
+                <div class="captcha-main">
+                    <div class="captcha-checkbox-container">
+                        <InputCheckbox @bind-Value="Input.CaptchaVerified"
+                                       class="captcha-checkbox"
+                                       id="captchaCheckbox" />
+                        @* <label class="captcha-checkbox-label" for="captchaCheckbox">
+                            <span class="checkbox-custom @(Input.CaptchaVerified ? "checked" : null)">
+                                <i class="fas fa-check"></i>
+                            </span>
+                        </label> *@
+                    </div>
+                    <div class="captcha-text-container">
+                        <span class="captcha-text">I'm not a robot</span>
+                    </div>
+                    <div class="captcha-logo">
+                        <div class="captcha-logo-container">
+                            <div class="captcha-logo-circle">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="captcha-brand">
+                                <span class="captcha-brand-text">CAPTCHA</span>
+                                <span class="captcha-privacy">Privacy - Terms</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <ValidationMessage For="() => Input.CaptchaVerified" class="validation-message" />
             </div>
         </div>

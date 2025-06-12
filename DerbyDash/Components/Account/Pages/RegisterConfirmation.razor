@@ -60,6 +60,9 @@
         <p class="next-steps">
             After confirming your email, you'll be able to log in and start using TurboFlash!
         </p>
+        <p>
+            Didn't get the email? <a href="/Account/ResendEmailConfirmation@((Email != null ? $"?email={Uri.EscapeDataString(Email)}" : ""))">Resend Email</a>
+        </p>
         
         <div class="confirmation-actions">
             <a href="Account/Login" class="btn btn-primary">

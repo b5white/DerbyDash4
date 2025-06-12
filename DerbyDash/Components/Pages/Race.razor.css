@@ -224,8 +224,8 @@ html, body {
 .stoplight-container {
     position: fixed;
     bottom: 200px; /* Position above the question and answer area */
-    left: 50%;
-    transform: translateX(-50%);
+    left: 16%;
+    transform: translateX(-10%);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -330,6 +330,11 @@ html, body {
     animation: showProblem 0.5s ease-out 3s forwards;
 }
 
+.problem-container .game-hud {
+    align-items: flex-start;
+    margin-left: 16%;
+}
+
 /* Speed indicator */
 .speed-indicator {
     position: fixed;
@@ -422,6 +427,7 @@ html, body {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     transform: translateY(0);
     animation: float 3s ease-in-out infinite;
+    margin-left: 0;
 }
 
 .problem-text {
@@ -435,6 +441,7 @@ html, body {
     width: 100%;
     max-width: 300px;
     margin: 0 auto;
+    margin-left: 0;
 }
 
 .answer-input {

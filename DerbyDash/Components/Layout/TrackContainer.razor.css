@@ -193,7 +193,7 @@
 /* Player indicator above the car */
 .player-indicator {
     position: absolute;
-    top: -50px;
+    top: -70px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 6;
@@ -278,7 +278,7 @@
 /* Responsive adjustments for mobile devices */
 @media (max-width: 768px) {
     .player-indicator {
-        top: -40px;
+        top: -55px;
     }
     
     .player-label {
@@ -293,7 +293,7 @@
 
 @media (max-width: 480px) {
     .player-indicator {
-        top: -35px;
+        top: -45px;
     }
     
     .player-label {
