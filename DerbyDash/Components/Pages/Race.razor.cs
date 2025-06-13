@@ -102,7 +102,7 @@ namespace DerbyDash.Components.Pages {
             Logger.LogInformation("Race.OnInitializedAsync()");
             
             // Initialize configuration and timers
-            ShowDebug = configuration.GetValue<bool>("ShowDebug");
+            ShowDebug = false; // Always hide debug panel during gameplay
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
             InactivityTimer.Elapsed += ShowAnswer;
             InactivityTimer.AutoReset = false;

@@ -332,7 +332,6 @@ html, body {
 
 .problem-container .game-hud {
     align-items: flex-start;
-    margin-left: 16%;
 }
 
 /* Speed indicator */
@@ -650,6 +649,14 @@ html, body {
 }
 
 @media (max-width: 768px) {
+    .main {
+        margin-top: 25px !important;
+    }
+    
+    nav[aria-label="breadcrumb"] {
+        display: none !important;
+    }
+    
     .stoplight-container {
         bottom: 180px;
         left: 50%;

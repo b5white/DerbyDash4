@@ -332,6 +332,7 @@
     }
     .car-dynamic {
         width: 15%;
+        transform: translateY(-170px); /* Move cars up by 50px */
     }
     
     .lane-group {
@@ -339,7 +340,8 @@
     }
 
     .start-line {
-        top: calc(100vh - 350px);
+        position: fixed;
+        top: 300px; /* Fixed position instead of calc(100vh - 350px) */
         left: 0;
         width: 100%;
     }
