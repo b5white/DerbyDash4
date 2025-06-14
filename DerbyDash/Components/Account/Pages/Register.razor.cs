@@ -46,7 +46,7 @@ namespace DerbyDash.Components.Account.Pages {
         private CustomAuthStateProvider AuthStateProvider { get; set; } = null!;
 
         [SupplyParameterFromForm]
-        private InputModel Input { get; set; } = new();
+        protected InputModel Input { get; set; } = new();
 
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
@@ -96,6 +96,14 @@ namespace DerbyDash.Components.Account.Pages {
             RedirectManager.RedirectTo(confirmationUrl);
         }
 
+        protected void ToggleCaptcha()
+        {
+            Logger.LogInformation("ToggleCaptcha called. Current state: {CaptchaVerified}", Input.CaptchaVerified);
+            Input.CaptchaVerified = !Input.CaptchaVerified;
+            Logger.LogInformation("ToggleCaptcha completed. New state: {CaptchaVerified}", Input.CaptchaVerified);
+            StateHasChanged();
+        }
+
         private ApplicationUser CreateUser() {
             try {
                 return Activator.CreateInstance<ApplicationUser>();
@@ -112,7 +120,7 @@ namespace DerbyDash.Components.Account.Pages {
             return (IUserEmailStore<ApplicationUser>)UserStore;
         }
 
-        private sealed class InputModel {
+        public sealed class InputModel {
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
@@ -136,6 +144,8 @@ namespace DerbyDash.Components.Account.Pages {
             [Range(typeof(bool), "true", "true", ErrorMessage = "Please verify that you are not a robot.")]
             [Display(Name = "I'm not a robot")]
             public bool CaptchaVerified { get; set; } = false;
+
+            public bool FakeCaptchaChecked { get; set; } = false;
         }
     }
 }

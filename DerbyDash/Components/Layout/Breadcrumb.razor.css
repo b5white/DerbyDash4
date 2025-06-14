@@ -1,3 +1,10 @@
 ﻿.breadcrumb {
     padding-left: 10px; /* Adding padding to the ol for overall left margin */
 }
+
+@media (max-width: 768px) {
+    nav[aria-label="breadcrumb"],
+    .breadcrumb-nav {
+        display: none !important;
+    }
+}

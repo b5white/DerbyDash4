@@ -3,7 +3,6 @@
     border-bottom: 1px solid #e0e0e0;
     padding: 1rem 1.5rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    margin-bottom: 0.5rem;
     transition: all 0.3s ease;
     /* Prevent horizontal overflow */
     width: 100%;
@@ -384,8 +383,7 @@
     }
     
     .page-info {
-        width: 100%;
-        margin-bottom: 0.75rem;
+        display: none; /* Hide page-info in all cases on mobile */
     }
     
     .page-title {
