@@ -4,10 +4,11 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using DerbyDash.Services;
 @inject NavigationManager NavManager
+@inject ILogger<About> Logger
 @inject DatabaseKeepAliveService DbKeepAlive
 @attribute [AllowAnonymous]
 
-<PageTitle>About DerbyDash</PageTitle>
+<PageTitle>About TurboFlash</PageTitle>
 
 <div class="about-container">
     <div class="about-header">
@@ -39,7 +40,7 @@
                 we know how challenging traditional practice can be.
             </p>
             <p>
-                That's why we created DerbyDash, a math game app designed to turn practice into play and help every student succeed.
+                That's why we created TurboFlash, a math game app designed to turn practice into play and help every student succeed.
             </p>
         </section>
 
@@ -66,7 +67,7 @@
         </section>
 
         <section class="about-section highlight-section">
-            <h2>DerbyDash Changes the Game</h2>
+            <h2>TurboFlash Changes the Game</h2>
             <ul>
                 <li>Turning practice into a fun, low-pressure race against their own best scores.</li>
                 <li>Rewarding every bit of progress, so kids see quick wins.</li>
@@ -79,21 +80,21 @@
             <section class="about-section conference-section">
                 <h2>Visit Us at the @Location Home School Conference!</h2>
                 <p>
-                    Ready to see DerbyDash in action? We invite you to visit our booth at the @Location Home School Conference! 
-                    Try the app for yourself, ask questions, and discover how DerbyDash can help your child develop 
+                    Ready to see TurboFlash in action? We invite you to visit our booth at the @Location Home School Conference! 
+                    Try the app for yourself, ask questions, and discover how TurboFlash can help your child develop 
                     the confidence and skills they need to thrive in math – and beyond. We look forward to meeting you!
                 </p>
             </section>
         }
         <section class="about-section cta-section"> 
             <div>
-            Note that DerbyDash is still in beta and we are actively working to improve the app.
+            Note that TurboFlash is still in beta and we are actively working to improve the app.
             </div>
             <div>
                 Any discounts or bonuses don't apply until it is released. 
             </div>
             <div>
-                Derby Dash is free to play until then.
+                TurboFlash is free to play until then.
             </div>
         </section>
 
@@ -143,7 +144,7 @@
         }
         
         // Log the location parameter for debugging
-        Console.WriteLine($"About page initialized with Location: {Location ?? "null"}");
+        Logger.LogInformation($"About page initialized with Location: {Location ?? "null"}");
         await DbKeepAlive.PingDatabaseAsync();
         await base.OnInitializedAsync();
     }

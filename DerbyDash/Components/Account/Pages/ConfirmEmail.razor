@@ -39,14 +39,6 @@
     public required SignInManager<ApplicationUser> SignInManager { get; set; }
     [Inject]
     internal IdentityRedirectManager RedirectManager { get; set; } = default!;
-    
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
-        registrationSteps = stepsHelper.GetRegistrationSteps();
-    }
-
 
     [Inject]
     public required CustomAuthStateProvider AuthStateProvider { get; set; }
@@ -66,18 +58,26 @@
     [SupplyParameterFromQuery]
     private bool RememberMe { get; set; } = true;
 
+    protected override void OnInitialized() {
+        base.OnInitialized();
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
+
     protected override async Task OnInitializedAsync() {
         if (UserId is null || Code is null) {
             RedirectManager.RedirectTo("");
+            return;
         }
 
-        var user = await UserManager.FindByIdAsync(UserId);
+        ApplicationUser? user = await UserManager.FindByIdAsync(UserId);
         if (user is null) {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
             statusMessage = $"Error loading user with ID {UserId}";
         } else {
-            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-            var result = await UserManager.ConfirmEmailAsync(user, code);
+            string code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+            IdentityResult result = await UserManager.ConfirmEmailAsync(user, code);
+            
             if (result.Succeeded) {
                 emailConfirmed = true;
                 statusMessage = "Thank you for confirming your email.";
@@ -85,6 +85,7 @@
                 if (RememberMe)
                     await SignInManager.SignInAsync(user, true);
             } else {
+                emailConfirmed = false;
                 statusMessage = "Error confirming your email.";
             }
         }

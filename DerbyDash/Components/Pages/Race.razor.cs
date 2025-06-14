@@ -51,6 +51,7 @@ namespace DerbyDash.Components.Pages {
         private ProblemsBase? problem;
         private int speedIncrement = 1;
         private string Answer = "";
+        private string PlaceholderText = "Type your answer...";
         private long starttime = 0;
         private float prevAverage = 0;
         private float improvedTime = 0;
@@ -63,7 +64,7 @@ namespace DerbyDash.Components.Pages {
         private CancellationTokenSource PeriodicTimerToken = new CancellationTokenSource();
         private Timer InactivityTimer = new Timer(1000);
         private Timer FlashTimer = new Timer(1000);
-        private bool isShowingAnswer = false;
+        private bool isShowingHint = false;
         private ElementReference textInput;
         private string encouragingWord = "";
         private bool ReceivedError = false;
@@ -91,11 +92,11 @@ namespace DerbyDash.Components.Pages {
             // Initialize configuration and timers
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
             InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
-            InactivityTimer.Elapsed += ShowAnswer;
+            InactivityTimer.Elapsed += ShowHint;
             InactivityTimer.AutoReset = false;
 
             FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
-            FlashTimer.Elapsed += HideAnswer;
+            FlashTimer.Elapsed += HideHint;
             FlashTimer.AutoReset = false;
 
             // Notify GameStateService that we're on a race page
@@ -137,7 +138,7 @@ namespace DerbyDash.Components.Pages {
 
                 if (InactivityTimer == null || _inactivityTimerDisposed) {
                     InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
-                    InactivityTimer.Elapsed += ShowAnswer;
+                    InactivityTimer.Elapsed += ShowHint;
                     InactivityTimer.AutoReset = false;
                     _inactivityTimerDisposed = false;
                 }
@@ -145,7 +146,7 @@ namespace DerbyDash.Components.Pages {
 
                 if (FlashTimer == null || _flashTimerDisposed) {
                     FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
-                    FlashTimer.Elapsed += HideAnswer;
+                    FlashTimer.Elapsed += HideHint;
                     FlashTimer.AutoReset = false;
                     _flashTimerDisposed = false;
                 }
@@ -213,12 +214,12 @@ namespace DerbyDash.Components.Pages {
             if (InactivityTimer != null && !_inactivityTimerDisposed) {
                 InactivityTimer.Stop();
             }
-            if (isShowingAnswer) {
-                isShowingAnswer = false;
+            if (isShowingHint) {
+                isShowingHint = false;
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();
                 }
-                Answer = RemoveHint(Answer);
+                PlaceholderText = "Type your answer..."; // reset
             }
             if (problem != null) {
                 if (Answer == problem.Result) {   // correct answer!
@@ -554,10 +555,10 @@ namespace DerbyDash.Components.Pages {
             }
         }
 
-        private void ShowAnswer(object? sender, ElapsedEventArgs e) {
+        private void ShowHint(object? sender, ElapsedEventArgs e) {
             InvokeAsync(() => {
-                isShowingAnswer = true;
-                Answer = GetHint();   // prompt them with the correct answer
+                isShowingHint = true;
+                PlaceholderText = GetHint();   // prompt them with the correct answer
                 StateHasChanged();
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Start();
@@ -565,10 +566,10 @@ namespace DerbyDash.Components.Pages {
             });
         }
 
-        private void HideAnswer(object? sender, ElapsedEventArgs e) {
+        private void HideHint(object? sender, ElapsedEventArgs e) {
             InvokeAsync(() => {
-                isShowingAnswer = false;
-                Answer = "";
+                isShowingHint = false;
+                PlaceholderText = "Type your answer...";
                 StateHasChanged();
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();

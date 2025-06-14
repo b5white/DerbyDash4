@@ -3,12 +3,10 @@
 @using Microsoft.AspNetCore.Authorization
 @using DerbyDash.Services
 @using DerbyDash.Data
-@using Microsoft.AspNetCore.Components.Authorization
 @attribute [AllowAnonymous]
 @inject ISubscriptionService SubscriptionService
 @inject ILogger<Subscription> Logger
 @inject NavigationManager Navigation
-@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <PageTitle>Subscription - TurboFlash</PageTitle>
 
@@ -152,13 +150,16 @@
     private bool showRenewOptions = false;
     private SubscriptionType selectedRenewalType = SubscriptionType.Monthly;
     private string userId = "demo-user"; // TODO Get this from user service
-    private string? errorMessage;    protected override async Task OnInitializedAsync() {
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync() {
+    // TODO Get user
         // Check if user is authenticated and redirect to manage page
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        if (authState.User.Identity?.IsAuthenticated == true) {
-            Navigation.NavigateTo("/Account/Manage/Subscription", replace: true);
-            return;
-        }
+//        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+//        if (authState.User.Identity?.IsAuthenticated == true) {
+//            Navigation.NavigateTo("/Account/Manage/Subscription", replace: true);
+//            return;
+//        }
 
         try {
             userSubscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);

@@ -49,6 +49,7 @@
                     Logger.LogInformation("User logged in: {Email}", Email);
                 } else {
                     // User not found, redirect back to login
+                    Logger.LogInformation("User is null: {Email}", Email);
                     targetUrl = "/Account/Login";
                 }
             } catch (Exception ex) {
@@ -56,6 +57,7 @@
                 targetUrl = "/Account/Login";
             }
         }
+        Logger.LogInformation("We made it. User logged in: {Email}. Redirecting to: {targeturl}", Email, targetUrl);
         RedirectManager.RedirectTo(targetUrl);
     }
 }

@@ -126,12 +126,16 @@
                     }
                 </div>
             </div>
+            <div class="deleteraces">
+                <button class="btn btn-outline-primary btn-lg" @onclick="ClearRaces">Clear Races</button>
+            </div>
+
         </div>
     }
     <p></p>
 } else {
     @if (problem != null) {
-        <p class="TC">            
+        <p class="TC">
             <TrackContainer 
                 @ref="trackContainerInstance" 
                 Track="@track" 
@@ -163,7 +167,7 @@
 
                         <div class="answer-box">
                             <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
-                                   @bind:after="OnAfter" placeholder="Type your answer..." />
+                                   @bind:after="OnAfter" placeholder="@PlaceholderText"/>
                         </div>
                         <button class="emergency-exit-button" @onclick="GoBack">
                             <i class="fas fa-exclamation-circle"></i> Emergency Exit

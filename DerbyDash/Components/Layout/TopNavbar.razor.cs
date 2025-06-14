@@ -60,7 +60,7 @@ namespace DerbyDash.Components.Layout {
                     if (currentRacer != null) {
                         SelectedRacer = currentRacer;
                         // Load race counts only when we have an active racer
-                        CurrentRacerRaceCount = await RaceTeamService.GetCurrentRacerRaceCountAsync();
+                        CurrentRacerRaceCount = SelectedRacer.RaceCount;
                         TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
                     } else {
                         // No active racer selected - don't default to first racer
@@ -86,7 +86,7 @@ namespace DerbyDash.Components.Layout {
 
         private async Task HandleRacerChangedAsync() {
             try {
-                //await LoadRacers();
+                await LoadRacers();
                 StateHasChanged();
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");

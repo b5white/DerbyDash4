@@ -1,8 +1,16 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
-<div class="beta-banner" @onclick="NavigateToWelcome" role="button" tabindex="0" @onkeypress="HandleKeyPress">
-    <span class="beta-text">BETA * BETA * BETA * BETA</span>
+<div class="beta-banner" @onclick="NavigateToWelcome">
+    <span class="beta-text">
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+    </span>
 </div>
 
 @code {

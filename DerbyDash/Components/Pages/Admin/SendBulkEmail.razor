@@ -1,0 +1,246 @@
+﻿@* Pages/SendBulkEmail.razor *@
+@page "/admin/bulk-email"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Mail
+@using Microsoft.AspNetCore.Identity.UI.Services
+@inject IEmailSender EmailSender
+@inject ILogger<SendBulkEmail> Logger
+
+<PageTitle>Send Bulk Email</PageTitle>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>Send Bulk Email</h2>
+
+            @if (showResults) {
+                <div class="alert alert-info">
+                    <h5>Email Send Results</h5>
+                    <p>
+                        <strong>@results.Count(r => r.Success)</strong> successful,
+                        <strong>@results.Count(r => !r.Success)</strong> failed
+                    </p>
+                </div>
+            }
+
+           <EditForm Model="@model" OnValidSubmit="@SendEmails" formname="bulkEmailForm">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label for="subject" class="form-label">Subject</label>
+                    <InputText @bind-Value="model.Subject" class="form-control" id="subject" placeholder="TurboFlash Beta Update" />
+                    <ValidationMessage For="@(() => model.Subject)" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="message" class="form-label">Message</label>
+                    <InputTextArea @bind-Value="model.Message" class="form-control" rows="10" id="message"
+                                   placeholder="Hi there,&#10;&#10;Thanks for being part of the TurboFlash beta program!&#10;&#10;Here's what's new..." />
+                    <ValidationMessage For="@(() => model.Message)" class="text-danger" />
+                    <div class="form-text">Plain text will be automatically converted to HTML</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="emails" class="form-label">Email Addresses (one per line or comma-separated)</label>
+                    <InputTextArea @bind-Value="model.EmailAddresses" class="form-control" rows="6" id="emails"
+                                   placeholder="user1@example.com&#10;user2@example.com&#10;user3@example.com" />
+                    <ValidationMessage For="@(() => model.EmailAddresses)" class="text-danger" />
+                    <div class="form-text">Enter one email per line, or separate with commas</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="delay" class="form-label">Delay between emails (seconds)</label>
+                    <InputNumber @bind-Value="model.DelayBetweenEmails" class="form-control" id="delay" min="0" max="60" />
+                    <ValidationMessage For="@(() => model.DelayBetweenEmails)" class="text-danger" />
+                    <div class="form-text">Delay between each email to avoid spam filters (recommended: 1-2 seconds)</div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="submit" class="btn btn-primary" disabled="@isSending">
+                        @if (isSending) {
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <span>Sending...</span>
+                        } else {
+                            <span>Send Emails</span>
+                        }
+                    </button>
+                    <button type="button" class="btn btn-secondary ms-2" @onclick="ShowPreview" disabled="@isSending">Preview</button>
+                </div>
+            </EditForm>
+
+            @if (showResults) {
+                <div class="mt-4">
+                    <h4>Detailed Results</h4>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var result in results) {
+                                    <tr class="@(result.Success ? "table-success" : "table-danger")">
+                                        <td>@result.Email</td>
+                                        <td>
+                                            @if (result.Success) {
+                                                <span class="badge bg-success">Success</span>
+                                            } else {
+                                                <span class="badge bg-danger">Failed</span>
+                                            }
+                                        </td>
+                                        <td>@result.Error</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">📧 <strong>Subject:</strong> Keep it clear and specific</li>
+                        <li class="mb-2">⏱️ <strong>Timing:</strong> Use 1-2 second delays for better deliverability</li>
+                        <li class="mb-2">📝 <strong>Content:</strong> Plain text is fine for beta updates</li>
+                        <li class="mb-2">📋 <strong>Emails:</strong> One per line or comma-separated</li>
+                        <li class="mb-2">🚫 <strong>Always include:</strong> Unsubscribe instructions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Preview Modal *@
+@if (showPreview) {
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Email Preview</h5>
+                    <button type="button" class="btn-close" @onclick="HidePreview"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Subject:</h6>
+                    <p class="border p-2 bg-light">@model.Subject</p>
+                    <h6>Message:</h6>
+                    <div class="border p-3" style="white-space: pre-line;">@model.Message</div>
+                    <h6>Recipients:</h6>
+                    <div class="border p-2 bg-light">
+                        <strong>@previewEmails.Count recipients:</strong><br>
+                        @foreach (var email in previewEmails) {
+                            @email
+
+                            <br>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HidePreview">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private BulkEmailModel model = new();
+    private List<EmailResult> results = new();
+    private bool showResults = false;
+    private bool isSending = false;
+    private bool showPreview = false;
+    private List<string> previewEmails = new();
+
+    private async Task SendEmails() {
+        isSending = true;
+        results.Clear();
+        showResults = true;
+
+        var emailAddresses = ParseEmailAddresses(model.EmailAddresses);
+
+        Logger.LogInformation($"Starting bulk email send to {emailAddresses.Count} recipients");
+
+        foreach (var email in emailAddresses) {
+            try {
+                await EmailSender.SendEmailAsync(email.Trim(), model.Subject, model.Message);
+                results.Add(new EmailResult { Email = email, Success = true });
+                Logger.LogInformation($"Email sent successfully to {email}");
+
+                // Add delay to avoid rate limiting
+                if (model.DelayBetweenEmails > 0) {
+                    await Task.Delay(model.DelayBetweenEmails * 1000);
+                }
+
+                StateHasChanged(); // Update UI with progress
+            } catch (Exception ex) {
+                results.Add(new EmailResult { Email = email, Success = false, Error = ex.Message });
+                Logger.LogError(ex, $"Failed to send email to {email}");
+            }
+        }
+
+        isSending = false;
+        showResults = true;
+    }
+
+    private void ShowPreview() {
+        previewEmails = ParseEmailAddresses(model.EmailAddresses);
+        showPreview = true;
+    }
+
+    private void HidePreview() {
+        showPreview = false;
+    }
+
+    private List<string> ParseEmailAddresses(string emailAddresses) {
+        if (string.IsNullOrWhiteSpace(emailAddresses))
+            return new List<string>();
+
+        return emailAddresses
+            .Split(new[] { '\n', '\r', ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(email => email.Trim())
+            .Where(email => !string.IsNullOrEmpty(email) && IsValidEmail(email))
+            .Distinct()
+            .ToList();
+    }
+
+    private bool IsValidEmail(string email) {
+        try {
+            var addr = new MailAddress(email);
+            return addr.Address == email;
+        } catch {
+            return false;
+        }
+    }
+
+    public class BulkEmailModel {
+        [Required]
+        [StringLength(200)]
+        public string Subject { get; set; } = "";
+
+        [Required]
+        [StringLength(5000)]
+        public string Message { get; set; } = "";
+
+        [Required]
+        public string EmailAddresses { get; set; } = "";
+
+        [Range(0, 60)]
+        public int DelayBetweenEmails { get; set; } = 1;
+    }
+
+    public class EmailResult {
+        public string Email { get; set; } = "";
+        public bool Success { get; set; }
+        public string Error { get; set; } = "";
+    }
+}

@@ -64,23 +64,24 @@ namespace DerbyDash.Services {
         public async Task<List<Racer>> GetRacersByUserId(string userId, bool includeCount) {
             Logger.LogInformation("GetRacersByUserId for ID: {ID}", userId);
             List<Racer> racers;
-            using var context = _contextFactory.CreateDbContext();
-            var query = context.RaceTeam
+            //  using var context = _contextFactory.CreateDbContext();
+            var query = raceTeam
                 .Where(rt => rt.UserId == userId)
                 .OrderBy(fm => fm.Name);
 
-            if (includeCount) {
-                racers = await query
-                    .Select(racer => new Racer {
-                        Id = racer.Id,
-                        UserId = racer.UserId,
-                        Name = racer.Name, // Add other properties as needed
-                        RaceCount = context.Races.Count(r => r.RacerId == racer.Id)
-                    })
-                    .ToListAsync();
-            } else {
-                racers = await query.ToListAsync();
-            }
+            //  Count already included in raceTeam
+            //if (includeCount) {  
+            //    racers = await query
+            //        .Select(racer => new Racer {
+            //            Id = racer.Id,
+            //            UserId = racer.UserId,
+            //            Name = racer.Name, // Add other properties as needed
+            //            RaceCount = context.Races.Count(r => r.RacerId == racer.Id)
+            //        })
+            //        .ToListAsync();
+            //} else {
+            racers = query.ToList();
+            //}
             //if (racers.Count == 0) {
             //    Logger.LogWarning("No Racers found for ID: {ID}", userId);
             //}
@@ -158,7 +159,7 @@ namespace DerbyDash.Services {
 
                 // Set as active racer only if this is the first racer for the user (when race team is being created)
                 if (active is null) {
-                    var racers = await GetRacers();
+                    var racers = await GetRacers(false);
                     if (racers.Count == 1) {
                         active = racers[0];
                         Logger.LogInformation($"No active racer was set, defaulting to first racer: {active.Name} (ID: {active.Id})");
