@@ -28,9 +28,9 @@ namespace DerbyDash.Services {
             _logger = logger;
         }
 
-        public async Task<string> GetUserIdAsync(string purpose = "") {
+        public async Task<string?> GetUserIdAsync(string purpose = "", bool throwIfMissing = true) {
             var logContext = string.IsNullOrEmpty(purpose) ? "GetUserIdAsync" : $"GetUserIdAsync for {purpose}";
-            _logger.LogInformation("{LogContext}", logContext);
+            _logger.LogDebug("{LogContext}", logContext);
 
             try {
                 // Return cached value if available
@@ -40,20 +40,29 @@ namespace DerbyDash.Services {
 
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 if (authState?.User == null) {
-                    _logger.LogWarning("No authentication state found when trying to {Purpose}", purpose);
-                    throw new MissingUserException("No authentication state available");
+                    if (throwIfMissing) {
+                        _logger.LogDebug("No authentication state found when trying to {Purpose}", purpose);
+                        throw new MissingUserException("No authentication state available");
+                    }
+                    return null;
                 }
 
                 var user = authState.User;
                 if (user?.Identity == null || !user.Identity.IsAuthenticated) {
-                    _logger.LogWarning("No authenticated user found when trying to {Purpose}", purpose);
-                    throw new MissingUserException("User is not authenticated");
+                    if (throwIfMissing) {
+                        _logger.LogDebug("No authenticated user found when trying to {Purpose}", purpose);
+                        throw new MissingUserException("User is not authenticated");
+                    }
+                    return null;
                 }
 
                 var userId = _userManager.GetUserId(user);
                 if (string.IsNullOrEmpty(userId)) {
-                    _logger.LogWarning("Unable to determine the user ID when trying to {Purpose}", purpose);
-                    throw new MissingUserException("Could not determine user ID");
+                    if (throwIfMissing) {
+                        _logger.LogWarning("Unable to determine the user ID when trying to {Purpose}", purpose);
+                        throw new MissingUserException("Could not determine user ID");
+                    }
+                    return null;
                 }
 
                 // Cache the user ID
@@ -61,11 +70,14 @@ namespace DerbyDash.Services {
                 CurrentRequest.UserId = userId; // Update the current request context
                 _userIdCacheInitialized = true;
 
-                _logger.LogInformation("Successfully retrieved user ID for {Purpose}", purpose);
+                _logger.LogDebug("Successfully retrieved user ID for {Purpose}", purpose);
                 return userId;
             } catch (Exception ex) when (!(ex is MissingUserException)) {
                 _logger.LogError(ex, "Error getting user ID for {Purpose}", purpose);
-                throw new MissingUserException("Could not determine user ID", ex);
+                if (throwIfMissing) {
+                    throw new MissingUserException("Could not determine user ID", ex);
+                }
+                return null;
             }
         }
 
@@ -74,7 +86,7 @@ namespace DerbyDash.Services {
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 return authState?.User?.Identity?.IsAuthenticated ?? false;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error checking if user is logged in");
+                _logger.LogDebug(ex, "Error checking if user is logged in");
                 return false;
             }
         }
@@ -84,7 +96,7 @@ namespace DerbyDash.Services {
                 var authState = await _authenticationStateProvider.GetAuthenticationStateAsync();
                 return authState?.User?.Identity?.IsAuthenticated == true ? authState.User : null;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error getting current user");
+                _logger.LogDebug(ex, "Error getting current user");
                 return null;
             }
         }
@@ -94,7 +106,7 @@ namespace DerbyDash.Services {
                 var user = await GetCurrentUserAsync();
                 return user?.Identity?.Name;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error getting user name");
+                _logger.LogDebug(ex, "Error getting user name");
                 return null;
             }
         }
@@ -104,7 +116,7 @@ namespace DerbyDash.Services {
                 var user = await GetCurrentUserAsync();
                 return user?.FindFirst(claimType)?.Value;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error getting user claim {ClaimType}", claimType);
+                _logger.LogDebug(ex, "Error getting user claim {ClaimType}", claimType);
                 return null;
             }
         }
@@ -114,7 +126,7 @@ namespace DerbyDash.Services {
                 var user = await GetCurrentUserAsync();
                 return user?.IsInRole(role) ?? false;
             } catch (Exception ex) {
-                _logger.LogError(ex, "Error checking if user is in role {Role}", role);
+                _logger.LogDebug(ex, "Error checking if user is in role {Role}", role);
                 return false;
             }
         }

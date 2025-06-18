@@ -6,6 +6,7 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using DerbyDash.Components.Shared
 @using static DerbyDash.Components.Shared.RegistrationProgress
+@rendermode InteractiveServer
 
 @attribute [Authorize]
 
@@ -48,9 +49,17 @@ else
                                 <td>@racer.RaceCount</td>
                                 <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
                                 <td>
-                                    <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
-                                        <i class="fas fa-check-circle"></i> Set Active
-                                    </button>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
+                                            <i class="fas fa-check-circle"></i> Set Active
+                                        </button>
+                                        <button class="btn btn-sm btn-info" @onclick="() => OpenEditDialog(racer)">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDeleteRacer(racer)">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -120,6 +129,62 @@ else
                     <i class="fas fa-rocket"></i> Continue to Start Racing
                 </a>
             </div>
+        }
+
+        @* Edit Racer Modal *@
+        @if (showEditDialog)
+        {
+            <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Racer</h5>
+                            <button type="button" class="btn-close" @onclick="CloseEditDialog"></button>
+                        </div>
+                        <div class="modal-body">
+                            <EditForm Model="editRacerInput" OnValidSubmit="SaveRacerEdit" FormName="edit-racer">
+                                <DataAnnotationsValidator />
+                                
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="editRacerInput.RacerName" class="form-control" placeholder="Enter racer name" />
+                                    <label for="editRacerInput.RacerName">Racer Name</label>
+                                    <ValidationMessage For="() => editRacerInput.RacerName" class="text-danger" />
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="CloseEditDialog">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        }
+
+        @* Delete Confirmation Modal *@
+        @if (showDeleteDialog)
+        {
+            <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close" @onclick="CloseDeleteDialog"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete racer <strong>@(racerToDelete?.Name)</strong>?</p>
+                            <p class="text-danger">This will also delete all race history for this racer and cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDeleteDialog">Cancel</button>
+                            <button type="button" class="btn btn-danger" @onclick="DeleteRacer">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
         }
     </text>;
 }

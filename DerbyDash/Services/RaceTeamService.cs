@@ -228,14 +228,25 @@ namespace DerbyDash.Services {
                 using var context = _contextFactory.CreateDbContext();
                 var racer = await context.Racers.FindAsync(racerId);
                 if (racer != null) {
-                    // Remove all races associated with this racer first
+                    // Get all races associated with this racer
                     var races = await context.Races.Where(r => r.RacerId == racerId).ToListAsync();
+                    
+                    // For each race, delete its speed increments first
+                    foreach (var race in races) {
+                        var speedIncrements = await context.SpeedIncrements.Where(si => si.RaceId == race.Id).ToListAsync();
+                        context.SpeedIncrements.RemoveRange(speedIncrements);
+                    }
+                    
+                    // Then remove all races
                     context.Races.RemoveRange(races);
                     
-                    // Remove the racer
+                    // Finally remove the racer
                     context.Racers.Remove(racer);
+                    
+                    // Save all changes in a single transaction
                     await context.SaveChangesAsync();
-                      // Refresh the cached team list
+                    
+                    // Refresh the cached team list
                     raceTeam = await GetRacersInternal();
                     
                     // If this was the active racer, clear the active racer (don't auto-select new one)

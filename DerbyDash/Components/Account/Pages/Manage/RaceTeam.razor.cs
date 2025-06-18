@@ -13,6 +13,15 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected int TeamRaceCount { get; set; } = 0;
         private List<RegistrationProgress.RegistrationStep> registrationSteps = new();
         
+        // Edit dialog properties
+        private bool showEditDialog = false;
+        private Racer? racerToEdit;
+        private EditRacerModel editRacerInput = new();
+        
+        // Delete dialog properties
+        private bool showDeleteDialog = false;
+        private Racer? racerToDelete;
+        
         [SupplyParameterFromQuery]
         private bool IsFromRegistration { get; set; }
 
@@ -53,8 +62,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private async void HandleRacerChangedAsync() {
             try {
                 Logger.LogInformation("HandleRacerChangedAsync started");
+                
+                // Reload the racers from the service (no need to clear first since ReloadUsers creates a new list)
                 await ReloadUsers();
-                await InvokeAsync(StateHasChanged);
+                
+                // Ensure UI is updated on the UI thread
+                await InvokeAsync(() => {
+                    StateHasChanged();
+                    Logger.LogInformation("HandleRacerChangedAsync UI updated");
+                });
+                
                 Logger.LogInformation("HandleRacerChangedAsync completed");
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleRacerChangedAsync");
@@ -74,15 +91,12 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                 Logger.LogInformation("Racer added successfully: {RacerName}", Input.RacerName);
 
-                // The list will be refreshed via the OnRacerChanged event
-                // Add a small delay to ensure the database operation is complete
-                await Task.Delay(100);
-
                 message = "The team member has been added";
                 Input = new(); // Clear the form
 
-                // Force an immediate reload to ensure UI is updated
-                await ReloadUsers();
+                // No need to call ReloadUsers() here as it will be called by the HandleRacerChangedAsync
+                // method when the OnRacerChanged event is triggered by RaceTeamService.AddRacer
+                // Just ensure the UI is updated
                 StateHasChanged();
             } catch (DuplicateRacerException) {
                 // Preserve the entered name and show error
@@ -110,8 +124,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                 // Get the racers directly from the service
                 // The service handles its own user authentication
-                raceTeam.Clear();
-                raceTeam.AddRange(await RaceTeamService.GetRacers());
+                var freshRacers = await RaceTeamService.GetRacers();
+                
+                // Create a new list to avoid reference issues
+                raceTeam = new List<Racer>(freshRacers);
 
                 // Get team race count
                 TeamRaceCount = await RaceTeamService.GetTeamRaceCountAsync();
@@ -130,6 +146,104 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [DataType(DataType.Text)]
             [Display(Name = "Racer name")]
             public string RacerName { get; set; } = "";
+        }
+        
+        private sealed class EditRacerModel {
+            [Required]
+            [DataType(DataType.Text)]
+            [Display(Name = "Racer name")]
+            public string RacerName { get; set; } = "";
+        }
+
+        // Edit racer methods
+        private void OpenEditDialog(Racer racer) {
+            racerToEdit = racer;
+            editRacerInput.RacerName = racer.Name;
+            showEditDialog = true;
+            StateHasChanged();
+        }
+        
+        private void CloseEditDialog() {
+            showEditDialog = false;
+            racerToEdit = null;
+            StateHasChanged();
+        }
+        
+        private async Task SaveRacerEdit() {
+            try {
+                if (racerToEdit == null) {
+                    message = "Error: No racer selected for editing";
+                    return;
+                }
+                
+                // Check if the name is already in use by another racer
+                var existingRacer = raceTeam.FirstOrDefault(r => 
+                    r.Id != racerToEdit.Id && 
+                    r.Name.Equals(editRacerInput.RacerName, StringComparison.OrdinalIgnoreCase));
+                
+                if (existingRacer != null) {
+                    message = $"Error: '{editRacerInput.RacerName}' already exists on the team";
+                    return;
+                }
+                
+                // Update the racer name
+                racerToEdit.Name = editRacerInput.RacerName;
+                
+                // Save to database
+                await RaceTeamService.UpdateRacer(racerToEdit);
+                
+                message = $"Racer name updated to '{racerToEdit.Name}'";
+                CloseEditDialog();
+                
+                // No need to call ReloadUsers() here as it will be called by the HandleRacerChangedAsync
+                // method when the OnRacerChanged event is triggered by RaceTeamService.UpdateRacer
+                // Just ensure the UI is updated
+                StateHasChanged();
+            }
+            catch (Exception ex) {
+                Logger.LogError(ex, "Error updating racer name");
+                message = "Error updating racer name: " + ex.Message;
+            }
+        }
+        
+        // Delete racer methods
+        private void ConfirmDeleteRacer(Racer racer) {
+            racerToDelete = racer;
+            showDeleteDialog = true;
+            StateHasChanged();
+        }
+        
+        private void CloseDeleteDialog() {
+            showDeleteDialog = false;
+            racerToDelete = null;
+            StateHasChanged();
+        }
+        
+        private async Task DeleteRacer() {
+            try {
+                if (racerToDelete == null) {
+                    message = "Error: No racer selected for deletion";
+                    return;
+                }
+                
+                string racerName = racerToDelete.Name;
+                int racerId = racerToDelete.Id;
+                
+                // Delete the racer
+                await RaceTeamService.RemoveRacer(racerId);
+                
+                message = $"Racer '{racerName}' has been deleted";
+                CloseDeleteDialog();
+                
+                // No need to call ReloadUsers() here as it will be called by the HandleRacerChangedAsync
+                // method when the OnRacerChanged event is triggered by RaceTeamService.RemoveRacer
+                // Just ensure the UI is updated
+                StateHasChanged();
+            }
+            catch (Exception ex) {
+                Logger.LogError(ex, "Error deleting racer");
+                message = "Error deleting racer: " + ex.Message;
+            }
         }
 
         public void Dispose() {

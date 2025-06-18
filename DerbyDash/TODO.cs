@@ -69,10 +69,10 @@
         //     are finishing.
         // TODO Current car Top never goes below 50% of screen height.
         // DONE Dress up the confirmation email. Currently "Please confirm your account by clicking here."
-        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
-        // TODO Add a way to change/delete the racer name on the RaceTeam page.
+        // DONE Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // DOING Add a way to change/delete the racer name on the RaceTeam page.
         // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Add current userId and racerId to feedback in service.
+        // DONE Add current userId and racerId to feedback in service.
         // TODO Get avatars working and attached to racers
         // TODO Put the avatar, in a larger form, on the Start Race pages.
         // TODO In a smaller form on the results page after a race.

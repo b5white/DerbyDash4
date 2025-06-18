@@ -6,9 +6,10 @@ namespace DerbyDash.Services {
         /// Gets the current user's ID from the authentication state
         /// </summary>
         /// <param name="purpose">Optional purpose description for logging</param>
-        /// <returns>The user ID</returns>
-        /// <exception cref="MissingUserException">Thrown when no authenticated user is found</exception>
-        Task<string> GetUserIdAsync(string purpose = "");
+        /// <param name="throwIfMissing">If true, throws MissingUserException when user is not found; if false, returns null</param>
+        /// <returns>The user ID, or null if user is not authenticated and throwIfMissing is false</returns>
+        /// <exception cref="MissingUserException">Thrown when no authenticated user is found and throwIfMissing is true</exception>
+        Task<string?> GetUserIdAsync(string purpose = "", bool throwIfMissing = true);
 
         /// <summary>
         /// Checks if the current user is authenticated
