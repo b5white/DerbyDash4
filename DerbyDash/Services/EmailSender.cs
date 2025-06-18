@@ -19,40 +19,9 @@ namespace DerbyDash.Services {
         public AuthMessageSenderOptions Options { get; } //Set with Secret Manager.
 
         public async Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
-            => await SendEmailAsync(email, "Confirm your Derby Dash Account",
-            $@"<html lang=""en"">
-<head>
-    <meta charset=""UTF-8"">
-    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
-    <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background-color: #4CAF50; color: white; padding: 10px; text-align: center; border-radius: 5px; }}
-        .content {{ padding: 20px; background-color: #f9f9f9; border-radius: 5px; margin-top: 20px; }}
-        .button {{ display: inline-block; background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }}
-        .footer {{ margin-top: 20px; font-size: 12px; color: #777; text-align: center; }}
-    </style>
-</head>
-<body>
-    <div class=""header"">
-        <h2>Derby Dash Account Confirmation</h2>
-    </div>
-    <div class=""content"">
-        <p>Hello {user.UserName},</p>
-        <p>Thank you for registering with Derby Dash! We're excited to have you join our community.</p>
-        <p>To complete your registration and activate your account, please click the button below:</p>
-        <p style=""text-align: center;"">
-            <a href=""{confirmationLink}"" class=""button"">Confirm My Account</a>
-        </p>
-        <p>If the button doesn't work, you can also copy and paste the following link into your browser:</p>
-        <p>{confirmationLink}</p>
-        <p>This link will expire in 24 hours for security reasons.</p>
-    </div>
-    <div class=""footer"">
-        <p>© Derby Dash. All rights reserved.</p>
-        <p>If you didn't create this account, please ignore this email.</p>
-    </div>
-</body>
-</html>");
+            => await SendEmailAsync(email, "Confirm your email",
+            "<html lang=\"en\"><head></head><body>Please confirm your account by " +
+            $"<a href='{confirmationLink}'>clicking here</a>.</body></html>");
 
         public async Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
             => await SendEmailAsync(email, "Reset your password",

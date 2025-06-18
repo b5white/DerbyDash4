@@ -56,7 +56,7 @@
         // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // DONE Change name from DerbyDash to TurboFlash
         // TODO Handle the screen shift when using a phone so can still see top of page.        
-        // DONE Check the cars and StartLine to make sure the Tops are both relative to the same parent.
+        // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
         // TODO Add a partially transparent results panel that pops up in the middle of the screen
@@ -71,6 +71,7 @@
         // DONE Dress up the confirmation email. Currently "Please confirm your account by clicking here."
         // DONE Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
         // DOING Add a way to change/delete the racer name on the RaceTeam page.
+
         // TODO Save the Race position in the list at time it was first run, in Race
         // DONE Add current userId and racerId to feedback in service.
         // TODO Get avatars working and attached to racers
