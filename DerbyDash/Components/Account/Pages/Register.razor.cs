@@ -1,3 +1,6 @@
+using Blazorise.Captcha;
+using DerbyDash.Components.Shared;
+using static DerbyDash.Components.Shared.RegistrationProgress;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -6,19 +9,12 @@ using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
-using DerbyDash.Components.Shared;
-using static DerbyDash.Components.Shared.RegistrationProgress;
+using System.Text.Json;
 
 namespace DerbyDash.Components.Account.Pages {
     public partial class Register: ComponentBase {
         private List<RegistrationStep> registrationStepsList = new();
 
-        protected override void OnInitialized()
-        {
-            base.OnInitialized();
-            var stepsHelper = new RegistrationSteps { CurrentStep = "register" };
-            registrationStepsList = stepsHelper.GetRegistrationSteps();
-        }
         private IEnumerable<IdentityError>? identityErrors;
 
         [Inject]
@@ -45,6 +41,16 @@ namespace DerbyDash.Components.Account.Pages {
         [Inject]
         private CustomAuthStateProvider AuthStateProvider { get; set; } = null!;
 
+        [Inject]
+        public required IConfiguration configuration { get; set; }
+
+        [Inject] IHttpClientFactory HttpClientFactory { get; set; } = default!;
+
+        private Blazorise.Captcha.ReCaptcha.ReCaptcha valid = default!;
+        private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;  // this is the fake captcha - honeytrap
+        private bool failed = false;
+        private bool canSubmit = false;
+
         [SupplyParameterFromForm]
         protected InputModel Input { get; set; } = new();
 
@@ -53,55 +59,143 @@ namespace DerbyDash.Components.Account.Pages {
 
         private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
 
-        public async Task RegisterUser(EditContext editContext) {
-            var user = CreateUser();
-            string email = Input.Email.Trim();
-            await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
-            var emailStore = GetEmailStore();
-            await emailStore.SetEmailAsync(user, email, CancellationToken.None);
-            var result = await UserManager.CreateAsync(user, Input.Password);
-
-            if (!result.Succeeded) {
-                identityErrors = result.Errors;
-                return;
-            }
-
-            var userId = await UserManager.GetUserIdAsync(user);
-            Logger.LogInformation("User created a new account with password. {email} {userId}", email, userId);
-
-            var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-            var callbackUrl = NavManager.GetUriWithQueryParameters(
-                NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { 
-                    ["userId"] = userId, 
-                    ["code"] = code, 
-                    ["returnUrl"] = ReturnUrl,
-                    ["rememberMe"] = Input.RememberMe 
-                });
-            if (UserManager.Options.SignIn.RequireConfirmedAccount) {
-                await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
-                Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
-            } else {
-                Logger.LogInformation("Email confirmation not required - automatically signing in user");
-
-                // Automatically sign in the user when email confirmation is disabled
-                await SignInManager.SignInAsync(user, isPersistent: Input.RememberMe);
-                AuthStateProvider.NotifyUserLogin();
-                Logger.LogInformation("User automatically signed in: {Email}", email);
-            }
-
-            // Always redirect to the RegisterConfirmation page after successful registration
-            var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
-            RedirectManager.RedirectTo(confirmationUrl);
+        protected override void OnInitialized() {
+            base.OnInitialized();
+            var stepsHelper = new RegistrationSteps { CurrentStep = "register" };
+            registrationStepsList = stepsHelper.GetRegistrationSteps();
         }
 
-        protected void ToggleCaptcha()
-        {
-            Logger.LogInformation("ToggleCaptcha called. Current state: {CaptchaVerified}", Input.CaptchaVerified);
-            Input.CaptchaVerified = !Input.CaptchaVerified;
-            Logger.LogInformation("ToggleCaptcha completed. New state: {CaptchaVerified}", Input.CaptchaVerified);
+        public async Task RegisterUser(EditContext editContext) {
+            if (!failed && valid.State.Valid) {
+                var user = CreateUser();
+                string email = Input.Email.Trim();
+                await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
+                var emailStore = GetEmailStore();
+                await emailStore.SetEmailAsync(user, email, CancellationToken.None);
+                var result = await UserManager.CreateAsync(user, Input.Password);
+
+                if (!result.Succeeded) {
+                    identityErrors = result.Errors;
+                    return;
+                }
+
+                var userId = await UserManager.GetUserIdAsync(user);
+                Logger.LogInformation("User created a new account with password. {email} {userId}", email, userId);
+
+				var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+				code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+				var callbackUrl = NavManager.GetUriWithQueryParameters(
+					NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+					new Dictionary<string, object?> {
+						["userId"] = userId,
+						["code"] = code,
+						["returnUrl"] = ReturnUrl,
+						["rememberMe"] = Input.RememberMe
+					});
+				if (UserManager.Options.SignIn.RequireConfirmedAccount) {
+					await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
+					Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
+				} else {
+					Logger.LogInformation("Email confirmation not required - automatically signing in user");
+
+					// Automatically sign in the user when email confirmation is disabled
+					await SignInManager.SignInAsync(user, isPersistent: Input.RememberMe);
+					AuthStateProvider.NotifyUserLogin();
+					Logger.LogInformation("User automatically signed in: {Email}", email);
+				}
+
+				// Always redirect to the RegisterConfirmation page after successful registration
+				var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
+				RedirectManager.RedirectTo(confirmationUrl);
+			}
+        }
+
+        private void Solved(CaptchaState state) {
+            Logger.LogWarning("Captcha fake Solved");
+            failed = true;
+            canSubmit = false;
+        }
+
+        private void Expired() {
+
+        }
+
+        private async Task Reset() {
+            Logger.LogWarning("Captcha fake Reset");
+            failed = true;
+            canSubmit = false;
+        }
+
+        private async Task<bool> Validate(CaptchaState state) {
+            Logger.LogWarning("Captcha fake Validate");
+            return false;
+        }
+
+        private void validSolved(CaptchaState state) {
+            Logger.LogInformation($"Captcha Success: {state.Valid}");
+            canSubmit = true;
             StateHasChanged();
+        }
+
+        private void validExpired() {
+            Logger.LogDebug("Captcha Expired");
+            canSubmit = false;
+        }
+
+        private async Task validReset() {
+            await valid.Reset();
+        }
+
+        private async Task<bool> validValidate(CaptchaState state) {
+            Logger.LogInformation("Captcha Validate");
+
+            // Check if we have a response token
+            if (string.IsNullOrEmpty(state.Response)) {
+                Logger.LogWarning("No captcha response token");
+                return false;
+            }
+
+            try {
+                var content = new FormUrlEncodedContent(new[] {
+                    new KeyValuePair<string, string>("secret", configuration.GetValue<string>("ReCaptcha:SecretKey") ?? ""),
+                    new KeyValuePair<string, string>("response", state.Response),
+                    // Optional: Add user's IP for additional validation
+                    // new KeyValuePair<string, string>("remoteip", GetUserIP())
+                });
+
+                var httpClient = HttpClientFactory.CreateClient("ReCaptcha");
+                var response = await httpClient.PostAsync("siteverify", content);
+
+                if (!response.IsSuccessStatusCode) {
+                    Logger.LogWarning($"reCAPTCHA API call failed: {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadAsStringAsync();
+                var googleResponse = JsonSerializer.Deserialize<GoogleResponse>(result, new JsonSerializerOptions() {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var isValid = googleResponse?.Success ?? false;
+
+                if (!isValid && googleResponse?.ErrorCodes?.Length > 0) {
+                    Logger.LogWarning($"reCAPTCHA validation failed: {string.Join(", ", googleResponse.ErrorCodes)}");
+                }
+
+                return isValid;
+            } catch (Exception ex) {
+                Logger.LogWarning($"reCAPTCHA validation error: {ex.Message}");
+                return false; // Fail secure
+            }
+        }
+
+        public class GoogleResponse {
+            public bool Success { get; set; }
+            public double Score { get; set; } //V3 only - The score for this request (0.0 - 1.0)
+            public string Action { get; set; } = ""; //v3 only - An identifier
+            public string Challenge_ts { get; set; } = "";
+            public string Hostname { get; set; } = "";
+            public string[] ErrorCodes { get; set; } = new string[0];
         }
 
         private ApplicationUser CreateUser() {

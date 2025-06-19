@@ -1,9 +1,15 @@
 ﻿@page "/Account/Register"
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
 @using System.Text
 @using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.WebUtilities
 @using DerbyDash.Components.Shared
+@using Blazorise
+@using Blazorise.Captcha
+@using Blazorise.Captcha.ReCaptcha
+@using Microsoft.Extensions.Options
+@using System.Text.Json
 
 @attribute [AllowAnonymous]
 
@@ -18,12 +24,18 @@
     <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
         FormName="register">
         <DataAnnotationsValidator />
-        <ValidationSummary class="text-danger" role="alert" />
-
+        <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
+        
         <div class="form-group">
             <label for="Input.Email">Email Address</label>
-            <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username"
-                aria-required="true" placeholder="Enter your email" />
+            <InputText 
+                @bind-Value="Input.Email" 
+                id="Input.Email" 
+                class="form-control" 
+                autocomplete="username"
+                aria-required="true" 
+                placeholder="Enter your email" 
+            />
             <ValidationMessage For="() => Input.Email" class="validation-message" />
         </div>
 
@@ -42,10 +54,15 @@
         <div class="form-group">
             <label for="Input.Password">Password</label>
             <div class="password-input-container">
-                <InputText type="password" @bind-Value="Input.Password" id="Input.Password" class="form-control"
-                    autocomplete="new-password" aria-required="true" placeholder="Create a password" />
-                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('Input.Password')"
-                    tabindex="-1">
+                <InputText 
+                    type="password" 
+                    @bind-Value="Input.Password" 
+                    id="Input.Password" 
+                    class="form-control"
+                    autocomplete="new-password" 
+                    aria-required="true" 
+                    placeholder="Create a password" />
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('Input.Password')" tabindex="-1">
                     <i class="fas fa-eye" aria-hidden="true"></i>
                     <span class="sr-only">Show password</span>
                 </button>
@@ -56,9 +73,15 @@
         <div class="form-group">
             <label for="Input.ConfirmPassword">Confirm Password</label>
             <div class="password-input-container">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" id="Input.ConfirmPassword"
-                    class="form-control" autocomplete="new-password" aria-required="true"
-                    placeholder="Confirm your password" />
+                <InputText 
+                    type="password" 
+                    @bind-Value="Input.ConfirmPassword" 
+                    id="Input.ConfirmPassword"
+                    class="form-control" 
+                    autocomplete="new-password" 
+                    aria-required="true"
+                    placeholder="Confirm your password" 
+                />
                 <button type="button" class="password-toggle-btn"
                     onclick="togglePasswordVisibility('Input.ConfirmPassword')" tabindex="-1">
                     <i class="fas fa-eye" aria-hidden="true"></i>
@@ -75,44 +98,31 @@
             </label>
         </div>
 
-        <div style="display:none;">
-            <InputCheckbox @bind-Value="Input.FakeCaptchaChecked" id="fakeCaptchaCheckbox" />
-            <label for="fakeCaptchaCheckbox">Fake CAPTCHA</label>
-        </div>
+        @* <div style="display:none;">
+            <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
+                <ReCaptcha @ref="@captcha" Solved="@Solved" Validate="@Validate" Expired="Expired" />
+                <Button Background="Background.Primary" Clicked="@Reset">
+                    Reset
+                </Button>
+            </Div>
+        </div>  *@
 
-        <div class="form-group captcha-group">
-            <div class="captcha-widget">
-                <div class="captcha-main">
-                    <div class="captcha-checkbox-container">
-                        <InputCheckbox @bind-Value="Input.CaptchaVerified"
-                                       class="captcha-checkbox"
-                                       id="captchaCheckbox" />
-                        @* <label class="captcha-checkbox-label" for="captchaCheckbox">
-                            <span class="checkbox-custom @(Input.CaptchaVerified ? "checked" : null)">
-                                <i class="fas fa-check"></i>
-                            </span>
-                        </label> *@
-                    </div>
-                    <div class="captcha-text-container">
-                        <span class="captcha-text">I'm not a robot</span>
-                    </div>
-                    <div class="captcha-logo">
-                        <div class="captcha-logo-container">
-                            <div class="captcha-logo-circle">
-                                <i class="fas fa-shield-alt"></i>
-                            </div>
-                            <div class="captcha-brand">
-                                <span class="captcha-brand-text">CAPTCHA</span>
-                                <span class="captcha-privacy">Privacy - Terms</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <ValidationMessage For="() => Input.CaptchaVerified" class="validation-message" />
-            </div>
-        </div>
+         <Div Class="form-group captcha-group">
+             <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
+                <ReCaptcha 
+                    @ref="@valid"
+                    Solved="@validSolved" 
+                    Validate="@validValidate" 
+                    Expired="validExpired"
+                    Theme="CaptchaTheme.Light" 
+                /> 
+                <Button Background="Background.Primary" Clicked="@validReset">
+                    Reset
+                </Button> 
+           </Div>
+        </Div>  
 
-        <button type="submit" class="btn btn-register">
+        <button type="submit" class="btn btn-register" disabled="@(!canSubmit)">
             <i class="fas fa-user-plus"></i> Create Account
         </button>
 

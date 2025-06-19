@@ -1,3 +1,7 @@
+using Blazorise;
+using Blazorise.Bootstrap5;
+using Blazorise.Captcha.ReCaptcha;
+using Blazorise.Icons.FontAwesome;
 using DerbyDash.Components;
 using DerbyDash.Components.Account;
 using DerbyDash.Data;
@@ -45,7 +49,7 @@ namespace DerbyDash {
                     cookieOptions.Cookie.SameSite = SameSiteMode.Lax;  // Or None if cross-site
                     cookieOptions.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // Enable for HTTPS
                     cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
-                    cookieOptions.Cookie.Name = "DerbyDash";
+                    cookieOptions.Cookie.Name = "TurboFlash";
                     cookieOptions.Cookie.IsEssential = true;
                 });
 
@@ -74,6 +78,21 @@ namespace DerbyDash {
                 options.Cookie.IsEssential = true;
             });
 
+                // recaptcha settings
+                builder.Services
+                    .AddBlazorise(options => {
+                        options.Immediate = true;
+                    })
+                    .AddBootstrap5Providers()  // Provides IClassProvider and other core services
+                    .AddFontAwesomeIcons()     // For icons (optional)
+                    .AddBlazoriseGoogleReCaptcha(reCaptchaOptions => {
+                        // reCaptchaOptions.SiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Google's test key
+                        reCaptchaOptions.SiteKey = builder.Configuration["ReCaptcha:SiteKey"] ?? "";
+                    });
+                builder.Services.AddHttpClient("ReCaptcha", client => {
+                    client.BaseAddress = new Uri("https://www.google.com/recaptcha/api/");
+                    client.Timeout = TimeSpan.FromSeconds(30);
+                });
             // Add Identity services with Entity Framework stores
             builder.Services.AddIdentityCore<ApplicationUser>(options => {
                 // Sign-in requirements
