@@ -1,6 +1,5 @@
 using Blazorise.Captcha;
 using DerbyDash.Components.Shared;
-using static DerbyDash.Components.Shared.RegistrationProgress;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -10,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
+using static DerbyDash.Components.Shared.RegistrationProgress;
 
 namespace DerbyDash.Components.Account.Pages {
     public partial class Register: ComponentBase {
@@ -46,9 +46,7 @@ namespace DerbyDash.Components.Account.Pages {
 
         [Inject] IHttpClientFactory HttpClientFactory { get; set; } = default!;
 
-        private Blazorise.Captcha.ReCaptcha.ReCaptcha valid = default!;
-        private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;  // this is the fake captcha - honeytrap
-        private bool failed = false;
+        private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;
         private bool canSubmit = false;
 
         [SupplyParameterFromForm]
@@ -66,7 +64,14 @@ namespace DerbyDash.Components.Account.Pages {
         }
 
         public async Task RegisterUser(EditContext editContext) {
-            if (!failed && valid.State.Valid) {
+            if (captcha.State.Valid) {
+
+                var isHuman = await VerifyWithGoogle();
+                if (!isHuman) {
+                    canSubmit = false;
+                    await captcha?.Reset(); // Force reCAPTCHA reset
+                    return;
+                }
                 var user = CreateUser();
                 string email = Input.Email.Trim();
                 await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
@@ -111,44 +116,34 @@ namespace DerbyDash.Components.Account.Pages {
         }
 
         private void Solved(CaptchaState state) {
-            Logger.LogWarning("Captcha fake Solved");
-            failed = true;
+            Logger.LogInformation($"Captcha Success: {state}");
+            if (state.Valid && !string.IsNullOrEmpty(state.Response)) {
+                Logger.LogInformation("Captcha response token captured.");
+                canSubmit = true;
+            } else {
+                Logger.LogWarning("Captcha was not successfully solved.");
             canSubmit = false;
         }
-
-        private void Expired() {
-
-        }
-
-        private async Task Reset() {
-            Logger.LogWarning("Captcha fake Reset");
-            failed = true;
-            canSubmit = false;
-        }
-
-        private async Task<bool> Validate(CaptchaState state) {
-            Logger.LogWarning("Captcha fake Validate");
-            return false;
-        }
-
-        private void validSolved(CaptchaState state) {
-            Logger.LogInformation($"Captcha Success: {state.Valid}");
-            canSubmit = true;
             StateHasChanged();
         }
 
-        private void validExpired() {
+        private void Expired() {
             Logger.LogDebug("Captcha Expired");
             canSubmit = false;
         }
 
-        private async Task validReset() {
-            await valid.Reset();
+        private async Task Reset() {
+            await captcha.Reset();
         }
 
-        private async Task<bool> validValidate(CaptchaState state) {
-            Logger.LogInformation("Captcha Validate");
+        private Task<bool> Validate(CaptchaState state) {
+            // Only check if token exists, don't call Google API here
+            return Task.FromResult(!string.IsNullOrEmpty(state.Response));
+        }
 
+        private async Task<bool> VerifyWithGoogle() {
+            Logger.LogInformation("Captcha Validate");
+            CaptchaState state = captcha.State;
             // Check if we have a response token
             if (string.IsNullOrEmpty(state.Response)) {
                 Logger.LogWarning("No captcha response token");
@@ -233,13 +228,6 @@ namespace DerbyDash.Components.Account.Pages {
 
             [Display(Name = "Keep me logged in with cookies")]
             public bool RememberMe { get; set; } = true;
-
-            [Required(ErrorMessage = "Please verify that you are not a robot.")]
-            [Range(typeof(bool), "true", "true", ErrorMessage = "Please verify that you are not a robot.")]
-            [Display(Name = "I'm not a robot")]
-            public bool CaptchaVerified { get; set; } = false;
-
-            public bool FakeCaptchaChecked { get; set; } = false;
         }
     }
 }

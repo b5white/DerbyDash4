@@ -97,26 +97,16 @@
                 Keep me logged in with cookies
             </label>
         </div>
-
-        @* <div style="display:none;">
-            <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
-                <ReCaptcha @ref="@captcha" Solved="@Solved" Validate="@Validate" Expired="Expired" />
-                <Button Background="Background.Primary" Clicked="@Reset">
-                    Reset
-                </Button>
-            </Div>
-        </div>  *@
-
          <Div Class="form-group captcha-group">
              <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
                 <ReCaptcha 
-                    @ref="@valid"
-                    Solved="@validSolved" 
-                    Validate="@validValidate" 
-                    Expired="validExpired"
+                    @ref="@captcha"
+                    Solved="@Solved" 
+                    Validate="@Validate" 
+                    Expired="@Expired"
                     Theme="CaptchaTheme.Light" 
                 /> 
-                <Button Background="Background.Primary" Clicked="@validReset">
+                <Button Background="Background.Primary" Clicked="@Reset">
                     Reset
                 </Button> 
            </Div>
