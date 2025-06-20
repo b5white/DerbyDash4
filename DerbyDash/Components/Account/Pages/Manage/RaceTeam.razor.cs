@@ -13,6 +13,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected int TeamRaceCount { get; set; } = 0;
         private List<RegistrationProgress.RegistrationStep> registrationSteps = new();
         
+        // Avatar options
+        private string[] Avatars = new[] { "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg" };
+        
         // Edit dialog properties
         private bool showEditDialog = false;
         private Racer? racerToEdit;
@@ -42,6 +45,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
         [Inject]
         public ILogger<RaceTeam> Logger { get; set; } = default!;
+        
+        [Inject]
+        public IAvatarService AvatarService { get; set; } = default!;
 
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
@@ -85,11 +91,22 @@ namespace DerbyDash.Components.Account.Pages.Manage {
 
                 Racer newRacer = new() {
                     Name = Input.RacerName,
+                    AvatarFileName = Input.AvatarFileName
                 };
 
+                // Add the new racer
                 await RaceTeamService.AddRacer(newRacer);
-
+                
                 Logger.LogInformation("Racer added successfully: {RacerName}", Input.RacerName);
+                
+                // If this is the first racer, it will be set as active automatically
+                // Check if this is now the active racer
+                var activeRacer = await RaceTeamService.GetActiveRacer();
+                if (activeRacer != null && activeRacer.Name == newRacer.Name) {
+                    // Notify avatar service that the avatar has changed
+                    AvatarService.NotifyAvatarChanged();
+                    Logger.LogInformation("Notified avatar service of avatar change for new active racer");
+                }
 
                 message = "The team member has been added";
                 Input = new(); // Clear the form
@@ -111,6 +128,11 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         protected async Task SetActiveRacer(Racer racer) {
             try {
                 await RaceTeamService.SetActiveRacer(racer);
+                
+                // Notify avatar service that the active racer has changed
+                AvatarService.NotifyAvatarChanged();
+                Logger.LogInformation("Notified avatar service of active racer change to {RacerName}", racer.Name);
+                
                 message = $"{racer.Name} is now the active racer.";
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error setting active racer");
@@ -146,6 +168,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [DataType(DataType.Text)]
             [Display(Name = "Racer name")]
             public string RacerName { get; set; } = "";
+            
+            [Display(Name = "Avatar")]
+            public string? AvatarFileName { get; set; } = "1.jpg"; // Default avatar
         }
         
         private sealed class EditRacerModel {
@@ -153,12 +178,29 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             [DataType(DataType.Text)]
             [Display(Name = "Racer name")]
             public string RacerName { get; set; } = "";
+            
+            [Display(Name = "Avatar")]
+            public string? AvatarFileName { get; set; }
         }
 
         // Edit racer methods
+        // Avatar selection methods
+        private void SelectAvatar(string avatar) {
+            Input.AvatarFileName = avatar;
+            Logger.LogInformation("Avatar selected for new racer: {Avatar}", avatar);
+            StateHasChanged();
+        }
+        
+        private void SelectEditAvatar(string avatar) {
+            editRacerInput.AvatarFileName = avatar;
+            Logger.LogInformation("Avatar selected for edit: {Avatar}", avatar);
+            StateHasChanged();
+        }
+        
         private void OpenEditDialog(Racer racer) {
             racerToEdit = racer;
             editRacerInput.RacerName = racer.Name;
+            editRacerInput.AvatarFileName = racer.AvatarFileName ?? Avatars[0]; // Use existing avatar or default
             showEditDialog = true;
             StateHasChanged();
         }
@@ -186,13 +228,22 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     return;
                 }
                 
-                // Update the racer name
+                // Update the racer name and avatar
                 racerToEdit.Name = editRacerInput.RacerName;
+                racerToEdit.AvatarFileName = editRacerInput.AvatarFileName;
                 
                 // Save to database
                 await RaceTeamService.UpdateRacer(racerToEdit);
                 
-                message = $"Racer name updated to '{racerToEdit.Name}'";
+                // Check if this is the active racer and notify avatar service if it is
+                var activeRacer = await RaceTeamService.GetActiveRacer();
+                if (activeRacer != null && activeRacer.Id == racerToEdit.Id) {
+                    // Notify avatar service that the avatar has changed
+                    AvatarService.NotifyAvatarChanged();
+                    Logger.LogInformation("Notified avatar service of avatar change for active racer");
+                }
+                
+                message = $"Racer updated successfully";
                 CloseEditDialog();
                 
                 // No need to call ReloadUsers() here as it will be called by the HandleRacerChangedAsync

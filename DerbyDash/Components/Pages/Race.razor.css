@@ -479,7 +479,7 @@ html, body {
 
 .race-title-box {
     text-align: center;
-    margin-bottom: 40px;
+    /* margin-bottom: 40px; */
     animation: fadeInDown 0.8s ease-out;
 }
 
@@ -497,6 +497,100 @@ html, body {
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     animation: pulseButton 2s infinite;
+    margin-top: 30px;
+}
+
+/* Current Racer Display */
+.current-racer-display, .guest-racer-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 40px 0;
+    animation: fadeInScale 1s ease-out;
+}
+
+.racer-avatar-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.large-racer-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+    animation: float 3s ease-in-out infinite;
+}
+
+.large-racer-avatar:hover {
+    transform: scale(1.05);
+}
+
+.large-racer-avatar-default {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    animation: float 3s ease-in-out infinite;
+}
+
+.large-racer-avatar-default i {
+    font-size: 70px;
+}
+
+.racer-info {
+    text-align: center;
+}
+
+.racer-name {
+    font-size: 36px;
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    margin: 0 0 10px 0;
+    animation: fadeInUp 1.2s ease-out;
+}
+
+.racer-subtitle {
+    font-size: 18px;
+    color: #a8c7ff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    margin: 0;
+    animation: fadeInUp 1.4s ease-out;
+}
+
+/* Animations */
+@keyframes fadeInScale {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .button-content {
@@ -662,6 +756,31 @@ html, body {
         left: 50%;
         transform: translateX(-50%);
     }
+    
+    /* Responsive racer avatar for tablets */
+    .large-racer-avatar, 
+    .large-racer-avatar-default {
+        width: 120px;
+        height: 120px;
+        border-width: 4px;
+    }
+    
+    .large-racer-avatar-default {
+        font-size: 48px;
+    }
+    
+    .large-racer-avatar-default i {
+        font-size: 56px;
+    }
+    
+    .racer-name {
+        font-size: 28px;
+    }
+    
+    .racer-subtitle {
+        font-size: 16px;
+    }
+    
     .problem-text {
         font-size: 24px;
     }
@@ -760,6 +879,34 @@ html, body {
     
     .emergency-exit-button i {
         font-size: 12px;
+    }
+    
+    /* Mobile racer avatar */
+    .large-racer-avatar, 
+    .large-racer-avatar-default {
+        width: 100px;
+        height: 100px;
+        border-width: 3px;
+    }
+    
+    .large-racer-avatar-default {
+        font-size: 40px;
+    }
+    
+    .large-racer-avatar-default i {
+        font-size: 46px;
+    }
+    
+    .racer-name {
+        font-size: 24px;
+    }
+    
+    .racer-subtitle {
+        font-size: 14px;
+    }
+    
+    .current-racer-display, .guest-racer-display {
+        margin: 30px 0;
     }
     
     /* Smaller stoplight for very small screens */

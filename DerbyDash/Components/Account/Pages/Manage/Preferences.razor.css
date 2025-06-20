@@ -42,6 +42,15 @@
     transform: translateY(-5px); /* Lift effect on hover */
 }
 
+.avatar-label.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.avatar-label.disabled:hover {
+    transform: none; /* No hover effect when disabled */
+}
+
 /* Hide the actual radio button */
 .avatar-label input[type="radio"] {
     position: absolute;

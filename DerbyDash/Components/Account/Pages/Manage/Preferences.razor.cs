@@ -14,6 +14,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [Inject] private NavigationManager NavManager { get; set; } = default!;
         [Inject] private ILogger<Preferences> Logger { get; set; } = default!;
         [Inject] private IAvatarService AvatarService { get; set; } = default!;
+        [Inject] private IRaceTeamService RaceTeamService { get; set; } = default!;
 
         public class PreferencesModel {
             public string? Avatar { get; set; }
@@ -23,6 +24,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         private string[] Avatars = new[] { "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg" };
         private string? SaveMessage;
         private ApplicationUser? user;
+        private Racer? activeRacer;
         [CascadingParameter] private Task<AuthenticationState> AuthStateTask { get; set; } = default!;
 
         protected override async Task OnInitializedAsync() {
@@ -33,6 +35,9 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             if (!string.IsNullOrEmpty(userId)) {
                 // Use FindByIdAsync to ensure we get a fresh copy from the database
                 user = await UserManager.FindByIdAsync(userId);
+                
+                // Get the active racer
+                activeRacer = await RaceTeamService.GetActiveRacer();
             }
 
             if (user == null) {
@@ -40,16 +45,15 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 SaveMessage = "Error: Could not load user data.";
             } else {
                 Logger.LogInformation("User {UserId} loaded successfully in OnInitializedAsync.", user.Id);
-                //   Logger.LogInformation("User avatar from database: {Avatar}", user.AvatarFileName ?? "null");
-
-                // Set the Model.Avatar from the user's current avatar
-                //if (string.IsNullOrEmpty(user.AvatarFileName) && Avatars.Length > 0) {
-                //    Model.Avatar = Avatars[0]; // Default to first avatar
-                //    Logger.LogInformation("No avatar found for user, defaulting to first avatar: {Avatar}", Model.Avatar);
-                //} else {
-                //    Model.Avatar = user.AvatarFileName;
-                //    Logger.LogInformation("Initial Model.Avatar set to: {Avatar}", Model.Avatar ?? "null");
-                //}
+                
+                // Set the Model.Avatar from the active racer's avatar
+                if (activeRacer != null) {
+                    Model.Avatar = activeRacer.AvatarFileName;
+                    Logger.LogInformation("Active racer avatar loaded: {Avatar}", Model.Avatar ?? "null");
+                } else if (Avatars.Length > 0) {
+                    Model.Avatar = Avatars[0]; // Default to first avatar
+                    Logger.LogInformation("No active racer found, defaulting to first avatar: {Avatar}", Model.Avatar);
+                }
             }
         }
 
@@ -70,73 +74,38 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 return;
             }
 
-            // Use FindByIdAsync to ensure we get a fresh copy from the database
-            var currentUser = await UserManager.FindByIdAsync(userId);
+            // Get the active racer
+            var currentRacer = await RaceTeamService.GetActiveRacer();
+            
+            if (currentRacer == null) {
+                Logger.LogError("No active racer found.");
+                SaveMessage = "Error: No active racer found. Please set an active racer first.";
+                return;
+            }
 
-            Logger.LogInformation("OnSubmitAsync started. Fetched User ID: {UserId}, Model.Avatar: {Avatar}", currentUser?.Id ?? "null", Model.Avatar ?? "null");
+            Logger.LogInformation("OnSubmitAsync started. Active Racer: {RacerName}, Model.Avatar: {Avatar}", 
+                currentRacer.Name, Model.Avatar ?? "null");
             SaveMessage = null; // Clear previous message
 
             // Debug: Log the current state of the Model.Avatar
             Logger.LogInformation("Model.Avatar at submission time: {Avatar}", Model.Avatar ?? "null");
 
             // Check if an avatar is selected - use string.IsNullOrEmpty to properly check for null or empty strings
-            if (currentUser != null && !string.IsNullOrEmpty(Model.Avatar)) {
-                Logger.LogInformation("Attempting to save avatar '{Avatar}' for user '{UserId}'", Model.Avatar, currentUser.Id);
+            if (!string.IsNullOrEmpty(Model.Avatar)) {
+                Logger.LogInformation("Attempting to save avatar '{Avatar}' for racer '{RacerName}'", Model.Avatar, currentRacer.Name);
 
-                // Update the avatar filename
-                //currentUser.AvatarFileName = Model.Avatar;
-
-                // Save changes to the database with retry logic for concurrency conflicts
-                var result = await UserManager.UpdateAsync(currentUser);
-
-                // If we get a concurrency conflict, retry with a fresh user entity
-                if (!result.Succeeded && result.Errors.Any(e => e.Description.Contains("Optimistic concurrency failure"))) {
-                    Logger.LogWarning("Concurrency conflict detected for user '{UserId}', retrying with fresh entity", currentUser.Id);
-
-                    // Fetch a fresh copy of the user from the database
-                    var freshUser = await UserManager.FindByIdAsync(userId);
-                    if (freshUser != null) {
-                        // Apply the avatar change to the fresh entity
-                        // freshUser.AvatarFileName = Model.Avatar;
-
-                        // Retry the update
-                        result = await UserManager.UpdateAsync(freshUser);
-                        currentUser = freshUser; // Update our reference
-
-                        if (result.Succeeded) {
-                            Logger.LogInformation("UserManager.UpdateAsync succeeded on retry for user '{UserId}'", currentUser.Id);
-                        } else {
-                            Logger.LogError("UserManager.UpdateAsync failed on retry for user '{UserId}'. Errors: {Errors}",
-                                currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
-                        }
-                    } else {
-                        Logger.LogError("Could not fetch fresh user entity for retry, user '{UserId}' not found", userId);
-                        result = IdentityResult.Failed(new IdentityError { Description = "Could not reload user data for retry" });
-                    }
-                }
-
-                if (result.Succeeded) {
-                    Logger.LogInformation("UserManager.UpdateAsync succeeded for user '{UserId}'", currentUser.Id);
-
-                    // Refresh the sign-in session to update the authentication cookie/principal
-                    // REMOVED: This causes 'Headers already sent' error in interactive server mode
-                    // await SignInManager.RefreshSignInAsync(currentUser);
-                    // Logger.LogInformation("SignInManager.RefreshSignInAsync called for user '{UserId}'", currentUser.Id);                    
-
-                    // *** Explicitly update the Model to reflect the saved state ***
-                    //Model.Avatar = currentUser.AvatarFileName;
-                    Logger.LogInformation("Model.Avatar explicitly updated after save to: {Avatar}", Model.Avatar ?? "null");
-
-                    // Update the local user reference (optional, as navigation will likely reload)
-                    user = currentUser;
-
-                    // Force a refresh of the user from the database to verify changes (optional debug step)
-                    var refreshedUser = await UserManager.FindByIdAsync(userId);
-                    //Logger.LogInformation("After save and refresh, refreshed user avatar is: {Avatar}", refreshedUser?.AvatarFileName ?? "null");
+                try {
+                    // Update the avatar filename for the active racer
+                    currentRacer.AvatarFileName = Model.Avatar;
+                    
+                    // Save changes to the database
+                    await RaceTeamService.UpdateRacer(currentRacer);
+                    
+                    Logger.LogInformation("Avatar updated successfully for racer '{RacerName}'", currentRacer.Name);
 
                     // Notify other components that the avatar has changed
                     AvatarService.NotifyAvatarChanged();
-                    Logger.LogInformation("Avatar change notification sent for user '{UserId}'", currentUser.Id);
+                    Logger.LogInformation("Avatar change notification sent for racer '{RacerName}'", currentRacer.Name);
 
                     SaveMessage = "Preferences saved!";
                     StateHasChanged(); // Update UI to show message and reflect Model change
@@ -144,23 +113,16 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                     // Show success message for a short delay
                     await Task.Delay(1200);
 
-                    // Instead of using RedirectManager, use NavigationManager for interactive components
+                    // Refresh the page to show the updated avatar
                     NavManager.NavigateTo(NavManager.Uri, forceLoad: true);
-                } else {
-                    Logger.LogError("UserManager.UpdateAsync failed for user '{UserId}'. Errors: {Errors}",
-                        currentUser.Id, string.Join(", ", result.Errors.Select(e => e.Description)));
-                    SaveMessage = "Error saving preferences: " + string.Join(", ", result.Errors.Select(e => e.Description));
+                }
+                catch (Exception ex) {
+                    Logger.LogError(ex, "Error updating avatar for racer '{RacerName}'", currentRacer.Name);
+                    SaveMessage = "Error saving preferences: " + ex.Message;
                 }
             } else {
-                // This block is executed if currentUser or Model.Avatar is null/empty
-                if (currentUser == null) {
-                    Logger.LogError("OnSubmitAsync check failed because user could not be found.");
-                    SaveMessage = "Error: Could not save preferences. User data could not be loaded.";
-                } else // User is not null, so Model.Avatar must be null or empty
-                  {
-                    Logger.LogWarning("OnSubmitAsync check failed because Model.Avatar is null or empty for user {UserId}.", currentUser.Id);
-                    SaveMessage = "Please select an avatar before saving.";
-                }
+                Logger.LogWarning("OnSubmitAsync check failed because Model.Avatar is null or empty for racer {RacerName}.", currentRacer.Name);
+                SaveMessage = "Please select an avatar before saving.";
             }
         }
     }

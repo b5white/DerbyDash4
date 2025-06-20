@@ -98,6 +98,21 @@ namespace DerbyDash.Components.Pages {
             return _cachedActiveRacer;
         }
 
+        /// <summary>
+        /// Handles racer changes from the service and updates the cached racer
+        /// </summary>
+        private async void HandleRacerChanged() {
+            try {
+                // Update the cached racer to reflect the new selection
+                _cachedActiveRacer = await RaceTeamService.GetActiveRacer();
+                
+                // Update the UI to show the new racer
+                await InvokeAsync(StateHasChanged);
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error handling racer change in Race component");
+            }
+        }
+
         protected override async Task OnInitializedAsync() {
             Logger.LogInformation("Race.OnInitializedAsync()");
             
@@ -113,6 +128,9 @@ namespace DerbyDash.Components.Pages {
 
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+
+            // Subscribe to racer changes to update the UI when racer selection changes
+            RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
             // Cache the active racer once during initialization
             _cachedActiveRacer = await RaceTeamService.EnsureActiveRacerInitializedAsync();
@@ -663,6 +681,9 @@ namespace DerbyDash.Components.Pages {
             // Reset game state when component is disposed
             GameStateService.SetGameRunning(false);
             GameStateService.SetCurrentRacePage("");
+
+            // Unsubscribe from racer changes
+            RaceTeamService.OnRacerChanged -= HandleRacerChanged;
 
             periodicTimer.Dispose();
 

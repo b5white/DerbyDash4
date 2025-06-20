@@ -116,7 +116,9 @@ namespace DerbyDash.Components.Layout {
 
         private async void HandleRacerChangedAsync() {
             try {
+                // Load racers and avatar when active racer changes
                 await LoadRacers();
+                await LoadUserAvatar(); // Add this line to update the avatar
                 StateHasChanged();
             } catch (InvalidOperationException ex) when (ex.Message.Contains("second operation was started")) {
                 // DbContext concurrency issue - this is temporary, retry after a short delay
@@ -128,6 +130,7 @@ namespace DerbyDash.Components.Layout {
                     try {
                         await InvokeAsync(async () => {
                             await LoadRacers();
+                            await LoadUserAvatar(); // Add this line to update the avatar
                             StateHasChanged();
                         });
                     } catch (Exception retryEx) {
@@ -229,25 +232,49 @@ namespace DerbyDash.Components.Layout {
         }
 
         private async Task LoadUserAvatar() {
-            // TODO replace
-            // var authState = await AuthStateTask;
-            var userId = ""; // authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-
-            if (!string.IsNullOrEmpty(userId)) {
-                // Use FindByIdAsync to ensure we get a fresh copy from the database
-                // TODO Can we just get the current user instead of getting the ID first?
-                var user = await UserManager.FindByIdAsync(userId);
-                if (user != null) {
-                    // TODO This is still wrong
-                    //UserAvatarFileName = user.AvatarFileName;
-                    UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
-                    UserEmail = user.Email; // Store the user's email
-                } else { // Clear fields if user not found (e.g., after logout)                  
-                    UserAvatarFileName = null;
-                    UserInitial = null;
-                    UserEmail = null;
+            try {
+                // Get the active racer
+                var activeRacer = await RaceTeamService.GetActiveRacer();
+                
+                if (activeRacer != null) {
+                    // Use the active racer's avatar
+                    UserAvatarFileName = activeRacer.AvatarFileName;
+                    UserInitial = !string.IsNullOrEmpty(activeRacer.Name) ? activeRacer.Name.Substring(0, 1).ToUpper() : null;
+                    
+                    // Get user email if needed
+                    var authState = await AuthStateTask;
+                    var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    if (!string.IsNullOrEmpty(userId)) {
+                        var user = await UserManager.FindByIdAsync(userId);
+                        UserEmail = user?.Email;
+                    }
+                } else {
+                    // No active racer, try to get user info
+                    var authState = await AuthStateTask;
+                    var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    
+                    if (!string.IsNullOrEmpty(userId)) {
+                        var user = await UserManager.FindByIdAsync(userId);
+                        if (user != null) {
+                            UserAvatarFileName = null; // No avatar
+                            UserInitial = !string.IsNullOrEmpty(user.UserName) ? user.UserName.Substring(0, 1).ToUpper() : null;
+                            UserEmail = user.Email;
+                        } else {
+                            // Clear fields if user not found
+                            UserAvatarFileName = null;
+                            UserInitial = null;
+                            UserEmail = null;
+                        }
+                    } else {
+                        // Clear fields if not authenticated
+                        UserAvatarFileName = null;
+                        UserInitial = null;
+                        UserEmail = null;
+                    }
                 }
-            } else { // Clear fields if not authenticated              
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error loading user avatar");
+                // Clear fields on error
                 UserAvatarFileName = null;
                 UserInitial = null;
                 UserEmail = null;

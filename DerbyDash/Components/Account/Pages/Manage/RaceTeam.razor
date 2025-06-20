@@ -36,6 +36,7 @@ else
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>Avatar</th>
                             <th>Racer Name</th>
                             <th>Races Completed</th>
                             <th>Last Raced</th>
@@ -45,6 +46,13 @@ else
                     <tbody>
                         @foreach (Racer racer in raceTeam) {
                             <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(racer.AvatarFileName)) {
+                                        <img src="/images/avatars/@racer.AvatarFileName" class="racer-table-avatar" alt="@racer.Name's avatar" />
+                                    } else {
+                                        <div class="racer-table-avatar-placeholder">@(racer.Name.Length > 0 ? racer.Name[0].ToString() : "")</div>
+                                    }
+                                </td>
                                 <td>@racer.Name</td>
                                 <td>@racer.RaceCount</td>
                                 <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
@@ -115,6 +123,18 @@ else
                         <ValidationMessage For="() => Input.RacerName" class="text-danger" />
                     </div>
 
+                    <div class="mb-3">
+                        <label class="form-label">Select Avatar</label>
+                        <div class="avatar-selection">
+                            @foreach (var avatar in Avatars) {
+                                <label class="avatar-option" @onclick="() => SelectAvatar(avatar)">
+                                    <input type="radio" name="avatar" value="@avatar" checked="@(Input.AvatarFileName == avatar)" />
+                                    <img src="/images/avatars/@avatar" class="avatar-img @(Input.AvatarFileName == avatar ? "selected" : "")" alt="Avatar" />
+                                </label>
+                            }
+                        </div>
+                    </div>
+
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-plus"></i> Add Racer
                     </button>
@@ -149,6 +169,18 @@ else
                                     <InputText @bind-Value="editRacerInput.RacerName" class="form-control" placeholder="Enter racer name" />
                                     <label for="editRacerInput.RacerName">Racer Name</label>
                                     <ValidationMessage For="() => editRacerInput.RacerName" class="text-danger" />
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Select Avatar</label>
+                                    <div class="avatar-selection">
+                                        @foreach (var avatar in Avatars) {
+                                            <label class="avatar-option" @onclick="() => SelectEditAvatar(avatar)">
+                                                <input type="radio" name="edit-avatar" value="@avatar" checked="@(editRacerInput.AvatarFileName == avatar)" />
+                                                <img src="/images/avatars/@avatar" class="avatar-img @(editRacerInput.AvatarFileName == avatar ? "selected" : "")" alt="Avatar" />
+                                            </label>
+                                        }
+                                    </div>
                                 </div>
                                 
                                 <div class="modal-footer">

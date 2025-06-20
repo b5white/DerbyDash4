@@ -13,6 +13,48 @@
             <p class="race-subtitle">Ready to race with numbers?</p>
         </div>
 
+        @* Large Racer Avatar Display *@
+        <AuthorizeView Context="authContext">
+            <Authorized>
+                @if (_cachedActiveRacer != null)
+                {
+                    <div class="current-racer-display">
+                        <div class="racer-avatar-container">
+                            @if (!string.IsNullOrEmpty(_cachedActiveRacer.AvatarFileName))
+                            {
+                                <img src="/images/avatars/@_cachedActiveRacer.AvatarFileName" 
+                                     class="large-racer-avatar" 
+                                     alt="@_cachedActiveRacer.Name's Avatar" />
+                            }
+                            else
+                            {
+                                <div class="large-racer-avatar-default">
+                                    @(_cachedActiveRacer.Name.Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                        </div>
+                        <div class="racer-info">
+                            <h2 class="racer-name">@_cachedActiveRacer.Name</h2>
+                            <p class="racer-subtitle">is ready to race!</p>
+                        </div>
+                    </div>
+                }
+            </Authorized>
+            <NotAuthorized>
+                <div class="guest-racer-display">
+                    <div class="racer-avatar-container">
+                        <div class="large-racer-avatar-default">
+                            <i class="fas fa-user-astronaut"></i>
+                        </div>
+                    </div>
+                    <div class="racer-info">
+                        <h2 class="racer-name">Guest Racer</h2>
+                        <p class="racer-subtitle">Login to save your progress!</p>
+                    </div>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
         <AuthorizeView Context="authContext">
             <Authorized>
                 <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartRaceForm">
