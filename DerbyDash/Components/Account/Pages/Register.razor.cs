@@ -70,6 +70,7 @@ namespace DerbyDash.Components.Account.Pages {
                 if (!isHuman) {
                     canSubmit = false;
                     await captcha?.Reset(); // Force reCAPTCHA reset
+                    Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
                     return;
                 }
                 var user = CreateUser();
@@ -142,7 +143,7 @@ namespace DerbyDash.Components.Account.Pages {
         }
 
         private async Task<bool> VerifyWithGoogle() {
-            Logger.LogInformation("Captcha Validate");
+            Logger.LogInformation("Captcha VerifyWithGoogle");
             CaptchaState state = captcha.State;
             // Check if we have a response token
             if (string.IsNullOrEmpty(state.Response)) {
