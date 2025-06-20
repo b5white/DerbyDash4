@@ -1,6 +1,11 @@
 ﻿@page "/Account/Login"
-
+@rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
+@using Blazorise
+@using Blazorise.Captcha
+@using Blazorise.Captcha.ReCaptcha
+@using Microsoft.Extensions.Options
+@using System.Text.Json
 
 @attribute [AllowAnonymous]
 
@@ -28,13 +33,13 @@
                 <StatusMessage Message="@errorMessage" />
                 <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
                     <DataAnnotationsValidator />
-                    <ValidationSummary class="text-danger" role="alert" />
+                    <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
 
                     <div class="form-group">
                         <label for="Input.Email">Email Address</label>
                         <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
                             autocomplete="username" aria-required="true" placeholder="Enter your email" />
-                        <ValidationMessage For="() => Input.Email" class="validation-message" />
+                        <Microsoft.AspNetCore.Components.Forms.ValidationMessage For="() => Input.Email" class="validation-message" />
                     </div>
 
                     <div class="form-group">
@@ -49,7 +54,7 @@
                                 <span class="sr-only">Show password</span>
                             </button>
                         </div>
-                        <ValidationMessage For="() => Input.Password" class="validation-message" />
+                        <Microsoft.AspNetCore.Components.Forms.ValidationMessage For="() => Input.Password" class="validation-message" />
                     </div>
 
                     <div class="form-group">
@@ -59,7 +64,22 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="btn btn-login">
+                    <Div Class="form-group captcha-group">
+                        <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
+                            <ReCaptcha 
+                                @ref="captcha"
+                                Solved="@Solved" 
+                                Validate="@Validate" 
+                                Expired="@Expired"
+                                Theme="CaptchaTheme.Light" 
+                            /> 
+                            <Button Background="Background.Primary" Clicked="@Reset">
+                                Reset
+                            </Button> 
+                        </Div>
+                    </Div>
+
+                    <button type="submit" class="btn btn-login" disabled="@(!canSubmit)">
                         <i class="fas fa-flag-checkered"></i> Start Your Engines
                     </button>
 

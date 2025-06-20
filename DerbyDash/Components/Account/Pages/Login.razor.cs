@@ -1,7 +1,9 @@
+using Blazorise.Captcha;
 using DerbyDash.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace DerbyDash.Components.Account.Pages {
     public partial class Login {
@@ -19,6 +21,15 @@ namespace DerbyDash.Components.Account.Pages {
         [Inject]
         internal IdentityRedirectManager RedirectManager { get; set; } = default!;
 
+        [Inject]
+        public required IConfiguration configuration { get; set; }
+
+        [Inject] 
+        public required IHttpClientFactory HttpClientFactory { get; set; }
+
+        private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;
+        private bool canSubmit = false;
+
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
 
@@ -32,6 +43,21 @@ namespace DerbyDash.Components.Account.Pages {
 
         public async Task LoginUser() {
             Console.WriteLine("Logging in user.");
+
+            // Check reCAPTCHA first
+            if (!captcha.State.Valid) {
+                errorMessage = "Error: Please complete the reCAPTCHA verification.";
+                return;
+            }
+
+            var isHuman = await VerifyWithGoogle();
+            if (!isHuman) {
+                canSubmit = false;
+                await captcha?.Reset(); // Force reCAPTCHA reset
+                Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
+                errorMessage = "Error: reCAPTCHA verification failed. Please try again.";
+                return;
+            }
 
             // Clear any existing error message
             errorMessage = "";
@@ -127,6 +153,84 @@ namespace DerbyDash.Components.Account.Pages {
                 { "returnUrl", returnUrl }
             };
             RedirectManager!.RedirectToWParams("/Account/ProcessLogin", queryParams);
+        }
+
+        private void Solved(CaptchaState state) {
+            Logger.LogInformation($"Captcha Success: {state}");
+            if (state.Valid && !string.IsNullOrEmpty(state.Response)) {
+                Logger.LogInformation("Captcha response token captured.");
+                canSubmit = true;
+            } else {
+                Logger.LogWarning("Captcha was not successfully solved.");
+                canSubmit = false;
+            }
+            StateHasChanged();
+        }
+
+        private void Expired() {
+            Logger.LogDebug("Captcha Expired");
+            canSubmit = false;
+        }
+
+        private async Task Reset() {
+            await captcha.Reset();
+        }
+
+        private Task<bool> Validate(CaptchaState state) {
+            // Only check if token exists, don't call Google API here
+            return Task.FromResult(!string.IsNullOrEmpty(state.Response));
+        }
+
+        private async Task<bool> VerifyWithGoogle() {
+            Logger.LogInformation("Captcha VerifyWithGoogle");
+            CaptchaState state = captcha.State;
+            // Check if we have a response token
+            if (string.IsNullOrEmpty(state.Response)) {
+                Logger.LogWarning("No captcha response token");
+                return false;
+            }
+
+            try {
+                var content = new FormUrlEncodedContent(new[] {
+                    new KeyValuePair<string, string>("secret", configuration.GetValue<string>("ReCaptcha:SecretKey") ?? ""),
+                    new KeyValuePair<string, string>("response", state.Response),
+                    // Optional: Add user's IP for additional validation
+                    // new KeyValuePair<string, string>("remoteip", GetUserIP())
+                });
+
+                var httpClient = HttpClientFactory.CreateClient("ReCaptcha");
+                var response = await httpClient.PostAsync("siteverify", content);
+
+                if (!response.IsSuccessStatusCode) {
+                    Logger.LogWarning($"reCAPTCHA API call failed: {response.StatusCode}");
+                    return false;
+                }
+
+                var result = await response.Content.ReadAsStringAsync();
+                var googleResponse = JsonSerializer.Deserialize<GoogleResponse>(result, new JsonSerializerOptions() {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+
+                var isValid = googleResponse?.Success ?? false;
+
+                if (!isValid && googleResponse?.ErrorCodes?.Length > 0) {
+                    Logger.LogWarning($"reCAPTCHA validation failed: {string.Join(", ", googleResponse.ErrorCodes)}");
+                }
+
+                return isValid;
+            } catch (Exception ex) {
+                Logger.LogWarning($"reCAPTCHA validation error: {ex.Message}");
+                return false; // Fail secure
+            }
+        }
+
+        public class GoogleResponse {
+            public bool Success { get; set; }
+            public double Score { get; set; } //V3 only - The score for this request (0.0 - 1.0)
+            public string Action { get; set; } = ""; //v3 only - An identifier
+            public string Challenge_ts { get; set; } = "";
+            public string Hostname { get; set; } = "";
+            public string[] ErrorCodes { get; set; } = new string[0];
         }
 
         private sealed class InputModel {

@@ -147,6 +147,20 @@
   left: 100%;
 }
 
+.btn-register:disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-register:disabled:hover {
+  background: #cccccc;
+  transform: none;
+  box-shadow: none;
+}
+
 .register-links {
   margin-top: 2rem;
   text-align: center;
