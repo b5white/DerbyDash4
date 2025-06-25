@@ -180,6 +180,69 @@
                 ShowDebug="@ShowDebug" 
                 IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
 
+            @* Results Popup Panel *@
+            @if (ShowResultsPopup) {
+                <div class="results-popup-overlay">
+                    <div class="results-popup-panel">
+                        <div class="results-popup-header">
+                            <div class="results-trophy-icon">
+                                @if (IsFirstPlace) {
+                                    <i class="fas fa-trophy"></i>
+                                } else {
+                                    <i class="fas fa-medal"></i>
+                                }
+                            </div>
+                            <h2 class="results-popup-title">
+                                @if (IsFirstPlace) {
+                                    <span class="victory-text">Great race! You won.</span>
+                                } else {
+                                    <span class="good-race-text">Good race.</span>
+                                }
+                            </h2>
+                        </div>
+                        
+                        <div class="results-popup-content">
+                            <div class="results-time-display">
+                                <div class="time-label">Your Time</div>
+                                <div class="time-value">@FinishTime.ToString("F3")s</div>
+                            </div>
+                            
+                            @if (CarsBeaten > 0) {
+                                <div class="results-achievement">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="achievement-text">
+                                        You beat <strong>@CarsBeaten</strong> of the previous top 5 times!
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (IsPersonalBest) {
+                                <div class="personal-best-badge">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Personal Best!</span>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="results-popup-position">
+                            @if (IsFirstPlace) {
+                                <div class="position-badge first-place">
+                                    <span class="position-number">1st</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            } else if (currentResultIndex >= 0) {
+                                <div class="position-badge">
+                                    <span class="position-number">@GetOrdinalNumber(currentResultIndex + 1)</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
             <div class="stoplight-container">
                 <div class="stoplight">
                     <div class="light red"></div>
