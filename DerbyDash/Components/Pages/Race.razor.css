@@ -1,4 +1,4 @@
-﻿﻿/* Base styles */
+﻿﻿﻿﻿/* Base styles */
 html, body {
     margin: 0;
     padding: 0;
@@ -198,7 +198,7 @@ html, body {
 }
 
 .results-popup-panel {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     padding: 40px;
     max-width: 500px;
@@ -248,16 +248,21 @@ html, body {
     font-weight: bold;
     margin: 0;
     animation: slideInTitle 0.8s ease-out 0.5s both;
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: #2c3e50;
+    padding: 15px 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(255, 215, 0, 0.4);
+    display: inline-block;
+    text-shadow: none;
 }
 
 .victory-text {
-    color: #27ae60;
-    text-shadow: 0 2px 4px rgba(39, 174, 96, 0.3);
+    color: #2c3e50;
 }
 
 .good-race-text {
-    color: #3498db;
-    text-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    color: #2c3e50;
 }
 
 .results-popup-content {
@@ -265,7 +270,7 @@ html, body {
 }
 
 .results-time-display {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
