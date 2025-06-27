@@ -59,7 +59,7 @@
         // DONE Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
-        // TODO Add a partially transparent results panel that pops up in the middle of the screen
+        // DONE Add a partially transparent results panel that pops up in the middle of the screen
         //     at the end of the race, and shows their new time and how many of
         //     the previous top 5 they beat.
         //     It stays up until 1 second after all racers finish.
