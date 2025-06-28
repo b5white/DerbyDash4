@@ -76,7 +76,7 @@
         // DONE Add current userId and racerId to feedback in service.
         // DONE Get avatars working and attached to racers
         // DONE Put the avatar, in a larger form, on the Start Race pages.
-        // TODO In a smaller form on the results page after a race.
+        // DONE In a smaller form on the results page after a race.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
