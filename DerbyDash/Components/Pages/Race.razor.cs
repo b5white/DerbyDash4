@@ -403,13 +403,19 @@ namespace DerbyDash.Components.Pages {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
+                
+                // Calculate finishing position
+                int finishingPosition = CalculateFinishingPosition();
+                
                 if (InactivityTimer != null && !_inactivityTimerDisposed) {
                     InactivityTimer.Stop();
                 }
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();
                 }
-                await UpdateResultsAsync(FinishTime);
+                
+                // Pass finishing position to UpdateResultsAsync
+                await UpdateResultsAsync(FinishTime, finishingPosition);
                 
                 // Show results popup immediately when user finishes
                 await ShowResultsPopupAsync();
@@ -469,12 +475,29 @@ namespace DerbyDash.Components.Pages {
 
             return allFinished;
         }
-        private async Task UpdateResultsAsync(float timeSpan) {
+        /// <summary>
+        /// Calculates the finishing position of the player's car based on when they finished relative to other cars
+        /// </summary>
+        /// <returns>The finishing position (1 = first place, 2 = second place, etc.)</returns>
+        private int CalculateFinishingPosition() {
+            int position = 1;
+            
+            // Count how many cars finished before the player
+            foreach (var car in track.Cars.Skip(1)) { // Skip player car (index 0)
+                if (car.TotalTime > 0 && car.TotalTime < FinishTime) {
+                    position++;
+                }
+            }
+            
+            return position;
+        }
+
+        private async Task UpdateResultsAsync(float timeSpan, int finishingPosition) {
             try {
                 ResetResults(timeSpan);
                 CalculateAverage();
-                // Save the race using RaceTeamService which properly saves to database and updates counts
-                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements);
+                // Save the race with finishing position
+                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements, finishingPosition);
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);

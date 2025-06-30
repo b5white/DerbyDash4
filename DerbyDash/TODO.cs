@@ -72,7 +72,7 @@
         // DONE Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
         // DONE Add a way to change/delete the racer name on the RaceTeam page.
 
-        // TODO Save the Race position in the list at time it was first run, in Race
+        // DONE Save the Race position in the list at time it was first run, in Race
         // DONE Add current userId and racerId to feedback in service.
         // DONE Get avatars working and attached to racers
         // DONE Put the avatar, in a larger form, on the Start Race pages.

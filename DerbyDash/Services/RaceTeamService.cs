@@ -535,9 +535,10 @@ namespace DerbyDash.Services {
         /// <param name="totalTime">The total time taken to complete the race</param>
         /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
         /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
         /// <returns>The saved race record</returns>
-        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null) {
-            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements);
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0) {
+            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements, finishingPosition);
         }
 
         /// <summary>
@@ -546,8 +547,9 @@ namespace DerbyDash.Services {
         /// <param name="totalTime">The total time taken to complete the race</param>
         /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
         /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
         /// <returns>The saved race record</returns>
-        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null) {
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0) {
             try {
                 // Use cached active racer if available
                 var activeRacer = ActiveRacer ?? await GetActiveRacer();
@@ -562,7 +564,8 @@ namespace DerbyDash.Services {
                     RaceDateTime = DateTime.Now,
                     TotalTime = totalTime,
                     ProblemSetId = problemSetId,
-                    ImageId = activeRacer.Id % 6 + 1 // Cycle through available car images
+                    ImageId = activeRacer.Id % 6 + 1, // Cycle through available car images
+                    FinishingPosition = finishingPosition
                 };
 
                 // Add to database
@@ -588,7 +591,7 @@ namespace DerbyDash.Services {
                     activeRacer.LastRaced = racer.LastRaced;
                 }
 
-                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}");
+                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}, Position {finishingPosition}");
                 
                 // Notify that race counts may have changed
                 OnRacerChanged?.Invoke();

@@ -16,6 +16,10 @@ namespace DerbyDash.Data {
         [Required]
         public int ProblemSetId { get; set; }
         public int ImageId { get; set; }
+        /// <summary>
+        /// The finishing position/order in the race (1 = first place, 2 = second place, etc.)
+        /// </summary>
+        public int FinishingPosition { get; set; } = 0;
         [Required]
         public ICollection<SpeedIncrement>? SpeedIncrements { get; set; }
     }
