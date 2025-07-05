@@ -18,6 +18,11 @@
             <a href="/admin/feedback" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i><span class="d-none d-sm-inline ms-1">Back to List</span>
             </a>
+            @if (feedback != null) {
+                <a href="@GetViewLogsUrl()" class="btn btn-outline-info">
+                    <i class="bi bi-file-text"></i><span class="d-none d-sm-inline ms-1">View Logs</span>
+                </a>
+            }
             @if (feedback != null && !feedback.IsResolved) {
                 <button class="btn btn-success" @onclick="OpenResolveDialog">
                     <i class="bi bi-check-circle"></i><span class="d-none d-sm-inline ms-1">Resolve</span>
@@ -96,6 +101,11 @@
                         <i class="bi bi-arrow-left"></i><span class="d-none d-sm-inline ms-1">Back to List</span>
                     </a>
                     <div class="d-flex flex-wrap gap-2">
+                        @if (feedback != null) {
+                            <a href="@GetViewLogsUrl()" class="btn btn-outline-info">
+                                <i class="bi bi-file-text"></i><span class="d-none d-sm-inline ms-1">View Logs</span>
+                            </a>
+                        }
                         @if (feedback != null && !feedback.IsResolved) {
                             <button class="btn btn-success" @onclick="OpenResolveDialog">
                                 <i class="bi bi-check-circle"></i><span class="d-none d-sm-inline ms-1">Resolve</span>
@@ -410,5 +420,27 @@
         } else {
             errorMessage = "Failed to delete feedback. It may have already been deleted.";
         }
+    }
+
+    private string GetViewLogsUrl() {
+        if (feedback == null) return "/admin/logs";
+        
+        var parameters = new List<string>();
+        
+        // Add from date parameter (feedback submission time)
+        parameters.Add($"FromDate={feedback.SubmittedAt:yyyy-MM-ddTHH:mm:ss}");
+        
+        // Add user ID if available
+        if (!string.IsNullOrEmpty(feedback.UserId)) {
+            parameters.Add($"UserId={Uri.EscapeDataString(feedback.UserId)}");
+        }
+        
+        // Add racer ID if available
+        if (feedback.RacerId.HasValue) {
+            parameters.Add($"RacerId={feedback.RacerId.Value}");
+        }
+        
+        var queryString = string.Join("&", parameters);
+        return $"/admin/logs?{queryString}";
     }
 }
