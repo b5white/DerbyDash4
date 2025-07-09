@@ -440,6 +440,9 @@
             parameters.Add($"RacerId={feedback.RacerId.Value}");
         }
         
+        // Note: SessionId could be added here if it's available in the feedback context
+        // For now, we'll focus on filtering by user and racer, which are more relevant
+        
         var queryString = string.Join("&", parameters);
         return $"/admin/logs?{queryString}";
     }

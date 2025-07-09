@@ -88,8 +88,8 @@
         // DONE Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
         // DONE Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // DONE Enable email
-        // TODO Admin page for viewing logs
-        // TODO Add SessionId to log
+        // DONE Admin page for viewing logs
+        // DONE Add SessionId to log
         // TODO Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 

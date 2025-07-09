@@ -29,6 +29,9 @@ namespace DerbyDash.Data
         public int? RacerId { get; set; }
 
         [MaxLength(100)]
+        public string? SessionId { get; set; }
+
+        [MaxLength(100)]
         public string? Category { get; set; }
 
         [MaxLength(1000)]

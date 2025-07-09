@@ -14,7 +14,7 @@ namespace DerbyDash.Services
             Logs = GenerateFakeLogs(50); // Generate some sample logs
         }
 
-        public async Task<List<Log>> GetLogsAsync(DateTime? fromDate = null, string? userId = null, int? racerId = null, int? logLevel = null, int limit = 100)
+        public async Task<List<Log>> GetLogsAsync(DateTime? fromDate = null, string? userId = null, int? racerId = null, int? logLevel = null, string? sessionId = null, int limit = 100)
         {
             var query = Logs.AsQueryable();
 
@@ -29,6 +29,9 @@ namespace DerbyDash.Services
 
             if (logLevel.HasValue)
                 query = query.Where(l => l.LogLevel >= logLevel.Value);
+
+            if (!string.IsNullOrEmpty(sessionId))
+                query = query.Where(l => l.SessionId == sessionId);
 
             var result = query
                 .OrderByDescending(l => l.CreatedAt)
@@ -46,12 +49,12 @@ namespace DerbyDash.Services
 
         public async Task<List<Log>> GetLogsByUserIdAsync(string userId, DateTime? fromDate = null, int limit = 100)
         {
-            return await GetLogsAsync(fromDate, userId, null, null, limit);
+            return await GetLogsAsync(fromDate, userId, null, null, null, limit);
         }
 
         public async Task<List<Log>> GetLogsByRacerIdAsync(int racerId, DateTime? fromDate = null, int limit = 100)
         {
-            return await GetLogsAsync(fromDate, null, racerId, null, limit);
+            return await GetLogsAsync(fromDate, null, racerId, null, null, limit);
         }
 
         public async Task<List<Log>> GetExceptionLogsAsync(DateTime? fromDate = null, int limit = 100)
@@ -85,6 +88,7 @@ namespace DerbyDash.Services
                 .RuleFor(l => l.Message, f => f.Lorem.Sentence(8))
                 .RuleFor(l => l.UserId, f => f.Random.Bool(0.6f) ? f.Random.Guid().ToString() : null)
                 .RuleFor(l => l.RacerId, f => f.Random.Bool(0.4f) ? f.Random.Int(1, 100) : null)
+                .RuleFor(l => l.SessionId, f => f.Random.Bool(0.8f) ? f.Random.AlphaNumeric(24) : null)
                 .RuleFor(l => l.Category, f => f.PickRandom(categories))
                 .RuleFor(l => l.CreatedAt, f => f.Date.Recent(30));
 

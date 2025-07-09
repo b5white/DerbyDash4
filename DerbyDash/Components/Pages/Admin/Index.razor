@@ -261,7 +261,13 @@
     private async Task LoadLogData()
     {
         var today = DateTime.Today;
-        var recentLogs = await LogService.GetLogsAsync(today, null, null, null, 1000);
+        var recentLogs = await LogService.GetLogsAsync(
+            fromDate: today, 
+            userId: null, 
+            racerId: null, 
+            logLevel: null, 
+            sessionId: null, 
+            limit: 1000);
         
         if (recentLogs != null)
         {

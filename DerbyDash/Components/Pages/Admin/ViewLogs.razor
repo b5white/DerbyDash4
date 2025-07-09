@@ -50,6 +50,12 @@
                         <input type="number" class="form-control" @bind="filterRacerId" placeholder="Enter Racer ID" />
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label">Session ID</label>
+                        <input type="text" class="form-control" @bind="filterSessionId" placeholder="Enter Session ID" />
+                    </div>
+                </div>
+                <div class="row g-3 mt-2">
+                    <div class="col-md-3">
                         <label class="form-label">Log Level</label>
                         <select class="form-control" @bind="filterLogLevel">
                             <option value="">All Levels</option>
@@ -115,6 +121,7 @@
                                 <th>Category</th>
                                 <th>Message</th>
                                 <th>User/Racer</th>
+                                <th>Session</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -164,6 +171,15 @@
                                             <div class="small">
                                                 <i class="bi bi-trophy me-1"></i>
                                                 Racer @log.RacerId
+                                            </div>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(log.SessionId))
+                                        {
+                                            <div class="small text-muted">
+                                                <i class="bi bi-clock me-1"></i>
+                                                @log.SessionId.Substring(0, Math.Min(8, log.SessionId.Length))...
                                             </div>
                                         }
                                     </td>
@@ -244,6 +260,12 @@
                                 <strong>Racer ID:</strong> @selectedLog.RacerId
                             </div>
                         }
+                        @if (!string.IsNullOrEmpty(selectedLog.SessionId))
+                        {
+                            <div class="col-md-6">
+                                <strong>Session ID:</strong> @selectedLog.SessionId
+                            </div>
+                        }
                     </div>
                     
                     @if (!string.IsNullOrEmpty(selectedLog.Message))
@@ -305,6 +327,9 @@
     [Parameter, SupplyParameterFromQuery]
     public DateTime? FromDate { get; set; }
 
+    [Parameter, SupplyParameterFromQuery]
+    public string? SessionId { get; set; }
+
     private List<Log>? logs;
     private bool loading = true;
     private bool showFilters = false;
@@ -315,6 +340,7 @@
     private DateTime? filterFromDate;
     private string? filterUserId;
     private int? filterRacerId;
+    private string? filterSessionId;
     private string? filterLogLevel;
 
     protected override async Task OnInitializedAsync()
@@ -323,6 +349,7 @@
         filterFromDate = FromDate;
         filterUserId = UserId;
         filterRacerId = RacerId;
+        filterSessionId = SessionId;
 
         await LoadLogs();
     }
@@ -333,6 +360,7 @@
         filterFromDate = FromDate;
         filterUserId = UserId;
         filterRacerId = RacerId;
+        filterSessionId = SessionId;
         
         await LoadLogs();
     }
@@ -352,6 +380,7 @@
             userId: filterUserId,
             racerId: filterRacerId,
             logLevel: logLevelFilter,
+            sessionId: filterSessionId,
             limit: 100
         );
         
@@ -379,6 +408,7 @@
         filterFromDate = null;
         filterUserId = null;
         filterRacerId = null;
+        filterSessionId = null;
         filterLogLevel = null;
         await LoadLogs();
     }
