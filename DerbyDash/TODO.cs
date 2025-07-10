@@ -90,7 +90,7 @@
         // DONE Enable email
         // DONE Admin page for viewing logs
         // DONE Add SessionId to log
-        // TODO Add a link to the most recent log messages for SessionId to the feedback report
+        // DONE Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 
         // ** Either Filipe or Brad **

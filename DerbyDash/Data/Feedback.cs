@@ -41,9 +41,6 @@ namespace DerbyDash.Data {
         [StringLength(500)]
         public string BrowserInfo { get; set; } = string.Empty;
 
-        [StringLength(100)]
-        public string? SessionId { get; set; }
-
         public bool ContactConsent { get; set; } = true;
 
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
