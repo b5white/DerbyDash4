@@ -8,6 +8,7 @@ namespace DerbyDash.Services
         Task<Log?> GetLogByIdAsync(int id);
         Task<List<Log>> GetLogsByUserIdAsync(string userId, DateTime? fromDate = null, int limit = 100);
         Task<List<Log>> GetLogsByRacerIdAsync(int racerId, DateTime? fromDate = null, int limit = 100);
+        Task<List<Log>> GetLogsBySessionIdAsync(string sessionId, DateTime? fromDate = null, int limit = 100);
         Task<List<Log>> GetExceptionLogsAsync(DateTime? fromDate = null, int limit = 100);
     }
 }

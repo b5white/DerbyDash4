@@ -137,6 +137,7 @@ namespace DerbyDash.Services {
                 .RuleFor(f => f.Subject, f => f.Lorem.Sentence(5))
                 .RuleFor(f => f.Message, f => f.Lorem.Paragraphs(1))
                 .RuleFor(f => f.BrowserInfo, f => f.Random.String2(20))
+                .RuleFor(f => f.SessionId, f => f.Random.Bool(0.8f) ? f.Random.AlphaNumeric(24) : null)
                 .RuleFor(f => f.ContactConsent, f => f.Random.Bool())
                 .RuleFor(f => f.SubmittedAt, f => f.Date.Recent())
                 .RuleFor(f => f.IsResolved, f => f.Random.Bool())

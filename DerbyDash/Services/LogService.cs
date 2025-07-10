@@ -57,6 +57,11 @@ namespace DerbyDash.Services
             return await GetLogsAsync(fromDate, null, racerId, null, null, limit);
         }
 
+        public async Task<List<Log>> GetLogsBySessionIdAsync(string sessionId, DateTime? fromDate = null, int limit = 100)
+        {
+            return await GetLogsAsync(fromDate, null, null, null, sessionId, limit);
+        }
+
         public async Task<List<Log>> GetExceptionLogsAsync(DateTime? fromDate = null, int limit = 100)
         {
             var query = Logs.AsQueryable()

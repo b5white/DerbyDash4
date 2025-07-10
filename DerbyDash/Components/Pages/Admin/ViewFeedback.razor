@@ -216,6 +216,23 @@
                                     <small class="text-muted">@feedback.BrowserInfo</small>
                                 </div>
                             </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <span><strong>Session ID:</strong></span>
+                                <div class="text-end">
+                                    @if (!string.IsNullOrEmpty(feedback.SessionId)) {
+                                        <div>
+                                            <code class="text-muted">@feedback.SessionId</code>
+                                        </div>
+                                        <div class="mt-1">
+                                            <a href="@GetSessionLogsUrl()" class="btn btn-sm btn-outline-info">
+                                                <i class="bi bi-file-text me-1"></i>View Session Logs
+                                            </a>
+                                        </div>
+                                    } else {
+                                        <span class="badge bg-secondary">No Session ID</span>
+                                    }
+                                </div>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -440,8 +457,25 @@
             parameters.Add($"RacerId={feedback.RacerId.Value}");
         }
         
-        // Note: SessionId could be added here if it's available in the feedback context
-        // For now, we'll focus on filtering by user and racer, which are more relevant
+        // Add session ID if available
+        if (!string.IsNullOrEmpty(feedback.SessionId)) {
+            parameters.Add($"SessionId={Uri.EscapeDataString(feedback.SessionId)}");
+        }
+        
+        var queryString = string.Join("&", parameters);
+        return $"/admin/logs?{queryString}";
+    }
+
+    private string GetSessionLogsUrl() {
+        if (feedback == null || string.IsNullOrEmpty(feedback.SessionId)) return "/admin/logs";
+        
+        var parameters = new List<string>();
+        
+        // Add from date parameter (feedback submission time)
+        parameters.Add($"FromDate={feedback.SubmittedAt:yyyy-MM-ddTHH:mm:ss}");
+        
+        // Add session ID parameter
+        parameters.Add($"SessionId={Uri.EscapeDataString(feedback.SessionId)}");
         
         var queryString = string.Join("&", parameters);
         return $"/admin/logs?{queryString}";
