@@ -15,8 +15,6 @@ namespace DerbyDash.Components.Account.Pages {
     public partial class Register: ComponentBase {
         private List<RegistrationStep> registrationStepsList = new();
 
-        private IEnumerable<IdentityError>? identityErrors;
-
         [Inject]
         private UserManager<ApplicationUser> UserManager { get; set; } = null!;
 
@@ -36,9 +34,6 @@ namespace DerbyDash.Components.Account.Pages {
         private NavigationManager NavManager { get; set; } = null!;
 
         [Inject]
-        private IdentityRedirectManager RedirectManager { get; set; } = null!;
-
-        [Inject]
         private CustomAuthStateProvider AuthStateProvider { get; set; } = null!;
 
         [Inject]
@@ -48,6 +43,7 @@ namespace DerbyDash.Components.Account.Pages {
 
         private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;
         private bool canSubmit = false;
+        private EditContext? editContext;
 
         [SupplyParameterFromForm]
         protected InputModel Input { get; set; } = new();
@@ -55,33 +51,39 @@ namespace DerbyDash.Components.Account.Pages {
         [SupplyParameterFromQuery]
         private string? ReturnUrl { get; set; }
 
-        private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+        private string Message = "";
 
         protected override void OnInitialized() {
             base.OnInitialized();
             var stepsHelper = new RegistrationSteps { CurrentStep = "register" };
             registrationStepsList = stepsHelper.GetRegistrationSteps();
+            editContext = new EditContext(Input);
+            editContext.OnFieldChanged += EditContext_OnFieldChanged;
+            editContext.OnValidationStateChanged += EditContext_OnValidationStateChanged;
+            UpdateCanSubmit();
         }
 
         public async Task RegisterUser(EditContext editContext) {
+            try {
             if (captcha.State.Valid) {
-
                 var isHuman = await VerifyWithGoogle();
-                if (!isHuman) {
                     canSubmit = false;
-                    await captcha?.Reset(); // Force reCAPTCHA reset
+                    await captcha!.Reset();
+                if (!isHuman) {
                     Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
                     return;
                 }
+                    Message = "";
                 var user = CreateUser();
                 string email = Input.Email.Trim();
                 await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
                 var emailStore = GetEmailStore();
                 await emailStore.SetEmailAsync(user, email, CancellationToken.None);
-                var result = await UserManager.CreateAsync(user, Input.Password);
+                    IdentityResult result = await UserManager.CreateAsync(user, Input.Password);
 
                 if (!result.Succeeded) {
-                    identityErrors = result.Errors;
+                        Message = result.Errors.First().Description;
+                        StateHasChanged();
                     return;
                 }
 
@@ -103,27 +105,28 @@ namespace DerbyDash.Components.Account.Pages {
 					Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
 				} else {
 					Logger.LogInformation("Email confirmation not required - automatically signing in user");
-
-					// Automatically sign in the user when email confirmation is disabled
 					await SignInManager.SignInAsync(user, isPersistent: Input.RememberMe);
 					AuthStateProvider.NotifyUserLogin();
 					Logger.LogInformation("User automatically signed in: {Email}", email);
 				}
 
-				// Always redirect to the RegisterConfirmation page after successful registration
 				var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
-				RedirectManager.RedirectTo(confirmationUrl);
+                    await InvokeAsync(() => NavManager.NavigateTo(confirmationUrl, forceLoad: true));
 			}
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error during registration for {Email}", Input.Email);
+                Message = "An unexpected error occurred. Please try again.";
+                StateHasChanged();
         }
+        }
+
 
         private void Solved(CaptchaState state) {
             Logger.LogInformation($"Captcha Success: {state}");
             if (state.Valid && !string.IsNullOrEmpty(state.Response)) {
                 Logger.LogInformation("Captcha response token captured.");
-                canSubmit = true;
             } else {
                 Logger.LogWarning("Captcha was not successfully solved.");
-            canSubmit = false;
         }
             StateHasChanged();
         }
@@ -131,15 +134,22 @@ namespace DerbyDash.Components.Account.Pages {
         private void Expired() {
             Logger.LogDebug("Captcha Expired");
             canSubmit = false;
+            Input.Captcha = false;
+            UpdateCanSubmit();
         }
 
         private async Task Reset() {
             await captcha.Reset();
+            Input.Captcha = false;
+            UpdateCanSubmit();
         }
 
         private Task<bool> Validate(CaptchaState state) {
             // Only check if token exists, don't call Google API here
-            return Task.FromResult(!string.IsNullOrEmpty(state.Response));
+            Input.Captcha = !string.IsNullOrEmpty(state.Response);
+            // Notify EditContext manually
+            editContext!.NotifyFieldChanged(editContext.Field(nameof(Input.Captcha)));
+            return Task.FromResult(Input.Captcha);
         }
 
         private async Task<bool> VerifyWithGoogle() {
@@ -183,6 +193,21 @@ namespace DerbyDash.Components.Account.Pages {
                 Logger.LogWarning($"reCAPTCHA validation error: {ex.Message}");
                 return false; // Fail secure
             }
+        }
+
+        private void EditContext_OnFieldChanged(object? sender, FieldChangedEventArgs e) {
+            // Optionally, trigger validation on each field change
+            editContext?.Validate();
+        }
+
+        private void EditContext_OnValidationStateChanged(object? sender, ValidationStateChangedEventArgs e) {
+            UpdateCanSubmit();
+            StateHasChanged(); // Ensure UI updates
+        }
+
+        private void UpdateCanSubmit() {
+            // canSubmit is true only if all fields are valid
+            canSubmit = !(editContext?.GetValidationMessages().Any() ?? true);
         }
 
         public class GoogleResponse {
@@ -229,6 +254,11 @@ namespace DerbyDash.Components.Account.Pages {
 
             [Display(Name = "Keep me logged in with cookies")]
             public bool RememberMe { get; set; } = true;
+
+            [Required(ErrorMessage = "Please verify that you are human.")]
+            [Range(typeof(bool), "true", "true", ErrorMessage = "Please verify that you are not a robot.")]
+            [Display(Name = "I'm not a robot")]
+            public bool Captcha { get; set; } = false;
         }
     }
 }

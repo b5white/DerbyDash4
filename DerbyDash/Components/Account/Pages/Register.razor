@@ -21,7 +21,10 @@
 
     <h2 class="register-title">Create Your Account</h2>
     <StatusMessage Message="@Message" />
-    <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser"
+    <EditForm asp-route-returnUrl="@ReturnUrl" 
+              method="post" 
+              OnValidSubmit="RegisterUser"
+              EditContext="editContext"
         FormName="register">
         <DataAnnotationsValidator />
         <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
