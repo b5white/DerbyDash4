@@ -13,6 +13,48 @@
             <p class="race-subtitle">Ready to race with numbers?</p>
         </div>
 
+        @* Large Racer Avatar Display *@
+        <AuthorizeView Context="authContext">
+            <Authorized>
+                @if (_cachedActiveRacer != null)
+                {
+                    <div class="current-racer-display">
+                        <div class="racer-avatar-container">
+                            @if (!string.IsNullOrEmpty(_cachedActiveRacer.AvatarFileName))
+                            {
+                                <img src="/images/avatars/@_cachedActiveRacer.AvatarFileName" 
+                                     class="large-racer-avatar" 
+                                     alt="@_cachedActiveRacer.Name's Avatar" />
+                            }
+                            else
+                            {
+                                <div class="large-racer-avatar-default">
+                                    @(_cachedActiveRacer.Name.Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                        </div>
+                        <div class="racer-info">
+                            <h2 class="racer-name">@_cachedActiveRacer.Name</h2>
+                            <p class="racer-subtitle">is ready to race!</p>
+                        </div>
+                    </div>
+                }
+            </Authorized>
+            <NotAuthorized>
+                <div class="guest-racer-display">
+                    <div class="racer-avatar-container">
+                        <div class="large-racer-avatar-default">
+                            <i class="fas fa-user-astronaut"></i>
+                        </div>
+                    </div>
+                    <div class="racer-info">
+                        <h2 class="racer-name">Guest Racer</h2>
+                        <p class="racer-subtitle">Login to save your progress!</p>
+                    </div>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
+
         <AuthorizeView Context="authContext">
             <Authorized>
                 <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartRaceForm">
@@ -86,6 +128,46 @@
             <div class="results-header">
                 <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
                 <h2 class="encouraging-message">@encouragingWord</h2>
+                
+                @* Medium Racer Avatar Display *@
+                <AuthorizeView Context="authContext">
+                    <Authorized>
+                        @if (_cachedActiveRacer != null)
+                        {
+                            <div class="results-racer-display">
+                                <div class="results-racer-avatar-container">
+                                    @if (!string.IsNullOrEmpty(_cachedActiveRacer.AvatarFileName))
+                                    {
+                                        <img src="/images/avatars/@_cachedActiveRacer.AvatarFileName" 
+                                             class="medium-racer-avatar" 
+                                             alt="@_cachedActiveRacer.Name's Avatar" />
+                                    }
+                                    else
+                                    {
+                                        <div class="medium-racer-avatar-default">
+                                            @(_cachedActiveRacer.Name.Substring(0, 1).ToUpper())
+                                        </div>
+                                    }
+                                </div>
+                                <div class="results-racer-info">
+                                    <h3 class="results-racer-name">@_cachedActiveRacer.Name</h3>
+                                </div>
+                            </div>
+                        }
+                    </Authorized>
+                    <NotAuthorized>
+                        <div class="results-racer-display">
+                            <div class="results-racer-avatar-container">
+                                <div class="medium-racer-avatar-default">
+                                    <i class="fas fa-user-astronaut"></i>
+                                </div>
+                            </div>
+                            <div class="results-racer-info">
+                                <h3 class="results-racer-name">Guest Racer</h3>
+                            </div>
+                        </div>
+                    </NotAuthorized>
+                </AuthorizeView>
             </div>
 
             <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())">
@@ -138,6 +220,69 @@
                 Distance="@(track.Cars.Any() ? track.Cars.Max(c => c.Distance) : 0)"                                        
                 ShowDebug="@ShowDebug" 
                 IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
+
+            @* Results Popup Panel *@
+            @if (ShowResultsPopup) {
+                <div class="results-popup-overlay">
+                    <div class="results-popup-panel">
+                        <div class="results-popup-header">
+                            <div class="results-trophy-icon">
+                                @if (IsFirstPlace) {
+                                    <i class="fas fa-trophy"></i>
+                                } else {
+                                    <i class="fas fa-medal"></i>
+                                }
+                            </div>
+                            <h2 class="results-popup-title">
+                                @if (IsFirstPlace) {
+                                    <span class="victory-text">Great race! You won.</span>
+                                } else {
+                                    <span class="good-race-text">Good race.</span>
+                                }
+                            </h2>
+                        </div>
+                        
+                        <div class="results-popup-content">
+                            <div class="results-time-display">
+                                <div class="time-label">Your Time</div>
+                                <div class="time-value">@FinishTime.ToString("F3")s</div>
+                            </div>
+                            
+                            @if (CarsBeaten > 0) {
+                                <div class="results-achievement">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="achievement-text">
+                                        You beat <strong>@CarsBeaten</strong> of the previous top 5 times!
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (IsPersonalBest) {
+                                <div class="personal-best-badge">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Personal Best!</span>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="results-popup-position">
+                            @if (IsFirstPlace) {
+                                <div class="position-badge first-place">
+                                    <span class="position-number">1st</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            } else if (currentResultIndex >= 0) {
+                                <div class="position-badge">
+                                    <span class="position-number">@GetOrdinalNumber(currentResultIndex + 1)</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
 
             <div class="stoplight-container">
                 <div class="stoplight">

@@ -56,6 +56,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<FeedbackService>();
+            builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();

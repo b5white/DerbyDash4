@@ -88,6 +88,13 @@ namespace DerbyDash.Components.Pages {
 
         TrackContainer? trackContainerInstance;
 
+        // Results Popup Properties
+        private bool ShowResultsPopup = false;
+        private bool IsFirstPlace = false;
+        private bool IsPersonalBest = false;
+        private int CarsBeaten = 0;
+        private Timer? ResultsPopupTimer;
+
         /// <summary>
         /// Gets the cached active racer, ensuring it's loaded once during component initialization
         /// </summary>
@@ -96,6 +103,21 @@ namespace DerbyDash.Components.Pages {
                 _cachedActiveRacer = await RaceTeamService.GetActiveRacer();
             }
             return _cachedActiveRacer;
+        }
+
+        /// <summary>
+        /// Handles racer changes from the service and updates the cached racer
+        /// </summary>
+        private async void HandleRacerChanged() {
+            try {
+                // Update the cached racer to reflect the new selection
+                _cachedActiveRacer = await RaceTeamService.GetActiveRacer();
+                
+                // Update the UI to show the new racer
+                await InvokeAsync(StateHasChanged);
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error handling racer change in Race component");
+            }
         }
 
         protected override async Task OnInitializedAsync() {
@@ -113,6 +135,9 @@ namespace DerbyDash.Components.Pages {
 
             // Notify GameStateService that we're on a race page
             GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+
+            // Subscribe to racer changes to update the UI when racer selection changes
+            RaceTeamService.OnRacerChanged += HandleRacerChanged;
 
             // Cache the active racer once during initialization
             _cachedActiveRacer = await RaceTeamService.EnsureActiveRacerInitializedAsync();
@@ -139,6 +164,12 @@ namespace DerbyDash.Components.Pages {
                 Answer = "";
                 Started = true;
                 Running = true;
+                
+                // Reset results popup state
+                ShowResultsPopup = false;
+                IsFirstPlace = false;
+                IsPersonalBest = false;
+                CarsBeaten = 0;
 
                 // Notify GameStateService that the game is now running
                 GameStateService.SetGameRunning(true);
@@ -372,13 +403,23 @@ namespace DerbyDash.Components.Pages {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
                 track.Cars[0].SpeedIncrements = RaceService.CreateSpeedIncrements(ElapsedAnswerTimes);
+                
+                // Calculate finishing position
+                int finishingPosition = CalculateFinishingPosition();
+                
                 if (InactivityTimer != null && !_inactivityTimerDisposed) {
                     InactivityTimer.Stop();
                 }
                 if (FlashTimer != null && !_flashTimerDisposed) {
                     FlashTimer.Stop();
                 }
-                await UpdateResultsAsync(FinishTime);
+                
+                // Pass finishing position to UpdateResultsAsync
+                await UpdateResultsAsync(FinishTime, finishingPosition);
+                
+                // Show results popup immediately when user finishes
+                await ShowResultsPopupAsync();
+                
                 Running = false;
                 problems = null;
                 StateHasChanged();
@@ -434,12 +475,29 @@ namespace DerbyDash.Components.Pages {
 
             return allFinished;
         }
-        private async Task UpdateResultsAsync(float timeSpan) {
+        /// <summary>
+        /// Calculates the finishing position of the player's car based on when they finished relative to other cars
+        /// </summary>
+        /// <returns>The finishing position (1 = first place, 2 = second place, etc.)</returns>
+        private int CalculateFinishingPosition() {
+            int position = 1;
+            
+            // Count how many cars finished before the player
+            foreach (var car in track.Cars.Skip(1)) { // Skip player car (index 0)
+                if (car.TotalTime > 0 && car.TotalTime < FinishTime) {
+                    position++;
+                }
+            }
+            
+            return position;
+        }
+
+        private async Task UpdateResultsAsync(float timeSpan, int finishingPosition) {
             try {
                 ResetResults(timeSpan);
                 CalculateAverage();
-                // Save the race using RaceTeamService which properly saves to database and updates counts
-                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements);
+                // Save the race with finishing position
+                await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements, finishingPosition);
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);
@@ -461,6 +519,99 @@ namespace DerbyDash.Components.Pages {
                 "division-100" => 8,
                 _ => 1 // Default to addition-4stable
             };
+        }
+
+        /// <summary>
+        /// Shows the results popup with race statistics
+        /// </summary>
+        private async Task ShowResultsPopupAsync() {
+            // Calculate statistics for the popup
+            CalculateResultsStatistics();
+            
+            // Show the popup
+            ShowResultsPopup = true;
+            StateHasChanged();
+            
+            // Start timer to hide popup after all racers finish (with 2 second delay)
+            await SetupResultsPopupTimerAsync();
+        }
+
+        /// <summary>
+        /// Calculates statistics for the results popup
+        /// </summary>
+        private void CalculateResultsStatistics() {
+            // Check if this is first place (fastest time among all cars)
+            var allFinishedTimes = track.Cars
+                .Where(car => car.TotalTime > 0)
+                .OrderBy(car => car.TotalTime)
+                .ToList();
+            
+            IsFirstPlace = allFinishedTimes.FirstOrDefault()?.TotalTime == track.Cars[0].TotalTime;
+            
+            // Count how many previous top 5 times were beaten
+            CarsBeaten = 0;
+            for (int i = 0; i < previousResults.Length; i++) {
+                if (previousResults[i] > 0 && FinishTime < previousResults[i]) {
+                    CarsBeaten++;
+                }
+            }
+            
+            // Check if this is a personal best (improvement over previous average)
+            IsPersonalBest = improvedTime > 0;
+        }
+
+        /// <summary>
+        /// Sets up timer to hide results popup after all racers finish
+        /// </summary>
+        private async Task SetupResultsPopupTimerAsync() {
+            // Use a background task to monitor when all racers finish
+            UtilityMethods.FireAndForget(async () => {
+                // Wait for all racers to finish
+                while (Running || !AllRacersFinished()) {
+                    await Task.Delay(100);
+                }
+                
+                // Wait additional 2 seconds after all racers finish
+                await Task.Delay(2000);
+                
+                // Hide the popup
+                await InvokeAsync(() => {
+                    ShowResultsPopup = false;
+                    StateHasChanged();
+                });
+            });
+        }
+
+        /// <summary>
+        /// Checks if all racers have finished the race
+        /// </summary>
+        private bool AllRacersFinished() {
+            return track.Cars.All(car => car.TotalTime > 0 || car.Distance >= RaceService.TotalDistance);
+        }
+
+        /// <summary>
+        /// Gets ordinal number string (1st, 2nd, 3rd, etc.)
+        /// </summary>
+        private string GetOrdinalNumber(int number) {
+            if (number <= 0) return number.ToString();
+            
+            switch (number % 100) {
+                case 11:
+                case 12:
+                case 13:
+                    return number + "th";
+            }
+            
+            switch (number % 10) {
+                case 1:
+                    return number + "st";
+                case 2:
+                    return number + "nd";
+                case 3:
+                    return number + "rd";
+                default:
+                    return number + "th";
+            }
         }
 
         private void ResetResults(float timeSpan) {
@@ -664,6 +815,9 @@ namespace DerbyDash.Components.Pages {
             GameStateService.SetGameRunning(false);
             GameStateService.SetCurrentRacePage("");
 
+            // Unsubscribe from racer changes
+            RaceTeamService.OnRacerChanged -= HandleRacerChanged;
+
             periodicTimer.Dispose();
 
             if (InactivityTimer != null) {
@@ -674,6 +828,10 @@ namespace DerbyDash.Components.Pages {
             if (FlashTimer != null) {
                 FlashTimer.Dispose();
                 _flashTimerDisposed = true;
+            }
+
+            if (ResultsPopupTimer != null) {
+                ResultsPopupTimer.Dispose();
             }
         }
 

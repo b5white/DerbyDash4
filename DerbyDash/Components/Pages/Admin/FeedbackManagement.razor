@@ -16,7 +16,7 @@
     <h1>Feedback Management</h1>
     
     <div class="row mb-4">
-        <div class="col-md-12">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Filter Options</h5>
@@ -25,10 +25,10 @@
                     }
                 </div>
                 <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <div class="form-group">
-                                <label>Filter by Type:</label>
+                                <label class="form-label">Filter by Type:</label>
                                 <select class="form-select" @bind="selectedFeedbackType">
                                     <option value="">All Types</option>
                                     <option value="@FeedbackType.BugReport">Bug Report</option>
@@ -38,9 +38,9 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <div class="form-group">
-                                <label>Filter by Status:</label>
+                                <label class="form-label">Filter by Status:</label>
                                 <select class="form-select" @bind="selectedStatus">
                                     <option value="">All Status</option>
                                     <option value="Resolved">Resolved</option>
@@ -48,21 +48,21 @@
                                 </select>
                             </div>
                         </div>                        
-                        <div class="col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <div class="form-group">
-                                <label>Start Date:</label>
+                                <label class="form-label">Start Date:</label>
                                 <input type="date"
                                        class="form-control"
                                        @bind="selectedStartDate"
                                        @bind:format="yyyy-MM-dd" />
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-sm-6 col-lg-3">
                             <div class="form-group">
-                                <label>&nbsp;</label>
+                                <label class="form-label d-block">&nbsp;</label>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-primary flex-grow-1" @onclick="@(async () => await ApplyFilters())">
-                                        <i class="bi bi-funnel"></i> Apply Filters
+                                        <i class="bi bi-funnel"></i><span class="d-none d-sm-inline ms-1">Apply Filters</span>
                                     </button>
                                     <button class="btn btn-outline-secondary" @onclick="@(async () => await ClearFilters())" 
                                             disabled="@(selectedFeedbackType == null && string.IsNullOrEmpty(selectedStatus))">
@@ -121,25 +121,25 @@
             <table class="table table-striped table-hover">
                 <thead class="table-dark">
                     <tr>
-                        <th>ID</th>
+                        <th class="d-none d-md-table-cell">ID</th>
                         <th>Date</th>
                         <th>Name</th>
-                        <th>User ID</th>
-                        <th>Racer ID</th>
+                        <th class="d-none d-md-table-cell">User ID</th>
+                        <th class="d-none d-md-table-cell">Racer ID</th>
                         <th>Type</th>
                         <th>Subject</th>
                         <th>Status</th>
-                        <th>Actions</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var feedback in feedbackList)
                     {
                         <tr>
-                            <td>@feedback.Id</td>
-                            <td>@feedback.SubmittedAt.ToString("MMM dd, yyyy HH:mm", CultureInfo.InvariantCulture)</td>
+                            <td class="d-none d-md-table-cell">@feedback.Id</td>
+                            <td>@feedback.SubmittedAt.ToString("MM/dd/yy", CultureInfo.InvariantCulture)</td>
                             <td>@feedback.Name</td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if (!string.IsNullOrEmpty(feedback.UserId)) {
                                     <span class="badge bg-info text-truncate" style="max-width: 80px;" title="@feedback.UserId">
                                         @(feedback.UserId.Length > 8 ? feedback.UserId.Substring(0, 8) + "..." : feedback.UserId)
@@ -148,15 +148,37 @@
                                     <span class="badge bg-secondary">Anonymous</span>
                                 }
                             </td>
-                            <td>
+                            <td class="d-none d-md-table-cell">
                                 @if (feedback.RacerId.HasValue) {
                                     <span class="badge bg-success"># @feedback.RacerId</span>
                                 } else {
                                     <span class="badge bg-light text-dark">--</span>
                                 }
                             </td>
-                            <td>@feedback.FeedbackType</td>
-                            <td>@feedback.Subject</td>
+                            <td>
+                                <span class="d-none d-sm-inline">@feedback.FeedbackType</span>
+                                <span class="d-inline d-sm-none">
+                                    @switch (feedback.FeedbackType.ToString())
+                                    {
+                                        case "BugReport":
+                                            <span title="Bug Report"><i class="bi bi-bug"></i></span>
+                                            break;
+                                        case "FeatureRequest":
+                                            <span title="Feature Request"><i class="bi bi-lightbulb"></i></span>
+                                            break;
+                                        case "GeneralFeedback":
+                                            <span title="General Feedback"><i class="bi bi-chat"></i></span>
+                                            break;
+                                        case "Question":
+                                            <span title="Question"><i class="bi bi-question-circle"></i></span>
+                                            break;
+                                        default:
+                                            <span>@feedback.FeedbackType</span>
+                                            break;
+                                    }
+                                </span>
+                            </td>
+                            <td class="text-truncate" style="max-width: 150px;" title="@feedback.Subject">@feedback.Subject</td>
                             <td>
                                 @if (feedback.IsResolved)
                                 {
@@ -168,18 +190,20 @@
                                 }
                             </td>
                             <td>
-                                <a href="@($"/admin/feedback/{feedback.Id}")" class="btn btn-sm btn-info me-1">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
-                                @if (!feedback.IsResolved)
-                                {
-                                    <button class="btn btn-sm btn-success me-1" @onclick="@(() => OpenResolveDialog(feedback))">
-                                        <i class="bi bi-check-circle"></i> Resolve
+                                <div class="d-flex justify-content-center flex-wrap gap-1">
+                                    <a href="@($"/admin/feedback/{feedback.Id}")" class="btn btn-sm btn-info" title="View Details">
+                                        <i class="bi bi-eye"></i><span class="d-none d-lg-inline ms-1">View</span>
+                                    </a>
+                                    @if (!feedback.IsResolved)
+                                    {
+                                        <button class="btn btn-sm btn-success" @onclick="@(() => OpenResolveDialog(feedback))" title="Resolve Feedback">
+                                            <i class="bi bi-check-circle"></i><span class="d-none d-lg-inline ms-1">Resolve</span>
+                                        </button>
+                                    }
+                                    <button class="btn btn-sm btn-danger" @onclick="@(() => OpenDeleteDialog(feedback.Id))" title="Delete Feedback">
+                                        <i class="bi bi-trash"></i><span class="d-none d-lg-inline ms-1">Delete</span>
                                     </button>
-                                }
-                                <button class="btn btn-sm btn-danger" @onclick="@(() => OpenDeleteDialog(feedback.Id))">
-                                    <i class="bi bi-trash"></i>
-                                </button>
+                                </div>
                             </td>
                         </tr>
                     }

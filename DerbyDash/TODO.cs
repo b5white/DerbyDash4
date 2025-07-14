@@ -55,11 +55,11 @@
         // DONE Use ActiveRacer instead of getting it from the cookie all the time.
         // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // DONE Change name from DerbyDash to TurboFlash
-        // TODO Handle the screen shift when using a phone so can still see top of page.        
-        // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
+        // DONE Handle the screen shift when using a phone so can still see top of page.        
+        // DONE Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
-        // TODO Add a partially transparent results panel that pops up in the middle of the screen
+        // DONE Add a partially transparent results panel that pops up in the middle of the screen
         //     at the end of the race, and shows their new time and how many of
         //     the previous top 5 they beat.
         //     It stays up until 1 second after all racers finish.
@@ -67,15 +67,16 @@
         //     Or "Good race." if not.
         //     Would pop up right away, even while other racers
         //     are finishing.
-        // TODO Current car Top never goes below 50% of screen height.
-        // TODO Dress up the confirmation email. Currently "Please confirm your account by clicking here."
-        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
-        // TODO Add a way to change/delete the racer name on the RaceTeam page.
-        // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Add current userId and racerId to feedback in service.
-        // TODO Get avatars working and attached to racers
-        // TODO Put the avatar, in a larger form, on the Start Race pages.
-        // TODO In a smaller form on the results page after a race.
+        // DONE Current car Top never goes below 50% of screen height.
+        // DONE Dress up the confirmation email. Currently "Please confirm your account by clicking here."
+        // DONE Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // DONE Add a way to change/delete the racer name on the RaceTeam page.
+
+        // DONE Save the Race position in the list at time it was first run, in Race
+        // DONE Add current userId and racerId to feedback in service.
+        // DONE Get avatars working and attached to racers
+        // DONE Put the avatar, in a larger form, on the Start Race pages.
+        // DONE In a smaller form on the results page after a race.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
@@ -87,9 +88,9 @@
         // DONE Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
         // DONE Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // DONE Enable email
-        // TODO Admin page for viewing logs
-        // TODO Add SessionId to log
-        // TODO Add a link to the most recent log messages for SessionId to the feedback report
+        // DONE Admin page for viewing logs
+        // DONE Add SessionId to log
+        // DONE Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 
         // ** Either Filipe or Brad **
