@@ -22,11 +22,11 @@ namespace DerbyDash {
             //    .AddAuthenticationStateSerialization();
 
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-            //  builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-            //      options.UseSqlServer(connectionString, sqlOptions =>
-            //          sqlOptions.EnableRetryOnFailure()
-            //      )
-            //  );
+            builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString, sqlOptions =>
+                    sqlOptions.EnableRetryOnFailure()
+                )
+            );
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             // Add Scoped services
@@ -110,11 +110,11 @@ namespace DerbyDash {
                 options.User.RequireUniqueEmail = true;
                 options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
             })
-            //    .AddRoles<IdentityRole>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddRoles<IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddSignInManager()
                 .AddDefaultTokenProviders();
-            builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
+            // builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
 
             // Add authorization services
             builder.Services.AddAuthorization();

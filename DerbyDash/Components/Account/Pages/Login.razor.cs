@@ -152,7 +152,9 @@ namespace DerbyDash.Components.Account.Pages {
                 { "rememberMe", rememberMe },
                 { "returnUrl", returnUrl }
             };
-            RedirectManager!.RedirectToWParams("/Account/ProcessLogin", queryParams);
+            // Force a full page reload so authentication state updates immediately
+            var uri = NavManager.GetUriWithQueryParameters("/Account/ProcessLogin", queryParams);
+            NavManager.NavigateTo(uri, forceLoad: true);
         }
 
         private void Solved(CaptchaState state) {

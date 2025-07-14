@@ -65,59 +65,51 @@ namespace DerbyDash.Components.Account.Pages {
 
         public async Task RegisterUser(EditContext editContext) {
             try {
-            if (captcha.State.Valid) {
-                var isHuman = await VerifyWithGoogle();
+                if (captcha.State.Valid) {
+                    var isHuman = await VerifyWithGoogle();
                     canSubmit = false;
                     await captcha!.Reset();
-                if (!isHuman) {
-                    Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
-                    return;
-                }
+                    if (!isHuman) {
+                        Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
+                        return;
+                    }
                     Message = "";
-                var user = CreateUser();
-                string email = Input.Email.Trim();
-                await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
-                var emailStore = GetEmailStore();
-                await emailStore.SetEmailAsync(user, email, CancellationToken.None);
+                    var user = CreateUser();
+                    string email = Input.Email.Trim();
+                    await UserStore.SetUserNameAsync(user, email, CancellationToken.None);
+                    var emailStore = GetEmailStore();
+                    await emailStore.SetEmailAsync(user, email, CancellationToken.None);
                     IdentityResult result = await UserManager.CreateAsync(user, Input.Password);
 
-                if (!result.Succeeded) {
+                    if (!result.Succeeded) {
                         Message = result.Errors.First().Description;
                         StateHasChanged();
-                    return;
-                }
+                        return;
+                    }
 
-                var userId = await UserManager.GetUserIdAsync(user);
-                Logger.LogInformation("User created a new account with password. {email} {userId}", email, userId);
+                    var userId = await UserManager.GetUserIdAsync(user);
+                    Logger.LogInformation("User created a new account with password. {email} {userId}", email, userId);
 
-				var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
-				code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-				var callbackUrl = NavManager.GetUriWithQueryParameters(
-					NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-					new Dictionary<string, object?> {
-						["userId"] = userId,
-						["code"] = code,
-						["returnUrl"] = ReturnUrl,
-						["rememberMe"] = Input.RememberMe
-					});
-				if (UserManager.Options.SignIn.RequireConfirmedAccount) {
-					await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
-					Logger.LogInformation("Email confirmation required - redirecting to RegisterConfirmation page");
-				} else {
-					Logger.LogInformation("Email confirmation not required - automatically signing in user");
-					await SignInManager.SignInAsync(user, isPersistent: Input.RememberMe);
-					AuthStateProvider.NotifyUserLogin();
-					Logger.LogInformation("User automatically signed in: {Email}", email);
-				}
-
-				var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
+                    var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    var callbackUrl = NavManager.GetUriWithQueryParameters(
+                        NavManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+                        new Dictionary<string, object?> {
+                            ["userId"] = userId,
+                            ["code"] = code,
+                            ["returnUrl"] = ReturnUrl,
+                            ["rememberMe"] = Input.RememberMe
+                        });
+                    await EmailSender.SendConfirmationLinkAsync(user, email, HtmlEncoder.Default.Encode(callbackUrl));
+                    Logger.LogInformation("Redirecting to RegisterConfirmation page after registration");
+                    var confirmationUrl = $"Account/RegisterConfirmation?email={Uri.EscapeDataString(email)}&rememberMe={Input.RememberMe}";
                     await InvokeAsync(() => NavManager.NavigateTo(confirmationUrl, forceLoad: true));
-			}
+                }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error during registration for {Email}", Input.Email);
                 Message = "An unexpected error occurred. Please try again.";
                 StateHasChanged();
-        }
+            }
         }
 
 

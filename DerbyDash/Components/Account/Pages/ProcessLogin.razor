@@ -1,13 +1,17 @@
 @page "/Account/ProcessLogin"
 @using Microsoft.Extensions.Logging
 @using System.Web
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Server
 
 @attribute [AllowAnonymous]
 
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 @inject ILogger<ProcessLogin> Logger
+
 @inject IdentityRedirectManager RedirectManager
+@inject NavigationManager NavManager
 
 <PageTitle>Processing Login - TurboFlash</PageTitle>
 
@@ -29,6 +33,7 @@
     public string? ReturnUrl { get; set; }
 
     @inject CustomAuthStateProvider AuthStateProvider
+    @inject AuthenticationStateProvider AuthenticationStateProvider
 
     static string targetUrl = "";
 
@@ -36,10 +41,8 @@
         if (string.IsNullOrEmpty(Email)) {
             targetUrl = "/";
         } else {
-
             try {
                 var user = await UserManager.FindByEmailAsync(Email);
-
                 if (user != null) {
                     targetUrl = string.IsNullOrEmpty(ReturnUrl) || ReturnUrl == "/" ? "/RaceSetsMenu" : ReturnUrl;
                     // Sign in the user directly without password verification
@@ -47,6 +50,10 @@
                     await SignInManager.SignInAsync(user, RememberMe);
                     AuthStateProvider.NotifyUserLogin();
                     Logger.LogInformation("User logged in: {Email}", Email);
+                    
+                    // Give a small delay to ensure auth state change propagates
+                    await Task.Delay(200);
+                    StateHasChanged();
                 } else {
                     // User not found, redirect back to login
                     Logger.LogInformation("User is null: {Email}", Email);
@@ -58,6 +65,7 @@
             }
         }
         Logger.LogInformation("We made it. User logged in: {Email}. Redirecting to: {targeturl}", Email, targetUrl);
-        RedirectManager.RedirectTo(targetUrl);
+        // Use forceLoad to ensure authentication state is refreshed
+        await InvokeAsync(() => NavManager.NavigateTo(targetUrl, forceLoad: true));
     }
 }
