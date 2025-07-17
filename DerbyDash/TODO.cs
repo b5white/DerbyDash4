@@ -77,6 +77,22 @@
         // DONE Get avatars working and attached to racers
         // DONE Put the avatar, in a larger form, on the Start Race pages.
         // DONE In a smaller form on the results page after a race.
+        // TODO Update the DerbyDash logo to TurboFlash. Something with a TF?
+        //    A 16x16px version for the tab icon, and a larger one for the phone screen icon.
+        // TODO Separate client
+        // TODO Show userId and racerId in admin feedback page.
+        // TODO Show user and racer counts in admin feedback page.
+        // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
+        // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
+        //    I want Reset to be higher level and it has too many details.
+        // TODO Move the css in *.razor over the the css files
+        // TODO Send a date range to the GetCount routines indicating AllTime.
+        //    Or, instead of sending a data range, we could send a range type.
+        //    AllTime, Last Week, Last30Days, Last90Days, LastYear
+        //    That way, the routine itself is reponsible for the date details.
+        // TODO In the feedback response, we need a field for public response and a private response
+        // TODO Limit racers to 8 per subscription.
+        //     Make this a User field so admin can increase it per user if needed.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
@@ -93,30 +109,12 @@
         // DONE Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 
-        // ** Either Filipe or Brad **
-        // HOLD Add version number to Feedback report
-
-        // ** Later **
-        // Show userId and racerId in admin feedback page.
-        // Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
-        // In Race.Reset, break the FireAndForget code out into a separate routine.
-        //    I want Reset to be higher level and it has too many details.
-        // Send a date range to the GetCount routines indicating AllTime.
-        //    Or, instead of sending a data range, we could send a range type.
-        //    AllTime, Last Week, Last30Days, Last90Days, LastYear
-        //    That way, the routine itself is reponsible for the date details.
-        // In the feedback response, we need a field for public response and a private response
         // We need a way for people to review their feedback submissions and our responses
         //     Note: We don't need a way to reply or ask for more details.
         //     They've already noted whether we can reply, in which case we handle it via email.
         //     And then record the final resolution here.
-        // Update the DerbyDash logo.
-        // Limit racers to 8 per subscription.
-        //     Make this a User field so admin can increase it per user if needed.
-        // Show user and racer counts in admin feedback page.
         // Parents review progress page
         // Race counts for user and racer on the parents review
-        // Move the css in *.razor over the the css files
         // Video page
         // Accessory page
 
