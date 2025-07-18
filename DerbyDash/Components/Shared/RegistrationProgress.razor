@@ -3,16 +3,12 @@
 <div class="registration-progress">
     <h3 class="progress-title">Registration Progress</h3>
     <div class="progress-steps">
-        @foreach (var step in Steps)
-        {
+        @foreach (var step in Steps) {
             <div class="progress-step @(step.IsActive ? "active" : "") @(step.IsCompleted ? "completed" : "")">
                 <div class="step-number">
-                    @if (step.IsCompleted)
-                    {
+                    @if (step.IsCompleted) {
                         <i class="fas fa-check-circle"></i>
-                    }
-                    else
-                    {
+                    } else {
                         <span>@step.StepNumber</span>
                     }
                 </div>
@@ -20,8 +16,7 @@
                     <div class="step-name">@step.Name</div>
                     <div class="step-description">@step.Description</div>
                 </div>
-                @if (step.IsCompleted && !string.IsNullOrEmpty(step.Url))
-                {
+                @if (step.IsCompleted && !string.IsNullOrEmpty(step.Url)) {
                     <a href="@step.Url" class="step-edit">
                         <i class="fas fa-edit"></i>
                     </a>
@@ -38,32 +33,25 @@
     [Parameter]
     public string CurrentStep { get; set; } = "";
 
-    protected override void OnInitialized()
-    {
+    protected override void OnInitialized() {
         // Mark the current step as active
         var currentStep = Steps.FirstOrDefault(s => s.Id == CurrentStep);
-        if (currentStep != null)
-        {
+        if (currentStep != null) {
             currentStep.IsActive = true;
         }
 
         // Mark all steps before the current one as completed
         bool foundCurrent = false;
-        foreach (var step in Steps)
-        {
-            if (step.Id == CurrentStep)
-            {
+        foreach (var step in Steps) {
+            if (step.Id == CurrentStep) {
                 foundCurrent = true;
-            }
-            else if (!foundCurrent)
-            {
+            } else if (!foundCurrent) {
                 step.IsCompleted = true;
             }
         }
     }
 
-    public class RegistrationStep
-    {
+    public class RegistrationStep {
         public string Id { get; set; } = "";
         public int StepNumber { get; set; }
         public string Name { get; set; } = "";
