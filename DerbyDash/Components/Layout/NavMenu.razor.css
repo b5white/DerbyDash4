@@ -134,6 +134,17 @@
     animation: bounce 1s ease infinite;
 }
 
+/* Featured icon and text styling */
+.featured-icon {
+    color: #ffcc00;
+}
+
+.featured-text {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #ffcc00;
+}
+
 @keyframes bounce {
     0%, 100% {
         transform: translateY(0);
