@@ -79,6 +79,9 @@
         // DONE In a smaller form on the results page after a race.
         // TODO Update the DerbyDash logo to TurboFlash. Something with a TF?
         //    A 16x16px version for the tab icon, and a larger one for the phone screen icon.
+        // TODO In both Subscription.razor pages, Get this from user service
+        //    private string userId = "demo-user";
+
         // TODO Separate client
         // TODO Show userId and racerId in admin feedback page.
         // TODO Show user and racer counts in admin feedback page.

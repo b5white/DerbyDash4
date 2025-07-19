@@ -149,7 +149,8 @@
     private bool isLoading = true;
     private bool showRenewOptions = false;
     private SubscriptionType selectedRenewalType = SubscriptionType.Monthly;
-    private string userId = "demo-user"; // TODO Get this from user service
+    // TODO In Subscription.razor, Get this from user service
+    private string userId = "demo-user";
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync() {
