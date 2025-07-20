@@ -3,6 +3,7 @@ using DerbyDash.Exceptions;
 using DerbyDash.Utilities.Logging;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace DerbyDash.Services {
@@ -128,6 +129,17 @@ namespace DerbyDash.Services {
             } catch (Exception ex) {
                 _logger.LogDebug(ex, "Error checking if user is in role {Role}", role);
                 return false;
+            }
+        }
+
+        public async Task<int> GetTotalUserCountAsync() {
+            try {
+                var users = await _userManager.Users.CountAsync();
+                _logger.LogDebug("Retrieved total user count: {Count}", users);
+                return users;
+            } catch (Exception ex) {
+                _logger.LogError(ex, "Error getting total user count");
+                return 0;
             }
         }
     }

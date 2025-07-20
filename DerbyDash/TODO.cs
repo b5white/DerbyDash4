@@ -80,8 +80,8 @@
         // TODO Update the DerbyDash logo to TurboFlash. Something with a TF?
         //    A 16x16px version for the tab icon, and a larger one for the phone screen icon.
         // TODO Separate client
-        // TODO Show userId and racerId in admin feedback page.
-        // TODO Show user and racer counts in admin feedback page.
+        // DONE Show userId and racerId in admin feedback page.
+        // DONE Show user and racer counts in admin feedback page.
         // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
         // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
         //    I want Reset to be higher level and it has too many details.

@@ -42,5 +42,11 @@ namespace DerbyDash.Services {
         /// <param name="role">The role to check for</param>
         /// <returns>True if the user has the role, false otherwise</returns>
         Task<bool> IsInRoleAsync(string role);
+
+        /// <summary>
+        /// Gets the total count of registered users
+        /// </summary>
+        /// <returns>The total number of users in the system</returns>
+        Task<int> GetTotalUserCountAsync();
     }
 }

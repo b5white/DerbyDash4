@@ -7,6 +7,8 @@
 @using System.Globalization
 @using DerbyDash.Components.Layout
 @inject FeedbackService FeedbackService
+@inject IUserService UserService
+@inject IRaceTeamService RaceTeamService
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
 
@@ -14,6 +16,45 @@
 
 <div class="container mt-4">
     <h1>Feedback Management</h1>
+    
+    <!-- System Statistics -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">System Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-primary">@totalUserCount</span>
+                                <span class="text-muted">Total Users</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-success">@totalRacerCount</span>
+                                <span class="text-muted">Total Racers</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-warning">@feedbackList.Count</span>
+                                <span class="text-muted">Total Feedback</span>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="d-flex flex-column">
+                                <span class="fs-2 fw-bold text-danger">@feedbackList.Count(f => !f.IsResolved)</span>
+                                <span class="text-muted">Unresolved</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <div class="row mb-4">
         <div class="col-12">
@@ -290,10 +331,13 @@
     private string adminNotes = "";
     private DateTime selectedStartDate = DateTime.UtcNow.AddMonths(-1);
     private int selectedFeedbackId;
+    private int totalUserCount = 0;
+    private int totalRacerCount = 0;
 
     protected override async Task OnInitializedAsync()
     {
         await LoadFeedback();
+        await LoadSystemCounts();
     }
 
     private async Task LoadFeedback()
@@ -301,6 +345,21 @@
         loading = true;
         feedbackList = await FeedbackService.GetFeedbackSinceDateAsync(selectedStartDate);
         loading = false;
+    }
+
+    private async Task LoadSystemCounts()
+    {
+        try
+        {
+            totalUserCount = await UserService.GetTotalUserCountAsync();
+            totalRacerCount = await RaceTeamService.GetTotalRacerCountAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading system counts: {ex.Message}");
+            totalUserCount = 0;
+            totalRacerCount = 0;
+        }
     }
 
     private async Task ApplyFilters()

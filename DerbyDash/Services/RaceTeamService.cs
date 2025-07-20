@@ -643,5 +643,21 @@ namespace DerbyDash.Services {
 
             return racers;
         }
+
+        public async Task<int> GetTotalRacerCountAsync()
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var count = await context.Racers.CountAsync();
+                Logger.LogDebug("Retrieved total racer count: {Count}", count);
+                return count;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting total racer count");
+                return 0;
+            }
+        }
     }
 }

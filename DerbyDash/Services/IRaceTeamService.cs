@@ -81,5 +81,11 @@ namespace DerbyDash.Services {
         /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
         /// <returns>The saved race record</returns>
         public Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0);
+
+        /// <summary>
+        /// Gets the total count of all racers in the system
+        /// </summary>
+        /// <returns>The total number of racers across all users</returns>
+        public Task<int> GetTotalRacerCountAsync();
     }
 }
