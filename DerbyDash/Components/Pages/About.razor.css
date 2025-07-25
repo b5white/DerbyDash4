@@ -65,6 +65,10 @@
     position: relative;
 }
 
+.about-sentence p.emphasis-break {
+    margin-bottom: 0.8rem;
+}
+
 .highlight-section {
     background-color: #f8f9ff;
     padding: 2rem;

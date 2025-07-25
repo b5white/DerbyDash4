@@ -59,6 +59,7 @@ namespace DerbyDash {
             builder.Services.AddScoped<IFAQService, FAQService>();
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<FeedbackService>();
+            builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
@@ -86,8 +87,8 @@ namespace DerbyDash {
                     .AddBootstrap5Providers()  // Provides IClassProvider and other core services
                     .AddFontAwesomeIcons()     // For icons (optional)
                     .AddBlazoriseGoogleReCaptcha(reCaptchaOptions => {
-                        // reCaptchaOptions.SiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Google's test key
-                        reCaptchaOptions.SiteKey = builder.Configuration["ReCaptcha:SiteKey"] ?? "";
+                        reCaptchaOptions.SiteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Google's test key for testing
+                        // reCaptchaOptions.SiteKey = builder.Configuration["ReCaptcha:SiteKey"] ?? "";
                     });
                 builder.Services.AddHttpClient("ReCaptcha", client => {
                     client.BaseAddress = new Uri("https://www.google.com/recaptcha/api/");

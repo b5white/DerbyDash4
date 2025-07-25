@@ -4,6 +4,7 @@ using DerbyDash.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DerbyDash.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250630090623_AddFinishingPositionToRace")]
+    partial class AddFinishingPositionToRace
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,10 +33,6 @@ namespace DerbyDash.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("AvatarFileName")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -44,9 +43,6 @@ namespace DerbyDash.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
-
-                    b.Property<string>("LastPlayedRace")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -123,10 +119,6 @@ namespace DerbyDash.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("RacerId");
-
-                    b.HasIndex("Id", "RacerId", "ProblemSetId");
-
                     b.ToTable("Races");
                 });
 
@@ -160,8 +152,6 @@ namespace DerbyDash.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("FamilyMembers");
                 });
@@ -324,39 +314,6 @@ namespace DerbyDash.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens", (string)null);
-                });
-
-            modelBuilder.Entity("DerbyDash.Data.Feedback", b =>
-                {
-                    b.HasOne("DerbyDash.Data.Racer", "Racer")
-                        .WithMany()
-                        .HasForeignKey("RacerId");
-
-                    b.HasOne("DerbyDash.Data.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Racer");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DerbyDash.Data.Race", b =>
-                {
-                    b.HasOne("DerbyDash.Data.Racer", null)
-                        .WithMany()
-                        .HasForeignKey("RacerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("DerbyDash.Data.Racer", b =>
-                {
-                    b.HasOne("DerbyDash.Data.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("DerbyDash.Data.SpeedIncrement", b =>

@@ -10,18 +10,28 @@
 
 <h3>Preferences</h3>
 <div class="preferences-section">
-    <h4>Choose Your Avatar</h4>
+    @if (activeRacer != null)
+    {
+        <h4>Choose Avatar for @activeRacer.Name</h4>
+    }
+    else
+    {
+        <h4>Choose Your Avatar</h4>
+        <div class="alert alert-warning">
+            No active racer selected. Please <a href="/Account/Manage/RaceTeam">set an active racer</a> first.
+        </div>
+    }
     <EditForm Model="Model" OnValidSubmit="OnSubmitAsync" FormName="preferences">
         <div class="avatar-options">
             @foreach (var avatar in Avatars) {
                 @* Use onclick on the label to explicitly call SelectAvatar *@
-                <label class="avatar-label" @onclick="() => SelectAvatar(avatar)">
-                    <input type="radio" name="avatar" value="@avatar" checked="@(Model.Avatar == avatar)" />
+                <label class="avatar-label @(activeRacer == null ? "disabled" : "")" @onclick="() => { if (activeRacer != null) SelectAvatar(avatar); }">
+                    <input type="radio" name="avatar" value="@avatar" checked="@(Model.Avatar == avatar)" disabled="@(activeRacer == null)" />
                     <img src="/images/avatars/@avatar" class="avatar-img @(Model.Avatar == avatar ? "selected" : "")" alt="Avatar" />
                 </label>
             }
         </div>
-        <button type="submit" class="btn btn-primary mt-3">Save Preferences</button>
+        <button type="submit" class="btn btn-primary mt-3" disabled="@(activeRacer == null)">Save Preferences</button>
     </EditForm>
     @if (SaveMessage != null) {
         <div class="alert @(SaveMessage.StartsWith("Error") || SaveMessage.StartsWith("Please") ? "alert-warning" : "alert-success") mt-2">@SaveMessage</div>
@@ -30,6 +40,7 @@
     <!-- Debug info (can be removed in production) -->
     <div class="mt-3 small text-muted">
         <div>Current Model.Avatar: @(Model.Avatar ?? "None")</div>
-        @*         <div>Current user.AvatarFileName: @(user?.AvatarFileName ?? "None")</div> *@
+        <div>Active Racer: @(activeRacer?.Name ?? "None")</div>
+        <div>Active Racer Avatar: @(activeRacer?.AvatarFileName ?? "None")</div>
     </div>
 </div>

@@ -55,11 +55,11 @@
         // DONE Use ActiveRacer instead of getting it from the cookie all the time.
         // DONE Default the Remember Me to true, rename, use to save cookies or not, for Registration page and pass to email conf
         // DONE Change name from DerbyDash to TurboFlash
-        // TODO Handle the screen shift when using a phone so can still see top of page.        
-        // TODO Check the cars and StartLine to make sure the Tops are both relative to the same parent.
+        // DONE Handle the screen shift when using a phone so can still see top of page.        
+        // DONE Check the cars and StartLine to make sure the Tops are both relative to the same parent.
         //    Check  position, margin, padding, display, align-items, and parent.
         //    Something has to be set differently for them to not be vertically aligned.
-        // TODO Add a partially transparent results panel that pops up in the middle of the screen
+        // DONE Add a partially transparent results panel that pops up in the middle of the screen
         //     at the end of the race, and shows their new time and how many of
         //     the previous top 5 they beat.
         //     It stays up until 1 second after all racers finish.
@@ -67,15 +67,32 @@
         //     Or "Good race." if not.
         //     Would pop up right away, even while other racers
         //     are finishing.
-        // TODO Current car Top never goes below 50% of screen height.
-        // TODO Dress up the confirmation email. Currently "Please confirm your account by clicking here."
-        // TODO Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
-        // TODO Add a way to change/delete the racer name on the RaceTeam page.
-        // TODO Save the Race position in the list at time it was first run, in Race
-        // TODO Add current userId and racerId to feedback in service.
-        // TODO Get avatars working and attached to racers
-        // TODO Put the avatar, in a larger form, on the Start Race pages.
-        // TODO In a smaller form on the results page after a race.
+        // DONE Current car Top never goes below 50% of screen height.
+        // DONE Dress up the confirmation email. Currently "Please confirm your account by clicking here."
+        // DONE Rewrite UserService so it either doesn't throw exceptions just because user isn't loggedin, or don't log the exception.
+        // DONE Add a way to change/delete the racer name on the RaceTeam page.
+
+        // DONE Save the Race position in the list at time it was first run, in Race
+        // DONE Add current userId and racerId to feedback in service.
+        // DONE Get avatars working and attached to racers
+        // DONE Put the avatar, in a larger form, on the Start Race pages.
+        // DONE In a smaller form on the results page after a race.
+        // TODO Update the DerbyDash logo to TurboFlash. Something with a TF?
+        //    A 16x16px version for the tab icon, and a larger one for the phone screen icon.
+        // TODO Separate client
+        // DONE Show userId and racerId in admin feedback page.
+        // DONE Show user and racer counts in admin feedback page.
+        // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
+        // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
+        //    I want Reset to be higher level and it has too many details.
+        // TODO Move the css in *.razor over the the css files
+        // TODO Send a date range to the GetCount routines indicating AllTime.
+        //    Or, instead of sending a data range, we could send a range type.
+        //    AllTime, Last Week, Last30Days, Last90Days, LastYear
+        //    That way, the routine itself is reponsible for the date details.
+        // TODO In the feedback response, we need a field for public response and a private response
+        // TODO Limit racers to 8 per subscription.
+        //     Make this a User field so admin can increase it per user if needed.
 
         // ** Brad **
         // DONE Get Feedback and Subscription reading/writing to DB.
@@ -87,35 +104,17 @@
         // DONE Sometimes getting No Racers on the TopMenu bar. **I think this should be fixed but needs more testing.**
         // DONE Race counts are still incorrect. Getting reports of counts bleeding over from other race types.
         // DONE Enable email
-        // TODO Admin page for viewing logs
-        // TODO Add SessionId to log
-        // TODO Add a link to the most recent log messages for SessionId to the feedback report
+        // DONE Admin page for viewing logs
+        // DONE Add SessionId to log
+        // DONE Add a link to the most recent log messages for SessionId to the feedback report
         // TODO Review Cookie.SameSite across all three cookie settings.
 
-        // ** Either Filipe or Brad **
-        // HOLD Add version number to Feedback report
-
-        // ** Later **
-        // Show userId and racerId in admin feedback page.
-        // Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
-        // In Race.Reset, break the FireAndForget code out into a separate routine.
-        //    I want Reset to be higher level and it has too many details.
-        // Send a date range to the GetCount routines indicating AllTime.
-        //    Or, instead of sending a data range, we could send a range type.
-        //    AllTime, Last Week, Last30Days, Last90Days, LastYear
-        //    That way, the routine itself is reponsible for the date details.
-        // In the feedback response, we need a field for public response and a private response
         // We need a way for people to review their feedback submissions and our responses
         //     Note: We don't need a way to reply or ask for more details.
         //     They've already noted whether we can reply, in which case we handle it via email.
         //     And then record the final resolution here.
-        // Update the DerbyDash logo.
-        // Limit racers to 8 per subscription.
-        //     Make this a User field so admin can increase it per user if needed.
-        // Show user and racer counts in admin feedback page.
         // Parents review progress page
         // Race counts for user and racer on the parents review
-        // Move the css in *.razor over the the css files
         // Video page
         // Accessory page
 

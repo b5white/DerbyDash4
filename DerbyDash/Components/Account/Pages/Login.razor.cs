@@ -53,7 +53,9 @@ namespace DerbyDash.Components.Account.Pages {
             var isHuman = await VerifyWithGoogle();
             if (!isHuman) {
                 canSubmit = false;
-                await captcha?.Reset(); // Force reCAPTCHA reset
+                if (captcha != null) {
+                    await captcha.Reset(); // Force reCAPTCHA reset
+                }
                 Logger.LogInformation("reCaptcha failed for {email}", Input.Email);
                 errorMessage = "Error: reCAPTCHA verification failed. Please try again.";
                 return;
@@ -186,6 +188,8 @@ namespace DerbyDash.Components.Account.Pages {
         private async Task<bool> VerifyWithGoogle() {
             Logger.LogInformation("Captcha VerifyWithGoogle");
             CaptchaState state = captcha.State;
+            Logger.LogInformation("Captcha state - Valid: {Valid}, Response: {HasResponse}", state.Valid, !string.IsNullOrEmpty(state.Response));
+            
             // Check if we have a response token
             if (string.IsNullOrEmpty(state.Response)) {
                 Logger.LogWarning("No captcha response token");
@@ -194,13 +198,15 @@ namespace DerbyDash.Components.Account.Pages {
 
             try {
                 var content = new FormUrlEncodedContent(new[] {
-                    new KeyValuePair<string, string>("secret", configuration.GetValue<string>("ReCaptcha:SecretKey") ?? ""),
+                    new KeyValuePair<string, string>("secret", "6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe"), // Google's test secret key
+                    // new KeyValuePair<string, string>("secret", configuration.GetValue<string>("ReCaptcha:SecretKey") ?? ""),
                     new KeyValuePair<string, string>("response", state.Response),
                     // Optional: Add user's IP for additional validation
                     // new KeyValuePair<string, string>("remoteip", GetUserIP())
                 });
 
                 var httpClient = HttpClientFactory.CreateClient("ReCaptcha");
+                Logger.LogInformation("Sending reCAPTCHA verification request to Google");
                 var response = await httpClient.PostAsync("siteverify", content);
 
                 if (!response.IsSuccessStatusCode) {
@@ -209,11 +215,14 @@ namespace DerbyDash.Components.Account.Pages {
                 }
 
                 var result = await response.Content.ReadAsStringAsync();
+                Logger.LogInformation("reCAPTCHA API response: {Response}", result);
+                
                 var googleResponse = JsonSerializer.Deserialize<GoogleResponse>(result, new JsonSerializerOptions() {
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 });
 
                 var isValid = googleResponse?.Success ?? false;
+                Logger.LogInformation("reCAPTCHA validation result: {IsValid}", isValid);
 
                 if (!isValid && googleResponse?.ErrorCodes?.Length > 0) {
                     Logger.LogWarning($"reCAPTCHA validation failed: {string.Join(", ", googleResponse.ErrorCodes)}");

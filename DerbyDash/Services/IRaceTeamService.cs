@@ -43,5 +43,37 @@ namespace DerbyDash.Services {
         /// </summary>
         /// <returns>The number of races for the active racer</returns>
         public Task<int> GetCurrentRacerRaceCountAsync();
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
+        /// <returns>The saved race record</returns>
+        public Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0);
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
+        /// <returns>The saved race record</returns>
+        public Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0);
+
+        /// <summary>
+        /// Gets the total count of all racers in the system
+        /// </summary>
+        /// <returns>The total number of racers across all users</returns>
+        public Task<int> GetTotalRacerCountAsync();
+
+        /// <summary>
+        /// Ensures that an active racer is initialized for the current user
+        /// </summary>
+        /// <returns>The active racer, or null if no racers exist</returns>
+        public Task<Racer?> EnsureActiveRacerInitializedAsync();
     }
 }

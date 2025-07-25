@@ -1,5 +1,6 @@
 ﻿using DerbyDash.Data;
 using DerbyDash.Exceptions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.JSInterop;
 
 namespace DerbyDash.Services {
@@ -8,6 +9,7 @@ namespace DerbyDash.Services {
         private readonly ILogger<RaceTeamService> Logger;
         private readonly SessionData CurrentSession;
         private readonly IJSRuntime _jsRuntime;
+        private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
         private bool _triedLoadingFromCookie = false;
 
@@ -27,11 +29,13 @@ namespace DerbyDash.Services {
             IUserService userService,
             ILogger<RaceTeamService> logger,
             SessionData currentRequest,
-            IJSRuntime jsRuntime) {
+            IJSRuntime jsRuntime,
+            IDbContextFactory<ApplicationDbContext> contextFactory) {
             _userService = userService;
             Logger = logger;
             CurrentSession = currentRequest;
             _jsRuntime = jsRuntime;
+            _contextFactory = contextFactory;
         }
 
         public async Task<List<Racer>> GetRacers(bool includeCount = true) {
@@ -53,6 +57,14 @@ namespace DerbyDash.Services {
                     return new List<Racer>();
                 }
 
+                // Ensure hardcoded racers have the current user's ID assigned
+                // This is for testing purposes - in production this would come from database
+                foreach (var racer in raceTeam) {
+                    if (string.IsNullOrEmpty(racer.UserId)) {
+                        racer.UserId = userId;
+                        Logger.LogDebug($"Assigned UserId {userId} to racer {racer.Name}");
+                    }
+                }
 
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in GetRacers()");
@@ -82,11 +94,17 @@ namespace DerbyDash.Services {
             //} else {
             racers = query.ToList();
             //}
-            //if (racers.Count == 0) {
-            //    Logger.LogWarning("No Racers found for ID: {ID}", userId);
-            //}
+            
+            Logger.LogInformation($"Found {racers.Count} racers for user {userId}");
+            if (racers.Count == 0) {
+                Logger.LogWarning("No Racers found for ID: {ID}. Total racers in team: {Total}", userId, raceTeam.Count);
+                foreach (var r in raceTeam) {
+                    Logger.LogWarning("Available racer: {Name} (ID: {Id}, UserId: {UserId})", r.Name, r.Id, r.UserId ?? "NULL");
+                }
+            }
+            
             await Task.CompletedTask; // Just to use 'await'
-            return raceTeam;
+            return racers; // Return the filtered racers, not the entire raceTeam
         }
 
         public async Task<Racer?> GetRacerByIdAsync(int racerId) {
@@ -138,8 +156,44 @@ namespace DerbyDash.Services {
 
         public async Task RemoveRacer(int racerId) {
             Logger.LogInformation("RemoveRacer for ID: {ID}", racerId);
-            await Task.CompletedTask; // Just to use 'await'
-            await InvokeOnRacerChanged();
+            
+            try {
+                using var context = _contextFactory.CreateDbContext();
+                var racer = await context.Racers.FindAsync(racerId);
+                if (racer != null) {
+                    // Get all races associated with this racer
+                    var races = await context.Races.Where(r => r.RacerId == racerId).ToListAsync();
+                    
+                    // For each race, delete its speed increments first
+                    foreach (var race in races) {
+                        var speedIncrements = await context.SpeedIncrements.Where(si => si.RaceId == race.Id).ToListAsync();
+                        context.SpeedIncrements.RemoveRange(speedIncrements);
+                    }
+                    
+                    // Then remove all races
+                    context.Races.RemoveRange(races);
+                    
+                    // Finally remove the racer
+                    context.Racers.Remove(racer);
+                    
+                    // Save all changes in a single transaction
+                    await context.SaveChangesAsync();
+                    
+                    // Refresh the cached team list
+                    raceTeam = await GetRacers(false);
+                    
+                    // If this was the active racer, clear the active racer (don't auto-select new one)
+                    if (Active?.Id == racerId) {
+                        Active = null;
+                    }
+                    
+                    // Notify subscribers that the racer has been removed
+                    OnRacerChanged?.Invoke();
+                }
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error removing racer {ID}", racerId);
+                throw;
+            }
         }
 
         public async Task<Racer?> GetActiveRacer() {
@@ -276,7 +330,10 @@ namespace DerbyDash.Services {
                     throw new MissingUserException("User is not authenticated");
                 }
 
-                string UserId = await _userService.GetUserIdAsync(purpose);
+                string? UserId = await _userService.GetUserIdAsync(purpose);
+                if (string.IsNullOrEmpty(UserId)) {
+                    throw new MissingUserException("Could not determine userId");
+                }
                 CurrentSession.UserId = UserId;
                 return UserId;
             } catch (Exception ex) {
@@ -392,6 +449,80 @@ namespace DerbyDash.Services {
         }
 
         /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, string problemClassString, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0) {
+            return await SaveRaceCompletionAsync(totalTime, GetProblemSetId(problemClassString), speedIncrements, finishingPosition);
+        }
+
+        /// <summary>
+        /// Saves a completed race to the database for the current active racer
+        /// </summary>
+        /// <param name="totalTime">The total time taken to complete the race</param>
+        /// <param name="problemSetId">The identifier of the problem set (e.g., 1 for addition-4stable)</param>
+        /// <param name="speedIncrements">The speed increments during the race</param>
+        /// <param name="finishingPosition">The finishing position in the race (1 = first place, etc.)</param>
+        /// <returns>The saved race record</returns>
+        public async Task<Race> SaveRaceCompletionAsync(double totalTime, int problemSetId, List<SpeedIncrement>? speedIncrements = null, int finishingPosition = 0) {
+            try {
+                // Use cached active racer if available
+                var activeRacer = await GetActiveRacer();
+                if (activeRacer == null) {
+                    throw new InvalidOperationException("No active racer found");
+                }
+
+                // Create the race record
+                using var context = _contextFactory.CreateDbContext();
+                var race = new Race {
+                    RacerId = activeRacer.Id,
+                    RaceDateTime = DateTime.Now,
+                    TotalTime = totalTime,
+                    ProblemSetId = problemSetId,
+                    ImageId = activeRacer.Id % 6 + 1, // Cycle through available car images
+                    FinishingPosition = finishingPosition
+                };
+
+                // Add to database
+                context.Races.Add(race);
+                await context.SaveChangesAsync();
+
+                // Add speed increments if provided
+                if (speedIncrements != null && speedIncrements.Count > 0) {
+                    foreach (var increment in speedIncrements) {
+                        increment.RaceId = race.Id;
+                    }
+                    context.SpeedIncrements.AddRange(speedIncrements);
+                    await context.SaveChangesAsync();
+                }
+
+                // Update the racer's last raced date
+                var racer = await context.Racers.FindAsync(activeRacer.Id);
+                if (racer != null) {
+                    racer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                    await context.SaveChangesAsync();
+                    
+                    // Update the active racer object as well
+                    activeRacer.LastRaced = racer.LastRaced;
+                }
+
+                Logger.LogInformation($"Saved race completion for racer {activeRacer.Name}: {totalTime:F2}s, ProblemSet {problemSetId}, Position {finishingPosition}");
+                
+                // Notify that race counts may have changed
+                OnRacerChanged?.Invoke();
+                
+                return race;
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error saving race completion");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Maps problem class strings to integer IDs for database storage
         /// </summary>
         /// <param name="problemClassString">The problem class string (e.g., "addition-4stable")</param>
@@ -410,6 +541,55 @@ namespace DerbyDash.Services {
                 "mixed-unstable" => 10,
                 _ => 999 // Unknown problem type
             };
+        }
+
+        public async Task<List<Racer>> GetRacersByUserId(string userId)
+        {
+            using var context = _contextFactory.CreateDbContext();
+            var racers = await context.Racers
+                .Where(r => r.UserId == userId)
+                .Select(r => new Racer
+                {
+                    Id = r.Id,
+                    Name = r.Name ?? string.Empty,
+                    UserId = r.UserId,
+                    LastRaced = r.LastRaced,
+                    LastPlayedRace = r.LastPlayedRace,
+                    AvatarFileName = r.AvatarFileName,
+                    RaceCount = context.Races.Count(race => race.RacerId == r.Id)
+                })
+                .ToListAsync();
+
+            return racers ?? new List<Racer>();
+        }
+
+        public async Task<int> GetTotalRacerCountAsync()
+        {
+            try
+            {
+                using var context = _contextFactory.CreateDbContext();
+                var count = await context.Racers.CountAsync();
+                Logger.LogDebug("Retrieved total racer count: {Count}", count);
+                return count;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error getting total racer count");
+                return 0;
+            }
+        }
+
+        public async Task<Racer?> EnsureActiveRacerInitializedAsync() {
+            var activeRacer = await GetActiveRacer();
+            if (activeRacer == null) {
+                // Try to get the first racer if no active racer is set
+                var racers = await GetRacers(false);
+                if (racers.Count > 0) {
+                    await SetActiveRacer(racers[0]);
+                    return racers[0];
+                }
+            }
+            return activeRacer;
         }
     }
 }
