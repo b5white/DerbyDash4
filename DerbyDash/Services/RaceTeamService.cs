@@ -15,9 +15,9 @@ namespace DerbyDash.Services {
 
 
         private List<Racer> raceTeam = new() {
-                new Racer { Id = 1, Name = "Alice", RaceCount = 5, LastRaced = new DateOnly(2025, 2, 1) },
-                new Racer { Id = 2, Name = "Bob", RaceCount = 3, LastRaced = new DateOnly(2025, 3, 15) },
-                new Racer { Id = 3, Name = "Charlie" }
+                new Racer { Id = 1, Name = "Alice", RaceCount = 5, LastRaced = new DateOnly(2025, 2, 1), LastPlayedRace = "addition-4stable" },
+                new Racer { Id = 2, Name = "Bob", RaceCount = 3, LastRaced = new DateOnly(2025, 3, 15), LastPlayedRace = "subtraction-4stable" },
+                new Racer { Id = 3, Name = "Charlie", LastPlayedRace = "multiplication-4stable" }
             };
         private Racer? Active;
         private string? UserId;
@@ -374,9 +374,16 @@ namespace DerbyDash.Services {
 
                 if (activeRacer != null) {
                     // Update the racer's last played race and last raced date
-
                     activeRacer.LastPlayedRace = problemClassString;
                     activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Today);
+                    
+                    // Also update the racer in the hardcoded list
+                    var racerInList = raceTeam.FirstOrDefault(r => r.Id == activeRacer.Id);
+                    if (racerInList != null) {
+                        racerInList.LastPlayedRace = problemClassString;
+                        racerInList.LastRaced = DateOnly.FromDateTime(DateTime.Today);
+                    }
+                    
                     Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
                     // await context.SaveChangesAsync();
 
