@@ -21,6 +21,9 @@ namespace DerbyDash {
             //    .AddInteractiveWebAssemblyComponents()
             //    .AddAuthenticationStateSerialization();
 
+            // Add API Controllers
+            builder.Services.AddControllers();
+
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
             builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString, sqlOptions =>
@@ -63,6 +66,9 @@ namespace DerbyDash {
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
+
+            // Add HttpClient for API calls
+            builder.Services.AddHttpClient();
 
             // Email
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -147,6 +153,10 @@ namespace DerbyDash {
             app.UseAuthorization();
             app.UseAntiforgery();
             app.MapStaticAssets();
+            
+            // Map API Controllers
+            app.MapControllers();
+            
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
             //    .AddInteractiveWebAssemblyRenderMode()

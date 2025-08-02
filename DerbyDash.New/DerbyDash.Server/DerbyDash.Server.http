@@ -1,0 +1,6 @@
+@DerbyDash.Server_HostAddress = http://localhost:5094
+
+GET {{DerbyDash.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
