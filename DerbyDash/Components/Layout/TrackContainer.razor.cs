@@ -12,9 +12,12 @@ namespace DerbyDash.Components.Layout {
         [Parameter]
         public double Distance { get; set; }
 
+        [Parameter]
+        public bool ShowDebug { get; set; } = false;
+
         private ElementReference startLineElement;
         private bool startLineHidden = false;
-        private System.Threading.Timer animationTimer;
+        private System.Threading.Timer? animationTimer;
         private DateTime animationStartTime;
         private bool animationStarted = false;
 
@@ -26,7 +29,7 @@ namespace DerbyDash.Components.Layout {
             animationTimer = new System.Threading.Timer(CheckStartLineVisibility, null, 1000, 200);
         }
 
-        private void CheckStartLineVisibility(object state) {
+        private void CheckStartLineVisibility(object? state) {
             // Only proceed if animation is running
             if (Track.IsAnyCarAtTop && !Track.IsFinishLineVisible) {
                 // If animation just started, record the start time
