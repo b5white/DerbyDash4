@@ -13,7 +13,7 @@
     </div>
 
     <div class="main">
-        @if (!IsAuthPage && !GameStateService.IsGameRunning)
+        @if (!IsAuthPage && (!GameStateService.IsGameRunning || !IsOnRacePage))
         {
             <TopNavbar />
             <Breadcrumb />
@@ -32,21 +32,42 @@
 
 @code {
     private bool IsAuthPage => NavManager.Uri.Contains("/Account/");
+    private bool IsOnRacePage => NavManager.Uri.Contains("/race/");
 
     protected override void OnInitialized()
     {
         NavManager.LocationChanged += LocationChanged;
+        GameStateService.OnGameStateChanged += OnGameStateChanged;
         base.OnInitialized();
+    }
+
+    private async Task OnGameStateChanged(bool isGameRunning)
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private void LocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        StateHasChanged();
+        // Reset game state if navigating away from race pages
+        if (!e.Location.Contains("/race/") && GameStateService.IsGameRunning)
+        {
+            // Use InvokeAsync to properly handle the async state changes
+            InvokeAsync(async () => {
+                await GameStateService.SetGameRunning(false);
+                await GameStateService.SetCurrentRacePage("");
+                StateHasChanged();
+            });
+        }
+        else 
+        {
+            StateHasChanged();
+        }
     }
 
     public new void Dispose()
     {
         NavManager.LocationChanged -= LocationChanged;
+        GameStateService.OnGameStateChanged -= OnGameStateChanged;
         base.Dispose();
     }
 }

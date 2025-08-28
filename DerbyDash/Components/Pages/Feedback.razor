@@ -34,7 +34,7 @@
         }
         else
         {
-            <EditForm Model="@feedbackModel" OnValidSubmit="HandleValidSubmit">
+            <EditForm Model="@feedbackModel" OnValidSubmit="HandleValidSubmit" FormName="FeedbackForm">
                 <DataAnnotationsValidator />
                 <ValidationSummary class="validation-summary" />
                 

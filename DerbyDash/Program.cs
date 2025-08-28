@@ -112,7 +112,17 @@ namespace DerbyDash {
             builder.Services.AddScoped<IApiAuthService, ApiAuthService>();
 
             // Add HttpClient for API calls
-            builder.Services.AddHttpClient();
+            builder.Services.AddHttpClient("default", client => {
+                var baseUrl = builder.Configuration["BaseUrl"] ?? "https://localhost:7028";
+                client.BaseAddress = new Uri(baseUrl);
+                client.DefaultRequestHeaders.Add("Accept", "application/json");
+            });
+            
+            // Register HttpClient as a service for DI
+            builder.Services.AddScoped<HttpClient>(provider => {
+                var factory = provider.GetRequiredService<IHttpClientFactory>();
+                return factory.CreateClient("default");
+            });
 
             // Email
             //builder.Services.AddTransient<IEmailSender, EmailSender>();
@@ -179,6 +189,21 @@ namespace DerbyDash {
                 options.AddPolicy("ApiPolicy", policy => {
                     policy.RequireAuthenticatedUser();
                     policy.AddAuthenticationSchemes("ApiScheme", IdentityConstants.ApplicationScheme);
+                });
+
+                // Internal API policy for server-side calls with special header
+                options.AddPolicy("InternalApiPolicy", policy => {
+                    policy.RequireAssertion(context => {
+                        // Allow if user is authenticated OR if it's an internal call
+                        if (context.User.Identity?.IsAuthenticated == true) {
+                            return true;
+                        }
+                        
+                        // Check for internal call header
+                        var httpContext = context.Resource as HttpContext;
+                        return httpContext?.Request.Headers.ContainsKey("X-Internal-Call") == true &&
+                               httpContext.Request.Headers["X-Internal-Call"] == "true";
+                    });
                 });
             });
 

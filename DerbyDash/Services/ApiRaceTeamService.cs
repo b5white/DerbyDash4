@@ -28,10 +28,11 @@ namespace DerbyDash.Services {
             _fallbackService = fallbackService;
         }
 
-        private async Task<bool> TrySetAuthHeader() {
+        private bool TrySetAuthHeader() {
             try {
-                // For now, we'll use cookie authentication since the user is already logged in
-                // In a real client-server split, this would use JWT tokens
+                // Add internal call header to bypass authentication for server-side calls
+                _httpClient.DefaultRequestHeaders.Remove("X-Internal-Call");
+                _httpClient.DefaultRequestHeaders.Add("X-Internal-Call", "true");
                 return true;
             } catch {
                 return false;
@@ -42,7 +43,7 @@ namespace DerbyDash.Services {
             try {
                 _logger.LogInformation("ApiRaceTeamService.GetRacers - Attempting API call");
                 
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     _logger.LogWarning("Could not set auth header, falling back to original service");
                     return await _fallbackService.GetRacers(includeCount);
                 }
@@ -83,7 +84,7 @@ namespace DerbyDash.Services {
 
         public async Task<Racer?> GetRacerByIdAsync(int racerId) {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     return await _fallbackService.GetRacerByIdAsync(racerId);
                 }
 
@@ -112,7 +113,7 @@ namespace DerbyDash.Services {
 
         public async Task<Racer> AddRacer(Racer racer) {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     return await _fallbackService.AddRacer(racer);
                 }
 
@@ -153,7 +154,7 @@ namespace DerbyDash.Services {
 
         public async Task UpdateRacer(Racer racer) {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     await _fallbackService.UpdateRacer(racer);
                     return;
                 }
@@ -181,7 +182,7 @@ namespace DerbyDash.Services {
 
         public async Task RemoveRacer(int racerId) {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     await _fallbackService.RemoveRacer(racerId);
                     return;
                 }
@@ -203,7 +204,7 @@ namespace DerbyDash.Services {
 
         public async Task<Racer?> GetActiveRacer() {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     return await _fallbackService.GetActiveRacer();
                 }
 
@@ -232,7 +233,7 @@ namespace DerbyDash.Services {
 
         public async Task SetActiveRacer(Racer racer) {
             try {
-                if (!await TrySetAuthHeader()) {
+                if (!TrySetAuthHeader()) {
                     await _fallbackService.SetActiveRacer(racer);
                     return;
                 }

@@ -8,7 +8,7 @@ using DerbyDash.Data;
 namespace DerbyDash.Controllers.Api {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "ApiPolicy")]
+    [Authorize(Policy = "InternalApiPolicy")]
     public class RaceController : ControllerBase {
         private readonly RaceService _raceService;
         private readonly IRaceTeamService _raceTeamService;
