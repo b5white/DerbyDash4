@@ -2,10 +2,12 @@ using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using DerbyDash.Utilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class RaceService {
         private readonly IRaceTeamService _raceTeamService;
+        private readonly ApplicationDbContext _context;
         private RaceComponents track = new();
         private readonly ILogger<RaceService> Logger;
         public float TotalDistance = 200;
@@ -14,9 +16,11 @@ namespace DerbyDash.Services {
 
         public RaceService(
             ILogger<RaceService> logger,
-            IRaceTeamService raceTeamService) {
+            IRaceTeamService raceTeamService,
+            ApplicationDbContext context) {
             Logger = logger;
             _raceTeamService = raceTeamService;
+            _context = context;
         }
 
         public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
@@ -170,6 +174,103 @@ namespace DerbyDash.Services {
                 Console.WriteLine($"timeSpan:{timeSpan}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
             }
             return speedIncrements;
+        }
+
+        // API-specific methods for race management
+        public async Task<Race> SaveRaceAsync(Race race) {
+            Logger.LogInformation("SaveRaceAsync (API version)");
+            
+            _context.Races.Add(race);
+            await _context.SaveChangesAsync();
+            
+            // Update active racer's last played race
+            if (activeRacer != null) {
+                activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                await _raceTeamService.UpdateRacer(activeRacer);
+            }
+            
+            return race;
+        }
+
+        public async Task<List<Race>> GetRaceHistoryAsync(int page, int pageSize, int? racerId = null) {
+            Logger.LogInformation("GetRaceHistoryAsync");
+            
+            var query = _context.Races
+                .Include(r => r.SpeedIncrements)
+                .AsQueryable();
+                
+            if (racerId.HasValue) {
+                query = query.Where(r => r.RacerId == racerId.Value);
+            }
+            
+            return await query
+                .OrderByDescending(r => r.RaceDateTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<int> GetRaceCountAsync(int? racerId = null) {
+            Logger.LogInformation("GetRaceCountAsync");
+            
+            var query = _context.Races.AsQueryable();
+            
+            if (racerId.HasValue) {
+                query = query.Where(r => r.RacerId == racerId.Value);
+            }
+            
+            return await query.CountAsync();
+        }
+
+        public async Task<Race?> GetRaceByIdAsync(int id) {
+            Logger.LogInformation("GetRaceByIdAsync");
+            
+            return await _context.Races
+                .Include(r => r.SpeedIncrements)
+                .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        public async Task<object> GetRaceStatsAsync(int? racerId = null) {
+            Logger.LogInformation("GetRaceStatsAsync");
+            
+            var query = _context.Races.AsQueryable();
+            
+            if (racerId.HasValue) {
+                query = query.Where(r => r.RacerId == racerId.Value);
+            }
+            
+            var races = await query.ToListAsync();
+            
+            if (!races.Any()) {
+                return new {
+                    TotalRaces = 0,
+                    AverageTime = 0.0,
+                    BestTime = 0.0,
+                    FirstPlaceFinishes = 0,
+                    LastRaceDate = (DateTime?)null
+                };
+            }
+            
+            return new {
+                TotalRaces = races.Count,
+                AverageTime = races.Average(r => r.TotalTime),
+                BestTime = races.Min(r => r.TotalTime),
+                FirstPlaceFinishes = races.Count(r => r.FinishingPosition == 1),
+                LastRaceDate = races.Max(r => r.RaceDateTime)
+            };
+        }
+
+        public async Task DeleteRaceAsync(int id) {
+            Logger.LogInformation("DeleteRaceAsync");
+            
+            var race = await _context.Races
+                .Include(r => r.SpeedIncrements)
+                .FirstOrDefaultAsync(r => r.Id == id);
+                
+            if (race != null) {
+                _context.Races.Remove(race);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 }

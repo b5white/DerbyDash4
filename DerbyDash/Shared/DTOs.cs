@@ -47,4 +47,47 @@ namespace DerbyDash.Shared.DTOs {
         public bool HasNextPage => PageNumber < TotalPages;
         public bool HasPreviousPage => PageNumber > 1;
     }
+
+    // Authentication DTOs
+    public class LoginRequest {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+    }
+
+    public class RegisterRequest {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string ConfirmPassword { get; set; } = string.Empty;
+    }
+
+    public class LoginResponse {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public string TokenType { get; set; } = "Bearer";
+        public int ExpiresIn { get; set; }
+        public UserDto? User { get; set; }
+    }
+
+    public class RefreshTokenRequest {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenResponse {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public string TokenType { get; set; } = "Bearer";
+        public int ExpiresIn { get; set; }
+    }
+
+    public class LogoutRequest {
+        public string? RefreshToken { get; set; }
+    }
+
+    public class UserDto {
+        public string Id { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public bool EmailConfirmed { get; set; }
+    }
 }

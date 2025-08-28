@@ -9,6 +9,9 @@ using DerbyDash.Services;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace DerbyDash {
     public class Program {
@@ -54,18 +57,59 @@ namespace DerbyDash {
                     cookieOptions.Cookie.HttpOnly = true;  // Protect against XSS
                     cookieOptions.Cookie.Name = "TurboFlash";
                     cookieOptions.Cookie.IsEssential = true;
+                })
+                .AddJwtBearer("ApiScheme", options => {
+                    var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+                    var secretKey = jwtSettings["SecretKey"] ?? "DerbyDash_Super_Secret_Key_That_Is_At_Least_32_Characters_Long";
+                    var issuer = jwtSettings["Issuer"] ?? "DerbyDash";
+                    var audience = jwtSettings["Audience"] ?? "DerbyDashAPI";
+
+                    options.TokenValidationParameters = new TokenValidationParameters {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+                        ValidateIssuer = true,
+                        ValidIssuer = issuer,
+                        ValidateAudience = true,
+                        ValidAudience = audience,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
                 });
 
             builder.Services.AddScoped<IUserService, UserService>();
-            builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
-            builder.Services.AddScoped<RaceService>();
-            builder.Services.AddScoped<IFAQService, FAQService>();
-            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
+            
+            // Conditionally register services based on configuration
+            var enableApiServices = builder.Configuration.GetValue<bool>("ApiMode:EnableApiServices");
+            var useApiForRaceTeam = builder.Configuration.GetValue<bool>("ApiMode:UseApiForRaceTeam");
+            var useApiForFAQ = builder.Configuration.GetValue<bool>("ApiMode:UseApiForFAQ");
+            var useApiForFeedback = builder.Configuration.GetValue<bool>("ApiMode:UseApiForFeedback");
+            
+            if (enableApiServices && useApiForRaceTeam) {
+                // Register the original service as a dependency for the API service
+                builder.Services.AddScoped<RaceTeamService>();
+                builder.Services.AddScoped<IRaceTeamService, ApiRaceTeamService>();
+            } else {
+                builder.Services.AddScoped<IRaceTeamService, RaceTeamService>();
+            }
+
+            if (enableApiServices && useApiForFAQ) {
+                // Register the original service as a dependency for the API service
+                builder.Services.AddScoped<FAQService>();
+                builder.Services.AddScoped<IFAQService, ApiFAQService>();
+            } else {
+                builder.Services.AddScoped<IFAQService, FAQService>();
+            }
+
             builder.Services.AddScoped<FeedbackService>();
+            
+            builder.Services.AddScoped<RaceService>();
+            builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
             builder.Services.AddScoped<IAvatarService, AvatarService>();
             builder.Services.AddScoped<GameStateService>();
+            builder.Services.AddScoped<IJwtService, JwtService>();
+            builder.Services.AddScoped<IApiAuthService, ApiAuthService>();
 
             // Add HttpClient for API calls
             builder.Services.AddHttpClient();
@@ -124,7 +168,19 @@ namespace DerbyDash {
             // builder.Services.AddSingleton<IUserStore<ApplicationUser>, FakeUserStore>();
 
             // Add authorization services
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options => {
+                // Default policy for Blazor components (uses cookies)
+                options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme)
+                    .Build();
+
+                // API policy for JWT-based authentication OR cookie authentication (for seamless integration)
+                options.AddPolicy("ApiPolicy", policy => {
+                    policy.RequireAuthenticatedUser();
+                    policy.AddAuthenticationSchemes("ApiScheme", IdentityConstants.ApplicationScheme);
+                });
+            });
 
             WebApplication app = builder.Build();
 
