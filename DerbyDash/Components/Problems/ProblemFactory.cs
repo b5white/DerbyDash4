@@ -8,6 +8,7 @@
             { "addition-1digitsimple",  typeof(Addition1DigitsSimple) },
             { "addition-1digit",        typeof(Addition1Digits) },
             { "multiplication-squaressmall",        typeof(MultiplicationSquaresSmall) },
+            { "multiplication-4stable",  typeof(Multiplication4sTable) },
             { "subtraction-4stable",  typeof(Subtraction4sTable) }
         };
 
