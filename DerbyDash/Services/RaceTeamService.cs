@@ -12,6 +12,7 @@ namespace DerbyDash.Services {
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
 
         private bool _triedLoadingFromCookie = false;
+        private bool _isHandlingRacerChanged = false; // Flag to prevent infinite recursion
 
 
         private List<Racer> raceTeam = new() {
@@ -212,7 +213,8 @@ namespace DerbyDash.Services {
                 }
 
                 // Set as active racer only if this is the first racer for the user (when race team is being created)
-                if (active is null) {
+                // and we're not already in the middle of handling a racer changed event (to prevent infinite loops)
+                if (active is null && !_isHandlingRacerChanged) {
                     var racers = await GetRacers(false);
                     if (racers.Count == 1) {
                         active = racers[0];
@@ -385,7 +387,11 @@ namespace DerbyDash.Services {
                     }
                     
                     Logger.LogInformation($"Saved last played race '{problemClassString}' for racer {activeRacer.Name}");
-                    // await context.SaveChangesAsync();
+                    
+                    // Save changes to database
+                    using var context = _contextFactory.CreateDbContext();
+                    context.Racers.Update(activeRacer);
+                    await context.SaveChangesAsync();
 
                     // Notify subscribers that the racer has been updated
                     await InvokeOnRacerChanged();
@@ -447,10 +453,15 @@ namespace DerbyDash.Services {
         }
 
         private async Task InvokeOnRacerChanged() {
-            if (OnRacerChanged != null) {
-                var handlers = OnRacerChanged.GetInvocationList().Cast<Func<Task>>();
-                foreach (var handler in handlers) {
-                    await handler(); // Await each handler
+            if (OnRacerChanged != null && !_isHandlingRacerChanged) {
+                try {
+                    _isHandlingRacerChanged = true;
+                    var handlers = OnRacerChanged.GetInvocationList().Cast<Func<Task>>();
+                    foreach (var handler in handlers) {
+                        await handler(); // Await each handler
+                    }
+                } finally {
+                    _isHandlingRacerChanged = false;
                 }
             }
         }

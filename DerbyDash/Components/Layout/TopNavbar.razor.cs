@@ -272,7 +272,9 @@ namespace DerbyDash.Components.Layout {
 
         private async Task HandleGameStateChangedAsync(bool running) {
             try {
+                Logger.LogInformation($"TopNavbar: Game state changed to running={running}, was {isGameRunning}");
                 isGameRunning = running;
+                Logger.LogInformation($"TopNavbar: ShouldShowNavbar = {ShouldShowNavbar}");
                 await InvokeAsync(StateHasChanged);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error in HandleGameStateChangedAsync");

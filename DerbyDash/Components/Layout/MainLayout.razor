@@ -53,13 +53,16 @@
         {
             // Use InvokeAsync to properly handle the async state changes
             InvokeAsync(async () => {
+                Console.WriteLine($"MainLayout: Navigating away from race page to {e.Location}, resetting game state");
                 await GameStateService.SetGameRunning(false);
                 await GameStateService.SetCurrentRacePage("");
+                Console.WriteLine($"MainLayout: Game state reset, IsGameRunning = {GameStateService.IsGameRunning}");
                 StateHasChanged();
             });
         }
         else 
         {
+            Console.WriteLine($"MainLayout: Location changed to {e.Location}, triggering StateHasChanged");
             StateHasChanged();
         }
     }

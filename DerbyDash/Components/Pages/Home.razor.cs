@@ -36,30 +36,30 @@ namespace DerbyDash.Components.Pages {
             return;
         }
 
+    // Note: Avoid calling StateHasChanged in lifecycle methods like OnParametersSetAsync to prevent render loops
+
         // Method to handle the Start Racing button click
         private async Task StartRacing() {
             try {
-                // Get the last played race from the database
+                Logger.LogInformation("StartRacing button clicked");
+
+                // Get the last played race from the service
                 lastPlayedRace = await RaceTeamService.GetLastPlayedRaceAsync();
 
-                // If there's a last played race, navigate to it
+                Logger.LogInformation($"Retrieved last played race: {lastPlayedRace ?? "null"}");
+
+                // Navigate accordingly
                 if (!string.IsNullOrEmpty(lastPlayedRace)) {
                     Logger.LogInformation($"Navigating to last played race: /race/{lastPlayedRace}");
-
-                    // Navigate to the last played race using NavigationManager instead of RedirectManager
-                    NavManager.NavigateTo($"/race/{lastPlayedRace}");
+                    NavManager.NavigateTo($"/race/{lastPlayedRace}", forceLoad: true);
                 } else {
-                    Logger.LogInformation("No last played race found, navigating to race selection menu  /RaceSetsMenu");
-
-                    // Default navigation if no last played race is found
-                    NavManager.NavigateTo("/RaceSetsMenu");
+                    Logger.LogInformation("No last played race found, navigating to /RaceSetsMenu");
+                    NavManager.NavigateTo("/RaceSetsMenu", forceLoad: true);
                 }
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error retrieving last played race");
-
-                // Navigate to race selection menu if there's an error
-                Logger.LogInformation($"Redirecting to /RaceSetsMenu");
-                NavManager.NavigateTo("/RaceSetsMenu");
+                Logger.LogInformation("Redirecting to /RaceSetsMenu");
+                NavManager.NavigateTo("/RaceSetsMenu", forceLoad: true);
             }
         }
     }
