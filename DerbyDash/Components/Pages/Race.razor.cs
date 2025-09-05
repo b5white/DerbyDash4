@@ -201,31 +201,36 @@ namespace DerbyDash.Components.Pages {
                     _flashTimerDisposed = false;
                 }
 
-                // Delay the start of inactivity timer
-                // Using FireAndForget pattern since we don't need to wait for this to complete
-                // TODO break out into separate method
-                UtilityMethods.FireAndForget(async () => {
-                    await Task.Delay(INITIAL_TIMER_DELAY);
-                    // Check if component is still active and timers are not disposed
-                    if (Running && !Finished && !_inactivityTimerDisposed) {
-                        try {
-                            await InvokeAsync(async () => {
-                                // Double-check timer is not disposed before starting
-                                if (InactivityTimer != null && !_inactivityTimerDisposed) {
-                                    InactivityTimer.Start();
-                                    starttime = DateTime.Now.Ticks;
-                                    await StartPeriodicTimerAsync().ConfigureAwait(false);
-                                }
-                            });
-                        } catch (ObjectDisposedException) {
-                            // Safely handle the case where the timer was disposed
-                            Logger.LogInformation("Timer was disposed before it could be started");
-                        }
-                    }
-                });
+                // Start the race timers with delay
+                StartRaceTimersAsync();
             }
         }
 
+        /// <summary>
+        /// Starts the race timers with a delay using fire-and-forget pattern
+        /// </summary>
+        private void StartRaceTimersAsync() {
+            // Using FireAndForget pattern since we don't need to wait for this to complete
+            UtilityMethods.FireAndForget(async () => {
+                await Task.Delay(INITIAL_TIMER_DELAY);
+                // Check if component is still active and timers are not disposed
+                if (Running && !Finished && !_inactivityTimerDisposed) {
+                    try {
+                        await InvokeAsync(async () => {
+                            // Double-check timer is not disposed before starting
+                            if (InactivityTimer != null && !_inactivityTimerDisposed) {
+                                InactivityTimer.Start();
+                                starttime = DateTime.Now.Ticks;
+                                await StartPeriodicTimerAsync().ConfigureAwait(false);
+                            }
+                        });
+                    } catch (ObjectDisposedException) {
+                        // Safely handle the case where the timer was disposed
+                        Logger.LogInformation("Timer was disposed before it could be started");
+                    }
+                }
+            });
+        }
 
         private async Task StartClick() {
             // Check if the user is logged in
