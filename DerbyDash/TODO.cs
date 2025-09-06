@@ -83,7 +83,7 @@
         // DONE Show userId and racerId in admin feedback page.
         // DONE Show user and racer counts in admin feedback page.
         // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
-        // TODO In Race.Reset, break the FireAndForget code out into a separate routine.
+        // DONE In Race.Reset, break the FireAndForget code out into a separate routine.
         //    I want Reset to be higher level and it has too many details.
         // TODO Move the css in *.razor over the the css files
         // TODO Send a date range to the GetCount routines indicating AllTime.

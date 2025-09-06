@@ -123,7 +123,7 @@
 
 @* Preview Modal *@
 @if (showPreview) {
-    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal fade show d-block modal-overlay" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -134,7 +134,7 @@
                     <h6>Subject:</h6>
                     <p class="border p-2 bg-light">@model.Subject</p>
                     <h6>Message:</h6>
-                    <div class="border p-3" style="white-space: pre-line;">@model.Message</div>
+                    <div class="border p-3 message-preview">@model.Message</div>
                     <h6>Recipients:</h6>
                     <div class="border p-2 bg-light">
                         <strong>@previewEmails.Count recipients:</strong><br>
