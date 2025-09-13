@@ -268,8 +268,23 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Admin Notes:</label>
-                        <textarea class="form-control admin-notes-textarea" rows="4" @bind="adminNotes">
+                        <label class="form-label">Public Response:</label>
+                        <small class="text-muted d-block mb-2">Response visible to users when they view their feedback status</small>
+                        <textarea class="form-control admin-notes-textarea" rows="4" @bind="publicResponse" placeholder="Enter public response that users can see...">
+                        </textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Private Response:</label>
+                        <small class="text-muted d-block mb-2">Internal notes for admin use only</small>
+                        <textarea class="form-control admin-notes-textarea" rows="4" @bind="privateResponse" placeholder="Enter private notes for internal use...">
+                        </textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Admin Notes (Legacy):</label>
+                        <small class="text-muted d-block mb-2">Legacy field - use Public/Private Response fields above</small>
+                        <textarea class="form-control admin-notes-textarea" rows="2" @bind="adminNotes" placeholder="Enter your resolution notes here...">
                         </textarea>
                     </div>
                 </div>
@@ -324,6 +339,8 @@
     private bool showResolveDialog = false;
     private bool showDeleteDialog = false;
     private string adminNotes = "";
+    private string publicResponse = "";
+    private string privateResponse = "";
     private DateTime selectedStartDate = DateTime.UtcNow.AddMonths(-1);
     private int selectedFeedbackId;
     private int totalUserCount = 0;
@@ -419,6 +436,8 @@
     {
         showResolveDialog = false;
         adminNotes = "";
+        publicResponse = "";
+        privateResponse = "";
         StateHasChanged(); // Ensure UI updates
     }
 
@@ -426,14 +445,14 @@
     {
         try
         {
-            Console.WriteLine($"Resolving feedback ID: {selectedFeedbackId} with notes: {adminNotes}");
+            Console.WriteLine($"Resolving feedback ID: {selectedFeedbackId} with notes: {adminNotes}, public: {publicResponse}, private: {privateResponse}");
             
             // First close the dialog to prevent UI issues
             showResolveDialog = false;
             StateHasChanged();
             
             // Then resolve the feedback
-            bool result = await FeedbackService.ResolveFeedbackAsync(selectedFeedbackId, adminNotes);
+            bool result = await FeedbackService.ResolveFeedbackAsync(selectedFeedbackId, adminNotes, publicResponse, privateResponse);
             
             if (result)
             {

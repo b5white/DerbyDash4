@@ -146,3 +146,20 @@ window.togglePasswordVisibility = (inputId) => {
         }
     }
 };
+
+// Register escape key handler for closing modals
+window.registerEscapeKey = (dotNetObjectReference) => {
+    const handler = function(event) {
+        if (event.key === 'Escape') {
+            dotNetObjectReference.invokeMethodAsync('HandleEscapeKey');
+        }
+    };
+    
+    document.addEventListener('keydown', handler);
+    
+    return {
+        dispose: function() {
+            document.removeEventListener('keydown', handler);
+        }
+    };
+};

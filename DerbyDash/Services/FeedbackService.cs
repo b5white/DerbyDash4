@@ -45,6 +45,11 @@ namespace DerbyDash.Services {
             return await Task.FromResult(result);
         }
 
+        public async Task<List<Feedback>> GetFeedbackByUserIdAsync(string userId) {
+            var result = Feedbacks.Where(f => f.UserId == userId).OrderByDescending(f => f.SubmittedAt).ToList();
+            return await Task.FromResult(result);
+        }
+
         public async Task<bool> AddFeedbackAsync(Feedback feedback) {
             try {
                 feedback.SubmittedAt = DateTime.UtcNow;
@@ -97,6 +102,10 @@ namespace DerbyDash.Services {
         }
 
         public async Task<bool> ResolveFeedbackAsync(int id, string adminNotes) {
+            return await ResolveFeedbackAsync(id, adminNotes, null, null);
+        }
+
+        public async Task<bool> ResolveFeedbackAsync(int id, string adminNotes, string? publicResponse = null, string? privateResponse = null) {
             try {
                 var feedback = await GetFeedbackByIdAsync(id);
                 if (feedback == null)
@@ -104,6 +113,8 @@ namespace DerbyDash.Services {
 
                 feedback.IsResolved = true;
                 feedback.AdminNotes = adminNotes;
+                feedback.PublicResponse = publicResponse;
+                feedback.PrivateResponse = privateResponse;
                 feedback.ResolvedAt = DateTime.UtcNow;
                 //   Feedbacks.Update(feedback);
 

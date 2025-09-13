@@ -18,6 +18,8 @@ namespace DerbyDash.DTOs
         public DateTime SubmittedAt { get; set; }
         public bool IsResolved { get; set; } = false;
         public string? AdminNotes { get; set; }
+        public string? PublicResponse { get; set; }
+        public string? PrivateResponse { get; set; }
         public DateTime? ResolvedAt { get; set; }
 
         // For API compatibility with simpler models
@@ -87,6 +89,12 @@ namespace DerbyDash.DTOs
 
         [StringLength(1000)]
         public string? AdminNotes { get; set; }
+
+        [StringLength(2000)]
+        public string? PublicResponse { get; set; }
+
+        [StringLength(2000)]
+        public string? PrivateResponse { get; set; }
 
         // For API compatibility
         public string Title { get; set; } = string.Empty;

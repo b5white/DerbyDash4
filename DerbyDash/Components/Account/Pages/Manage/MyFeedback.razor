@@ -1,0 +1,172 @@
+@page "/Account/Manage/MyFeedback"
+@layout ManageLayout
+@using Microsoft.AspNetCore.Authorization
+@using System.Globalization
+@using DerbyDash.Services
+@using DerbyDash.Data
+@attribute [Authorize]
+@inject FeedbackService FeedbackService
+@inject IUserService UserService
+@rendermode InteractiveServer
+
+<PageTitle>My Feedback - TurboFlash</PageTitle>
+
+<div class="feedback-history-container">
+    <div class="page-header">
+        <h3>My Feedback History</h3>
+        <p class="text-muted">View your submitted feedback and any responses from our team.</p>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading-spinner">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading your feedback...</p>
+        </div>
+    }
+    else if (!feedbackList.Any())
+    {
+        <div class="no-feedback">
+            <div class="empty-state">
+                <i class="fas fa-comment-alt-lines fa-3x text-muted mb-3"></i>
+                <h4>No feedback submitted yet</h4>
+                <p class="text-muted">You haven't submitted any feedback yet. Help us improve TurboFlash by sharing your thoughts!</p>
+                <a href="/feedback" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Submit Feedback
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="feedback-list">
+            @foreach (var feedback in feedbackList.OrderByDescending(f => f.SubmittedAt))
+            {
+                <div class="feedback-card @(feedback.IsResolved ? "resolved" : "pending")">
+                    <div class="feedback-header">
+                        <div class="feedback-meta">
+                            <h5 class="feedback-subject">@feedback.Subject</h5>
+                            <div class="feedback-info">
+                                <span class="feedback-type badge badge-@GetTypeClass(feedback.FeedbackType)">
+                                    @feedback.FeedbackType
+                                </span>
+                                <span class="feedback-date text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @feedback.SubmittedAt.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)
+                                </span>
+                            </div>
+                        </div>
+                        <div class="feedback-status">
+                            @if (feedback.IsResolved)
+                            {
+                                <span class="status-badge resolved">
+                                    <i class="fas fa-check-circle me-1"></i>Resolved
+                                </span>
+                                @if (feedback.ResolvedAt.HasValue)
+                                {
+                                    <small class="text-muted d-block">
+                                        @feedback.ResolvedAt.Value.ToString("MMM dd, yyyy", CultureInfo.InvariantCulture)
+                                    </small>
+                                }
+                            }
+                            else
+                            {
+                                <span class="status-badge pending">
+                                    <i class="fas fa-clock me-1"></i>Under Review
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="feedback-body">
+                        <div class="original-message">
+                            <h6 class="section-title">Your Message</h6>
+                            <p class="message-text">@feedback.Message</p>
+                        </div>
+
+                        @if (feedback.IsResolved && !string.IsNullOrEmpty(feedback.PublicResponse))
+                        {
+                            <div class="admin-response mt-3">
+                                <h6 class="section-title">
+                                    <i class="fas fa-reply me-2 text-success"></i>Our Response
+                                </h6>
+                                <div class="response-content">
+                                    <p class="response-text">@feedback.PublicResponse</p>
+                                </div>
+                            </div>
+                        }
+                        else if (feedback.IsResolved && !string.IsNullOrEmpty(feedback.AdminNotes))
+                        {
+                            <!-- Fallback to legacy admin notes if no public response -->
+                            <div class="admin-response mt-3">
+                                <h6 class="section-title">
+                                    <i class="fas fa-reply me-2 text-success"></i>Our Response
+                                </h6>
+                                <div class="response-content">
+                                    <p class="response-text">@feedback.AdminNotes</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="feedback-footer">
+                        <small class="text-muted">
+                            Feedback ID: #@feedback.Id
+                        </small>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="action-section mt-4">
+            <a href="/feedback" class="btn btn-outline-primary">
+                <i class="fas fa-plus me-2"></i>Submit New Feedback
+            </a>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Feedback> feedbackList = new();
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUserFeedback();
+    }
+
+    private async Task LoadUserFeedback()
+    {
+        loading = true;
+        try
+        {
+            var userId = await UserService.GetUserIdAsync();
+            if (!string.IsNullOrEmpty(userId))
+            {
+                feedbackList = await FeedbackService.GetFeedbackByUserIdAsync(userId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading user feedback: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string GetTypeClass(FeedbackType type)
+    {
+        return type switch
+        {
+            FeedbackType.BugReport => "danger",
+            FeedbackType.FeatureRequest => "success",
+            FeedbackType.GeneralFeedback => "primary",
+            FeedbackType.Question => "info",
+            _ => "secondary"
+        };
+    }
+}

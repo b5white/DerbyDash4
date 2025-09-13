@@ -50,6 +50,12 @@ namespace DerbyDash.Data {
         [StringLength(1000)]
         public string? AdminNotes { get; set; }
 
+        [StringLength(2000)]
+        public string? PublicResponse { get; set; }
+
+        [StringLength(2000)]
+        public string? PrivateResponse { get; set; }
+
         public DateTime? ResolvedAt { get; set; }
     }
 

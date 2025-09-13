@@ -248,6 +248,8 @@ namespace DerbyDash.Services
                 SubmittedAt = dto.SubmittedAt != default ? dto.SubmittedAt : dto.CreatedAt,
                 IsResolved = dto.IsResolved,
                 AdminNotes = dto.AdminNotes,
+                PublicResponse = dto.PublicResponse,
+                PrivateResponse = dto.PrivateResponse,
                 ResolvedAt = dto.ResolvedAt
             };
         }
@@ -282,6 +284,8 @@ namespace DerbyDash.Services
                 ContactConsent = feedback.ContactConsent,
                 IsResolved = feedback.IsResolved,
                 AdminNotes = feedback.AdminNotes,
+                PublicResponse = feedback.PublicResponse,
+                PrivateResponse = feedback.PrivateResponse,
                 Title = feedback.Subject,
                 Description = feedback.Message,
                 Status = feedback.IsResolved ? "Resolved" : "Open"

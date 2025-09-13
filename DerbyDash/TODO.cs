@@ -85,12 +85,12 @@
         // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
         // DONE In Race.Reset, break the FireAndForget code out into a separate routine.
         //    I want Reset to be higher level and it has too many details.
-        // TODO Move the css in *.razor over the the css files
+        // DONE Move the css in *.razor over the the css files
         // TODO Send a date range to the GetCount routines indicating AllTime.
         //    Or, instead of sending a data range, we could send a range type.
         //    AllTime, Last Week, Last30Days, Last90Days, LastYear
         //    That way, the routine itself is reponsible for the date details.
-        // TODO In the feedback response, we need a field for public response and a private response
+        // DONE In the feedback response, we need a field for public response and a private response
         // TODO Limit racers to 8 per subscription.
         //     Make this a User field so admin can increase it per user if needed.
 
