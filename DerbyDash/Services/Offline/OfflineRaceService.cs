@@ -2,89 +2,83 @@ using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using DerbyDash.Utilities;
-using Microsoft.EntityFrameworkCore;
 
-namespace DerbyDash.Services {
-    public class RaceService : IRaceService {
-        private readonly IRaceTeamService _raceTeamService;
-        private readonly ApplicationDbContext _context;
+namespace DerbyDash.Services.Offline {
+    public class OfflineRaceService : IRaceService {
+        private readonly IOfflineRaceTeamService _raceTeamService;
         private RaceComponents track = new();
-        private readonly ILogger<RaceService> Logger;
+        private readonly ILogger<OfflineRaceService> Logger;
         public float TotalDistance { get; } = 400; // Increased from 200 to make races longer
         private Random random = new Random();
-        Racer? activeRacer;
+        private readonly List<Race> _offlineRaces = new();
+        private int _nextRaceId = 1;
 
-        public RaceService(
-            ILogger<RaceService> logger,
-            IRaceTeamService raceTeamService,
-            ApplicationDbContext context) {
+        public OfflineRaceService(
+            ILogger<OfflineRaceService> logger,
+            IOfflineRaceTeamService raceTeamService) {
             Logger = logger;
             _raceTeamService = raceTeamService;
-            _context = context;
         }
 
         public async Task<RaceComponents> CreateTrack(string problemSetIdentifier) {
-            Logger.LogInformation("CreateTrack");
-            // Use cached active racer or ensure it's initialized
-            activeRacer = await _raceTeamService.GetActiveRacer();
+            Logger.LogInformation("CreateTrack (Offline Mode)");
+            
+            // Get active racer from offline service
+            var activeRacer = await _raceTeamService.GetActiveRacer();
             if (activeRacer == null) {
                 throw new MissingRacerException("No active racer selected. Please select a racer from your race team.");
             }
+            
             return await CreateTrack(activeRacer.Id, problemSetIdentifier);
         }
 
         private async Task<RaceComponents> CreateTrack(int racerId, string problemSet) {
-            Logger.LogInformation("CreateTrack");
+            Logger.LogInformation("CreateTrack (Offline Mode)");
             const int CAR_GAP = 30;
             const int MAX_CARS = 6;
 
             int problemSetId = UtilityMethods.GetUniqueIntFromString(problemSet);
-            // Retrieve the 5 previous races for the given RacerID
+            
             try {
-                List<Race> previousRaces = new List<Race>();
-                //List<Race> previousRaces = await _context.Races
-                //    .Where(r => r.RacerId == racerId && r.ProblemSetId == problemSetId)
-                //    .Include(r => r.SpeedIncrements)
-                //    .OrderByDescending(r => r.RaceDateTime)
-                //    .Take(5)
-                //    .ToListAsync().ConfigureAwait(false);
+                // Get previous races from offline storage
+                List<Race> previousRaces = _offlineRaces
+                    .Where(r => r.RacerId == racerId && r.ProblemSetId == problemSetId)
+                    .OrderByDescending(r => r.RaceDateTime)
+                    .Take(5)
+                    .ToList();
 
                 // Generate a random ImageId for the car at index 0
-                Random random = new Random();
-                int randomImageId = random.Next(1, 11); // Assuming you have 10 car images available
+                int randomImageId = random.Next(1, 11);
 
                 // Initialize the cars list
                 List<Car> Cars = new List<Car> {
-                new Car { index = 0, ImageId = randomImageId, RaceDateTime = DateTime.Now, Top = 9999  },
-                new Car { index = 1, ImageId = 2, Top = 9999  },
-                new Car { index = 2, ImageId = 3, Top = 9999  },
-                new Car { index = 3, ImageId = 4, Top = 9999  },
-                // new Car { index = 4, ImageId = 5, Top = 9999  },
-                // new Car { index = 5, ImageId = 6, Top = 9999  } // Add more cars as needed
-                // Only 3 cars for the race
+                    new Car { index = 0, ImageId = randomImageId, RaceDateTime = DateTime.Now, Top = 9999  },
+                    new Car { index = 1, ImageId = 2, Top = 9999  },
+                    new Car { index = 2, ImageId = 3, Top = 9999  },
+                    new Car { index = 3, ImageId = 4, Top = 9999  },
                 };
 
                 // Assign the previous races to cars 1 to 5
                 for (int i = 1; i <= previousRaces.Count; i++) {
                     Race race = previousRaces[i - 1];
-                    Car car = new(); // Cars[i];
+                    Car car = new();
                     car.ImageId = race.ImageId;
                     car.RaceId = race.Id;
                     car.TotalTime = race.TotalTime;
                     car.RaceDateTime = race.RaceDateTime;
                     car.SpeedIncrements.AddRange(race.SpeedIncrements ?? Enumerable.Empty<SpeedIncrement>());
                     car.ResetFlexBasis(MAX_CARS, CAR_GAP);
-                    car.Top = 9999; // Initialize the top position off-screen
+                    car.Top = 9999;
                     Cars.Add(car);
                 }
 
-                // Start from index 0 to initialize all cars
+                // Initialize all cars
                 for (int i = 0; i < Cars.Count; i++) {
-                    // Make sure we don't exceed the array bounds in the Car class
-                    int safeIndex = Math.Min(i, 4); // The times/distances arrays have 5 rows (0-4)
+                    int safeIndex = Math.Min(i, 4);
                     Cars[i].InitializeFastEddyTimeIncrements(random, safeIndex);
-                    Cars[i].ResetFlexBasis(MAX_CARS/*Cars.Count*/, CAR_GAP);
+                    Cars[i].ResetFlexBasis(MAX_CARS, CAR_GAP);
                 }
+                
                 // Set the track properties
                 track.Cars = Cars;
                 track.ProblemId = problemSetId;
@@ -93,28 +87,32 @@ namespace DerbyDash.Services {
                 // Initialize lines off-screen
                 track.StartLine = new RaceComponent { Top = 490f, ImageUrl = "StartLine.png" };
                 track.FinishLine = new RaceComponent { Top = 9999f, ImageUrl = "FinishLine.png" };
-                await Task.CompletedTask; // Just to use 'await'
+                
+                await Task.CompletedTask;
             } catch (Exception ex) {
-                Logger.LogError(ex, "CreateTrack");
+                Logger.LogError(ex, "CreateTrack (Offline Mode)");
             }
             return track;
         }
 
         public async Task SaveRaceAsync(Car car, int racerId, int problemId) {
-            Logger.LogInformation("SaveRaceAsync");
+            Logger.LogInformation("SaveRaceAsync (Offline Mode)");
 
             Race race = CreateNewRace(car, racerId, problemId);
-            //_context.Races.Add(race);
-            //await _context.SaveChangesAsync();
+            race.Id = _nextRaceId++;
+            _offlineRaces.Add(race);
+            
             car.RaceId = race.Id;
 
-            activeRacer!.LastRaced = DateOnly.FromDateTime(DateTime.Now);
-            await _raceTeamService.UpdateRacer(activeRacer);
-            await Task.CompletedTask; // Just to use 'await'
+            var activeRacer = await _raceTeamService.GetActiveRacer();
+            if (activeRacer != null) {
+                activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
+                await _raceTeamService.UpdateRacer(activeRacer);
+            }
         }
 
         private Race CreateNewRace(Car car, int racerId, int problemId) {
-            Logger.LogInformation("CreateNewRace");
+            Logger.LogInformation("CreateNewRace (Offline Mode)");
             Race race = new Race {
                 ImageId = car.ImageId,
                 TotalTime = car.TotalTime,
@@ -133,23 +131,30 @@ namespace DerbyDash.Services {
         }
 
         public async Task DeleteRaces(string problemSet) {
-            Logger.LogInformation($"DeleteRaces for current racer, {problemSet}");
+            Logger.LogInformation($"DeleteRaces (Offline Mode) for current racer, {problemSet}");
             try {
                 int problemSetId = UtilityMethods.GetUniqueIntFromString(problemSet);
-                int racerId = (await _raceTeamService.GetActiveRacer())?.Id ?? 0;
+                var activeRacer = await _raceTeamService.GetActiveRacer();
+                int racerId = activeRacer?.Id ?? 0;
+                
                 if (racerId != 0) {
-                    //int deletedCount = await _context.Races
-                    //    .Where(r => r.RacerId == racerId && r.ProblemSetId == problemSetId)
-                    //    .ExecuteDeleteAsync();
-                    //Logger.LogInformation("Deleted {deletedCount");
+                    var racesToDelete = _offlineRaces
+                        .Where(r => r.RacerId == racerId && r.ProblemSetId == problemSetId)
+                        .ToList();
+                    
+                    foreach (var race in racesToDelete) {
+                        _offlineRaces.Remove(race);
+                    }
+                    
+                    Logger.LogInformation($"Deleted {racesToDelete.Count} races from offline storage");
                 }
             } catch (Exception ex) {
-                Logger.LogError(ex, "DeleteRaces");
+                Logger.LogError(ex, "DeleteRaces (Offline Mode)");
             }
         }
 
         public List<SpeedIncrement> CreateSpeedIncrements(float[] Times) {
-            Logger.LogInformation("CreateSpeedIncrements");
+            Logger.LogInformation("CreateSpeedIncrements (Offline Mode)");
             float currentTime = 0;
             double currentSpeed = 0;
             double currentDistance = 0;
@@ -158,32 +163,30 @@ namespace DerbyDash.Services {
             for (int i = 0; i < Times.Length; i++) {
                 double timeSpan = Times[i];
                 if (timeSpan == 0) {
-                    break; // Exit the loop after the last populated timeSpan 
+                    break;
                 }
                 if (i == 0) {
                     currentDistance = 0;
                 } else {
                     currentDistance += currentSpeed * (timeSpan - Times[i - 1]);
                 }
-                currentSpeed++; // Assumes speed increment of 1
+                currentSpeed++;
                 speedIncrements.Add(new SpeedIncrement {
                     Time = timeSpan,
                     Speed = currentSpeed,
                     Distance = currentDistance * RaceComponents.SPEED_MULTIPLIER
                 });
-                Console.WriteLine($"timeSpan:{timeSpan}, currentTime:{currentTime}, currentSpeed:{currentSpeed}, currentDistance:{currentDistance}");
             }
             return speedIncrements;
         }
 
-        // API-specific methods for race management
         public async Task<Race> SaveRaceAsync(Race race) {
-            Logger.LogInformation("SaveRaceAsync (API version)");
+            Logger.LogInformation("SaveRaceAsync (Offline Mode) - API version");
             
-            _context.Races.Add(race);
-            await _context.SaveChangesAsync();
+            race.Id = _nextRaceId++;
+            _offlineRaces.Add(race);
             
-            // Update active racer's last played race
+            var activeRacer = await _raceTeamService.GetActiveRacer();
             if (activeRacer != null) {
                 activeRacer.LastRaced = DateOnly.FromDateTime(DateTime.Now);
                 await _raceTeamService.UpdateRacer(activeRacer);
@@ -193,55 +196,57 @@ namespace DerbyDash.Services {
         }
 
         public async Task<List<Race>> GetRaceHistoryAsync(int page, int pageSize, int? racerId = null) {
-            Logger.LogInformation("GetRaceHistoryAsync");
+            Logger.LogInformation("GetRaceHistoryAsync (Offline Mode)");
             
-            var query = _context.Races
-                .Include(r => r.SpeedIncrements)
-                .AsQueryable();
+            var query = _offlineRaces.AsQueryable();
                 
             if (racerId.HasValue) {
                 query = query.Where(r => r.RacerId == racerId.Value);
             }
             
-            return await query
+            var result = query
                 .OrderByDescending(r => r.RaceDateTime)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync();
+                .ToList();
+                
+            await Task.CompletedTask;
+            return result;
         }
 
         public async Task<int> GetRaceCountAsync(int? racerId = null) {
-            Logger.LogInformation("GetRaceCountAsync");
+            Logger.LogInformation("GetRaceCountAsync (Offline Mode)");
             
-            var query = _context.Races.AsQueryable();
+            var query = _offlineRaces.AsQueryable();
             
             if (racerId.HasValue) {
                 query = query.Where(r => r.RacerId == racerId.Value);
             }
             
-            return await query.CountAsync();
+            await Task.CompletedTask;
+            return query.Count();
         }
 
         public async Task<Race?> GetRaceByIdAsync(int id) {
-            Logger.LogInformation("GetRaceByIdAsync");
+            Logger.LogInformation("GetRaceByIdAsync (Offline Mode)");
             
-            return await _context.Races
-                .Include(r => r.SpeedIncrements)
-                .FirstOrDefaultAsync(r => r.Id == id);
+            await Task.CompletedTask;
+            return _offlineRaces.FirstOrDefault(r => r.Id == id);
         }
 
         public async Task<object> GetRaceStatsAsync(int? racerId = null) {
-            Logger.LogInformation("GetRaceStatsAsync");
+            Logger.LogInformation("GetRaceStatsAsync (Offline Mode)");
             
-            var query = _context.Races.AsQueryable();
+            var query = _offlineRaces.AsQueryable();
             
             if (racerId.HasValue) {
                 query = query.Where(r => r.RacerId == racerId.Value);
             }
             
-            var races = await query.ToListAsync();
+            var races = query.ToList();
             
             if (!races.Any()) {
+                await Task.CompletedTask;
                 return new {
                     TotalRaces = 0,
                     AverageTime = 0.0,
@@ -251,6 +256,7 @@ namespace DerbyDash.Services {
                 };
             }
             
+            await Task.CompletedTask;
             return new {
                 TotalRaces = races.Count,
                 AverageTime = races.Average(r => r.TotalTime),
@@ -261,16 +267,14 @@ namespace DerbyDash.Services {
         }
 
         public async Task DeleteRaceAsync(int id) {
-            Logger.LogInformation("DeleteRaceAsync");
+            Logger.LogInformation("DeleteRaceAsync (Offline Mode)");
             
-            var race = await _context.Races
-                .Include(r => r.SpeedIncrements)
-                .FirstOrDefaultAsync(r => r.Id == id);
-                
+            var race = _offlineRaces.FirstOrDefault(r => r.Id == id);
             if (race != null) {
-                _context.Races.Remove(race);
-                await _context.SaveChangesAsync();
+                _offlineRaces.Remove(race);
             }
+            
+            await Task.CompletedTask;
         }
     }
 }

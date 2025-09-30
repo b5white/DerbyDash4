@@ -4,6 +4,7 @@ using DerbyDash.Components.Track;
 using DerbyDash.Data;
 using DerbyDash.Exceptions;
 using DerbyDash.Services;
+using DerbyDash.Services.Offline;
 using DerbyDash.Utilities;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
@@ -14,12 +15,12 @@ using Timer = System.Timers.Timer;
 
 namespace DerbyDash.Components.Pages {
 
-    public partial class Race: ComponentBase, IAsyncDisposable {
+    public partial class OfflineRace: ComponentBase, IAsyncDisposable {
         [Inject]
         public required IRaceService RaceService { get; set; }
 
         [Inject]
-        public required IRaceTeamService RaceTeamService { get; set; }
+        public required IOfflineRaceTeamService RaceTeamService { get; set; }
 
         [Inject]
         public required NavigationManager NavManager { get; set; }
@@ -28,13 +29,10 @@ namespace DerbyDash.Components.Pages {
         public required IConfiguration configuration { get; set; }
 
         [Inject]
-        public required ILogger<Race> Logger { get; set; }
+        public required ILogger<OfflineRace> Logger { get; set; }
 
         [Inject]
         public required IJSRuntime JSRuntime { get; set; }
-
-        [Inject]
-        public required IUserService UserService { get; set; }
 
         [Inject]
         public required GameStateService GameStateService { get; set; }
@@ -115,11 +113,12 @@ namespace DerbyDash.Components.Pages {
                 // Update the UI to show the new racer
                 await InvokeAsync(StateHasChanged);
             } catch (Exception ex) {
-                Logger.LogError(ex, "Error handling racer change in Race component");
+                Logger.LogError(ex, "Error handling racer change in OfflineRace component");
             }
         }
+        
         protected override async Task OnInitializedAsync() {
-            Logger.LogInformation("Race.OnInitializedAsync()");
+            Logger.LogInformation("OfflineRace.OnInitializedAsync()");
 
             // Initialize configuration and timers
             ShowDebug = configuration.GetValue<bool>("ShowDebug");
@@ -132,7 +131,7 @@ namespace DerbyDash.Components.Pages {
             FlashTimer.AutoReset = false;
 
             // Notify GameStateService that we're on a race page
-            await GameStateService.SetCurrentRacePage(ProblemClassString ?? "race");
+            await GameStateService.SetCurrentRacePage($"offline-{ProblemClassString ?? "race"}");
 
             // Subscribe to racer changes to update the UI when racer selection changes
             RaceTeamService.OnRacerChanged += HandleRacerChanged;
@@ -140,18 +139,14 @@ namespace DerbyDash.Components.Pages {
             // Cache the active racer once during initialization
             _cachedActiveRacer = await RaceTeamService.EnsureActiveRacerInitializedAsync();
             
-            // ENFORCE: Must have a chosen racer to race
+            // In offline mode, we always have a default racer, so no need to redirect
             if (_cachedActiveRacer == null) {
-                Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
-                NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
-                return;
+                Logger.LogWarning("No active racer found in offline mode. This should not happen.");
             }
         }
 
-        // OnAfterRenderAsync is defined later in the file
-
         private async Task Reset() {
-            Logger.LogInformation("Reset");
+            Logger.LogInformation("Reset (Offline Mode)");
             // Set GameStateService.SetGameRunning(false) before starting a new race (if not already false)
             await GameStateService.SetGameRunning(false);
             if (!Running) {
@@ -183,16 +178,13 @@ namespace DerbyDash.Components.Pages {
                 }
                 problem = problems!.Next();
 
-
                 // Ensure timers are recreated if they've been disposed
-
                 if (InactivityTimer == null || _inactivityTimerDisposed) {
                     InactivityTimer = new Timer(INACTIVITY_TIMER_INTERVAL);
                     InactivityTimer.Elapsed += ShowHint;
                     InactivityTimer.AutoReset = false;
                     _inactivityTimerDisposed = false;
                 }
-
 
                 if (FlashTimer == null || _flashTimerDisposed) {
                     FlashTimer = new Timer(FLASH_TIMER_INTERVAL);
@@ -226,37 +218,20 @@ namespace DerbyDash.Components.Pages {
                         });
                     } catch (ObjectDisposedException) {
                         // Safely handle the case where the timer was disposed
-                        Logger.LogInformation("Timer was disposed before it could be started");
+                        Logger.LogInformation("Timer was disposed before it could be started (Offline Mode)");
                     }
                 }
             });
         }
 
         private async Task StartClick() {
-            // Check if the user is logged in
-            bool isAuthenticated = await UserService.IsLoggedInAsync();
-
-            if (!isAuthenticated) {
-                // User is not logged in, redirect to login page with return URL
-                NavManager.NavigateTo($"/Account/Login?returnUrl={Uri.EscapeDataString(NavManager.Uri)}", true);
-                return;
-            }
-
-            // Refresh the active racer cookie if there is an active racer
-            try {
-                Racer? activeRacer = await RaceTeamService.GetActiveRacer();
-                if (activeRacer != null) {
-                    await RaceTeamService.SetActiveRacer(activeRacer); // This will refresh the cookie
-                }
-            } catch (Exception ex) {
-                Logger.LogError(ex, "Error refreshing active racer cookie");
-            }
-
+            // In offline mode, no authentication required
+            Logger.LogInformation("Starting offline race");
             await Reset();
         }
 
         private void CreateProblems() {
-            Logger.LogInformation("CreateProblems");
+            Logger.LogInformation("CreateProblems (Offline Mode)");
             if (String.IsNullOrEmpty(ProblemClassString)) {
                 ProblemClassString = "addition-4stable";
             }
@@ -280,7 +255,6 @@ namespace DerbyDash.Components.Pages {
                 if (Answer == problem.Result) {   // correct answer!
                     Answer = "";
                     await CalculateNewDistance(GetTimespan(starttime));
-                    //         CalculateFlexBasis(6, 10, Margin++);
                     try {
                         ElapsedAnswerTimes[currentTimeIndex++] = GetTimespan(starttime);
                     } catch (IndexOutOfRangeException) {
@@ -344,26 +318,12 @@ namespace DerbyDash.Components.Pages {
                     relativePosition = (car.Distance - visibleStart) / VISIBLE_TRACK_LENGTH;
                     float targetTop = (float)(TOP_MARGIN + (1 - relativePosition) * TRACK_HEIGHT) * TOP_MULTIPLIER;
                     car.Top = targetTop;
-
-                    // Apply special handling for the current player car only when inactive
-                    // if (i == 0 && car.Speed <= 0 && isAnyCarAtTop && Running && !Finished) {
-                    //     // Calculate time since last answer for the active player
-                    //     float timeSinceLastAnswer = 0;
-
-                    //     if (currentTimeIndex > 0 && starttime > 0) {
-                    //         timeSinceLastAnswer = GetSpan(starttime) - ElapsedAnswerTimes[currentTimeIndex - 1];
-                    //     }
-
-                    //     // Apply fall-behind effect only for the active player when they're inactive
-                    //     float fallBehindFactor = Math.Min(1.0f, timeSinceLastAnswer / FALL_BEHIND_TIME_THRESHOLD);
-                    //     car.Top = INITIAL_START_LINE_TOP * fallBehindFactor + targetTop * (1 - fallBehindFactor);
-                    // }
                 }
             }
         }
 
         private void SynchronizeAnimationStart() {
-            Logger.LogInformation("SynchronizeAnimationStart");
+            Logger.LogInformation("SynchronizeAnimationStart (Offline Mode)");
             // Reset any existing animations
             track.IsAnyCarAtTop = false;
 
@@ -401,7 +361,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task EndRace() {
-            Logger.LogInformation("EndRace");
+            Logger.LogInformation("EndRace (Offline Mode)");
             if (Running) {
                 FinishTime = GetTimespan(starttime);
                 track.Cars[0].TotalTime = FinishTime;
@@ -478,6 +438,7 @@ namespace DerbyDash.Components.Pages {
 
             return allFinished;
         }
+
         /// <summary>
         /// Calculates the finishing position of the player's car based on when they finished relative to other cars
         /// </summary>
@@ -499,29 +460,12 @@ namespace DerbyDash.Components.Pages {
             try {
                 ResetResults(timeSpan);
                 CalculateAverage();
-                // Save the race with finishing position
+                // Save the race with finishing position (offline mode)
                 await RaceTeamService.SaveRaceCompletionAsync(timeSpan, ProblemClassString!, track.Cars[0].SpeedIncrements, finishingPosition);
                 await RaceTeamService.SaveLastPlayedRaceAsync(ProblemClassString!);
             } catch (Exception ex) {
                 LogMessage(ex);
             }
-        }
-
-        /// <summary>
-        /// Maps problem class string to problem set ID
-        /// </summary>
-        private int GetProblemSetId(string problemClassString) {
-            return problemClassString switch {
-                "addition-4stable" => 1,
-                "subtraction-4stable" => 2,
-                "multiplication-4stable" => 3,
-                "division-4stable" => 4,
-                "addition-100" => 5,
-                "subtraction-100" => 6,
-                "multiplication-100" => 7,
-                "division-100" => 8,
-                _ => 1 // Default to addition-4stable
-            };
         }
 
         /// <summary>
@@ -618,7 +562,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void ResetResults(float timeSpan) {
-            Logger.LogInformation("ResetResults");
+            Logger.LogInformation("ResetResults (Offline Mode)");
             List<Car> previousRaces = track.Cars
                 .Where(car => car.TotalTime > 0)
                 .OrderBy(car => car.TotalTime)  // take the 5 fastest
@@ -649,7 +593,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void CalculateAverage() {
-            Logger.LogInformation("CalculateAverage");
+            Logger.LogInformation("CalculateAverage (Offline Mode)");
             int count = 0;
             float total = 0;
 
@@ -663,42 +607,25 @@ namespace DerbyDash.Components.Pages {
             if (prevAverage > 0) {
                 improvedTime = (average < prevAverage) ? (prevAverage - average) : 0;
             }
-            Logger.LogInformation("ave: {average} prev: {prevAverage} improv {improvedTime}", average, prevAverage, improvedTime);
+            Logger.LogInformation("ave: {average} prev: {prevAverage} improv {improvedTime} (Offline Mode)", average, prevAverage, improvedTime);
             prevAverage = average;
         }
 
-        //private void ignoremouse(MouseEventArgs e) {
-        //    try {
-        //        await textInput.FocusAsync();
-        //    } catch (Exception e) {
-        //    }
-        //}
-
         public async Task InitializeTrack(string? problemSetIdentifier) {
-            Logger.LogInformation("InitializeTrack");
+            Logger.LogInformation("InitializeTrack (Offline Mode)");
             if (string.IsNullOrEmpty(problemSetIdentifier)) {
                 throw new Exception("problemSetIdentifier is empty or null.");
             }
             try {
-                // Get the current racer from the _raceTeamService
+                // Get the current racer from the offline race team service
                 Racer? currentRacer = await RaceTeamService.GetActiveRacer();
                 if (currentRacer == null) {
-                    // If no racer is selected, redirect to the RaceTeam page
-                    Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
-                    NavManager.NavigateTo("/Account/Manage/RaceTeam");
+                    Logger.LogWarning("No active racer found in offline mode. This should not happen.");
                     return;
                 }
 
                 // Create the track with the current racer
                 track = await RaceService.CreateTrack(problemSetIdentifier);
-            } catch (MissingRacerException ex) {
-                LogMessage(ex);
-                Logger.LogInformation($"Redirecting to /Account/Manage/RaceTeam");
-                NavManager.NavigateTo("/Account/Manage/RaceTeam");
-            } catch (MissingUserException ex) {
-                LogMessage(ex);
-                Logger.LogInformation($"Redirecting to /Account/login");
-                NavManager.NavigateTo("/Account/login");
             } catch (Exception ex) {
                 LogMessage(ex);
             }
@@ -706,22 +633,11 @@ namespace DerbyDash.Components.Pages {
 
         protected override async Task OnAfterRenderAsync(bool firstRender) {
             try {
-                // ENFORCE: Must have a chosen racer to race
-                var activeRacer = await RaceTeamService.GetActiveRacer();
-                if (activeRacer == null) {
-                    Logger.LogWarning("No active racer found. Redirecting to RaceTeam page.");
-                    NavManager.NavigateTo("/Account/Manage/RaceTeam", true);
-                    return;
-                }
-
                 // Try to focus the text input if it exists
                 await textInput.FocusAsync();
             } catch (Exception) {
                 // Ignore focus errors
             }
-
-            // No need to check authentication status on first render
-            // The UI already shows a login message for unauthenticated users
         }
 
         public async Task OnAfterIgnore() {
@@ -787,7 +703,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private async Task StartPeriodicTimerAsync() {
-            Logger.LogInformation("StartPeriodicTimerAsync");
+            Logger.LogInformation("StartPeriodicTimerAsync (Offline Mode)");
             // Create a new CancellationTokenSource each time the timer is started
             PeriodicTimerToken = new CancellationTokenSource();
             periodicTimer = new(TimeSpan.FromMicroseconds(PERIODIC_TIMER_SPAN_MICROSECONDS));
@@ -805,7 +721,7 @@ namespace DerbyDash.Components.Pages {
         }
 
         private void StopPeriodicTimer() {
-            Logger.LogInformation("StopPeriodicTimer");
+            Logger.LogInformation("StopPeriodicTimer (Offline Mode)");
             // Cancel the token and dispose of the timer
             PeriodicTimerToken.Cancel();
             periodicTimer.Dispose();
@@ -854,51 +770,51 @@ namespace DerbyDash.Components.Pages {
 
         string[] encouragingWords = new string[] {
             //Encouragement and Praise for Effort:
-            "Great job sticking with it!",
+            "Great job practicing!",
             "You did it!",
-            "I'm so proud of your hard work!",
-            "Your effort is really paying off!",
-            "You're doing fantastic work!",
-            "Keep it up, you're doing great!",
-            "Fantastic effort, keep it up!",
-            "You're doing a wonderful job!",
-            "Your hard work is really showing!",
+            "Keep up the great work!",
+            "Your practice is paying off!",
+            "You're doing fantastic!",
+            "Nice work in practice mode!",
+            "Fantastic effort!",
+            "You're improving!",
             "Great perseverance!",
-            "You're making great progress!",
-            "You should be proud of yourself!",
-            "Your hard work is paying off!",
-            "You're doing an excellent job!",
-            "Fantastic!",
-            "You're showing great determination!",
-            "You're doing a great job staying focused!",
+            "You're getting better!",
+            "Excellent practice session!",
+            "You're doing great!",
+            "Keep practicing!",
+            "Nice job!",
+            "You're on fire!",
+            "Great focus!",
 
             //Recognition of Improvement:
-            "You're getting better every day!",
-            "I can see how much you've improved!",
+            "You're getting faster!",
+            "I can see improvement!",
             "You are really improving!",
             "You're mastering these problems!",
             "You are becoming a math whiz!",
-            "You're really getting the hang of this!",
-            "I'm impressed with your progress!",
-            "You're getting better with every race!",
-            "You're really shining in math!",
+            "You're getting the hang of this!",
+            "Great progress in practice!",
+            "You're getting better with every try!",
+            "You're really shining!",
 
             //Motivational and Positive Reinforcement:
-            "I love how you don't give up!",
+            "I love how you keep trying!",
             "Wow, look at you go!",
             "Like a boss.",
-            "Complaining doesn't solve problems, you do.",
-            "Problems aren't solved by complaining — they're solved by you!",
-            "Slicing through those problems like a champ.",
-            "You tackled those problems like a pro!",
-            "Your dedication is inspiring!",
+            "Practice makes perfect!",
+            "You're crushing those problems!",
+            "Slicing through those problems!",
+            "You tackled those like a pro!",
+            "Your dedication shows!",
             "Solving those problems - like a boss.",
-            "Practice strengthens those brain muscles.",
-            "Sailing through those problems like a pro.",
+            "Practice strengthens your brain!",
+            "Sailing through those problems!",
 
-            // Funny?
-            "Do it the same, but better!"
+            // Practice Mode Specific
+            "Great practice session!",
+            "Keep up the practice!",
+            "Practice mode champion!"
         };
     }
 }
-

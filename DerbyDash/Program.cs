@@ -102,7 +102,14 @@ namespace DerbyDash {
 
             builder.Services.AddScoped<FeedbackService>();
             
-            builder.Services.AddScoped<RaceService>();
+            // Register RaceService with interface
+            builder.Services.AddScoped<IRaceService, RaceService>();
+            
+            // Register offline services
+            builder.Services.AddScoped<IOfflineRaceTeamService, Services.Offline.OfflineRaceTeamService>();
+            builder.Services.AddScoped<Services.Offline.OfflineRaceService>();
+            builder.Services.AddScoped<Services.Offline.IOfflineDetectionService, Services.Offline.OfflineDetectionService>();
+            
             builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
             builder.Services.AddScoped<ILogService, LogService>();
             builder.Services.AddScoped<DatabaseKeepAliveService>();
