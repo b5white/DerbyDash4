@@ -48,6 +48,16 @@
     font-family: 'Racing Sans One', cursive, sans-serif;
 }
 
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Category button anchor styling */
+.category-button {
+    scroll-margin-top: 2rem;
+}
+
 .race-flag {
     position: absolute;
     width: 60px;

@@ -10,6 +10,7 @@ namespace DerbyDash.Services {
         private readonly SessionData CurrentSession;
         private readonly IJSRuntime _jsRuntime;
         private readonly IDbContextFactory<ApplicationDbContext> _contextFactory;
+        private readonly ISubscriptionService _subscriptionService;
 
         private bool _triedLoadingFromCookie = false;
         private bool _isHandlingRacerChanged = false; // Flag to prevent infinite recursion
@@ -31,12 +32,14 @@ namespace DerbyDash.Services {
             ILogger<RaceTeamService> logger,
             SessionData currentRequest,
             IJSRuntime jsRuntime,
-            IDbContextFactory<ApplicationDbContext> contextFactory) {
+            IDbContextFactory<ApplicationDbContext> contextFactory,
+            ISubscriptionService subscriptionService) {
             _userService = userService;
             Logger = logger;
             CurrentSession = currentRequest;
             _jsRuntime = jsRuntime;
             _contextFactory = contextFactory;
+            _subscriptionService = subscriptionService;
         }
 
         public async Task<List<Racer>> GetRacers(bool includeCount = true) {
@@ -122,6 +125,14 @@ namespace DerbyDash.Services {
             Logger.LogInformation("AddRacer for ID: {ID}", racer.Id);
             racer.UserId = await GetUserID("AddRacer");
             Logger.LogInformation($"Using UserId: {racer.UserId} for new racer");
+
+            // Check racer limit before adding
+            var currentRacers = await GetRacers();
+            var racerLimit = await _subscriptionService.GetRacerLimitAsync(racer.UserId);
+            
+            if (currentRacers.Count >= racerLimit) {
+                throw new InvalidOperationException($"Cannot add racer. You have reached your limit of {racerLimit} racers. Upgrade your subscription to add more racers.");
+            }
 
             // Generate a unique ID if not provided
             if (racer.Id <= 0) {

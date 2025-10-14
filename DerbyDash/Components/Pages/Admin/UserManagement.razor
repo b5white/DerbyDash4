@@ -1,0 +1,248 @@
+@page "/admin/users"
+@using DerbyDash.Data
+@using DerbyDash.Services
+@using Microsoft.AspNetCore.Identity
+@attribute [Authorize]
+@inject UserManager<ApplicationUser> UserManager
+@inject ISubscriptionService SubscriptionService
+@inject IUserService UserService
+@inject ILogger<UserManagement> Logger
+
+<PageTitle>User Management - Admin</PageTitle>
+
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>User Management</h1>
+        <p>Manage user racer limits and subscription overrides</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p>Loading users...</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger" role="alert">
+            @errorMessage
+        </div>
+    }
+    else
+    {
+        <div class="users-table-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Current Racers</th>
+                        <th>Racer Limit</th>
+                        <th>Subscription</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in users)
+                    {
+                        <tr>
+                            <td>@user.UserName</td>
+                            <td>@user.Email</td>
+                            <td>@user.CurrentRacerCount</td>
+                            <td>
+                                @if (user.IsRacerLimitOverridden)
+                                {
+                                    <span class="badge bg-warning">Override: @user.RacerLimit</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info">Default: @user.RacerLimit</span>
+                                }
+                            </td>
+                            <td>@user.SubscriptionType</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        @onclick="() => EditUserLimit(user)">
+                                    Edit Limit
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+<!-- Edit User Limit Modal -->
+@if (showEditModal)
+{
+    <div class="modal show d-block" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Racer Limit</h5>
+                    <button type="button" class="btn-close" @onclick="CloseEditModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">User: @selectedUser?.UserName</label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Current Racers: @selectedUser?.CurrentRacerCount</label>
+                    </div>
+                    <div class="mb-3">
+                        <label for="racerLimit" class="form-label">Racer Limit</label>
+                        <input type="number" class="form-control" id="racerLimit" 
+                               @bind="newRacerLimit" min="1" max="50" />
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isOverride" 
+                                   @bind="isAdminOverride" />
+                            <label class="form-check-label" for="isOverride">
+                                Admin Override (bypasses subscription limits)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseEditModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveUserLimit" 
+                            disabled="@(isSaving)">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Save Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal-backdrop show"></div>
+}
+
+@code {
+    private List<UserWithDetails> users = new();
+    private bool isLoading = true;
+    private string errorMessage = string.Empty;
+    private bool showEditModal = false;
+    private UserWithDetails? selectedUser;
+    private int newRacerLimit;
+    private bool isAdminOverride;
+    private bool isSaving = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            isLoading = true;
+            users.Clear();
+
+            var allUsers = UserManager.Users.ToList();
+            
+            foreach (var user in allUsers)
+            {
+                var subscription = await SubscriptionService.GetCurrentSubscriptionAsync(user.Id);
+                var racerLimit = await SubscriptionService.GetRacerLimitAsync(user.Id);
+                
+                // Get current racer count (this would need to be implemented)
+                var currentRacerCount = await GetCurrentRacerCount(user.Id);
+                
+                users.Add(new UserWithDetails
+                {
+                    Id = user.Id,
+                    UserName = user.UserName ?? "Unknown",
+                    Email = user.Email ?? "No email",
+                    RacerLimit = racerLimit,
+                    IsRacerLimitOverridden = user.IsRacerLimitOverridden,
+                    SubscriptionType = subscription.Type.ToString(),
+                    CurrentRacerCount = currentRacerCount
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error loading users: {ex.Message}";
+            Logger.LogError(ex, "Error loading users");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private Task<int> GetCurrentRacerCount(string userId)
+    {
+        // This would need to be implemented based on your racer storage
+        // For now, return a placeholder
+        return Task.FromResult(0);
+    }
+
+    private void EditUserLimit(UserWithDetails user)
+    {
+        selectedUser = user;
+        newRacerLimit = user.RacerLimit;
+        isAdminOverride = user.IsRacerLimitOverridden;
+        showEditModal = true;
+    }
+
+    private void CloseEditModal()
+    {
+        showEditModal = false;
+        selectedUser = null;
+    }
+
+    private async Task SaveUserLimit()
+    {
+        if (selectedUser == null) return;
+
+        try
+        {
+            isSaving = true;
+            var success = await SubscriptionService.SetRacerLimitAsync(
+                selectedUser.Id, 
+                newRacerLimit, 
+                isAdminOverride);
+
+            if (success)
+            {
+                await LoadUsers(); // Refresh the list
+                CloseEditModal();
+            }
+            else
+            {
+                errorMessage = "Failed to update racer limit";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error updating racer limit: {ex.Message}";
+            Logger.LogError(ex, "Error updating racer limit for user {UserId}", selectedUser.Id);
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    public class UserWithDetails
+    {
+        public string Id { get; set; } = string.Empty;
+        public string UserName { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public int RacerLimit { get; set; }
+        public bool IsRacerLimitOverridden { get; set; }
+        public string SubscriptionType { get; set; } = string.Empty;
+        public int CurrentRacerCount { get; set; }
+    }
+}

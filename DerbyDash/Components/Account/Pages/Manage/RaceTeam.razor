@@ -30,6 +30,18 @@ else
 @code {
     private RenderFragment RenderContent() => @<text>
         <h3>Current race team</h3>
+        
+        @if (racerLimitInfo != null) {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Racer Limit:</strong> You have @raceTeam.Count of @racerLimitInfo.Limit racers 
+                @if (racerLimitInfo.IsOverridden) {
+                    <span class="badge bg-warning ms-2">Admin Override</span>
+                } else {
+                    <span class="badge bg-primary ms-2">@racerLimitInfo.SubscriptionType</span>
+                }
+            </div>
+        }
 
         @if (raceTeam.Any()) {
             <div class="table-responsive">

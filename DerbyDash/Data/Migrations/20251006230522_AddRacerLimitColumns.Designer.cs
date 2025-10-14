@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DerbyDash.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250908004330_AddPublicPrivateResponseToFeedback")]
-    partial class AddPublicPrivateResponseToFeedback
+    [Migration("20251006230522_AddRacerLimitColumns")]
+    partial class AddRacerLimitColumns
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,6 +44,9 @@ namespace DerbyDash.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsRacerLimitOverridden")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -66,6 +69,9 @@ namespace DerbyDash.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<int?>("RacerLimit")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");

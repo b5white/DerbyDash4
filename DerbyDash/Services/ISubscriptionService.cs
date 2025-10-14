@@ -9,5 +9,7 @@ namespace DerbyDash.Services {
         Task<bool> CancelSubscriptionAsync(string userId);
         Task<bool> RenewSubscriptionAsync(string userId, SubscriptionType type);
         Task<bool> UseReferralCreditAsync(string userId);
+        Task<int> GetRacerLimitAsync(string userId);
+        Task<bool> SetRacerLimitAsync(string userId, int limit, bool isAdminOverride = false);
     }
 }

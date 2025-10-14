@@ -48,8 +48,17 @@ namespace DerbyDash.Components.Account.Pages.Manage {
         [Inject]
         public IAvatarService AvatarService { get; set; } = default!;
 
+        [Inject]
+        public ISubscriptionService SubscriptionService { get; set; } = default!;
+
+        [Inject]
+        public IUserService UserService { get; set; } = default!;
+
         [SupplyParameterFromForm]
         private InputModel Input { get; set; } = new();
+
+        // Racer limit information
+        private RacerLimitInfo? racerLimitInfo;
 
         protected override async Task OnInitializedAsync() {
             // Initialize registration steps if coming from registration flow
@@ -61,6 +70,7 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             // Subscribe to racer changes
             RaceTeamService.OnRacerChanged += HandleRacerChangedAsync;
             await ReloadUsers();
+            await LoadRacerLimitInfo();
         }
 
         private async Task HandleRacerChangedAsync() {
@@ -117,6 +127,10 @@ namespace DerbyDash.Components.Account.Pages.Manage {
                 // Preserve the entered name and show error
                 message = $"Error: '{Input.RacerName}' already exists on the team";
                 Logger.LogWarning("Duplicate racer name attempted: {RacerName}", Input.RacerName);
+            } catch (InvalidOperationException ex) when (ex.Message.Contains("racer limit")) {
+                // Handle racer limit exceeded
+                message = ex.Message;
+                Logger.LogWarning("Racer limit exceeded for user: {Message}", ex.Message);
             } catch (Exception ex) {
                 Logger.LogError(ex, "Error adding racer: {RacerName}", Input.RacerName);
                 message = "Error adding racer: " + ex.Message;
@@ -295,9 +309,41 @@ namespace DerbyDash.Components.Account.Pages.Manage {
             }
         }
 
+        private async Task LoadRacerLimitInfo() {
+            try {
+                var userId = await UserService.GetUserIdAsync("LoadRacerLimitInfo");
+                var subscription = await SubscriptionService.GetCurrentSubscriptionAsync(userId);
+                var racerLimit = await SubscriptionService.GetRacerLimitAsync(userId);
+                
+                // Check if user has an admin override by getting the user directly
+                var user = await UserManager.FindByIdAsync(userId);
+                var isOverridden = user?.IsRacerLimitOverridden ?? false;
+                
+                racerLimitInfo = new RacerLimitInfo {
+                    Limit = racerLimit,
+                    SubscriptionType = subscription.Type.ToString(),
+                    IsOverridden = isOverridden
+                };
+            } catch (Exception ex) {
+                Logger.LogError(ex, "Error loading racer limit info");
+                // Set default values if loading fails
+                racerLimitInfo = new RacerLimitInfo {
+                    Limit = 8,
+                    SubscriptionType = "Unknown",
+                    IsOverridden = false
+                };
+            }
+        }
+
         public void Dispose() {
             // Unsubscribe from racer changes
             RaceTeamService.OnRacerChanged -= HandleRacerChangedAsync;
         }
+    }
+
+    public class RacerLimitInfo {
+        public int Limit { get; set; }
+        public string SubscriptionType { get; set; } = string.Empty;
+        public bool IsOverridden { get; set; }
     }
 }

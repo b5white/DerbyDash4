@@ -1,11 +1,17 @@
 using DerbyDash.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace DerbyDash.Services {
     public class SubscriptionService: ISubscriptionService {
         // In-memory storage for demo purposes
         private static Dictionary<string, Subscription> _subscriptions = new Dictionary<string, Subscription>();
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationDbContext _context;
 
-        public SubscriptionService() {
+        public SubscriptionService(UserManager<ApplicationUser> userManager, ApplicationDbContext context) {
+            _userManager = userManager;
+            _context = context;
         }
 
         public async Task<Subscription> GetCurrentSubscriptionAsync(string userId) {
@@ -148,6 +154,45 @@ namespace DerbyDash.Services {
             subscription.EndDate = subscription.EndDate.AddDays(30);
 
             return true;
+        }
+
+        public async Task<int> GetRacerLimitAsync(string userId) {
+            // First check if user has a manually set limit
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null && user.RacerLimit.HasValue) {
+                return user.RacerLimit.Value;
+            }
+
+            // Get subscription-based limit
+            var subscription = await GetCurrentSubscriptionAsync(userId);
+            return GetDefaultRacerLimit(subscription.Type);
+        }
+
+        public async Task<bool> SetRacerLimitAsync(string userId, int limit, bool isAdminOverride = false) {
+            try {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null) {
+                    return false;
+                }
+
+                user.RacerLimit = limit;
+                user.IsRacerLimitOverridden = isAdminOverride;
+
+                var result = await _userManager.UpdateAsync(user);
+                return result.Succeeded;
+            } catch (Exception) {
+                return false;
+            }
+        }
+
+        private int GetDefaultRacerLimit(SubscriptionType subscriptionType) {
+            return subscriptionType switch {
+                SubscriptionType.Trial => 3,
+                SubscriptionType.Monthly => 8,
+                SubscriptionType.Annual => 12,
+                SubscriptionType.Lifetime => 20,
+                _ => 3
+            };
         }
     }
 }

@@ -52,7 +52,8 @@
                         bool isActive = selectedCategory == category;
                         
                         <button class="category-button @(isActive ? "active" : "")" 
-                                @onclick="() => ToggleCategorySelection(category)">
+                                @onclick="() => ToggleCategorySelection(category)"
+                                id="@GetCategoryAnchorId(category)">
                             @category
                         </button>
                         
@@ -128,9 +129,14 @@
             allFAQs = await FAQService.GetAllFAQsAsync();
             categories = await FAQService.GetCategoriesAsync();
             
-            // Don't select any category by default
-            selectedCategory = null;
-            filteredFAQs = new List<DerbyDash.Data.FAQ>();
+            // Check for URL hash fragment to auto-select category
+            await CheckUrlHashAndSelectCategory();
+            
+            // Don't select any category by default if no hash
+            if (selectedCategory == null)
+            {
+                filteredFAQs = new List<DerbyDash.Data.FAQ>();
+            }
         }
         catch (Exception ex)
         {
@@ -172,5 +178,40 @@
         
         // Reset expanded items when changing category - all closed by default
         expandedItems.Clear();
+    }
+
+    private string GetCategoryAnchorId(string category)
+    {
+        // Convert category to lowercase and replace spaces with hyphens for URL-friendly anchor
+        return category.ToLowerInvariant().Replace(" ", "-");
+    }
+
+    private async Task CheckUrlHashAndSelectCategory()
+    {
+        try
+        {
+            // Get the current URL hash fragment
+            var currentUrl = await JSRuntime.InvokeAsync<string>("eval", "window.location.href");
+            var uri = new Uri(currentUrl);
+            var hash = uri.Fragment.TrimStart('#');
+            
+            if (!string.IsNullOrEmpty(hash))
+            {
+                // Find category that matches the hash (case-insensitive)
+                var matchingCategory = categories.FirstOrDefault(c => 
+                    GetCategoryAnchorId(c).Equals(hash, StringComparison.OrdinalIgnoreCase));
+                
+                if (matchingCategory != null)
+                {
+                    selectedCategory = matchingCategory;
+                    filteredFAQs = allFAQs.Where(f => f.Category == matchingCategory).ToList();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            // Silently handle any errors with URL parsing
+            Console.WriteLine($"Error parsing URL hash: {ex.Message}");
+        }
     }
 }
