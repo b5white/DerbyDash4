@@ -37,7 +37,14 @@
             <Authorized>
                 <div class="nav-divider">
                     <span>Resources</span>
-                </div>                
+                </div>
+
+                <div class="nav-item">
+                    <NavLink class="nav-link parent-progress-link" href="ParentProgress" Match="NavLinkMatch.All" @onclick="HandleNavClick">
+                        <i class="nav-icon fas fa-chart-line"></i>
+                        <span class="nav-text">Progress Dashboard</span>
+                    </NavLink>
+                </div>
                 
                 <div class="nav-item">
                     <NavLink class="nav-link" href="faq" Match="NavLinkMatch.All" @onclick="HandleNavClick">

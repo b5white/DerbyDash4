@@ -1,0 +1,291 @@
+@page "/ParentProgress"
+@rendermode InteractiveServer
+@attribute [Authorize]
+@using RaceData = DerbyDash.Data.Race
+
+<PageTitle>Parent Progress Dashboard - TurboFlash</PageTitle>
+
+<div class="parent-progress-container">
+    <!-- Header Section -->
+    <div class="progress-header">
+        <div class="header-content">
+            <div class="header-title-section">
+                <h1 class="progress-title">
+                    <i class="fas fa-chart-line"></i>
+                    Race Team Progress
+                </h1>
+                <p class="progress-subtitle">Track your racers' math journey and celebrate their achievements!</p>
+            </div>
+            <div class="racing-flag-icon">🏁</div>
+        </div>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="loading-section">
+            <div class="loading-spinner">
+                <i class="fas fa-car fa-3x fa-spin"></i>
+            </div>
+            <p class="loading-text">Loading race statistics...</p>
+        </div>
+    }
+    else if (!Racers.Any())
+    {
+        <div class="no-racers-message">
+            <div class="no-racers-icon">
+                <i class="fas fa-users-slash fa-4x"></i>
+            </div>
+            <h3>No Racers Yet!</h3>
+            <p>Start by adding racers to your team to track their progress.</p>
+            <a href="/Account/Manage/RaceTeam" class="btn btn-primary btn-lg">
+                <i class="fas fa-user-plus"></i> Add Racers
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Overall Team Statistics -->
+        <div class="team-stats-section">
+            <h2 class="section-title">
+                <i class="fas fa-trophy"></i>
+                Team Statistics
+            </h2>
+            <div class="stats-grid">
+                <div class="stat-card total-races">
+                    <div class="stat-icon">
+                        <i class="fas fa-flag-checkered"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">@TotalTeamRaces</div>
+                        <div class="stat-label">Total Races</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card active-racers">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">@Racers.Count</div>
+                        <div class="stat-label">Team Members</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card total-wins">
+                    <div class="stat-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">@TotalFirstPlaceFinishes</div>
+                        <div class="stat-label">1st Place Wins</div>
+                    </div>
+                </div>
+                
+                <div class="stat-card avg-time">
+                    <div class="stat-icon">
+                        <i class="fas fa-stopwatch"></i>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-value">@TeamAverageTime.ToString("F1")s</div>
+                        <div class="stat-label">Avg. Time</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Individual Racer Progress -->
+        <div class="racers-progress-section">
+            <h2 class="section-title">
+                <i class="fas fa-user-chart"></i>
+                Individual Progress
+            </h2>
+            
+            @foreach (var racer in Racers)
+            {
+                var stats = RacerStats.ContainsKey(racer.Id) ? RacerStats[racer.Id] : null;
+                
+                <div class="racer-progress-card">
+                    <!-- Racer Header -->
+                    <div class="racer-header">
+                        <div class="racer-identity">
+                            <div class="racer-avatar-wrapper">
+                                @if (!string.IsNullOrEmpty(racer.AvatarFileName))
+                                {
+                                    <img src="/images/avatars/@racer.AvatarFileName" 
+                                         class="racer-avatar" 
+                                         alt="@racer.Name's Avatar" />
+                                }
+                                else
+                                {
+                                    <div class="racer-avatar-placeholder">
+                                        @(racer.Name.Length > 0 ? racer.Name[0].ToString().ToUpper() : "?")
+                                    </div>
+                                }
+                            </div>
+                            <div class="racer-name-section">
+                                <h3 class="racer-name">@racer.Name</h3>
+                                <p class="racer-meta">
+                                    Last raced: @(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")
+                                </p>
+                            </div>
+                        </div>
+                        
+                        @if (stats != null && stats.TotalRaces > 0)
+                        {
+                            <div class="racer-badges">
+                                @if (stats.FirstPlaceFinishes >= 10)
+                                {
+                                    <span class="badge badge-gold" title="10+ First Place Wins">
+                                        <i class="fas fa-crown"></i> Champion
+                                    </span>
+                                }
+                                @if (stats.TotalRaces >= 50)
+                                {
+                                    <span class="badge badge-purple" title="50+ Races Completed">
+                                        <i class="fas fa-star"></i> Pro Racer
+                                    </span>
+                                }
+                                @if (stats.TotalRaces >= 100)
+                                {
+                                    <span class="badge badge-rainbow" title="100+ Races Completed">
+                                        <i class="fas fa-trophy"></i> Legend
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    @if (stats != null && stats.TotalRaces > 0)
+                    {
+                        <!-- Racer Stats Grid -->
+                        <div class="racer-stats-grid">
+                            <div class="racer-stat">
+                                <div class="racer-stat-label">Total Races</div>
+                                <div class="racer-stat-value">@stats.TotalRaces</div>
+                            </div>
+                            <div class="racer-stat">
+                                <div class="racer-stat-label">Best Time</div>
+                                <div class="racer-stat-value">@stats.BestTime.ToString("F1")s</div>
+                            </div>
+                            <div class="racer-stat">
+                                <div class="racer-stat-label">Average Time</div>
+                                <div class="racer-stat-value">@stats.AverageTime.ToString("F1")s</div>
+                            </div>
+                            <div class="racer-stat">
+                                <div class="racer-stat-label">1st Place</div>
+                                <div class="racer-stat-value">@stats.FirstPlaceFinishes</div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-bar-section">
+                            <div class="progress-bar-header">
+                                <span class="progress-label">Win Rate</span>
+                                <span class="progress-percentage">@stats.WinPercentage.ToString("F0")%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: @(stats.WinPercentage)%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        @if (RecentRaces.ContainsKey(racer.Id) && RecentRaces[racer.Id].Any())
+                        {
+                            <div class="recent-activity">
+                                <h4 class="activity-title">
+                                    <i class="fas fa-history"></i> Recent Races
+                                </h4>
+                                <div class="recent-races-list">
+                                    @foreach (var race in RecentRaces[racer.Id].Take(5))
+                                    {
+                                        <div class="recent-race-item">
+                                            <div class="race-date">
+                                                <i class="fas fa-calendar-day"></i>
+                                                @race.RaceDateTime.ToString("MMM d")
+                                            </div>
+                                            <div class="race-type">
+                                                <i class="fas fa-calculator"></i>
+                                                @GetProblemSetName(race.ProblemSetId)
+                                            </div>
+                                            <div class="race-time">
+                                                <i class="fas fa-clock"></i>
+                                                @race.TotalTime.ToString("F1")s
+                                            </div>
+                                            <div class="race-position">
+                                                @if (race.FinishingPosition == 1)
+                                                {
+                                                    <span class="position-badge gold">
+                                                        <i class="fas fa-medal"></i> 1st
+                                                    </span>
+                                                }
+                                                else if (race.FinishingPosition == 2)
+                                                {
+                                                    <span class="position-badge silver">
+                                                        <i class="fas fa-medal"></i> 2nd
+                                                    </span>
+                                                }
+                                                else if (race.FinishingPosition == 3)
+                                                {
+                                                    <span class="position-badge bronze">
+                                                        <i class="fas fa-medal"></i> 3rd
+                                                    </span>
+                                                }
+                                                else if (race.FinishingPosition > 0)
+                                                {
+                                                    <span class="position-badge">
+                                                        @race.FinishingPosition@(GetOrdinalSuffix(race.FinishingPosition))
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="no-races-message">
+                            <i class="fas fa-car-side fa-2x"></i>
+                            <p>@racer.Name hasn't completed any races yet. Encourage them to start racing!</p>
+                            <a href="/RaceSetsMenu" class="btn btn-success">
+                                <i class="fas fa-play"></i> Start Racing
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Encouragement Tips Section -->
+        <div class="tips-section">
+            <h2 class="section-title">
+                <i class="fas fa-lightbulb"></i>
+                Tips for Parents
+            </h2>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <div class="tip-icon">🎯</div>
+                    <h4>Set Daily Goals</h4>
+                    <p>Encourage 5-10 races per day for consistent practice and skill building.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🌟</div>
+                    <h4>Celebrate Progress</h4>
+                    <p>Acknowledge improvements in speed and accuracy, not just first-place finishes.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">🎪</div>
+                    <h4>Make it Fun</h4>
+                    <p>Let kids choose their avatars and racing challenges to keep them engaged.</p>
+                </div>
+                <div class="tip-card">
+                    <div class="tip-icon">📈</div>
+                    <h4>Track Improvement</h4>
+                    <p>Look for decreasing times and increasing win rates as signs of mastery.</p>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+

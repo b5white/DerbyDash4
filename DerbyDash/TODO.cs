@@ -82,7 +82,7 @@
         // TODO Separate client
         // DONE Show userId and racerId in admin feedback page.
         // DONE Show user and racer counts in admin feedback page.
-        // TODO Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
+        // DONE Add anchors on the FAQ page so we can link to the specific sections, like FAQ#subscription
         // DONE In Race.Reset, break the FireAndForget code out into a separate routine.
         //    I want Reset to be higher level and it has too many details.
         // DONE Move the css in *.razor over the the css files
@@ -91,7 +91,7 @@
         //    AllTime, Last Week, Last30Days, Last90Days, LastYear
         //    That way, the routine itself is reponsible for the date details.
         // DONE In the feedback response, we need a field for public response and a private response
-        // TODO Limit racers to 8 per subscription.
+        // DONE Limit racers to 8 per subscription.
         //     Make this a User field so admin can increase it per user if needed.
 
         // ** Brad **
