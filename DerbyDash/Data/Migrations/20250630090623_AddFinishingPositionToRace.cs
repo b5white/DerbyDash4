@@ -11,15 +11,24 @@ namespace DerbyDash.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "Feedbacks");
+            // Check if Feedbacks table exists before dropping it
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[Feedbacks]', N'U') IS NOT NULL
+                BEGIN
+                    DROP TABLE [Feedbacks];
+                END
+            ");
 
-            migrationBuilder.AddColumn<int>(
-                name: "FinishingPosition",
-                table: "Races",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            // Check if Races table exists before adding column
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[Races]', N'U') IS NOT NULL
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'[Races]') AND name = 'FinishingPosition')
+                    BEGIN
+                        ALTER TABLE [Races] ADD [FinishingPosition] int NOT NULL DEFAULT 0;
+                    END
+                END
+            ");
         }
 
         /// <inheritdoc />

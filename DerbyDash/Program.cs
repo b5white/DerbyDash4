@@ -216,6 +216,45 @@ namespace DerbyDash {
 
             WebApplication app = builder.Build();
 
+            // Ensure Identity tables are created in development
+            if (app.Environment.IsDevelopment()) {
+                using (var scope = app.Services.CreateScope()) {
+                    var dbContextFactory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+                    using var dbContext = dbContextFactory.CreateDbContext();
+                    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+                    try {
+                        // Check if database exists and has tables
+                        var canConnect = dbContext.Database.CanConnect();
+                        if (!canConnect) {
+                            logger.LogInformation("Database does not exist. Creating database and tables...");
+                            dbContext.Database.EnsureCreated();
+                            logger.LogInformation("Database and tables created successfully.");
+                        } else {
+                            // Database exists, check if AspNetUsers table exists
+                            try {
+                                var testQuery = dbContext.Database.ExecuteSqlRaw("SELECT TOP 1 Id FROM AspNetUsers");
+                                logger.LogInformation("AspNetUsers table exists.");
+                            } catch {
+                                // If query fails, table doesn't exist - create all tables
+                                logger.LogInformation("AspNetUsers table not found. Creating all database tables...");
+                                dbContext.Database.EnsureCreated();
+                                logger.LogInformation("Database tables created successfully.");
+                            }
+                        }
+                    } catch (Exception ex) {
+                        // If there's an error, try to ensure created anyway
+                        try {
+                            logger.LogWarning(ex, "Error checking database. Attempting to create tables...");
+                            dbContext.Database.EnsureCreated();
+                            logger.LogInformation("Database tables created successfully.");
+                        } catch (Exception createEx) {
+                            // Log but don't fail startup
+                            logger.LogError(createEx, "Could not ensure database is created. Please run: dotnet ef database update");
+                        }
+                    }
+                }
+            }
+
             app.MapGet("/throwerror", async () => {
                 await Task.CompletedTask; // Just to use 'await'
                 var inner = new Exception("Inner exception message");

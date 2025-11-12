@@ -11,90 +11,76 @@ namespace DerbyDash.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<bool>(
-                name: "IsRacerLimitOverridden",
-                table: "AspNetUsers",
-                type: "bit",
-                nullable: false,
-                defaultValue: false);
+            // Check if AspNetUsers table exists before adding columns
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[AspNetUsers]', N'U') IS NOT NULL
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'[AspNetUsers]') AND name = 'IsRacerLimitOverridden')
+                    BEGIN
+                        ALTER TABLE [AspNetUsers] ADD [IsRacerLimitOverridden] bit NOT NULL DEFAULT CAST(0 AS bit);
+                    END
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID(N'[AspNetUsers]') AND name = 'RacerLimit')
+                    BEGIN
+                        ALTER TABLE [AspNetUsers] ADD [RacerLimit] int NULL;
+                    END
+                END
+            ");
 
-            migrationBuilder.AddColumn<int>(
-                name: "RacerLimit",
-                table: "AspNetUsers",
-                type: "int",
-                nullable: true);
+            // Only create Feedbacks table if AspNetUsers exists
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[AspNetUsers]', N'U') IS NOT NULL
+                BEGIN
+                    IF OBJECT_ID(N'[Feedbacks]', N'U') IS NULL
+                    BEGIN
+                        CREATE TABLE [Feedbacks] (
+                            [Id] int NOT NULL IDENTITY,
+                            [UserId] nvarchar(450) NULL,
+                            [RacerId] int NULL,
+                            [Name] nvarchar(100) NOT NULL,
+                            [Email] nvarchar(256) NOT NULL,
+                            [FeedbackType] int NOT NULL,
+                            [Subject] nvarchar(200) NOT NULL,
+                            [Message] nvarchar(2000) NOT NULL,
+                            [BrowserInfo] nvarchar(500) NOT NULL,
+                            [ContactConsent] bit NOT NULL,
+                            [SubmittedAt] datetime2 NOT NULL,
+                            [IsResolved] bit NOT NULL,
+                            [AdminNotes] nvarchar(1000) NULL,
+                            [PublicResponse] nvarchar(2000) NULL,
+                            [PrivateResponse] nvarchar(2000) NULL,
+                            [ResolvedAt] datetime2 NULL,
+                            CONSTRAINT [PK_Feedbacks] PRIMARY KEY ([Id]),
+                            CONSTRAINT [FK_Feedbacks_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id])
+                        );
+                        CREATE INDEX [IX_Feedbacks_RacerId] ON [Feedbacks] ([RacerId]);
+                        CREATE INDEX [IX_Feedbacks_UserId] ON [Feedbacks] ([UserId]);
+                    END
+                END
+            ");
 
-            migrationBuilder.CreateTable(
-                name: "Feedbacks",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    RacerId = table.Column<int>(type: "int", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
-                    FeedbackType = table.Column<int>(type: "int", nullable: false),
-                    Subject = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: false),
-                    BrowserInfo = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    ContactConsent = table.Column<bool>(type: "bit", nullable: false),
-                    SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsResolved = table.Column<bool>(type: "bit", nullable: false),
-                    AdminNotes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    PublicResponse = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    PrivateResponse = table.Column<string>(type: "nvarchar(2000)", maxLength: 2000, nullable: true),
-                    ResolvedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Feedbacks", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Feedbacks_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Feedbacks_FamilyMembers_RacerId",
-                        column: x => x.RacerId,
-                        principalTable: "FamilyMembers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Log",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    LogLevel = table.Column<int>(type: "int", nullable: false),
-                    ThreadId = table.Column<int>(type: "int", nullable: true),
-                    EventId = table.Column<int>(type: "int", nullable: true),
-                    EventName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(450)", maxLength: 450, nullable: true),
-                    RacerId = table.Column<int>(type: "int", nullable: true),
-                    SessionId = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    ExceptionMessage = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
-                    ExceptionStackTrace = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExceptionSource = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Log", x => x.Id);
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Feedbacks_RacerId",
-                table: "Feedbacks",
-                column: "RacerId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Feedbacks_UserId",
-                table: "Feedbacks",
-                column: "UserId");
+            // Create Log table if it doesn't exist
+            migrationBuilder.Sql(@"
+                IF OBJECT_ID(N'[Log]', N'U') IS NULL
+                BEGIN
+                    CREATE TABLE [Log] (
+                        [Id] int NOT NULL IDENTITY,
+                        [LogLevel] int NOT NULL,
+                        [ThreadId] int NULL,
+                        [EventId] int NULL,
+                        [EventName] nvarchar(100) NULL,
+                        [Message] nvarchar(500) NULL,
+                        [UserId] nvarchar(450) NULL,
+                        [RacerId] int NULL,
+                        [SessionId] nvarchar(100) NULL,
+                        [Category] nvarchar(100) NULL,
+                        [ExceptionMessage] nvarchar(1000) NULL,
+                        [ExceptionStackTrace] nvarchar(max) NULL,
+                        [ExceptionSource] nvarchar(100) NULL,
+                        [CreatedAt] datetime2 NOT NULL,
+                        CONSTRAINT [PK_Log] PRIMARY KEY ([Id])
+                    );
+                END
+            ");
         }
 
         /// <inheritdoc />

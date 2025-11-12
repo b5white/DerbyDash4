@@ -44,6 +44,7 @@ namespace DerbyDash.Components.Account.Pages {
         private Blazorise.Captcha.ReCaptcha.ReCaptcha captcha = default!;
         private bool canSubmit = false;
         private EditContext? editContext;
+        private string siteKey = "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"; // Google's test key
 
         [SupplyParameterFromForm]
         protected InputModel Input { get; set; } = new();
