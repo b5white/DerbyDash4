@@ -1,0 +1,40 @@
+﻿@page "/"
+@namespace DerbyDash.Components.Pages
+@using DerbyDash.Components.Layout
+@using DerbyDash.Components.MenuPages
+@rendermode InteractiveWebAssembly
+@attribute [AllowAnonymous]
+
+<PageTitle>@appName - Math Racing Game</PageTitle>
+
+<div class="home-container">
+    <div class="floating-symbols">
+        <div class="symbol">+</div>
+        <div class="symbol">×</div>
+        <div class="symbol">1</div>
+        <div class="symbol">2</div>
+        <div class="symbol">3</div>
+        <div class="symbol">+</div>
+        <div class="symbol">×</div>
+        <div class="symbol">4</div>
+        <div class="symbol">5</div>
+        <div class="symbol">6</div>
+    </div>
+    
+    <div class="home-content">
+        <h1 class="app-title">@appName</h1>
+        <p class="app-subtitle">Race to math success! Solve problems and speed to victory!</p>
+        
+    <button type="button" @onclick="StartRacing" class="start-button">
+            Start Racing
+        </button>
+        
+        <div class="race-gif-container">
+            <img src="@selectedGif" alt="Horse racing" class="race-gif" />
+            <div class="checkered-border"></div>
+        </div>
+    </div>
+    
+    <div class="race-track-decoration"></div>
+</div>
+

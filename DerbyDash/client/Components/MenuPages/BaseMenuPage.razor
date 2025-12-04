@@ -1,0 +1,13 @@
+﻿@* BaseMenuPage.razor *@
+@inherits LayoutComponentBase
+
+<h1 class="topic-title">@Title</h1>
+<p class="topic-subtitle">@Subtitle</p>
+<p></p>
+@ChildContent
+
+@code {
+    [Parameter] public required string Title { get; set; }
+    [Parameter] public required string Subtitle { get; set; }
+    [Parameter] public required RenderFragment ChildContent { get; set; }
+}

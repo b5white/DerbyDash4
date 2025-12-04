@@ -1,0 +1,257 @@
+/* Multiplication-TablesMenu.razor.css */
+
+.tables-menu-container {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.table-card {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border: 2px solid transparent;
+}
+
+.table-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    border-color: #9c27b0;
+}
+
+.table-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background: linear-gradient(90deg, #9c27b0, #673ab7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.table-card:hover::before {
+    opacity: 1;
+}
+
+.table-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.5rem;
+    text-decoration: none;
+    color: #2c3e50;
+    height: 100%;
+    transition: background-color 0.3s ease;
+}
+
+.table-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #9c27b0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.table-text {
+    font-size: 1.2rem;
+    text-align: center;
+}
+
+.multiplication-symbol {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.multiplication-symbol::before,
+.multiplication-symbol::after {
+    content: '';
+    position: absolute;
+    background-color: #9c27b0;
+    transition: all 0.3s ease;
+}
+
+.multiplication-symbol::before {
+    width: 16px;
+    height: 3px;
+    transform: rotate(45deg);
+}
+
+.multiplication-symbol::after {
+    width: 16px;
+    height: 3px;
+    transform: rotate(-45deg);
+}
+
+.table-card:hover .multiplication-symbol {
+    transform: rotate(180deg);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table-card {
+    animation: fadeInUp 0.5s ease-out forwards;
+    animation-delay: calc(var(--animation-order) * 0.1s);
+    opacity: 0;
+}
+
+/* Bottom animation section */
+.animation-container {
+    margin-top: 3rem;
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 12px;
+    background: linear-gradient(to right, #9c27b0, #673ab7);
+}
+
+.race-track {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #333;
+    border-top: 3px dashed white;
+}
+
+.race-car {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 60px;
+    height: 30px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><path fill="%239c27b0" d="M544 192h-16L419.22 56.02A64.025 64.025 0 0 0 369.24 32H155.33c-26.17 0-49.7 15.93-59.42 40.23L48 194.26C20.44 201.4 0 226.21 0 256v112c0 8.84 7.16 16 16 16h48c0 53.02 42.98 96 96 96s96-42.98 96-96h128c0 53.02 42.98 96 96 96s96-42.98 96-96h48c8.84 0 16-7.16 16-16v-80c0-53.02-42.98-96-96-96zM160 432c-26.47 0-48-21.53-48-48s21.53-48 48-48 48 21.53 48 48-21.53 48-48 48zm72-240H116.93l38.4-96H232v96zm48 0V96h89.24l76.8 96H280zm200 240c-26.47 0-48-21.53-48-48s21.53-48 48-48 48 21.53 48 48-21.53 48-48 48z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: moveCar 10s linear infinite;
+}
+
+/* Floating multiplication symbols */
+.floating-symbols {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.symbol {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 1.5rem;
+    font-weight: bold;
+    animation: float 10s ease-in-out infinite;
+}
+
+.symbol:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.symbol:nth-child(2) {
+    top: 30%;
+    left: 30%;
+    animation-delay: 1s;
+}
+
+.symbol:nth-child(3) {
+    top: 15%;
+    left: 50%;
+    animation-delay: 2s;
+}
+
+.symbol:nth-child(4) {
+    top: 40%;
+    left: 70%;
+    animation-delay: 3s;
+}
+
+.symbol:nth-child(5) {
+    top: 25%;
+    left: 90%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+@keyframes moveCar {
+    0% {
+        left: -60px;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .tables-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+    }
+    
+    .table-number {
+        font-size: 2rem;
+    }
+    
+    .table-text {
+        font-size: 1rem;
+    }
+    
+    .table-link {
+        padding: 1.5rem 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tables-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tables-menu-container {
+        padding: 1rem;
+    }
+}

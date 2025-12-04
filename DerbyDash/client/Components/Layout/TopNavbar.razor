@@ -1,0 +1,83 @@
+@using DerbyDash.Data
+@using DerbyDash.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@rendermode InteractiveWebAssembly
+@implements IDisposable
+
+<div class="top-navbar @(GetNavbarClasses())">
+    <div class="container-fluid">
+        <div class="page-info">
+            <div class="page-title">
+                <i class="@GetPageIcon()"></i>
+                <h1>@GetPageTitle()</h1>
+            </div>
+            <div class="page-subtitle">
+                @GetPageMotivation()
+            </div>
+        </div>
+        <div class="top-navbar-content">
+            <AuthorizeView>
+                <Authorized>
+                    
+                    @if (Racers.Count == 0) {
+                        <div class="no-racers-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>No racers available. <a href="Account/Manage/RaceTeam">Add a racer</a></span>
+                        </div>
+                    } else {
+                        <div class="racer-selector">
+                            <div class="racer-icon">
+                                @if (RacerAvatarFileName != null)
+                                {
+                                    <img src="/images/avatars/@RacerAvatarFileName" class="racer-avatar-img" alt="Racer Avatar" />
+                                }
+                                else if (!string.IsNullOrEmpty(RacerInitial))
+                                {
+                                    <div class="racer-avatar-default">@RacerInitial</div>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-user-astronaut"></i>
+                                }
+                            </div>
+                            <div class="racer-dropdown-container">
+                                <label for="currentRacer">
+                                    <i class="fas fa-exchange-alt"></i> Select Your Racer
+                                </label>
+                                <div class="select-wrapper">
+                                    <select id="currentRacer" class="racer-dropdown" value="@SelectedRacer.Id"
+                                            @onchange="OnRacerChangedAsync" title="Click to change your active racer">
+                                        @foreach (var racer in Racers) {
+                                            <option value="@racer.Id">@racer.Name (@racer.RaceCount races)</option>
+                                        }
+                                    </select>
+                                    <div class="select-hint">
+                                        <span class="race-stats">
+                                            <span class="current-racer-races">Current: @CurrentRacerRaceCount races</span>
+                                            <span class="team-races">Team: @TeamRaceCount total races</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </Authorized>
+                <NotAuthorized>
+                    <div class="login-prompt">
+                        <span>Sign in to create your race team</span>
+                        <a href="Account/Login" class="login-button">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Expose avatar properties for use in markup
+    private string? GetRacerAvatarFileName() => RacerAvatarFileName;
+    private string? GetRacerInitial() => RacerInitial;
+}
+

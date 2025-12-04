@@ -1,0 +1,232 @@
+﻿@page "/Account/Manage/RaceTeam"
+
+@using System.ComponentModel.DataAnnotations
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
+@rendermode InteractiveWebAssembly
+
+@attribute [Authorize]
+
+<PageTitle>Manage team members</PageTitle>
+
+@if (IsFromRegistration)
+{
+    <RegistrationLayout Steps="@registrationSteps" 
+                       CurrentStep="race-team"
+                       SidebarTitle="Create Your Race Team"
+                       SidebarDescription="Add racers to your team and start your math racing adventure!"
+                       SidebarExtraContent="<div class='team-hint'><i class='fas fa-users'></i> You can add multiple racers for your family</div>">
+        @RenderContent()
+    </RegistrationLayout>
+}
+else
+{
+    @RenderContent()
+}
+
+@code {
+    private RenderFragment RenderContent() => @<text>
+        <h3>Current race team</h3>
+        
+        @if (racerLimitInfo != null) {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Racer Limit:</strong> You have @raceTeam.Count of @racerLimitInfo.Limit racers 
+                @if (racerLimitInfo.IsOverridden) {
+                    <span class="badge bg-warning ms-2">Admin Override</span>
+                } else {
+                    <span class="badge bg-primary ms-2">@racerLimitInfo.SubscriptionType</span>
+                }
+            </div>
+        }
+
+        @if (raceTeam.Any()) {
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Avatar</th>
+                            <th>Racer Name</th>
+                            <th>Races Completed</th>
+                            <th>Last Raced</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (Racer racer in raceTeam) {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(racer.AvatarFileName)) {
+                                        <img src="/images/avatars/@racer.AvatarFileName" class="racer-table-avatar" alt="@racer.Name's avatar" />
+                                    } else {
+                                        <div class="racer-table-avatar-placeholder">@(racer.Name.Length > 0 ? racer.Name[0].ToString() : "")</div>
+                                    }
+                                </td>
+                                <td>@racer.Name</td>
+                                <td>@racer.RaceCount</td>
+                                <td>@(racer.LastRaced?.ToString("MMM d, yyyy") ?? "Never")</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-primary" @onclick="() => SetActiveRacer(racer)">
+                                            <i class="fas fa-check-circle"></i> Set Active
+                                        </button>
+                                        <button class="btn btn-sm btn-info" @onclick="() => OpenEditDialog(racer)">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" @onclick="() => ConfirmDeleteRacer(racer)">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="table-info">
+                            <td><strong>Team Total</strong></td>
+                            <td><strong>@TeamRaceCount</strong></td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        } else {
+            <div class="alert alert-info">
+                Your race team is empty. Add racers to get started!
+            </div>
+        }
+
+        @if (TeamRaceCount == 0 && raceTeam.Any()) {
+            <div class="mt-3 mb-4">
+                <div class="card border-primary">
+                    <div class="card-body text-center">
+                        <h5 class="card-title text-primary">
+                            <i class="fas fa-lightbulb"></i> New to TurboFlash?
+                        </h5>
+                        <p class="card-text">
+                            Get the most out of this app! See our quick guide for parents before you start racing.
+                        </p>
+                        <a href="/TryAppExplainer" class="btn btn-primary">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <StatusMessage Message="@message" />
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Add New Racer
+                </h4>
+            </div>
+            <div class="card-body">
+                <EditForm Model="Input" OnValidSubmit="OnValidSubmitAsync" FormName="add-racer">
+                    <DataAnnotationsValidator />
+
+                    <div class="form-floating mb-3">
+                        <InputText @bind-Value="Input.RacerName" class="form-control" placeholder="Enter racer name" />
+                        <label for="Input.RacerName">Racer Name</label>
+                        <ValidationMessage For="() => Input.RacerName" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Select Avatar</label>
+                        <div class="avatar-selection">
+                            @foreach (var avatar in Avatars) {
+                                <label class="avatar-option" @onclick="() => SelectAvatar(avatar)">
+                                    <input type="radio" name="avatar" value="@avatar" checked="@(Input.AvatarFileName == avatar)" />
+                                    <img src="/images/avatars/@avatar" class="avatar-img @(Input.AvatarFileName == avatar ? "selected" : "")" alt="Avatar" />
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Add Racer
+                    </button>
+                </EditForm>
+            </div>
+        </div>
+
+        @if (IsFromRegistration && raceTeam.Any())
+        {
+            <div class="registration-next-step">
+                <a href="/TryAppExplainer?IsFromRegistration=true" class="btn btn-lg btn-primary">
+                    <i class="fas fa-rocket"></i> Continue to Start Racing
+                </a>
+            </div>
+        }
+
+        @* Edit Racer Modal *@
+        @if (showEditDialog)
+        {
+            <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edit Racer</h5>
+                            <button type="button" class="btn-close" @onclick="CloseEditDialog"></button>
+                        </div>
+                        <div class="modal-body">
+                            <EditForm Model="editRacerInput" OnValidSubmit="SaveRacerEdit" FormName="edit-racer">
+                                <DataAnnotationsValidator />
+                                
+                                <div class="form-floating mb-3">
+                                    <InputText @bind-Value="editRacerInput.RacerName" class="form-control" placeholder="Enter racer name" />
+                                    <label for="editRacerInput.RacerName">Racer Name</label>
+                                    <ValidationMessage For="() => editRacerInput.RacerName" class="text-danger" />
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Select Avatar</label>
+                                    <div class="avatar-selection">
+                                        @foreach (var avatar in Avatars) {
+                                            <label class="avatar-option" @onclick="() => SelectEditAvatar(avatar)">
+                                                <input type="radio" name="edit-avatar" value="@avatar" checked="@(editRacerInput.AvatarFileName == avatar)" />
+                                                <img src="/images/avatars/@avatar" class="avatar-img @(editRacerInput.AvatarFileName == avatar ? "selected" : "")" alt="Avatar" />
+                                            </label>
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" @onclick="CloseEditDialog">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                                </div>
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        }
+
+        @* Delete Confirmation Modal *@
+        @if (showDeleteDialog)
+        {
+            <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Confirm Delete</h5>
+                            <button type="button" class="btn-close" @onclick="CloseDeleteDialog"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Are you sure you want to delete racer <strong>@(racerToDelete?.Name)</strong>?</p>
+                            <p class="text-danger">This will also delete all race history for this racer and cannot be undone.</p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseDeleteDialog">Cancel</button>
+                            <button type="button" class="btn btn-danger" @onclick="DeleteRacer">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-backdrop fade show"></div>
+        }
+    </text>;
+}
+

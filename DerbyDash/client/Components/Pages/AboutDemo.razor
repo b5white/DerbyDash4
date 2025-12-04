@@ -1,0 +1,52 @@
+@page "/aboutdemo"
+@rendermode InteractiveWebAssembly
+@using Microsoft.AspNetCore.Authorization
+@attribute [AllowAnonymous]
+
+<PageTitle>About DerbyDash Demo</PageTitle>
+
+<div class="container">
+    <h1>About DerbyDash Demo</h1>
+    
+    <p>This page demonstrates how to use the location parameter in the About page.</p>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Iowa Conference</h5>
+                </div>
+                <div class="card-body">
+                    <p>Visit our Iowa Home School Conference page:</p>
+                    <a href="/about?location=iowa" class="btn btn-primary">Iowa Conference Page</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Arizona Conference</h5>
+                </div>
+                <div class="card-body">
+                    <p>Visit our Arizona Home School Conference page:</p>
+                    <a href="/about?location=arizona" class="btn btn-success">Arizona Conference Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">Regular About Page</h5>
+        </div>
+        <div class="card-body">
+            <p>Visit our regular About page:</p>
+            <a href="/about" class="btn btn-info">About DerbyDash</a>
+        </div>
+    </div>
+    
+    <div class="alert alert-warning">
+        <strong>Note:</strong> The URL format for location-specific pages is <code>/about?location=location</code>, not <code>/about/location</code>.
+    </div>
+</div>

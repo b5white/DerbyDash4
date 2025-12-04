@@ -1,0 +1,35 @@
+﻿@* BaseMenuComponent.razor *@
+<div class="nav_menu_container">
+    <nav class="nav_menu_nav">
+        <ul class="nav_menu_list">
+            @ChildContent
+        </ul>
+    </nav>
+</div>
+
+<div class="bottom-half">
+    <img src="@selectedImage" alt="Horse running" class="centered-image" />
+</div>
+
+@code {
+    [Parameter]
+    public required RenderFragment ChildContent { get; set; }
+
+    private string[] images = {
+        "images/horse-running1.gif",
+        "images/horse-running2.gif",
+        "images/horse-running3.gif",
+        "images/horse-running4.gif",
+        "images/horse-running5.gif",
+        "images/horse-running6.gif",
+        "images/horse-running7.gif"
+    };
+
+    private string selectedImage = "";
+
+    protected override void OnInitialized() {
+        Random random = new Random();
+        int index = random.Next(images.Length);
+        selectedImage = images[index];
+    }
+}

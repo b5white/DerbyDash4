@@ -1,0 +1,303 @@
+/* MultiplicationMenu.razor.css */
+
+.multiplication-menu-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.multiplication-menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    margin-top: 2rem;
+}
+
+.multiplication-menu-card {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border: 2px solid #9c27b0;
+    height: 220px;
+    animation: fadeInUp 0.6s ease-out forwards;
+    animation-delay: calc(var(--animation-order) * 0.2s);
+    opacity: 0;
+}
+
+.multiplication-menu-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 24px rgba(156, 39, 176, 0.3);
+    background: linear-gradient(135deg, #e1bee7 0%, #ce93d8 100%);
+}
+
+.multiplication-menu-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    text-decoration: none;
+    color: #2c3e50;
+    height: 100%;
+    position: relative;
+    z-index: 1;
+}
+
+.multiplication-menu-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    color: #7b1fa2;
+    transition: transform 0.3s ease;
+}
+
+.multiplication-menu-card:hover .multiplication-menu-icon {
+    transform: scale(1.2);
+}
+
+.multiplication-menu-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0.8rem;
+}
+
+.multiplication-menu-description {
+    font-size: 1.1rem;
+    text-align: center;
+    color: #546e7a;
+    max-width: 90%;
+}
+
+/* Race track decoration */
+.multiplication-menu-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 15px;
+    background: repeating-linear-gradient(
+        90deg,
+        #000,
+        #000 20px,
+        #fff 20px,
+        #fff 40px
+    );
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.multiplication-menu-card:hover::after {
+    opacity: 1;
+}
+
+/* Multiplication sign decoration */
+.times-decoration {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.times-decoration::before,
+.times-decoration::after {
+    content: '';
+    position: absolute;
+    background-color: #7b1fa2;
+    transition: all 0.3s ease;
+}
+
+.times-decoration::before {
+    width: 20px;
+    height: 4px;
+    transform: rotate(45deg);
+}
+
+.times-decoration::after {
+    width: 4px;
+    height: 20px;
+    transform: rotate(45deg);
+}
+
+.multiplication-menu-card:hover .times-decoration {
+    transform: rotate(45deg);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+/* Animation for race car at bottom */
+.animation-section {
+    margin-top: 4rem;
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: linear-gradient(to right, #7b1fa2, #ce93d8);
+}
+
+.race-track-bg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #333;
+    border-top: 4px dashed white;
+}
+
+.race-gif {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-height: 120px;
+    z-index: 2;
+}
+
+.finish-line {
+    position: absolute;
+    bottom: 0;
+    right: 50px;
+    width: 20px;
+    height: 60px;
+    background: repeating-linear-gradient(
+        0deg,
+        #000,
+        #000 10px,
+        #fff 10px,
+        #fff 20px
+    );
+}
+
+/* Math symbols floating in the background */
+.floating-symbols {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.symbol {
+    position: absolute;
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 2rem;
+    animation: float 10s ease-in-out infinite;
+}
+
+.symbol:nth-child(1) {
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.symbol:nth-child(2) {
+    top: 30%;
+    left: 30%;
+    animation-delay: 1s;
+}
+
+.symbol:nth-child(3) {
+    top: 15%;
+    left: 50%;
+    animation-delay: 2s;
+}
+
+.symbol:nth-child(4) {
+    top: 40%;
+    left: 70%;
+    animation-delay: 3s;
+}
+
+.symbol:nth-child(5) {
+    top: 25%;
+    left: 90%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(10deg);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .multiplication-menu-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .multiplication-menu-card {
+        height: 200px;
+    }
+    
+    .multiplication-menu-icon {
+        font-size: 3.5rem;
+    }
+    
+    .multiplication-menu-title {
+        font-size: 1.6rem;
+    }
+    
+    .animation-section {
+        height: 150px;
+    }
+    
+    .race-gif {
+        max-height: 100px;
+    }
+}
+
+@media (max-width: 480px) {
+    .multiplication-menu-container {
+        padding: 1.5rem;
+    }
+    
+    .multiplication-menu-card {
+        height: 180px;
+    }
+    
+    .multiplication-menu-link {
+        padding: 2rem 1.5rem;
+    }
+    
+    .multiplication-menu-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .multiplication-menu-title {
+        font-size: 1.4rem;
+    }
+    
+    .multiplication-menu-description {
+        font-size: 1rem;
+    }
+}

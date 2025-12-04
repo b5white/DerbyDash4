@@ -1,0 +1,164 @@
+.registration-progress {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 20px;
+    /* margin-bottom: 20px; */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.progress-title {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+.progress-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: relative;
+}
+
+/* Scroll hint removed */
+
+.progress-step {
+    display: flex;
+    align-items: flex-start;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #fff;
+    border-left: 3px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.progress-step.active {
+    border-left-color: #007bff;
+    background-color: #f0f7ff;
+}
+
+.progress-step.completed {
+    border-left-color: #28a745;
+}
+
+.step-number {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-weight: bold;
+    margin-right: 15px;
+    flex-shrink: 0;
+}
+
+.progress-step.active .step-number {
+    background-color: #007bff;
+    color: white;
+}
+
+.progress-step.completed .step-number {
+    background-color: #28a745;
+    color: white;
+}
+
+.step-content {
+    flex-grow: 1;
+}
+
+.step-name {
+    font-weight: 600;
+    margin-bottom: 3px;
+    color: #333;
+}
+
+.progress-step.active .step-name {
+    color: #007bff;
+}
+
+.progress-step.completed .step-name {
+    color: #28a745;
+}
+
+.step-description {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.step-edit {
+    color: #6c757d;
+    margin-left: 10px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.step-edit:hover {
+    background-color: #f8f9fa;
+    color: #007bff;
+}
+
+@media (max-width: 768px) {
+    .registration-progress {
+        padding: 15px;
+    }
+    
+    .progress-title {
+        font-size: 15px; /* Set to exactly 15px for mobile */
+    }
+    
+    .progress-steps {
+        max-height: 110px; /* Show approximately 1 step */
+        overflow-y: auto;
+        padding-right: 5px;
+        position: relative;
+    }
+    
+    /* Scroll hint removed */
+    
+    .progress-steps:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 30px;
+        background: linear-gradient(to bottom, rgba(248, 249, 250, 0), rgba(248, 249, 250, 0.9));
+        pointer-events: none;
+    }
+    
+    .progress-step {
+        padding: 8px;
+    }
+    
+    .step-number {
+        width: 25px;
+        height: 25px;
+        margin-right: 10px;
+    }
+    
+    .step-name {
+        font-size: 0.9rem;
+    }
+    
+    .step-description {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .progress-steps {
+        max-height: 100px; /* Show only 1 step on smaller phones */
+    }
+}

@@ -1,0 +1,101 @@
+/* Preferences Page Styling */
+.preferences-section {
+    background: #f8f9fa; /* Lighter background */
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    max-width: 550px; /* Slightly wider */
+    /* margin: 2rem auto; */ /* Removed to allow container control */
+    border: 1px solid #dee2e6; /* Subtle border */
+}
+
+.preferences-section h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #495057;
+}
+
+.preferences-section h4 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #6c757d;
+    font-weight: 400;
+}
+
+.avatar-options {
+    display: flex;
+    gap: 2.5rem; /* Increased gap */
+    justify-content: center;
+    margin-bottom: 2.5rem; /* Increased margin */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.avatar-label {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.2s ease-in-out; /* Add hover effect */
+}
+
+.avatar-label:hover {
+    transform: translateY(-5px); /* Lift effect on hover */
+}
+
+.avatar-label.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.avatar-label.disabled:hover {
+    transform: none; /* No hover effect when disabled */
+}
+
+/* Hide the actual radio button */
+.avatar-label input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.avatar-img {
+    width: 90px; /* Slightly larger */
+    height: 90px;
+    border-radius: 50%;
+    border: 4px solid #ced4da; /* Default border */
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Style for the selected avatar's image */
+.avatar-label input[type="radio"]:checked + .avatar-img {
+    border-color: #007bff; /* Use primary color for selected border */
+    box-shadow: 0 0 15px rgba(0, 123, 255, 0.4); /* Glow effect */
+}
+
+/* Button Styling */
+.preferences-section .btn-primary {
+    display: block; /* Make button block level */
+    width: 60%; /* Control width */
+    margin: 1.5rem auto 0; /* Center button and add top margin */
+    padding: 0.75rem 1.25rem; /* Larger padding */
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 8px; /* Rounded corners */
+}
+
+/* Message Styling */
+.preferences-section .alert {
+    margin-top: 1.5rem; /* Ensure space above message */
+    text-align: center;
+}
+
+/* Debug Info Styling */
+.preferences-section .small.text-muted {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+    font-size: 0.8rem;
+    color: #adb5bd;
+}

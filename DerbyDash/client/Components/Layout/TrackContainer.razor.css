@@ -1,0 +1,269 @@
+﻿.road {
+    width: 100%;
+    height: 90vh;
+    max-width: 100vw;
+    background-color: #404040;
+    position: relative;
+    overflow: hidden;
+    perspective: 1000px;
+}
+
+.track-background {
+    position: absolute;
+    width: 100%;
+    /* Set height to exactly twice the animation distance */
+    height: 1120px;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transform: translateZ(0);
+    display: block; /* Ensure segments stack */
+}
+
+/* Animation only runs when explicitly enabled and finish line is not visible */
+.track-background.animated:not(.finish-visible) {
+    animation: moveRoad 3s linear infinite;
+    animation-play-state: running;
+    transform-origin: top center;
+}
+
+.lane-section {
+    height: 33.33%;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.lane-group {
+    position: absolute;
+    width: 10px;
+    height: calc(100vh + 560px); /* Extended height to allow smooth entry */
+    transform-style: preserve-3d;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    /* Position the lane group above the viewport initially */
+    top: -280px;
+}
+
+.lane {
+    width: 100%;
+    height: 70px; /* Increased from 70px */
+    background-color: #ffff00;
+    margin-bottom: 210px;
+    transform-style: preserve-3d;
+}
+
+.lane-group:nth-child(1) { left: 15%; }
+.lane-group:nth-child(2) { left: 32%; }
+.lane-group:nth-child(3) { left: 49%; }
+.lane-group:nth-child(4) { left: 66%; }
+.lane-group:nth-child(5) { left: 83%; }
+
+@keyframes moveRoad {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(560px); }
+}
+
+/* Start line animation - separate from road animation */
+.track-background.animated:not(.finish-visible) {
+    animation: moveRoad 3s linear infinite;
+    animation-play-state: running;
+    transform-origin: top center;
+}
+
+.track-background.animated .start-line.hidden,
+.track-background.finish-visible .start-line.hidden {
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+}
+
+/* Speed variations for dynamic animation speeds - adjusted for better consistency */
+.track-background.animated.speed-1:not(.finish-visible) { animation-duration: 18.0s; }  /* 12.0 * 1.5 */
+.track-background.animated.speed-2:not(.finish-visible) { animation-duration: 9.0s; }   /* 6.0 * 1.5 */
+.track-background.animated.speed-3:not(.finish-visible) { animation-duration: 6.0s; }   /* 4.0 * 1.5 */
+.track-background.animated.speed-4:not(.finish-visible) { animation-duration: 3.9s; }   /* 3.0 * 1.3 */
+.track-background.animated.speed-5:not(.finish-visible) { animation-duration: 3.12s; }  /* 2.4 * 1.3 */
+.track-background.animated.speed-6:not(.finish-visible) { animation-duration: 2.6s; }   /* 2.0 * 1.3 */
+.track-background.animated.speed-7:not(.finish-visible) { animation-duration: 2.23s; }  /* 1.71 * 1.3 */
+.track-background.animated.speed-8:not(.finish-visible) { animation-duration: 1.65s; }  /* 1.5 * 1.1 */
+.track-background.animated.speed-9:not(.finish-visible) { animation-duration: 1.47s; }  /* 1.33 * 1.1 */
+.track-background.animated.speed-10:not(.finish-visible) { animation-duration: 1.32s; } /* 1.2 * 1.1 */
+.track-background.animated.speed-11:not(.finish-visible) { animation-duration: 1.09s; } /* 1.09 */
+.track-background.animated.speed-12:not(.finish-visible) { animation-duration: 1.0s; }  /* 1.0 */
+.track-background.animated.speed-13:not(.finish-visible) { animation-duration: 0.92s; } /* 0.92 */
+.track-background.animated.speed-14:not(.finish-visible) { animation-duration: 0.86s; } /* 0.86 */
+.track-background.animated.speed-15:not(.finish-visible) { animation-duration: 0.8s; }  /* 0.8 */
+
+/* Also apply the same speed variations to the start line animation */
+.track-background.animated.speed-1:not(.finish-visible) .start-line { animation-duration: 18.0s; }
+.track-background.animated.speed-2:not(.finish-visible) .start-line { animation-duration: 9.0s; }
+.track-background.animated.speed-3:not(.finish-visible) .start-line { animation-duration: 6.0s; }
+.track-background.animated.speed-4:not(.finish-visible) .start-line { animation-duration: 3.9s; }
+.track-background.animated.speed-5:not(.finish-visible) .start-line { animation-duration: 3.12s; }
+.track-background.animated.speed-6:not(.finish-visible) .start-line { animation-duration: 2.6s; }
+.track-background.animated.speed-7:not(.finish-visible) .start-line { animation-duration: 2.23s; }
+.track-background.animated.speed-8:not(.finish-visible) .start-line { animation-duration: 1.65s; }
+.track-background.animated.speed-9:not(.finish-visible) .start-line { animation-duration: 1.47s; }
+.track-background.animated.speed-10:not(.finish-visible) .start-line { animation-duration: 1.32s; }
+.track-background.animated.speed-11:not(.finish-visible) .start-line { animation-duration: 1.09s; }
+.track-background.animated.speed-12:not(.finish-visible) .start-line { animation-duration: 1.0s; }
+.track-background.animated.speed-13:not(.finish-visible) .start-line { animation-duration: 0.92s; }
+.track-background.animated.speed-14:not(.finish-visible) .start-line { animation-duration: 0.86s; }
+.track-background.animated.speed-15:not(.finish-visible) .start-line { animation-duration: 0.8s; }
+
+.track-segment {
+    /* Contains one copy of the repeating lane pattern */
+    position: relative;
+    /* Set height to exactly match the animation distance */
+    height: 560px;
+}
+
+.track-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.race-lines {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.start-line, .finish-line {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    transform-style: preserve-3d;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Start line positioning */
+.start-line {
+    top: calc(100vh - 450px);
+    left: 0;
+    width: 100%;
+}
+
+.start-line img, .finish-line img {
+    width: 100vw;
+    max-width: none;
+    height: auto;
+    object-fit: cover;
+}
+
+.cars-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-between;
+    z-index: 3;
+}
+
+.car-dynamic {
+    position: relative;
+    width: 16%;
+    margin: 5px;
+    transform-style: preserve-3d;
+    will-change: transform;
+    transition: top 0.5s ease-out;
+}
+
+.car-dynamic img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Player indicator ("YOU" label + arrow) */
+.player-indicator {
+    position: absolute;
+    /* Place the indicator just above the car */
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 5; /* above car image */
+    pointer-events: none; /* avoid blocking clicks/touches */
+}
+
+.player-label {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 1.4;
+    background: linear-gradient(135deg, #1b6ec2 0%, #1861ac 100%);
+    border-radius: 999px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    white-space: nowrap;
+}
+
+/* Use a CSS triangle for a crisp, theme-colored down arrow */
+.player-arrow {
+    width: 0;
+    height: 0;
+    font-size: 0; /* hide any fallback character */
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 8px solid #1861ac; /* matches label end color */
+    filter: drop-shadow(0 1px 2px rgba(0,0,0,0.25));
+}
+
+.debug-panel {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+    z-index: 1000;
+}
+
+.debug-info {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+@media screen and (max-width: 768px) {
+    .road {
+        top: 15vh;
+    }
+    .lane {
+        height: 70px; /* Maintain smaller height on mobile */
+    }
+    .car-dynamic {
+        width: 15%;
+    }
+    .player-label {
+        font-size: 11px;
+        padding: 2px 8px;
+    }
+    .player-arrow {
+        border-left-width: 5px;
+        border-right-width: 5px;
+        border-top-width: 7px;
+    }
+    
+    .lane-group {
+        width: 8px;
+    }
+
+    .start-line {
+        top: calc(100vh - 350px);
+        left: 0;
+        width: 100%;
+    }
+}
+

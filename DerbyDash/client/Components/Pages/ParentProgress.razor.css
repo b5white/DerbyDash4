@@ -1,0 +1,642 @@
+/* Parent Progress Container */
+.parent-progress-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    min-height: 100vh;
+}
+
+/* Header Section */
+.progress-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.3;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+}
+
+.progress-title {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.progress-title i {
+    margin-right: 0.5rem;
+}
+
+.progress-subtitle {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.racing-flag-icon {
+    font-size: 5rem;
+    animation: wave 2s ease-in-out infinite;
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(-10deg); }
+    50% { transform: rotate(10deg); }
+}
+
+/* Loading Section */
+.loading-section {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.loading-spinner {
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.loading-text {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* No Racers Message */
+.no-racers-message {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.no-racers-icon {
+    color: #cbd5e0;
+    margin-bottom: 1.5rem;
+}
+
+.no-racers-message h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+}
+
+.no-racers-message p {
+    color: #718096;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+}
+
+/* Team Stats Section */
+.team-stats-section {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    color: #667eea;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.total-races::before {
+    background: linear-gradient(180deg, #4299e1 0%, #3182ce 100%);
+}
+
+.stat-card.active-racers::before {
+    background: linear-gradient(180deg, #48bb78 0%, #38a169 100%);
+}
+
+.stat-card.total-wins::before {
+    background: linear-gradient(180deg, #f6ad55 0%, #ed8936 100%);
+}
+
+.stat-card.avg-time::before {
+    background: linear-gradient(180deg, #fc8181 0%, #f56565 100%);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.total-races .stat-icon { color: #4299e1; }
+.active-racers .stat-icon { color: #48bb78; }
+.total-wins .stat-icon { color: #f6ad55; }
+.avg-time .stat-icon { color: #fc8181; }
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2d3748;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+/* Racers Progress Section */
+.racers-progress-section {
+    margin-bottom: 3rem;
+}
+
+.racer-progress-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.racer-progress-card:hover {
+    transform: translateX(5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Racer Header */
+.racer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.racer-identity {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.racer-avatar-wrapper {
+    flex-shrink: 0;
+}
+
+.racer-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #667eea;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.racer-avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    border: 4px solid #e2e8f0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.racer-name {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin: 0 0 0.25rem 0;
+}
+
+.racer-meta {
+    color: #718096;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Racer Badges */
+.racer-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.badge-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #744210;
+    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.badge-purple {
+    background: linear-gradient(135deg, #9f7aea 0%, #805ad5 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(159, 122, 234, 0.3);
+}
+
+.badge-rainbow {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ffd93d 25%, #6bcf7f 50%, #4d96ff 75%, #a78bfa 100%);
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.2); }
+}
+
+/* Racer Stats Grid */
+.racer-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.racer-stat {
+    text-align: center;
+    padding: 1rem;
+    background: #f7fafc;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.racer-stat:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: scale(1.05);
+}
+
+.racer-stat-label {
+    color: #718096;
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.racer-stat-value {
+    color: #2d3748;
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+/* Progress Bar */
+.progress-bar-section {
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.progress-label {
+    color: #4a5568;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.progress-percentage {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.progress-bar {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 6px;
+    transition: width 1s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer-slide 2s infinite;
+}
+
+@keyframes shimmer-slide {
+    0% { left: -100%; }
+    100% { left: 200%; }
+}
+
+/* Recent Activity */
+.recent-activity {
+    background: #f7fafc;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.activity-title {
+    color: #2d3748;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin: 0 0 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.activity-title i {
+    color: #667eea;
+}
+
+.recent-races-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.recent-race-item {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px 100px;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.recent-race-item:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+    transform: translateX(5px);
+}
+
+.race-date, .race-type, .race-time {
+    color: #4a5568;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.race-date i { color: #667eea; }
+.race-type i { color: #48bb78; }
+.race-time i { color: #f6ad55; }
+
+.race-position {
+    text-align: right;
+}
+
+.position-badge {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: bold;
+    background: #e2e8f0;
+    color: #4a5568;
+}
+
+.position-badge.gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+    color: #744210;
+    box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+}
+
+.position-badge.silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+    color: #4a5568;
+    box-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
+}
+
+.position-badge.bronze {
+    background: linear-gradient(135deg, #cd7f32 0%, #e5a164 100%);
+    color: #744210;
+    box-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
+}
+
+/* No Races Message */
+.no-races-message {
+    text-align: center;
+    padding: 2rem;
+    color: #718096;
+}
+
+.no-races-message i {
+    color: #cbd5e0;
+    margin-bottom: 1rem;
+}
+
+.no-races-message p {
+    margin: 1rem 0 1.5rem 0;
+    font-size: 1.05rem;
+}
+
+/* Tips Section */
+.tips-section {
+    margin-top: 3rem;
+}
+
+.tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.tip-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-top: 4px solid #667eea;
+}
+
+.tip-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.tip-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.tip-card h4 {
+    color: #2d3748;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.75rem;
+}
+
+.tip-card p {
+    color: #718096;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .parent-progress-container {
+        padding: 1rem;
+    }
+
+    .progress-header {
+        padding: 1.5rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+
+    .progress-title {
+        font-size: 1.8rem;
+    }
+
+    .racing-flag-icon {
+        font-size: 3rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .racer-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .racer-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .recent-race-item {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+
+    .race-position {
+        text-align: left;
+    }
+
+    .tips-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .progress-title {
+        font-size: 1.5rem;
+    }
+
+    .racer-avatar,
+    .racer-avatar-placeholder {
+        width: 60px;
+        height: 60px;
+    }
+
+    .racer-name {
+        font-size: 1.4rem;
+    }
+
+    .racer-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+

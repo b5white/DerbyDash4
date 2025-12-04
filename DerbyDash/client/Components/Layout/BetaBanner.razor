@@ -1,0 +1,26 @@
+@inject NavigationManager Navigation
+@rendermode InteractiveWebAssembly
+
+<div class="beta-banner" @onclick="NavigateToWelcome">
+    <span class="beta-text">
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+        <span>*</span>
+        <span>BETA</span>
+    </span>
+</div>
+
+@code {
+    private void NavigateToWelcome() {
+        Navigation.NavigateTo("/beta-welcome");
+    }
+
+    private void HandleKeyPress(KeyboardEventArgs e) {
+        if (e.Key == "Enter" || e.Key == " ") {
+            NavigateToWelcome();
+        }
+    }
+} 

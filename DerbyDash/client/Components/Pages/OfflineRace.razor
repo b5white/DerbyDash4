@@ -1,0 +1,322 @@
+@page "/offline-race/{ProblemClassString}"
+@rendermode @(new InteractiveWebAssemblyRenderMode())
+@attribute [AllowAnonymous]
+@using DerbyDash.Components.Problems
+@using DerbyDash.Components.Layout
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="offline-mode-banner">
+    <div class="offline-indicator">
+        <i class="fas fa-wifi-slash"></i>
+        <span>Offline Practice Mode</span>
+    </div>
+</div>
+
+@if (!Started) {
+    <div class="race-start-container">
+        <div class="race-title-box">
+            <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
+            <p class="race-subtitle">Practice racing with numbers offline!</p>
+        </div>
+
+        @* Large Racer Avatar Display *@
+        @if (_cachedActiveRacer != null)
+        {
+            <div class="current-racer-display">
+                <div class="racer-avatar-container">
+                    @if (!string.IsNullOrEmpty(_cachedActiveRacer.AvatarFileName))
+                    {
+                        <img src="/images/avatars/@_cachedActiveRacer.AvatarFileName" 
+                             class="large-racer-avatar" 
+                             alt="@_cachedActiveRacer.Name's Avatar" />
+                    }
+                    else
+                    {
+                        <div class="large-racer-avatar-default">
+                            @(_cachedActiveRacer.Name.Substring(0, 1).ToUpper())
+                        </div>
+                    }
+                </div>
+                <div class="racer-info">
+                    <h2 class="racer-name">@_cachedActiveRacer.Name</h2>
+                    <p class="racer-subtitle">is ready to practice!</p>
+                </div>
+            </div>
+        }
+
+        <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="StartOfflineRaceForm">
+            <input type="text" id="hidden" style="position:absolute; left:-9999px;" tabindex="0" />
+            <button type="submit" tabindex="1" id="startButton" class="race-start-button" autofocus>
+                <div class="button-content">
+                    <i class="fas fa-flag-checkered"></i>
+                    <span>Start Practice Race</span>
+                </div>
+            </button>
+        </EditForm>
+
+        <div class="race-instructions">
+            <p>Solve math problems to accelerate your car.</p>
+            <p>Beat your previous times in practice mode!</p>
+            <div class="offline-notice">
+                <i class="fas fa-info-circle"></i>
+                <span>Progress in offline mode is not saved to your account</span>
+            </div>
+        </div>
+    </div>
+} else if (Finished) {
+    @if (ReceivedError) {
+        <div class="error-container">
+            <div class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <p>The system ran into a problem and couldn't calculate your results.</p>
+            </div>
+            <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="RetryOfflineRaceForm">
+                <button class="retry-button" type="submit" tabindex="0" autofocus="autofocus">
+                    <i class="fas fa-redo"></i> Try again
+                </button>
+                <input type="text" id="hidden" />
+            </EditForm>
+        </div>
+    } else {
+        <div class="results-box">
+        </div>
+        <div class="results-container">
+            <div class="results-header">
+                <h1 class="race-title">@GetTitle(ProblemClassString)</h1>
+                <h2 class="encouraging-message">@encouragingWord</h2>
+                
+                @* Medium Racer Avatar Display *@
+                @if (_cachedActiveRacer != null)
+                {
+                    <div class="results-racer-display">
+                        <div class="results-racer-avatar-container">
+                            @if (!string.IsNullOrEmpty(_cachedActiveRacer.AvatarFileName))
+                            {
+                                <img src="/images/avatars/@_cachedActiveRacer.AvatarFileName" 
+                                     class="medium-racer-avatar" 
+                                     alt="@_cachedActiveRacer.Name's Avatar" />
+                            }
+                            else
+                            {
+                                <div class="medium-racer-avatar-default">
+                                    @(_cachedActiveRacer.Name.Substring(0, 1).ToUpper())
+                                </div>
+                            }
+                        </div>
+                        <div class="results-racer-info">
+                            <h3 class="results-racer-name">@_cachedActiveRacer.Name</h3>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <EditForm EditContext="@editContext" OnValidSubmit="@(async () => await StartClick())" FormName="PlayAgainOfflineForm">
+                <button class="play-again-button" type="submit" tabindex="0" autofocus="autofocus">
+                    <i class="fas fa-play"></i> Practice Again
+                </button>
+                <input type="text" id="hidden" />
+            </EditForm>
+
+            <div class="race-stats">
+                <div class="stat-card">
+                    <div class="stat-label">Your Time</div>
+                    <div class="stat-value">@FinishTime.ToString("F3")</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-label">Session Average</div>
+                    <div class="stat-value">@prevAverage.ToString("F3")</div>
+                </div>
+
+                @if (improvedTime > 0) {
+                    <div class="stat-card improvement">
+                        <div class="stat-label">Improvement</div>
+                        <div class="stat-value">+@improvedTime.ToString("F3")</div>
+                    </div>
+                }
+            </div>
+
+            <div class="leaderboard">
+                <h2 class="leaderboard-title">Session Top 5</h2>
+                <div class="score-list">
+                    @for (int i = 0; i < previousResults.Length; i++) {
+                        string formattedTime = (previousResults[i] > 0) ? previousResults[i].ToString("F3") : "0";
+                        <div class="score-item @(i == currentResultIndex ? "current-score" : "")">
+                            <span class="rank">@(i + 1)</span>
+                            <span class="time">@formattedTime</span>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="deleteraces">
+                <button class="btn btn-outline-primary btn-lg" @onclick="ClearRaces">Clear Session</button>
+            </div>
+
+        </div>
+    }
+    <p></p>
+} else {
+    @if (problem != null) {
+        <p class="TC">
+            <TrackContainer 
+                @ref="trackContainerInstance" 
+                Track="@track" 
+                Distance="@(track.Cars.Any() ? track.Cars.Max(c => c.Distance) : 0)"                                        
+                ShowDebug="@ShowDebug" 
+                IsMoving="@(track.Cars.Any(c => c.Top > 0))" />
+
+            @* Results Popup Panel *@
+            @if (ShowResultsPopup) {
+                <div class="results-popup-overlay">
+                    <div class="results-popup-panel">
+                        <div class="results-popup-header">
+                            <div class="results-trophy-icon">
+                                @if (IsFirstPlace) {
+                                    <i class="fas fa-trophy"></i>
+                                } else {
+                                    <i class="fas fa-medal"></i>
+                                }
+                            </div>
+                            <h2 class="results-popup-title">
+                                @if (IsFirstPlace) {
+                                    <span class="victory-text">Great practice! You won.</span>
+                                } else {
+                                    <span class="good-race-text">Good practice.</span>
+                                }
+                            </h2>
+                        </div>
+                        
+                        <div class="results-popup-content">
+                            <div class="results-time-display">
+                                <div class="time-label">Your Time</div>
+                                <div class="time-value">@FinishTime.ToString("F3")s</div>
+                            </div>
+                            
+                            @if (CarsBeaten > 0) {
+                                <div class="results-achievement">
+                                    <div class="achievement-icon">
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                    <div class="achievement-text">
+                                        You beat <strong>@CarsBeaten</strong> of your previous session times!
+                                    </div>
+                                </div>
+                            }
+                            
+                            @if (IsPersonalBest) {
+                                <div class="personal-best-badge">
+                                    <i class="fas fa-fire"></i>
+                                    <span>Session Best!</span>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="results-popup-position">
+                            @if (IsFirstPlace) {
+                                <div class="position-badge first-place">
+                                    <span class="position-number">1st</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            } else if (currentResultIndex >= 0) {
+                                <div class="position-badge">
+                                    <span class="position-number">@GetOrdinalNumber(currentResultIndex + 1)</span>
+                                    <span class="position-label">Place</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="stoplight-container">
+                <div class="stoplight">
+                    <div class="light red"></div>
+                    <div class="light yellow"></div>
+                    <div class="light green"></div>
+                </div>
+            </div>
+            @if (Running && !CurrentRacerFinished) {
+                <div class="problem-container delayed-show">
+                    <div class="game-hud">
+                        <div class="math-problem">
+                            <div class="problem-bubble">
+                                <h2 class="problem-text">@problem.Description</h2>
+                            </div>
+                        </div>
+
+                        <div class="answer-box">
+                            <input class="answer-input" type="tel" @ref="textInput" @bind="Answer" @bind:event="oninput"
+                                   @bind:after="OnAfter" placeholder="@PlaceholderText"/>
+                        </div>
+                        <button class="emergency-exit-button" @onclick="GoBack">
+                            <i class="fas fa-exclamation-circle"></i> Emergency Exit
+                        </button>
+                    </div>
+                </div>
+            }
+
+        </p>
+        @if (!CurrentRacerFinished) {
+            <div class="problem-container delayed-show">
+                <div class="speed-indicator player-speed">
+                    <div class="speed-label">YOUR SPEED</div>
+                    <span class="speed-value">@(Math.Round(track.Cars[0].Speed * 7 * 1.09))kph</span>
+                </div>
+                <div class="ignoremouseclick" @onclick:preventDefault @onclick="OnAfterIgnore"></div>
+            </div>
+        }
+        <p> </p>
+    }
+}
+
+<style>
+.offline-mode-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    padding: 8px 0;
+    text-align: center;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.offline-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.offline-indicator i {
+    font-size: 16px;
+}
+
+.offline-notice {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: rgba(255, 193, 7, 0.1);
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    color: #856404;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.offline-notice i {
+    color: #ffc107;
+}
+
+/* Adjust main content to account for banner */
+body {
+    padding-top: 40px;
+}
+</style>

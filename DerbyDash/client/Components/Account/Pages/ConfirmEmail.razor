@@ -1,0 +1,29 @@
+﻿@page "/Account/ConfirmEmail"
+@rendermode InteractiveWebAssembly
+
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
+@attribute [AllowAnonymous]
+
+<PageTitle>Confirm email</PageTitle>
+
+<RegistrationLayout Steps="@registrationSteps"
+                CurrentStep="confirm-email"
+                SidebarTitle="Email Confirmation"
+                SidebarDescription="Almost there! Just one more step to complete your registration.">
+
+    <h1>Confirm email</h1>
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Email confirmation is not yet available in the client application. 
+        Your account has been created and you are logged in. Email confirmation will be available once API endpoints are implemented.
+    </div>
+</RegistrationLayout>
+
+@code {
+    private List<RegistrationStep> registrationSteps = new();
+
+    protected override void OnInitialized() {
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
+}

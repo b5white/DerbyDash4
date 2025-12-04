@@ -1,0 +1,62 @@
+﻿@page "/MultiplicationMenu"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@inherits BaseMenuPage
+
+<BaseMenuPage Title="Multiplication Racing" Subtitle="Choose your multiplication challenge">
+    <div class="multiplication-menu-container">
+        <div class="multiplication-menu-grid">
+            <div class="multiplication-menu-card" style="--animation-order:1">
+                <a href="/Multiplication-TablesMenu" class="multiplication-menu-link">
+                    <div class="times-decoration"></div>
+                    <div class="multiplication-menu-icon">2×3</div>
+                    <div class="multiplication-menu-title">Multiplication Tables</div>
+                    <div class="multiplication-menu-description">Practice with specific multiplication tables</div>
+                </a>
+            </div>
+            
+            <div class="multiplication-menu-card" style="--animation-order:2">
+                <a href="/Multiplication-ProblemsMenu" class="multiplication-menu-link">
+                    <div class="times-decoration"></div>
+                    <div class="multiplication-menu-icon">∏</div>
+                    <div class="multiplication-menu-title">Mixed Problem Sets</div>
+                    <div class="multiplication-menu-description">Challenge yourself with mixed multiplication problems</div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="animation-section">
+            <div class="floating-symbols">
+                <div class="symbol">×</div>
+                <div class="symbol">2</div>
+                <div class="symbol">3</div>
+                <div class="symbol">4</div>
+                <div class="symbol">×</div>
+            </div>
+            <div class="race-track-bg"></div>
+            <div class="finish-line"></div>
+            <img src="@selectedGif" alt="Horse racing" class="race-gif" />
+        </div>
+    </div>
+</BaseMenuPage>
+
+@code {
+    private string selectedGif = "";
+
+    private string[] gifs = {
+        "images/horse-running1.gif",
+        "images/horse-running2.gif",
+        "images/horse-running3.gif",
+        "images/horse-running4.gif",
+        "images/horse-running5.gif",
+        "images/horse-running6.gif",
+        "images/horse-running7.gif"
+    };
+
+    protected override void OnInitialized() {
+        // Select a random GIF from the array
+        Random random = new Random();
+        int index = random.Next(gifs.Length);
+        selectedGif = gifs[index];
+    }
+}

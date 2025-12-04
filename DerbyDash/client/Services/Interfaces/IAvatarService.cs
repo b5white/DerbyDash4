@@ -1,0 +1,17 @@
+namespace DerbyDash.Services {
+    public interface IAvatarService {
+        /// <summary>
+        /// Event that fires when a user's avatar is updated
+        /// </summary>
+        event Func<Task>? OnAvatarChanged;
+
+        /// <summary>
+        /// Notifies subscribers that the current user's avatar has been updated
+        /// </summary>
+        Task NotifyAvatarChanged();
+
+        Task<List<string>> GetAvailableAvatarsAsync();
+        Task<string?> GetAvatarUrlAsync(string? avatarFileName);
+    }
+}
+

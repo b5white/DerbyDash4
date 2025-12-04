@@ -1,0 +1,70 @@
+﻿@inherits MainLayoutBase
+@using DerbyDash.Components.Layout
+@using Microsoft.AspNetCore.Components.Routing
+@using DerbyDash.Data
+@inject NavigationManager NavManager
+@inject GameStateService GameStateService
+
+<BetaBanner />
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <div class="main">
+        @if (!IsAuthPage && (!GameStateService.IsGameRunning || !IsOnRacePage))
+        {
+            <TopNavbar />
+            <Breadcrumb />
+        }
+        <main>
+            @Body
+        </main>
+    </div>
+</div>
+
+@code {
+    private bool IsAuthPage => NavManager.Uri.Contains("/Account/");
+    private bool IsOnRacePage => NavManager.Uri.Contains("/race/");
+
+    protected override void OnInitialized()
+    {
+        NavManager.LocationChanged += LocationChanged;
+        GameStateService.OnGameStateChanged += OnGameStateChanged;
+        base.OnInitialized();
+    }
+
+    private async Task OnGameStateChanged(bool isGameRunning)
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void LocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        // Reset game state if navigating away from race pages
+        if (!e.Location.Contains("/race/") && GameStateService.IsGameRunning)
+        {
+            // Use InvokeAsync to properly handle the async state changes
+            InvokeAsync(async () => {
+                Console.WriteLine($"MainLayout: Navigating away from race page to {e.Location}, resetting game state");
+                await GameStateService.SetGameRunning(false);
+                await GameStateService.SetCurrentRacePage("");
+                Console.WriteLine($"MainLayout: Game state reset, IsGameRunning = {GameStateService.IsGameRunning}");
+                StateHasChanged();
+            });
+        }
+        else 
+        {
+            Console.WriteLine($"MainLayout: Location changed to {e.Location}, triggering StateHasChanged");
+            StateHasChanged();
+        }
+    }
+
+    public new void Dispose()
+    {
+        NavManager.LocationChanged -= LocationChanged;
+        GameStateService.OnGameStateChanged -= OnGameStateChanged;
+        base.Dispose();
+    }
+}

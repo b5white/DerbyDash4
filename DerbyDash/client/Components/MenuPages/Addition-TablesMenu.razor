@@ -1,0 +1,31 @@
+﻿@page "/Addition-TablesMenu"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@inherits BaseMenuPage
+
+<BaseMenuPage Title="Addition Tables" Subtitle="Choose a table to race with">
+    <div class="tables-menu-container">
+        <div class="tables-grid">
+            @for (int i = 1; i <= 13; i++)
+            {
+                int tableNumber = i;
+                <div class="table-card" style="--animation-order:@tableNumber">
+                    <a href="/race/addition-@(tableNumber)stable" class="table-link">
+                        <div class="table-number">@tableNumber</div>
+                        <div class="table-text">@tableNumber's Table</div>
+                        <div class="checkered-flag"></div>
+                    </a>
+                </div>
+            }
+        </div>
+        
+        <div class="animation-container">
+            <div class="race-track"></div>
+            <div class="race-car"></div>
+        </div>
+    </div>
+</BaseMenuPage>
+
+@code {
+    // No additional code needed
+}

@@ -1,0 +1,52 @@
+﻿@using DerbyDash.Components.Account
+@using Microsoft.AspNetCore.Components.Routing
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@GetLayoutType(routeData)">
+                <Authorizing>
+                    <div class="loading-container">
+                        <p>Loading...</p>
+                    </div>
+                </Authorizing>
+                <NotAuthorized>
+                    <RedirectToLogin />
+                </NotAuthorized>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="typeof(DerbyDash.Components.Layout.MainLayout)">
+                <p role="alert">Sorry, there's nothing at this address.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+
+@code {
+    private Type GetLayoutType(RouteData routeData)
+    {
+        // Use AdminLayout for admin pages
+        if (routeData.PageType.Namespace?.Contains("Admin") == true)
+        {
+            return typeof(DerbyDash.Components.Layout.AdminLayout);
+        }
+        
+        // Use MainLayout for Login, Register, and Welcome pages to show sidebar menu
+        var pageTypeName = routeData.PageType.Name;
+        if (pageTypeName == "Login" || pageTypeName == "Register" || pageTypeName == "Welcome")
+        {
+            return typeof(DerbyDash.Components.Layout.MainLayout);
+        }
+        
+        // Use AuthLayout for other Account pages (ConfirmEmail, etc.)
+        if (routeData.PageType.Namespace?.Contains("Account.Pages") == true)
+        {
+            return typeof(DerbyDash.Components.Account.Layout.AuthLayout);
+        }
+        
+        return typeof(DerbyDash.Components.Layout.MainLayout);
+    }
+}

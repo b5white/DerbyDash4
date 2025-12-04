@@ -1,0 +1,38 @@
+﻿@page "/Multiplication-TablesMenu"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@inherits BaseMenuPage
+
+<BaseMenuPage Title="Multiplication Tables" Subtitle="Choose a table to race with">
+    <div class="tables-menu-container">
+        <div class="tables-grid">
+            @for (int i = 2; i <= 13; i++)
+            {
+                int tableNumber = i;
+                <div class="table-card" style="--animation-order:@(tableNumber-1)">
+                    <a href="/race/multiplication-@(tableNumber)stable" class="table-link">
+                        <div class="multiplication-symbol"></div>
+                        <div class="table-number">@tableNumber</div>
+                        <div class="table-text">@tableNumber's Table</div>
+                    </a>
+                </div>
+            }
+        </div>
+        
+        <div class="animation-container">
+            <div class="floating-symbols">
+                <div class="symbol">×</div>
+                <div class="symbol">2</div>
+                <div class="symbol">×</div>
+                <div class="symbol">3</div>
+                <div class="symbol">×</div>
+            </div>
+            <div class="race-track"></div>
+            <div class="race-car"></div>
+        </div>
+    </div>
+</BaseMenuPage>
+
+@code {
+    // No additional code needed
+}

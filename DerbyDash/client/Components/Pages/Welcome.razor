@@ -1,0 +1,135 @@
+@page "/beta-welcome"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+@rendermode InteractiveWebAssembly
+
+<PageTitle>Welcome to TurboFlash - Math Racing Adventure!</PageTitle>
+
+<div class="welcome-container">
+    <!-- Animated Background -->
+    <div class="racing-background">
+        <div class="racing-track"></div>
+        <div class="finish-line"></div>
+    </div>
+
+    <!-- Floating Math Symbols -->
+    <div class="floating-symbols">
+        <div class="symbol">+</div>
+        <div class="symbol">×</div>
+        <div class="symbol">÷</div>
+        <div class="symbol">−</div>
+        <div class="symbol">=</div>
+        <div class="symbol">√</div>
+        <div class="symbol">∑</div>
+        <div class="symbol">∞</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="welcome-content">
+        <div class="hero-section">
+            <div class="logo-container">
+                <div class="logo-animation">
+                    <h1 class="main-title">
+                        <span class="derby">Turbo</span>
+                        <span class="dash">Flash</span>
+                    </h1>
+                    <div class="beta-badge">BETA</div>
+                </div>
+                <p class="tagline">Where Math Meets Speed!</p>
+            </div>
+
+            <div class="description">
+                <h2>🏁 Welcome to the Ultimate Math Racing Experience!</h2>
+                <p>
+                    Rev up your brain and race through exciting math challenges!
+                    TurboFlash combines the thrill of racing with the power of mathematics,
+                    creating an engaging learning experience for all skill levels.
+                </p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚗</div>
+                    <h3>Race & Learn</h3>
+                    <p>Solve math problems to accelerate your car and win races!</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Racing</h3>
+                    <p>Create your race team and compete with multiple racers!</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Track Progress</h3>
+                    <p>Monitor your improvement with detailed statistics and leaderboards!</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Multiple Challenges</h3>
+                    <p>Master addition, subtraction, multiplication, and division!</p>
+                </div>
+            </div>
+
+            <div class="cta-section">
+                <AuthorizeView>
+                    <Authorized>
+                        <button class="cta-button primary" @onclick="NavigateToRaces">
+                            <i class="fas fa-flag-checkered"></i>
+                            Start Racing Now!
+                        </button>
+                        <button class="cta-button secondary" @onclick="NavigateToTeam">
+                            <i class="fas fa-users"></i>
+                            Manage Race Team
+                        </button>
+                    </Authorized>
+                    <NotAuthorized>
+                        <button class="cta-button primary" @onclick="NavigateToLogin">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Join TurboFlash
+                        </button>
+                        <button class="cta-button secondary" @onclick="NavigateToRegister">
+                            <i class="fas fa-user-plus"></i>
+                            Create Account
+                        </button>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+
+            <div class="beta-info">
+                <div class="beta-notice">
+                    <h3>🚧 Beta Version</h3>
+                    <p>
+                        You're experiencing TurboFlash in its beta phase! We're actively working on new features
+                        and improvements. Your feedback helps us create the best math racing experience possible.
+                    </p>
+                    <div class="beta-features">
+                        <span class="beta-tag">New Features Coming Soon</span>
+                        <span class="beta-tag">Regular Updates</span>
+                        <span class="beta-tag">Community Feedback</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToRaces() {
+        Navigation.NavigateTo("/RaceSetsMenu");
+    }
+
+    private void NavigateToTeam() {
+        Navigation.NavigateTo("/Account/Manage/RaceTeam");
+    }
+
+    private void NavigateToLogin() {
+        Navigation.NavigateTo("/Account/Login");
+    }
+
+    private void NavigateToRegister() {
+        Navigation.NavigateTo("/Account/Register");
+    }
+} 

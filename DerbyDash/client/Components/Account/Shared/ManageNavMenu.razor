@@ -1,0 +1,44 @@
+﻿@using DerbyDash.Data
+
+<div class="profile-menu-grid">
+    <NavLink class="profile-menu-btn" href="Account/Manage" Match="NavLinkMatch.All">
+        <i class="fas fa-user"></i> Profile
+    </NavLink>
+    @* Email management requires API endpoint - disabled for now
+    <NavLink class="profile-menu-btn" href="Account/Manage/Email">
+        <i class="fas fa-envelope"></i> Email
+    </NavLink>
+    *@
+    @* Password change requires API endpoint - disabled for now
+    <NavLink class="profile-menu-btn" href="Account/Manage/ChangePassword">
+        <i class="fas fa-key"></i> Password
+    </NavLink>
+    *@
+    <NavLink class="profile-menu-btn" href="Account/Manage/RaceTeam">
+        <i class="fas fa-users"></i> Race Team
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/Subscription">
+        <i class="fas fa-credit-card"></i> Subscription
+    </NavLink>
+    <NavLink class="profile-menu-btn" href="Account/Manage/MyFeedback">
+        <i class="fas fa-comments"></i> My Feedback
+    </NavLink>
+    @* External logins not supported in client
+    @if (hasExternalLogins)
+    {
+        <NavLink class="profile-menu-btn" href="Account/Manage/ExternalLogins">
+            <i class="fas fa-link"></i> External logins
+        </NavLink>
+    }
+    *@
+    @* Two-factor authentication requires API endpoint - disabled for now
+    <NavLink class="profile-menu-btn" href="Account/Manage/TwoFactorAuthentication">
+        <i class="fas fa-shield-alt"></i> Two-factor authentication
+    </NavLink>
+    *@
+    @* Personal data requires API endpoint - disabled for now
+    <NavLink class="profile-menu-btn" href="Account/Manage/PersonalData">
+        <i class="fas fa-user-shield"></i> Personal data
+    </NavLink>
+    *@
+</div>

@@ -1,0 +1,126 @@
+@page "/TryAppExplainer"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
+
+<PageTitle>Try TurboFlash First</PageTitle>
+
+@if (IsFromRegistration)
+{
+    <RegistrationLayout Steps="@registrationSteps" 
+                       CurrentStep="start-racing"
+                       SidebarTitle="Ready to Start Racing!"
+                       SidebarDescription="You're all set up! Now try TurboFlash yourself to see how it works."
+                       SidebarExtraContent="<div class='racing-hint'><i class='fas fa-trophy'></i> Experience the learning yourself first!</div>">
+        @RenderContent()
+    </RegistrationLayout>
+}
+else
+{
+    <div class="explainer-container">
+        @RenderContent()
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery]
+    private bool IsFromRegistration { get; set; }
+    
+    private List<RegistrationStep> registrationSteps = new();
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (IsFromRegistration)
+        {
+            var stepsHelper = new RegistrationSteps { CurrentStep = "start-racing" };
+            registrationSteps = stepsHelper.GetRegistrationSteps();
+        }
+    }
+    
+    private RenderFragment RenderContent() => @<text>
+        <div class="explainer-header">
+            <h1 class="explainer-title">
+                <i class="fas fa-lightbulb"></i>
+                Try TurboFlash Yourself First!
+            </h1>
+            <p class="explainer-subtitle">
+                We suggest parents try the app before handing it over to their kids
+            </p>
+        </div>
+
+        <div class="explainer-content">
+            <div class="suggestion-card">
+                <div class="suggestion-icon">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <div class="suggestion-text">
+                    <h3>Learn by Example</h3>
+                    <p>
+                        The best way to understand how TurboFlash works is to experience it yourself. 
+                        We recommend starting with multiplication squares to see how the app helps with math learning.
+                    </p>
+                </div>
+            </div>
+
+            <div class="suggestion-card">
+                <div class="suggestion-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="suggestion-text">
+                    <h3>Just 5-10 Races</h3>
+                    <p>
+                        After just 5 to 10 races with small multiplication squares, you'll likely notice 
+                        you know your squares better. This quick experience will help you understand 
+                        what your kids will gain from using the app.
+                    </p>
+                </div>
+            </div>
+
+            <div class="suggestion-card">
+                <div class="suggestion-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <div class="suggestion-text">
+                    <h3>Share the Experience</h3>
+                    <p>
+                        Once you've tried it yourself, you'll be able to better guide and encourage 
+                        your children as they use TurboFlash to improve their math skills.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-section">
+            <div class="race-preview">
+                <h3>Ready to Race?</h3>
+                <p>Click below to try multiplication squares and see how TurboFlash works!</p>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/race/multiplication-squaressmall" class="btn-lets-race">
+                    <i class="fas fa-flag-checkered"></i>
+                    Let's Race!
+                </a>
+                
+                <a href="/Account/Manage/RaceTeam" class="btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Race Team
+                </a>
+            </div>
+        </div>
+
+        <div class="educational-note">
+            <div class="note-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="note-text">
+                <p>
+                    <strong>Educational Tip:</strong> Multiplication squares (like 2×2, 3×3, 4×4) are foundational 
+                    for mental math. Mastering these small squares first makes larger multiplication problems much easier!
+                </p>
+            </div>
+        </div>
+    </text>;
+}

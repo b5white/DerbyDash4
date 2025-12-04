@@ -1,0 +1,100 @@
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Authorization
+@* @attribute [Authorize(Roles = "Admin")] *@
+
+<div class="admin-layout">
+    <header class="admin-header">
+        <div class="container">
+            <div class="admin-header-content">
+                <h1>TurboFlash Admin</h1>
+                <a href="/" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-house-door"></i> Back to Site
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 col-lg-2 admin-sidebar">
+                <div class="admin-nav">
+                    <div class="admin-nav-header">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </div>
+                    <ul class="admin-nav-items">
+                        <li>
+                            <a href="/admin" class="@GetActiveClass("/admin")">
+                                <i class="bi bi-house"></i> Overview
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/feedback" class="@GetActiveClass("/admin/feedback")">
+                                <i class="bi bi-chat-dots"></i> Feedback
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/users" class="@GetActiveClass("/admin/users")">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/races" class="@GetActiveClass("/admin/races")">
+                                <i class="bi bi-flag"></i> Races
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/bulk-email" class="@GetActiveClass("/admin/bulk-email")">
+                                <i class="bi bi-people"></i> Bulk Email
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/admin/settings" class="@GetActiveClass("/admin/settings")">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-9 col-lg-10 admin-content">
+                @Body
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Inject]     
+    public required NavigationManager NavigationManager { get; set; }
+
+    private string GetActiveClass(string href)
+    {
+        // Get the relative path from the current URI
+        var currentPath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        
+        // Handle the root admin path
+        if (href == "/admin")
+        {
+            // Only active if we're exactly at /admin
+            return currentPath == "admin" ? "active" : "";
+        }
+        
+        // For other admin sections
+        // Remove the leading slash for comparison
+        string hrefWithoutSlash = href.Substring(1);
+        
+        // Check if the current path matches the menu item's path
+        if (currentPath == hrefWithoutSlash)
+        {
+            return "active";
+        }
+        
+        // Check if we're on a sub-page of the current section
+        // For example, /admin/feedback/123 should highlight the Feedback menu item
+        if (currentPath.StartsWith(hrefWithoutSlash + "/"))
+        {
+            return "active";
+        }
+        
+        return "";
+    }
+}

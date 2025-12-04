@@ -1,0 +1,81 @@
+﻿@using DerbyDash.Track
+@using Microsoft.AspNetCore.Components.Web
+
+<div class="road">
+    <div class="track-background @((Track.IsAnyCarAtTop) ? $"animated speed-{Track.SpeedClass}" : "") @(Track.IsFinishLineVisible ? "finish-visible" : "")">
+        @for (int i = 0; i < 5; i++) {
+            <div class="lane-group">
+                @for (int j = 0; j < 40; j++) {
+                    <div class="lane"></div>
+                }
+            </div>
+        }
+
+        <div class="start-line @(startLineHidden ? "hidden" : "")" @ref="startLineElement">
+            <img src="/images/RaceTrack/@Track.StartLine.ImageUrl" alt="Start Line" />
+        </div>
+    </div>
+
+    <div class="track-container">
+        <div class="finish-line" style="top: @Track.FinishLine.TopStr;">
+            <img src="/images/RaceTrack/@Track.FinishLine.ImageUrl" alt="Finish Line" />
+        </div>
+
+        <div class="cars-container">
+            @for (int i = 0; i < Track.Cars.Count; i++)
+            {
+                var car = Track.Cars[i];
+                <div class="car-dynamic @(i == 0 ? "player-car" : "ai-car")" style="@GetCarLeftPosition(i, Track.Cars.Count) top: @car.TopStr;">
+                    @if (i == 0)
+                    {
+                        <div class="player-indicator">
+                            <span class="player-label">YOU</span>
+                            <div class="player-arrow">▼</div>
+                        </div>
+                    }
+                    <img src="/images/RaceTrack/@car.ImageUrl" alt="@(i == 0 ? "Your Race car" : "AI Race car")" />
+                </div>
+            }
+        </div>
+        @if (ShowDebug) {
+            <div class="debug-panel">
+                @foreach (var car in Track.Cars) {
+                    <div class="debug-info">
+                        Speed: @car.Speed.ToString("F0")
+                        Top: @car.Top.ToString("F0")
+                        Distance: @car.Distance.ToString("F2")
+                        Offset: @Track.LaneOffset.ToString("F0")
+                    </div>
+                }
+                <div class="debug-info">
+                    StTop: @Track.StartLine.Top.ToString("F0")
+                    AnimProgress: @(animationStarted ? ((DateTime.Now - animationStartTime).TotalSeconds %
+                GetAnimationDurationForSpeedClass(Track.SpeedClass) /
+                GetAnimationDurationForSpeedClass(Track.SpeedClass)).ToString("F2") : "0.00")
+                    FinVis: @Track.IsFinishLineVisible
+                    StHid: @startLineHidden
+                    SC: @Track.SpeedClass
+                    Time: @Track.RaceTime
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private string GetCarLeftPosition(int carIndex, int totalCars = 3)
+    {
+        // Lane sections (between yellow lines): 0%-15%, 15%-32%, 32%-49%, 49%-66%, 66%-83%, 83%-100%
+        // Car positions are centered in each lane section
+        string[] laneCenters = { "7.5%", "23.5%", "40.5%", "57.5%", "74.5%", "91.5%" };
+        
+        if (carIndex >= 0 && carIndex < laneCenters.Length)
+        {
+            return $"left: calc({laneCenters[carIndex]} - 8%);";
+        }
+        
+        // fallback: evenly distribute
+        double percent = 100.0 * (carIndex + 0.5) / 6; // 6 available lane sections
+        return $"left: calc({percent}% - 8%);";
+    }
+}

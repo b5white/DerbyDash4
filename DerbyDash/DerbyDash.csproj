@@ -10,6 +10,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- Exclude client and server folders from compilation -->
+    <Compile Remove="client\**" />
+    <Compile Remove="server\**" />
+    <Content Remove="client\**" />
+    <Content Remove="server\**" />
+    <EmbeddedResource Remove="client\**" />
+    <EmbeddedResource Remove="server\**" />
+    <None Remove="client\**" />
+    <None Remove="server\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!--<ProjectReference Include="..\DerbyDash.Client\DerbyDash.Client.csproj" />-->
     <PackageReference Include="Bogus" Version="35.6.3" />
 	  <PackageReference Include="Blazorise.Bootstrap5" Version="1.7.7" />

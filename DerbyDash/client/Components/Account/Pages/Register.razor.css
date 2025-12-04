@@ -1,0 +1,557 @@
+/* Form-specific styles for Register page */
+.register-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1.8rem;
+  text-align: center;
+  position: relative;
+  padding-bottom: 0.8rem;
+}
+
+.register-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(90deg, #ff5722, #ff9800);
+  border-radius: 2px;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-check-input {
+  width: 2rem !important;
+  height: 2rem !important;
+  margin-right: 2rem !important;
+}
+
+/* .form-check-label {
+  display: flex !important;
+  align-items: baseline;
+} */
+
+.form-group label {
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.form-control {
+  border-radius: 10px;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid #e0e0e0;
+  transition: all 0.3s ease;
+  font-size: 1rem;
+  background-color: #f9f9f9;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.form-control:focus {
+  border-color: #ff5722;
+  box-shadow: 0 0 0 0.2rem rgba(255, 87, 34, 0.15);
+  background-color: #fff;
+}
+
+/* Password visibility toggle styles */
+.password-input-container {
+  position: relative;
+}
+
+.password-input-container .form-control {
+  padding-right: 3rem;
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.password-toggle-btn:hover,
+.password-toggle-btn:focus {
+  color: #ff5722;
+  outline: none;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-register {
+  background: linear-gradient(135deg, #ff5722 0%, #ff9800 100%);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding: 1rem 1.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+}
+
+.btn-register:hover {
+  background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 87, 34, 0.5);
+}
+
+.btn-register:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(255, 87, 34, 0.4);
+}
+
+.btn-register::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: 0.5s;
+}
+
+.btn-register:hover::before {
+  left: 100%;
+}
+
+.btn-register:disabled {
+  background: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-register:disabled:hover {
+  background: #cccccc;
+  transform: none;
+  box-shadow: none;
+}
+
+.register-links {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.register-links a {
+  color: #ff5722;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.register-links a:hover {
+  color: #ff9800;
+  text-decoration: underline;
+}
+
+.validation-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.password-tips {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-left: 4px solid #ff5722;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+}
+
+.password-tips::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -4px;
+  right: -2px;
+  height: 2px;
+  background: linear-gradient(90deg, #ff5722, #ff9800);
+  border-radius: 1px 1px 0 0;
+}
+
+.password-tips h3 {
+  color: #333;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.password-tips h3 i {
+  margin-right: 0.5rem;
+  color: #ff5722;
+}
+
+.password-tips ul {
+  margin: 0;
+  padding-left: 1.5rem;
+}
+
+.password-tips li {
+  margin-bottom: 0.5rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.password-tips li::before {
+  content: "✓";
+  margin-right: 0.5rem;
+  color: #28a745;
+  font-weight: bold;
+  margin-left: -1.2rem;
+  position: absolute;
+}
+
+.password-tips .example {
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  font-family: "Courier New", monospace;
+  font-weight: 600;
+  color: #495057;
+  text-align: center;
+}
+
+/* CAPTCHA Widget Styles */
+.captcha-group {
+  margin-left: 48px !important;
+  margin: 2rem 0;
+}
+
+.captcha-widget {
+  border: 2px solid #d3d3d3;
+  border-radius: 4px;
+  background: #f9f9f9;
+  padding: 0;
+  max-width: 300px;
+  font-family: Roboto, helvetica, arial, sans-serif;
+}
+
+.captcha-main {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  background: #fff;
+  border-radius: 2px;
+  position: relative;
+}
+
+/* Ensure button styling doesn't interfere */
+button.captcha-main {
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  background: #fff;
+  border-radius: 2px;
+  position: relative;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.captcha-main:focus {
+  outline: 2px solid #4285f4;
+  outline-offset: 2px;
+}
+
+.captcha-checkbox-container {
+  margin-right: 12px;
+}
+
+.captcha-checkbox {
+  display: none;
+}
+
+.captcha-checkbox-label {
+  cursor: pointer;
+  display: block;
+}
+
+.checkbox-custom {
+  width: 28px;
+  height: 28px;
+  border: 2px solid #c1c1c1;
+  border-radius: 2px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.captcha-checkbox:checked + .captcha-checkbox-label .checkbox-custom,
+.checkbox-custom.checked {
+  background: #1c4587;
+  border-color: #1c4587;
+}
+
+.captcha-checkbox:checked + .captcha-checkbox-label .checkbox-custom i,
+.checkbox-custom.checked i {
+  color: white;
+  font-size: 14px;
+  display: block;
+  opacity: 1;
+}
+
+.checkbox-custom i {
+  display: none;
+  opacity: 0;
+  transition: all 0.2s ease;
+}
+
+.checkbox-custom:hover {
+  border-color: #4285f4;
+}
+
+.captcha-text-container {
+  flex: 1;
+}
+
+.captcha-text {
+  font-size: 18px;
+  color: #222;
+  font-weight: normal;
+  line-height: 17px;
+}
+
+.captcha-logo {
+  margin-left: auto;
+}
+
+.captcha-logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0.7;
+}
+
+.captcha-logo-circle {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4285f4 0%, #34a853 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+}
+
+.captcha-logo-circle i {
+  color: white;
+  font-size: 18px;
+}
+
+.captcha-brand {
+  text-align: center;
+}
+
+.captcha-brand-text {
+  font-size: 10px;
+  color: #555;
+  font-weight: bold;
+  display: block;
+  line-height: 10px;
+}
+
+.captcha-privacy {
+  font-size: 8px;
+  color: #555;
+  margin-top: 1px;
+  display: block;
+  line-height: 8px;
+}
+
+.captcha-widget:hover {
+  border-color: #4285f4;
+}
+
+.captcha-widget .validation-message {
+  display: block;
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  padding: 0 14px 10px 14px;
+}
+
+/* Scroll down hint styles for sidebar extra content */
+:global(.scroll-down-hint) {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  animation: fadeInUp 0.8s ease-out 0.5s forwards,
+    bounce 2s ease-in-out infinite 1.5s;
+  opacity: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+:global(.scroll-down-hint i) {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  :global(.scroll-down-hint) {
+    font-size: 1rem;
+    margin-top: 1.2rem;
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-title {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-register {
+    font-size: 1rem;
+    padding: 0.9rem 1.2rem;
+  }
+
+  .captcha-widget {
+    max-width: 100%;
+  }
+
+  .captcha-main {
+    padding: 12px;
+  }
+
+  .captcha-text {
+    font-size: 13px;
+  }
+
+  .captcha-logo-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .captcha-logo-circle i {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  :global(.scroll-down-hint) {
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    display: flex;
+  }
+
+  .captcha-widget {
+    max-width: 100%;
+  }
+
+  .captcha-main {
+    padding: 10px;
+  }
+
+  .captcha-checkbox-container {
+    margin-right: 10px;
+  }
+
+  .checkbox-custom {
+    width: 24px;
+    height: 24px;
+  }
+
+  .captcha-checkbox:checked + .captcha-checkbox-label .checkbox-custom i {
+    font-size: 12px;
+  }
+
+  .captcha-text {
+    font-size: 12px;
+  }
+
+  .captcha-logo-circle {
+    width: 28px;
+    height: 28px;
+  }
+
+  .captcha-logo-circle i {
+    font-size: 14px;
+  }
+
+  .captcha-brand-text {
+    font-size: 9px;
+  }  .captcha-privacy {
+    font-size: 7px;
+  }
+}

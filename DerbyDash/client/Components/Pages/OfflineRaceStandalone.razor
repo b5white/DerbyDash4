@@ -1,0 +1,295 @@
+@page "/offline-race-standalone/{ProblemClassString}"
+@attribute [AllowAnonymous]
+@using DerbyDash.Components.Problems
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DerbyDash - Offline Practice</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="/app.css" />
+    <style>
+        body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .offline-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .offline-banner { background: linear-gradient(135deg, #ff6b6b, #ee5a52); color: white; padding: 15px; text-align: center; margin-bottom: 20px; border-radius: 8px; }
+        .race-area { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .problem-display { font-size: 2rem; font-weight: bold; text-align: center; margin: 20px 0; }
+        .answer-input { font-size: 1.5rem; padding: 15px; width: 200px; text-align: center; border: 2px solid #ddd; border-radius: 8px; margin: 0 10px; }
+        .start-button, .next-button { background: #007bff; color: white; border: none; padding: 15px 30px; font-size: 1.2rem; border-radius: 8px; cursor: pointer; margin: 10px; }
+        .start-button:hover, .next-button:hover { background: #0056b3; }
+        .stats { display: flex; gap: 20px; justify-content: center; margin: 20px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; min-width: 120px; }
+        .timer { font-size: 1.5rem; font-weight: bold; color: #007bff; }
+        .correct { color: #28a745; }
+        .wrong { color: #dc3545; }
+        .results { background: #e8f5e9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-banner">
+            <i class="fas fa-wifi-slash"></i>
+            <strong>Offline Practice Mode</strong> - No server connection needed!
+        </div>
+
+        <div class="race-area">
+            <h1 style="text-align: center; color: #2c3e50;">@GetTitle()</h1>
+            
+            <div id="gameArea">
+                @if (!gameStarted)
+                {
+                    <div style="text-align: center;">
+                        <p style="font-size: 1.2rem; color: #666;">Ready to practice @GetTitle()? Click start when you're ready!</p>
+                        <button class="start-button" onclick="startGame()">
+                            <i class="fas fa-flag-checkered"></i> Start Practice
+                        </button>
+                    </div>
+                }
+                else if (!gameFinished)
+                {
+                    <div class="stats">
+                        <div class="stat-card">
+                            <div>Problem</div>
+                            <div><strong>@currentProblemIndex / @totalProblems</strong></div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Time</div>
+                            <div class="timer">@elapsedTime.ToString("F1")s</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>Correct</div>
+                            <div class="correct"><strong>@correctAnswers</strong></div>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div class="problem-display">@currentProblem</div>
+                        <div>
+                            <input type="number" class="answer-input" id="answerInput" 
+                                   onkeypress="handleKeyPress(event)" placeholder="Answer" autofocus />
+                            <button class="next-button" onclick="checkAnswer()">Submit</button>
+                        </div>
+                        <div id="feedback" style="margin: 20px 0; font-size: 1.2rem;"></div>
+                    </div>
+                }
+                else
+                {
+                    <div class="results">
+                        <h2 style="text-align: center; color: #2c3e50;">Practice Complete! 🎉</h2>
+                        <div class="stats">
+                            <div class="stat-card">
+                                <div>Total Time</div>
+                                <div><strong>@totalTime.ToString("F1")s</strong></div>
+                            </div>
+                            <div class="stat-card">
+                                <div>Correct Answers</div>
+                                <div class="correct"><strong>@correctAnswers / @totalProblems</strong></div>
+                            </div>
+                            <div class="stat-card">
+                                <div>Average Time</div>
+                                <div><strong>@(totalTime/totalProblems).ToString("F1")s</strong></div>
+                            </div>
+                        </div>
+                        <div style="text-align: center; margin: 20px 0;">
+                            <button class="start-button" onclick="restartGame()">
+                                <i class="fas fa-redo"></i> Practice Again
+                            </button>
+                            <a href="/offline-menu" class="start-button" style="text-decoration: none; display: inline-block;">
+                                <i class="fas fa-home"></i> Back to Menu
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameStarted = false;
+        let gameFinished = false;
+        let currentProblemIndex = 0;
+        let totalProblems = 20;
+        let correctAnswers = 0;
+        let startTime = 0;
+        let problems = [];
+        let currentAnswer = 0;
+
+        // Problem generation based on type
+        function generateProblems(type) {
+            problems = [];
+            for (let i = 0; i < totalProblems; i++) {
+                let problem = generateSingleProblem(type);
+                problems.push(problem);
+            }
+        }
+
+        function generateSingleProblem(type) {
+            switch (type) {
+                case 'addition-4stable':
+                    return generate4sAddition();
+                case 'addition-2stable':
+                    return generate2sAddition();
+                case 'addition-3stable':
+                    return generate3sAddition();
+                case 'addition-5stable':
+                    return generate5sAddition();
+                case 'subtraction-4stable':
+                    return generate4sSubtraction();
+                case 'multiplication-4stable':
+                    return generate4sMultiplication();
+                default:
+                    return generate4sAddition();
+            }
+        }
+
+        function generate4sAddition() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = 4;
+            return { question: `${a} + ${b}`, answer: a + b };
+        }
+
+        function generate2sAddition() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = 2;
+            return { question: `${a} + ${b}`, answer: a + b };
+        }
+
+        function generate3sAddition() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = 3;
+            return { question: `${a} + ${b}`, answer: a + b };
+        }
+
+        function generate5sAddition() {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = 5;
+            return { question: `${a} + ${b}`, answer: a + b };
+        }
+
+        function generate4sSubtraction() {
+            const result = Math.floor(Math.random() * 10) + 1;
+            const b = 4;
+            const a = result + b;
+            return { question: `${a} - ${b}`, answer: result };
+        }
+
+        function generate4sMultiplication() {
+            const a = Math.floor(Math.random() * 12) + 1;
+            const b = 4;
+            return { question: `${a} × ${b}`, answer: a * b };
+        }
+
+        function startGame() {
+            gameStarted = true;
+            gameFinished = false;
+            currentProblemIndex = 0;
+            correctAnswers = 0;
+            startTime = Date.now();
+            
+            const problemType = '@ProblemClassString';
+            generateProblems(problemType);
+            
+            updateDisplay();
+            showNextProblem();
+        }
+
+        function showNextProblem() {
+            if (currentProblemIndex < totalProblems) {
+                const problem = problems[currentProblemIndex];
+                document.querySelector('.problem-display').textContent = problem.question + ' = ?';
+                currentAnswer = problem.answer;
+                document.getElementById('answerInput').value = '';
+                document.getElementById('answerInput').focus();
+                document.getElementById('feedback').innerHTML = '';
+            } else {
+                finishGame();
+            }
+        }
+
+        function checkAnswer() {
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            const feedback = document.getElementById('feedback');
+            
+            if (userAnswer === currentAnswer) {
+                correctAnswers++;
+                feedback.innerHTML = '<span class="correct"><i class="fas fa-check"></i> Correct!</span>';
+            } else {
+                feedback.innerHTML = `<span class="wrong"><i class="fas fa-times"></i> Wrong. The answer is ${currentAnswer}</span>`;
+            }
+            
+            currentProblemIndex++;
+            setTimeout(() => {
+                showNextProblem();
+                updateDisplay();
+            }, 1000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                checkAnswer();
+            }
+        }
+
+        function updateDisplay() {
+            const elapsedSeconds = (Date.now() - startTime) / 1000;
+            document.querySelector('.timer').textContent = elapsedSeconds.toFixed(1) + 's';
+            document.querySelector('.stat-card:nth-child(1) strong').textContent = `${currentProblemIndex} / ${totalProblems}`;
+            document.querySelector('.stat-card:nth-child(3) strong').textContent = correctAnswers;
+        }
+
+        function finishGame() {
+            gameFinished = true;
+            const finalTime = (Date.now() - startTime) / 1000;
+            
+            // Update final results
+            document.querySelector('.results .stat-card:nth-child(1) strong').textContent = finalTime.toFixed(1) + 's';
+            document.querySelector('.results .stat-card:nth-child(2) strong').textContent = `${correctAnswers} / ${totalProblems}`;
+            document.querySelector('.results .stat-card:nth-child(3) strong').textContent = (finalTime / totalProblems).toFixed(1) + 's';
+            
+            updateDisplay();
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        // Update timer every 100ms during game
+        setInterval(() => {
+            if (gameStarted && !gameFinished) {
+                updateDisplay();
+            }
+        }, 100);
+    </script>
+</body>
+</html>
+
+@code {
+    [Parameter] public string? ProblemClassString { get; set; }
+
+    private bool gameStarted = false;
+    private bool gameFinished = false;
+    private int currentProblemIndex = 0;
+    private int totalProblems = 20;
+    private int correctAnswers = 0;
+    private double elapsedTime = 0;
+    private double totalTime = 0;
+    private string currentProblem = "";
+
+    private string GetTitle()
+    {
+        return ProblemClassString switch
+        {
+            "addition-4stable" => "Addition 4s Table",
+            "addition-2stable" => "Addition 2s Table",
+            "addition-3stable" => "Addition 3s Table",
+            "addition-5stable" => "Addition 5s Table",
+            "subtraction-4stable" => "Subtraction 4s Table",
+            "multiplication-4stable" => "Multiplication 4s Table",
+            _ => "Math Practice"
+        };
+    }
+}

@@ -1,0 +1,18 @@
+@page "/Account/ProcessLogin"
+@rendermode InteractiveWebAssembly
+@attribute [AllowAnonymous]
+
+<PageTitle>Processing Login - TurboFlash</PageTitle>
+
+<div class="alert alert-info">
+    <i class="fas fa-info-circle"></i> Processing login... Please wait.
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync() {
+        // This page is used for processing login redirects
+        // In client-side, login is handled directly via ApiAuthService
+        // Redirect to home or return URL
+        await Task.CompletedTask;
+    }
+}

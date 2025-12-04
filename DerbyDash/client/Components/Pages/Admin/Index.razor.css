@@ -1,0 +1,15 @@
+.progress-bar-bug-report {
+    width: var(--bug-report-width);
+}
+
+.progress-bar-feature-request {
+    width: var(--feature-request-width);
+}
+
+.progress-bar-general-feedback {
+    width: var(--general-feedback-width);
+}
+
+.progress-bar-other {
+    width: var(--other-width);
+}

@@ -1,0 +1,46 @@
+﻿@page "/Account/RegisterConfirmation"
+@rendermode InteractiveWebAssembly
+
+@using DerbyDash.Components.Shared
+@using static DerbyDash.Components.Shared.RegistrationProgress
+@attribute [AllowAnonymous]
+
+@inject NavigationManager NavManager
+
+<PageTitle>Registration Successful - TurboFlash</PageTitle>
+
+<RegistrationLayout Steps="@registrationSteps" 
+               CurrentStep="confirm-email"
+               SidebarTitle="Registration Successful!"
+               SidebarDescription="Thank you for joining TurboFlash! Your racing adventure is about to begin.">
+    
+    <div class="confirmation-header">
+        <h1>Registration Successful!</h1>
+    </div>
+
+    <div class="confirmation-content">
+        <div class="checkered-flag-icon">
+            <i class="fas fa-flag-checkered"></i>
+        </div>
+        <p class="confirmation-message">
+            Your account has been created successfully! You are now logged in and ready to start racing.
+        </p>
+        <div class="confirmation-actions">
+            <a href="/Account/Manage/RaceTeam" class="btn btn-primary btn-lg">
+                <i class="fas fa-users"></i> Set Up Your Race Team
+            </a>
+            <a href="/RaceSetsMenu" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-flag-checkered"></i> Start Racing
+            </a>
+        </div>
+    </div>
+</RegistrationLayout>
+
+@code {
+    private List<RegistrationStep> registrationSteps = new();
+
+    protected override void OnInitialized() {
+        var stepsHelper = new RegistrationSteps { CurrentStep = "confirm-email" };
+        registrationSteps = stepsHelper.GetRegistrationSteps();
+    }
+}

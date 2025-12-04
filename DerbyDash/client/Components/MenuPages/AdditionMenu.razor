@@ -1,0 +1,42 @@
+﻿@page "/AdditionMenu"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@inherits BaseMenuPage
+
+<BaseMenuPage Title="Addition Racing" Subtitle="Choose your addition challenge">
+    <div class="addition-menu-container">
+        <div class="addition-menu-grid">
+            <div class="addition-menu-card" style="--animation-order:1">
+                <a href="/Addition-TablesMenu" class="addition-menu-link">
+                    <div class="plus-decoration"></div>
+                    <div class="addition-menu-icon">1+2</div>
+                    <div class="addition-menu-title">Addition Tables</div>
+                    <div class="addition-menu-description">Practice with specific addition tables</div>
+                </a>
+            </div>
+            
+            <div class="addition-menu-card" style="--animation-order:2">
+                <a href="/Addition-ProblemsMenu" class="addition-menu-link">
+                    <div class="plus-decoration"></div>
+                    <div class="addition-menu-icon">∑</div>
+                    <div class="addition-menu-title">Mixed Problem Sets</div>
+                    <div class="addition-menu-description">Challenge yourself with mixed addition problems</div>
+                </a>
+            </div>
+            
+        </div>
+        
+        <div class="animation-section">
+            <div class="floating-symbols">
+                <div class="symbol">+</div>
+                <div class="symbol">1</div>
+                <div class="symbol">2</div>
+                <div class="symbol">3</div>
+                <div class="symbol">+</div>
+            </div>
+            <div class="race-track-bg"></div>
+            <div class="finish-line"></div>
+            <div class="race-car-animation"></div>
+        </div>
+    </div>
+</BaseMenuPage>

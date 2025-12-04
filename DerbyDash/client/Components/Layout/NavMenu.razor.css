@@ -1,0 +1,496 @@
+/* Racing-themed sidebar styling */
+.sidebar-header {
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-image {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+}
+
+.logo-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.derby {
+    color: #ffffff;
+}
+
+.dash {
+    color: #ff9800;
+}
+
+.navbar-brand {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-toggler {
+    appearance: none;
+    cursor: pointer;
+    width: 2.5rem;
+    height: 2.5rem;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.75%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem transparent;
+    transition: all 0.3s ease;
+}
+
+.navbar-toggler:checked {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Navigation items styling */
+.nav-item {
+    margin: 0.25rem 1rem;
+}
+
+.nav-item ::deep .nav-link {
+    color: #e0e0e0;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
+
+/* Featured item styling - for the Races menu item */
+.featured-item {
+    margin: 0.5rem 0.75rem;
+    transform: scale(1.05);
+}
+
+.featured-item ::deep .featured-link {
+    background: linear-gradient(90deg, rgba(255, 204, 0, 0.15) 0%, rgba(255, 204, 0, 0.05) 100%);
+    border: 1px solid rgba(255, 204, 0, 0.3);
+    box-shadow: 0 0 10px rgba(255, 204, 0, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.featured-item ::deep .featured-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+        rgba(255, 204, 0, 0.1) 0%, 
+        rgba(255, 204, 0, 0) 70%);
+    z-index: -1;
+}
+
+.featured-item ::deep .featured-link:hover {
+    background: linear-gradient(90deg, rgba(255, 204, 0, 0.25) 0%, rgba(255, 204, 0, 0.1) 100%);
+    transform: translateX(3px) scale(1.02);
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.3);
+}
+
+.featured-item ::deep .featured-link.active {
+    background: linear-gradient(90deg, rgba(255, 204, 0, 0.3) 0%, rgba(255, 204, 0, 0.15) 100%);
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+}
+
+/* Pulsing animation for the featured item */
+@keyframes featured-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 204, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0);
+    }
+}
+
+.featured-item {
+    animation: featured-pulse 2s infinite;
+}
+
+/* Trophy indicator for the featured item */
+.featured-indicator {
+    margin-left: auto;
+    font-size: 1.2em;
+    animation: bounce 1s ease infinite;
+}
+
+/* Featured icon and text styling */
+.featured-icon {
+    color: #ffcc00;
+}
+
+.featured-text {
+    font-weight: bold;
+    font-size: 1.1em;
+    color: #ffcc00;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+.nav-icon {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-text {
+    font-size: 0.95rem;
+}
+
+.nav-item ::deep a.active {
+    background-color: rgba(255, 152, 0, 0.25);
+    color: #ff9800;
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.1);
+}
+
+.nav-item ::deep .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    transform: translateX(3px);
+}
+
+/* Special styling for the Profile link */
+.profile-item ::deep .nav-link {
+    border-left: 3px solid rgba(255, 152, 0, 0.5);
+    padding-left: calc(1rem - 3px);
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-item ::deep .nav-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(255, 152, 0, 0.05) 0%, 
+        rgba(255, 152, 0, 0) 100%);
+    z-index: -1;
+}
+
+.profile-item ::deep .nav-icon {
+    color: rgba(255, 152, 0, 0.8);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.profile-item ::deep .nav-link:hover .nav-icon {
+    transform: scale(1.2);
+    color: #ff9800;
+}
+
+/* Add a subtle pulse animation to draw attention to the profile link */
+@keyframes subtle-pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(255, 152, 0, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+    }
+}
+
+.profile-item {
+    position: relative;
+}
+
+.profile-item::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    /* background-color: #ff9800; */
+    border-radius: 50%;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    /* animation: subtle-pulse 2s infinite; */
+}
+
+.profile-item ::deep .nav-link:hover {
+    background-color: rgba(255, 152, 0, 0.15);
+    border-left-color: #ff9800;
+}
+
+.profile-item ::deep .nav-link.active {
+    background-color: rgba(255, 152, 0, 0.3);
+    border-left-color: #ff9800;
+}
+
+/* Parent Progress link styling */
+.nav-item ::deep .parent-progress-link {
+    border-left: 3px solid rgba(102, 126, 234, 0.5);
+    padding-left: calc(1rem - 3px);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item ::deep .parent-progress-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(102, 126, 234, 0.05) 0%, 
+        rgba(102, 126, 234, 0) 100%);
+    z-index: -1;
+}
+
+.nav-item ::deep .parent-progress-link .nav-icon {
+    color: rgba(102, 126, 234, 0.8);
+    transition: all 0.3s ease;
+}
+
+.nav-item ::deep .parent-progress-link:hover {
+    background-color: rgba(102, 126, 234, 0.15);
+    border-left-color: #667eea;
+    color: #667eea;
+}
+
+.nav-item ::deep .parent-progress-link:hover .nav-icon {
+    transform: scale(1.2);
+    color: #667eea;
+}
+
+.nav-item ::deep .parent-progress-link.active {
+    background-color: rgba(102, 126, 234, 0.3);
+    border-left-color: #667eea;
+    color: #667eea;
+}
+
+/* Pay it Forward link styling */
+.nav-item ::deep .pay-it-forward-link {
+    border-left: 3px solid rgba(46, 204, 113, 0.5);
+    padding-left: calc(1rem - 3px);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item ::deep .pay-it-forward-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(46, 204, 113, 0.05) 0%, 
+        rgba(46, 204, 113, 0) 100%);
+    z-index: -1;
+}
+
+.nav-item ::deep .pay-it-forward-link .nav-icon {
+    color: rgba(46, 204, 113, 0.8);
+    transition: all 0.3s ease;
+}
+
+.nav-item ::deep .pay-it-forward-link:hover {
+    background-color: rgba(46, 204, 113, 0.15);
+    border-left-color: #2ecc71;
+    color: #2ecc71;
+}
+
+.nav-item ::deep .pay-it-forward-link:hover .nav-icon {
+    transform: scale(1.2);
+    color: #2ecc71;
+}
+
+.nav-item ::deep .pay-it-forward-link.active {
+    background-color: rgba(46, 204, 113, 0.3);
+    border-left-color: #2ecc71;
+    color: #2ecc71;
+}
+
+/* About link styling */
+.nav-item ::deep .about-link {
+    border-left: 3px solid rgba(41, 128, 185, 0.5);
+    padding-left: calc(1rem - 3px);
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-item ::deep .about-link::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        rgba(41, 128, 185, 0.05) 0%, 
+        rgba(41, 128, 185, 0) 100%);
+    z-index: -1;
+}
+
+.nav-item ::deep .about-link .nav-icon {
+    color: rgba(41, 128, 185, 0.8);
+    transition: all 0.3s ease;
+}
+
+.nav-item ::deep .about-link:hover {
+    background-color: rgba(41, 128, 185, 0.15);
+    border-left-color: #2980b9;
+    color: #2980b9;
+}
+
+.nav-item ::deep .about-link:hover .nav-icon {
+    transform: scale(1.2);
+    color: #2980b9;
+}
+
+.nav-item ::deep .about-link.active {
+    background-color: rgba(41, 128, 185, 0.3);
+    border-left-color: #2980b9;
+    color: #2980b9;
+}
+
+.nav-item ::deep .logout-link:hover {
+    cursor: pointer;
+    background-color: rgba(244, 67, 54, 0.15);
+    color: #ff5252;
+}
+
+/* Navigation divider */
+.nav-divider {
+    margin: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Scrollable navigation */
+.nav-scrollable {
+    display: none;
+    padding-top: 0.5rem;
+}
+
+/* Add rule for JS-toggled class */
+.nav-scrollable.show-menu {
+    display: block;
+}
+
+@media (max-width: 640px) {
+    .sidebar-header {
+        padding: 0.75rem;
+        height: 3.5rem; /* Fixed height for the sidebar header */
+        box-sizing: border-box;
+        /* Safe area handling for devices with notches */
+        padding-top: max(0.75rem, env(safe-area-inset-top));
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+        /* Prevent content shifting */
+        width: 100%;
+        position: relative;
+    }
+    
+    .logo-text {
+        font-size: 1.3rem;
+    }
+    
+    .logo-image {
+        width: 28px;
+        height: 28px;
+    }
+    
+    .nav-scrollable {
+        position: absolute;
+        width: 100%;
+        top: 3.5rem; /* Position below the sidebar header */
+        background-image: linear-gradient(180deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+        /* Safe area handling */
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+        /* Prevent horizontal overflow */
+        overflow-x: hidden;
+        max-width: 100vw;
+    }
+
+    .nav-scrollable.show-menu {
+        /* Ensure expanded menu is above the fixed sidebar header (z-index: 1001 in MainLayout.razor.css) */
+        /* and potentially other content */
+        z-index: 1002;
+    }
+}
+
+@media (min-width: 641px) {
+    .navbar-toggler {
+        display: none;
+    }
+
+    .nav-scrollable {
+        display: block;
+        height: calc(100vh - 4.5rem);
+        overflow-y: auto;
+        padding-bottom: 3rem;
+    }
+}
+
+/* Scrollbar styling */
+.nav-scrollable::-webkit-scrollbar {
+    width: 6px;
+}
+
+.nav-scrollable::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.nav-scrollable::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.nav-scrollable::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Version number */
+.version-number {
+    text-align: center;
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    right: 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 0.5rem;
+}

@@ -1,0 +1,136 @@
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: -webkit-fill-available; /* Fallback for iOS Safari */
+    width: 100%;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+}
+
+.main {
+    flex: 1;
+    width: 100%;
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+    /* padding: 1rem; */
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #1e3c72 0%, #2a5298 50%, #1e3c72 100%);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1001; /* Ensure sidebar is above other elements */
+}
+
+.top-row {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+        text-decoration: none;
+    }
+
+    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row ::deep a:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+@media (max-width: 640.98px) {
+    .top-row {
+        justify-content: space-between;
+    }
+
+    .top-row ::deep a, .top-row ::deep .btn-link {
+        margin-left: 0;
+    }
+    
+    /* main {
+        padding: 0.75rem;
+    } */
+    
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: auto;
+        z-index: 1001;
+        /* Safe area handling for devices with notches */
+        padding-top: max(0px, env(safe-area-inset-top));
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+    
+    /* Add margin-top to the main div to prevent content from being hidden under the sidebar */
+    .main {
+        margin-top: 25px;
+        /* Handle safe areas for main content */
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+        padding-bottom: max(0px, env(safe-area-inset-bottom));
+        
+        /* Prevent content shifting */
+        width: 100%;
+        overflow-x: hidden;
+        position: relative;
+    }
+    
+    /* Ensure page takes full height on mobile */
+    .page {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        width: 100%;
+        overflow-x: hidden;
+    }
+}
+
+@media (min-width: 641px) {
+    .page {
+        flex-direction: row;
+    }
+
+    .sidebar {
+        width: 250px;
+        /* height: 100vh; */
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .top-row.auth ::deep a:first-child {
+        flex: 1;
+        text-align: right;
+        width: 0;
+    }
+    
+    /* main {
+        padding: 1rem;
+    } */
+    
+    /* Reset margin for desktop view */
+    .main {
+        margin-top: 0;
+    }
+}
+

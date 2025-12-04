@@ -1,0 +1,19 @@
+@page "/admin/logs"
+@rendermode InteractiveWebAssembly
+@attribute [Authorize]
+
+<PageTitle>View Logs - TurboFlash Admin</PageTitle>
+
+<div class="alert alert-warning">
+    <h3><i class="fas fa-exclamation-triangle"></i> Admin Feature Not Available</h3>
+    <p>
+        Viewing logs is a server-only admin feature that requires direct database access. 
+        This feature is only available on the server application.
+    </p>
+    <p>
+        Please access this feature through the server admin interface.
+    </p>
+</div>
+<div class="mt-3">
+    <a href="/" class="btn btn-primary">Return to Home</a>
+</div>

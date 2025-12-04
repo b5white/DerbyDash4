@@ -1,0 +1,109 @@
+﻿@page "/Account/Login"
+@using System.ComponentModel.DataAnnotations
+@using Blazorise
+@using Blazorise.Captcha
+@using Blazorise.Captcha.ReCaptcha
+@using Microsoft.Extensions.Options
+@using System.Text.Json
+
+@attribute [AllowAnonymous]
+
+<PageTitle>Log in - TurboFlash</PageTitle>
+
+<div class="login-container">
+    <div class="login-background"></div>
+    <div class="login-content">
+        <div class="login-logo">
+            <h1>Turbo<span>Flash</span></h1>
+        </div>
+        <div class="login-card">
+            <div class="login-image">
+                <div class="checkered-pattern top"></div>
+                <div class="racing-stripe"></div>
+                <div class="login-image-content">
+                    <h2>Race to Learn!</h2>
+                    <p>Solve math problems and beat your opponents in exciting races. Track your progress and become the
+                        ultimate math racing champion!</p>
+                </div>
+                <div class="checkered-pattern"></div>
+            </div>
+            <div class="login-form">
+                <h2 class="login-title">Sign In to Your Account</h2>
+                <StatusMessage Message="@errorMessage" />
+                <EditForm EditContext="editContext" method="post" OnValidSubmit="LoginUser" FormName="login">
+                    <DataAnnotationsValidator />
+                    <Microsoft.AspNetCore.Components.Forms.ValidationSummary class="text-danger" role="alert" />
+
+                    <div class="form-group">
+                        <label for="Input.Email">Email Address</label>
+                        <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control"
+                            autocomplete="username" aria-required="true" placeholder="Enter your email" />
+                        <Microsoft.AspNetCore.Components.Forms.ValidationMessage For="() => Input.Email" class="validation-message" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Input.Password">Password</label>
+                        <div class="password-input-container">
+                            <InputText type="password" @bind-Value="Input.Password"
+                                id="Input.Password" class="form-control" autocomplete="current-password"
+                                aria-required="true" placeholder="Enter your password" />
+                            <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('Input.Password')"
+                                tabindex="-1">
+                                <i class="fas fa-eye" aria-hidden="true"></i>
+                                <span class="sr-only">Show password</span>
+                            </button>
+                        </div>
+                        <Microsoft.AspNetCore.Components.Forms.ValidationMessage For="() => Input.Password" class="validation-message" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-check-label">
+                            <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
+                            Keep me logged in with cookies.
+                        </label>
+                    </div>
+
+                    <Div Class="form-group captcha-group">
+                        <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
+                            <ReCaptcha 
+                                @ref="captcha"
+                                SiteKey="@siteKey"
+                                Solved="@Solved" 
+                                Validate="@Validate" 
+                                Expired="@Expired"
+                                Theme="CaptchaTheme.Light" 
+                            /> 
+                            <Button Background="Background.Primary" Clicked="@Reset">
+                                Reset
+                            </Button> 
+                        </Div>
+                    </Div>
+
+                    <button type="submit" class="btn btn-login" disabled="@(!canSubmit)">
+                        <i class="fas fa-flag-checkered"></i> Start Your Engines
+                    </button>
+
+                    <div class="login-divider">
+                        <span>OR</span>
+                    </div>
+
+                    <div class="login-links">
+                        <p>
+                            <a href="Account/ForgotPassword">Forgot your password?</a>
+                        </p>
+                        <p>
+                            Don't have an account?
+                            <a
+                                href="@(NavManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                                Sign up now
+                            </a>
+                        </p>
+                        <p>
+                            <a href="Account/ResendEmailConfirmation">Resend email confirmation</a>
+                        </p>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>

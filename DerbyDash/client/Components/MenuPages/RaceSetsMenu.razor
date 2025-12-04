@@ -1,0 +1,53 @@
+﻿@page "/RaceSetsMenu"
+@attribute [AllowAnonymous]
+@rendermode InteractiveWebAssembly
+@inherits BaseMenuPage
+
+<BaseMenuPage Title="Math Race Menu" Subtitle="Choose your racing challenge">
+    <div class="race-sets-container">
+        <div class="race-sets-grid">
+            <div class="race-set-card addition" style="--animation-order:1">
+                <a href="/AdditionMenu" class="race-set-link">
+                    <div class="checkered-flag"></div>
+                    <div class="race-set-icon">+</div>
+                    <div class="race-set-title">Addition</div>
+                    <div class="race-set-description">Race with addition problems</div>
+                </a>
+            </div>
+            
+            <div class="race-set-card multiplication" style="--animation-order:2">
+                <a href="/MultiplicationMenu" class="race-set-link">
+                    <div class="checkered-flag"></div>
+                    <div class="race-set-icon">×</div>
+                    <div class="race-set-title">Multiplication</div>
+                    <div class="race-set-description">Race with multiplication problems</div>
+                </a>
+            </div>
+            
+            <!-- Disabled options with future expansion in mind -->
+            <div class="race-set-card disabled" style="--animation-order:3">
+                <a href="#" class="race-set-link">
+                    <div class="checkered-flag"></div>
+                    <div class="race-set-icon">−</div>
+                    <div class="race-set-title">Subtraction</div>
+                    <div class="race-set-description">Coming soon!</div>
+                </a>
+            </div>
+            
+            <div class="race-set-card disabled" style="--animation-order:4">
+                <a href="#" class="race-set-link">
+                    <div class="checkered-flag"></div>
+                    <div class="race-set-icon">÷</div>
+                    <div class="race-set-title">Division</div>
+                    <div class="race-set-description">Coming soon!</div>
+                </a>
+            </div>
+        </div>
+        
+        <div class="animation-section">
+            <div class="race-track-bg"></div>
+            <div class="finish-line"></div>
+            <div class="race-car-animation"></div>
+        </div>
+    </div>
+</BaseMenuPage>

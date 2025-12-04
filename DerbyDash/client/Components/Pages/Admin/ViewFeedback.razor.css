@@ -1,0 +1,11 @@
+.feedback-message {
+    white-space: pre-wrap;
+}
+
+.modal-show {
+    display: block;
+}
+
+.admin-notes {
+    white-space: pre-wrap;
+}

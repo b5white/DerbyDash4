@@ -1,0 +1,13 @@
+﻿<nav aria-label="breadcrumb" class="breadcrumb-nav">
+    <ol class="breadcrumb">
+        @foreach (BreadcrumbItem breadcrumb in Breadcrumbs) {
+            <li class="breadcrumb-item @(breadcrumb.IsActive ? "active" : "")">
+                @if (breadcrumb.IsActive) {
+                    @breadcrumb.Title
+                } else {
+                    <a href="@breadcrumb.Url">@breadcrumb.Title</a>
+                }
+            </li>
+        }
+    </ol>
+</nav>
