@@ -13,6 +13,9 @@ namespace DerbyDash {
 
             // Add API Controllers
             builder.Services.AddControllers();
+            
+            // Add Razor Pages
+            builder.Services.AddRazorPages();
 
             // Add CORS for client access
             builder.Services.AddCors(options => {
@@ -190,6 +193,7 @@ namespace DerbyDash {
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles(); // Enable static files (CSS, JS, images)
             app.UseCors("AllowClient");
             app.UseRouting();
             app.UseSession();
@@ -199,6 +203,9 @@ namespace DerbyDash {
             
             // Map API Controllers
             app.MapControllers();
+            
+            // Map Razor Pages
+            app.MapRazorPages();
             
             app.Run();
         }

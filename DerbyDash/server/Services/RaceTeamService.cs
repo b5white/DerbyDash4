@@ -540,6 +540,7 @@ namespace DerbyDash.Services {
                     context.SpeedIncrements.AddRange(speedIncrements);
                     await context.SaveChangesAsync();
                 }
+                
 
                 // Update the racer's last raced date
                 var racer = await context.Racers.FindAsync(activeRacer.Id);
