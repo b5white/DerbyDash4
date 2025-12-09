@@ -1,8 +1,11 @@
 @page "/about"
 @using Microsoft.AspNetCore.Components
+@using Microsoft.JSInterop
+@implements IDisposable
 @inject NavigationManager NavManager
 @inject IConfiguration Configuration
 @inject HttpClient Http
+@inject IJSRuntime JSRuntime
 @attribute [AllowAnonymous]
 
 <PageTitle>About TurboFlash</PageTitle>
@@ -78,8 +81,14 @@ else if (!string.IsNullOrEmpty(htmlContent))
                     htmlContent = html;
                 }
                 
-                // Fix relative URLs in the HTML to point to the server
-                htmlContent = FixRelativeUrls(htmlContent, serverUrl);
+                // Fix relative URLs for static resources (images, etc.) to point to the server
+                // But keep navigation links relative so they work within the Blazor client app
+                htmlContent = FixStaticResourceUrls(htmlContent, serverUrl);
+                
+                // Set up link interceptors after content is ready
+                StateHasChanged();
+                await Task.Delay(100); // Small delay for DOM to update
+                await InterceptLinkClicks();
             } else {
                 errorMessage = $"Failed to load About page. Status: {response.StatusCode}";
             }
@@ -217,20 +226,41 @@ else if (!string.IsNullOrEmpty(htmlContent))
         return html;
     }
     
-    private string FixRelativeUrls(string html, string serverUrl) {
-        // Fix relative URLs to be absolute URLs pointing to the server
-        // Handle various URL patterns
-        html = html.Replace("href=\"/", $"href=\"{serverUrl}/");
+    private string FixStaticResourceUrls(string html, string serverUrl) {
+        // Only fix src attributes (images, scripts) to point to the server
+        // Leave href attributes relative so navigation works within the Blazor client app
         html = html.Replace("src=\"/", $"src=\"{serverUrl}/");
-        html = html.Replace("href=\"~/", $"href=\"{serverUrl}/");
         html = html.Replace("src=\"~/", $"src=\"{serverUrl}/");
         
-        // Also handle single quotes
-        html = html.Replace("href='/", $"href='{serverUrl}/");
+        // Also handle single quotes for src
         html = html.Replace("src='/", $"src='{serverUrl}/");
-        html = html.Replace("href='~/", $"href='{serverUrl}/");
         html = html.Replace("src='~/", $"src='{serverUrl}/");
         
+        // Note: We don't modify href attributes - they should remain relative
+        // so they navigate within the Blazor client app (localhost:5173)
+        
         return html;
+    }
+    
+    
+    private async Task InterceptLinkClicks() {
+        // Use JavaScript to intercept clicks on links and use Blazor NavigationManager
+        // This ensures navigation stays within the client app (localhost:5173)
+        var dotNetRef = DotNetObjectReference.Create(this);
+        
+        try {
+            await JSRuntime.InvokeVoidAsync("setupAboutPageLinks", dotNetRef);
+        } catch (Exception ex) {
+            Console.WriteLine($"Error setting up link interceptors: {ex.Message}");
+        }
+    }
+    
+    [JSInvokable]
+    public void NavigateTo(string url) {
+        NavManager.NavigateTo(url);
+    }
+    
+    public void Dispose() {
+        // Cleanup if needed
     }
 }

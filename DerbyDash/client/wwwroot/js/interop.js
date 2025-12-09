@@ -163,3 +163,38 @@ window.registerEscapeKey = (dotNetObjectReference) => {
         }
     };
 };
+
+// Setup link interceptors for About page to use Blazor navigation
+window.setupAboutPageLinks = (dotNetRef) => {
+    // Wait a bit for DOM to be ready
+    setTimeout(function() {
+        var aboutContainer = document.querySelector('.about-container');
+        if (!aboutContainer) return;
+        
+        var links = aboutContainer.querySelectorAll('a[href]');
+        links.forEach(function(link) {
+            var href = link.getAttribute('href');
+            
+            // Only intercept relative URLs (not external links or anchors)
+            if (href && 
+                !href.startsWith('http://') && 
+                !href.startsWith('https://') && 
+                !href.startsWith('mailto:') &&
+                !href.startsWith('#') &&
+                href.startsWith('/')) {
+                
+                // Remove any existing listeners to avoid duplicates
+                var newLink = link.cloneNode(true);
+                link.parentNode.replaceChild(newLink, link);
+                
+                newLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Call Blazor method to navigate
+                    dotNetRef.invokeMethodAsync('NavigateTo', href);
+                }, false);
+            }
+        });
+    }, 100);
+};
